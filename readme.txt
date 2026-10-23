@@ -4,7 +4,7 @@ Tags: form builder, contact form, forms, multi-step form, file upload
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.7.0
+Stable tag: 2.7.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -130,6 +130,15 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 6. The form preview with appearance presets.
 
 == Changelog ==
+
+= 2.7.1 - 2026-10-23 =
+* Change: Payments, coupons and the Payments page moved to SubtleForms Pro. Forms with payment fields show a not available message until Pro 2.7.0 is active.
+* Change: Forms that inherit the theme load no SubtleForms stylesheet, and the stylesheet has an RTL version.
+* Change: Choice groups use a fieldset with a legend, and error and success boxes use theme-neutral colours.
+* Fix: The keep-data uninstall setting is now saved and honoured.
+* Fix: The per-user entry limit works.
+* Security: Form schemas need the manage_options capability, reCAPTCHA v3 checks the score and action, and time tokens expire after two hours and work once.
+* Security: The client IP honours trusted proxies, and queued mail and webhook details stay out of the cron option.
 
 = 2.7.0 - 2026-10-23 =
 * New: Web addresses and links written as [text](https://example.com) in a form's confirmation message are now clickable; only http, https and site-relative links are allowed and anything else stays plain text.
@@ -311,6 +320,9 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 The full history is in changelog.txt in the plugin folder.
 
 == Upgrade Notice ==
+
+= 2.7.1 =
+Payments, coupons and the Payments page moved to SubtleForms Pro. Forms with payment fields now need Pro 2.7.0; without it they show a not available message instead of taking unpaid orders.
 
 = 2.7.0 =
 Picture Choice, multiple file uploads, advanced logic and form analytics are now part of SubtleForms Pro. Forms that use them keep working: without Pro they fall back to plain choices, one file and simple show and hide. Install Pro 2.6.0 to keep the full features.

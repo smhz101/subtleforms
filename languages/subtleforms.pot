@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: SubtleForms 2.7.0\n"
+"Project-Id-Version: SubtleForms 2.7.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/subtleforms\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-22T23:35:05+00:00\n"
+"POT-Creation-Date: 2026-10-23T06:40:15+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -17,11 +17,10 @@ msgstr ""
 #. Plugin Name of the plugin
 #. Author of the plugin
 #: subtleforms.php
-#: src/Admin/AdminMenu.php:515
-#: src/Admin/AdminMenu.php:1197
-#: resources/admin/components/builder/CheckoutPanel.jsx:83
-#: resources/blocks/form/edit.jsx:202
-#: resources/blocks/form/edit.jsx:376
+#: src/Admin/AdminMenu.php:473
+#: src/Admin/AdminMenu.php:934
+#: resources/blocks/form/edit.jsx:213
+#: resources/blocks/form/edit.jsx:388
 msgid "SubtleForms"
 msgstr ""
 
@@ -36,23 +35,23 @@ msgid "https://subtleforms.com/"
 msgstr ""
 
 #. translators: %s: Current PHP version
-#: src/Activator.php:50
+#: src/Activator.php:97
 #, php-format
-msgid "SubtleForms requires PHP 7.4 or higher. Your server is running PHP %s"
+msgid "SubtleForms requires PHP 8.1 or higher. Your server is running PHP %s"
 msgstr ""
 
-#: src/Activator.php:53
-#: src/Activator.php:68
+#: src/Activator.php:100
+#: src/Activator.php:115
 msgid "Plugin Activation Error"
 msgstr ""
 
 #. translators: %s: Current WordPress version
-#: src/Activator.php:65
+#: src/Activator.php:112
 #, php-format
 msgid "SubtleForms requires WordPress 6.6 or higher. You are running %s"
 msgstr ""
 
-#: src/Activator.php:253
+#: src/Activator.php:280
 msgid "Database Creation Error"
 msgstr ""
 
@@ -103,30 +102,8 @@ msgstr ""
 
 #: src/Admin/AdminMenu.php:230
 #: src/Admin/AdminMenu.php:231
-#: src/Admin/AdminMenu.php:629
-#: resources/admin/app/AdminApp.jsx:211
-#: resources/admin/components/AppNav.jsx:52
-#: resources/admin/components/builder/FieldDock.jsx:26
-#: resources/admin/components/builder/FormSettings.jsx:192
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:27
-#: resources/admin/pages/PaymentsPage.jsx:376
-#: resources/admin/templates/categories.js:17
-msgid "Payments"
-msgstr ""
-
-#: src/Admin/AdminMenu.php:240
-#: src/Admin/AdminMenu.php:241
-#: resources/admin/app/AdminApp.jsx:210
-#: resources/admin/components/AppNav.jsx:60
-#: resources/admin/pages/DashboardPage.jsx:183
-#: resources/admin/pages/ExtensionsPage.jsx:165
-msgid "Extensions"
-msgstr ""
-
-#: src/Admin/AdminMenu.php:250
-#: src/Admin/AdminMenu.php:251
 #: resources/admin/app/AdminApp.jsx:209
-#: resources/admin/components/AppNav.jsx:68
+#: resources/admin/components/AppNav.jsx:52
 #: resources/admin/components/builder/layout/BuilderViewSwitcher.jsx:11
 #: resources/admin/pages/SettingsPage.jsx:208
 #: resources/admin/pages/SettingsPage.jsx:218
@@ -134,237 +111,100 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:398
+#: src/Admin/AdminMenu.php:356
 msgid "Are you sure you want to delete this item?"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:399
-#: src/Frontend/FrontendAssets.php:144
+#: src/Admin/AdminMenu.php:357
+#: src/Frontend/FrontendAssets.php:138
 msgid "An error occurred. Please try again."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:400
-#: src/Admin/AdminMenu.php:1070
+#: src/Admin/AdminMenu.php:358
 msgid "Action completed successfully."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:594
+#: src/Admin/AdminMenu.php:550
 #: resources/admin/components/settings/extensions/WebhooksPanel.jsx:47
 #: resources/admin/pages/ToolsPage.jsx:17
 #: resources/admin/pages/ToolsPage.jsx:480
 msgid "Webhooks"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:595
+#: src/Admin/AdminMenu.php:551
 msgid "Send each entry as JSON to any URL, with retries and signed requests."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:599
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:70
-msgid "Email Marketing"
-msgstr ""
-
-#: src/Admin/AdminMenu.php:600
-msgid "Add people who fill in a form to Mailchimp, Brevo or Kit."
-msgstr ""
-
-#: src/Admin/AdminMenu.php:604
-#: resources/admin/components/builder/IntegrationsPanel.jsx:350
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:21
-#: resources/admin/ui/UpgradeModal.jsx:131
-msgid "CRM"
-msgstr ""
-
-#: src/Admin/AdminMenu.php:605
-msgid "Create or update HubSpot contacts, or send contacts to Zapier or Make."
-msgstr ""
-
-#: src/Admin/AdminMenu.php:609
-msgid "Analytics"
-msgstr ""
-
-#: src/Admin/AdminMenu.php:610
-msgid "Views, submissions and conversion rate for every form."
-msgstr ""
-
-#: src/Admin/AdminMenu.php:614
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:22
-#: resources/admin/ui/UpgradeModal.jsx:143
-msgid "WooCommerce"
-msgstr ""
-
-#: src/Admin/AdminMenu.php:615
-msgid "Take form payments through the WooCommerce checkout and sell WooCommerce products from any form."
-msgstr ""
-
-#: src/Admin/AdminMenu.php:619
-#: resources/admin/components/settings/extensions/PdfPanel.jsx:18
-msgid "Entry PDF"
-msgstr ""
-
-#: src/Admin/AdminMenu.php:620
-msgid "Download any entry as a PDF and attach it to notification emails."
-msgstr ""
-
-#: src/Admin/AdminMenu.php:624
-#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:64
-msgid "Multilanguage"
-msgstr ""
-
-#: src/Admin/AdminMenu.php:625
-msgid "Register form strings with WPML or Polylang for full translation support."
-msgstr ""
-
-#: src/Admin/AdminMenu.php:630
-msgid "Accept Stripe or PayPal payments directly through your forms."
-msgstr ""
-
-#: src/Admin/AdminMenu.php:782
+#: src/Admin/AdminMenu.php:637
 msgid "Security check failed."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:807
-#: src/Admin/AdminMenu.php:820
-#: src/Admin/AdminMenu.php:839
-#: src/Admin/AdminMenu.php:862
-#: src/Admin/AdminMenu.php:888
-#: src/Admin/AdminMenu.php:925
-#: src/Admin/AdminMenu.php:932
-#: src/Admin/AdminMenu.php:943
+#: src/Admin/AdminMenu.php:662
+#: src/Admin/AdminMenu.php:675
+#: src/Admin/AdminMenu.php:694
+#: src/Admin/AdminMenu.php:717
+#: src/Admin/AdminMenu.php:769
+#: src/Admin/AdminMenu.php:779
 msgid "You do not have permission to access this page."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:850
-#: src/Admin/AdminMenu.php:998
-#: src/Frontend/Shortcode.php:85
+#: src/Admin/AdminMenu.php:705
+#: src/Admin/AdminMenu.php:834
 msgid "Form not found."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:971
-#: src/Admin/AdminMenu.php:993
-#: src/Admin/AdminMenu.php:1026
+#: src/Admin/AdminMenu.php:807
+#: src/Admin/AdminMenu.php:829
+#: src/Admin/AdminMenu.php:862
 msgid "Invalid request."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1078
-msgid "Coming Soon"
+#: src/Admin/AdminMenu.php:891
+msgid "This screen could not be loaded."
 msgstr ""
 
-#. translators: %s: Name of the interface being developed
-#: src/Admin/AdminMenu.php:1082
-#, php-format
-msgid "The %s interface is under development."
-msgstr ""
-
-#: src/Admin/AdminMenu.php:1086
-msgid "This is a placeholder. Template files will be created in the templates/admin/ directory."
-msgstr ""
-
-#: src/Admin/AdminMenu.php:1091
-msgid "Your Forms"
-msgstr ""
-
-#: src/Admin/AdminMenu.php:1095
-#: src/Fields/CoreFields.php:1215
-#: src/Fields/CoreFields.php:1243
-#: src/Fields/CoreFields.php:1412
-msgid "Title"
-msgstr ""
-
-#: src/Admin/AdminMenu.php:1096
-#: src/Api/SubmissionsApi.php:1096
-#: src/Privacy/PrivacyExporter.php:101
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:299
-#: resources/admin/components/builder/webhook/webhookModel.js:273
-#: resources/admin/components/FormsList.jsx:42
-#: resources/admin/components/FormsList.jsx:279
-#: resources/admin/components/FormsList.jsx:957
-#: resources/admin/components/SubmissionsTable.jsx:54
-#: resources/admin/components/SubmissionsTable.jsx:766
-#: resources/admin/pages/PaymentsPage.jsx:511
-#: resources/admin/pages/ToolsPage.jsx:588
-msgid "Status"
-msgstr ""
-
-#: src/Admin/AdminMenu.php:1097
-msgid "Created"
-msgstr ""
-
-#: src/Admin/AdminMenu.php:1098
-#: resources/admin/pages/PaymentsPage.jsx:512
-msgid "Actions"
-msgstr ""
-
-#: src/Admin/AdminMenu.php:1123
-#: resources/admin/components/builder/ContainerWrapper.jsx:77
-#: resources/admin/components/builder/FieldInspector.jsx:229
-#: resources/admin/components/builder/layout/BuilderModalsController.jsx:54
-#: resources/admin/pages/PaymentsPage.jsx:579
-msgid "Delete"
-msgstr ""
-
-#: src/Admin/AdminMenu.php:1137
-msgid "Total Forms"
-msgstr ""
-
-#: src/Admin/AdminMenu.php:1141
-msgid "Active Forms"
-msgstr ""
-
-#: src/Admin/AdminMenu.php:1145
-msgid "Total Submissions"
-msgstr ""
-
-#: src/Admin/AdminMenu.php:1174
-#: src/Admin/AdminMenu.php:1179
+#: src/Admin/AdminMenu.php:911
+#: src/Admin/AdminMenu.php:916
 msgid "WordPress Admin"
 msgstr ""
 
-#. translators: %s: minimum SubtleForms Pro version
-#: src/Admin/AdminNotices.php:51
-#, php-format
-msgid "SubtleForms: please update SubtleForms Pro to %s or later. Older versions do not add the Signature, Calculation and Card Payment fields to this version of SubtleForms, so forms that use them will not show those fields until you update."
-msgstr ""
-
 #. translators: %s: URL to the Permalinks settings page
-#: src/Admin/AdminNotices.php:91
+#: src/Admin/AdminNotices.php:53
 #, php-format
 msgid "<strong>SubtleForms:</strong> The REST API requires pretty permalinks to be enabled. <a href=\"%s\">Update your permalink settings</a> and choose any option other than \"Plain\"."
 msgstr ""
 
-#: src/Api/ApiGuards.php:50
-#: src/Api/DashboardApi.php:438
-#: src/Api/PaymentsApi.php:132
-#: src/Api/SettingsApi.php:156
-#: src/Extensions/PaymentsExtension.php:98
+#: src/Api/ApiGuards.php:48
+#: src/Api/DashboardApi.php:436
+#: src/Api/SettingsApi.php:176
 msgid "Too many requests. Please try again later."
 msgstr ""
 
 #. translators: %s: resource type (e.g. "form", "submission")
-#: src/Api/ApiGuards.php:84
+#: src/Api/ApiGuards.php:82
 #, php-format
 msgid "The %s has been modified by another user. Please refresh and try again."
 msgstr ""
 
-#: src/Api/ApiGuards.php:140
-#: src/Api/ApiGuards.php:149
-#: src/Api/DashboardApi.php:467
+#: src/Api/ApiGuards.php:138
+#: src/Api/ApiGuards.php:147
+#: src/Api/DashboardApi.php:465
 #: src/Api/OnboardingApi.php:259
 #: src/Api/OnboardingApi.php:280
-#: src/Api/SettingsApi.php:341
+#: src/Api/SettingsApi.php:382
 #: src/Api/WebhooksApi.php:107
 msgid "Security check failed. Please refresh and try again."
 msgstr ""
 
-#: src/Api/ApiGuards.php:168
-#: src/Api/ApiGuards.php:181
-#: src/Api/ApiGuards.php:199
-#: src/Api/ApiGuards.php:212
-#: src/Api/DashboardApi.php:458
+#: src/Api/ApiGuards.php:166
+#: src/Api/ApiGuards.php:179
+#: src/Api/ApiGuards.php:197
+#: src/Api/ApiGuards.php:210
+#: src/Api/DashboardApi.php:456
 #: src/Api/OnboardingApi.php:250
 #: src/Api/OnboardingApi.php:271
-#: src/Api/SettingsApi.php:261
-#: src/Api/SettingsApi.php:332
+#: src/Api/SettingsApi.php:302
+#: src/Api/SettingsApi.php:373
 #: src/Api/WebhooksApi.php:103
 msgid "You are not allowed to perform this action."
 msgstr ""
@@ -405,7 +245,7 @@ msgstr ""
 #: src/Api/SubmissionsApi.php:476
 #: src/Api/SubmissionsApi.php:478
 #: src/Api/SubmissionsApi.php:519
-#: src/Privacy/PrivacyExporter.php:88
+#: src/Privacy/PrivacyExporter.php:89
 msgid "Unknown Form"
 msgstr ""
 
@@ -444,113 +284,109 @@ msgid_plural "%d days ago"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Api/FormsApi.php:329
-#: src/Api/FormsApi.php:337
-#: src/Api/FormsApi.php:475
-#: src/Api/FormsApi.php:489
+#: src/Api/FormsApi.php:353
+#: src/Api/FormsApi.php:361
+#: src/Api/FormsApi.php:499
+#: src/Api/FormsApi.php:513
+#: src/Api/FormsApi.php:605
+#: src/Api/FormsApi.php:610
 msgid "Form not available"
 msgstr ""
 
-#: src/Api/FormsApi.php:437
-#: src/Api/FormsApi.php:624
-#: src/Api/FormsApi.php:918
-#: src/Api/FormsApi.php:1021
-#: src/Api/FormsApi.php:1066
-#: src/Api/FormsApi.php:1111
-#: src/Api/PaymentsApi.php:222
-#: src/Api/PublicSubmitApi.php:251
+#: src/Api/FormsApi.php:461
+#: src/Api/FormsApi.php:677
+#: src/Api/FormsApi.php:957
+#: src/Api/FormsApi.php:1060
+#: src/Api/FormsApi.php:1105
+#: src/Api/FormsApi.php:1150
+#: src/Api/PublicSubmitApi.php:257
 #: src/Api/SpamApi.php:124
-#: src/Extensions/PaymentsExtension.php:126
 msgid "Form not found"
 msgstr ""
 
-#: src/Api/FormsApi.php:494
+#: src/Api/FormsApi.php:518
 msgid "Schema not available"
 msgstr ""
 
-#: src/Api/FormsApi.php:523
+#: src/Api/FormsApi.php:547
 msgid "Failed to load form schema"
 msgstr ""
 
-#: src/Api/FormsApi.php:681
+#: src/Api/FormsApi.php:734
 msgid "Schema validation failed"
 msgstr ""
 
-#: src/Api/FormsApi.php:697
+#: src/Api/FormsApi.php:750
 msgid "Schema was saved but could not be loaded back"
 msgstr ""
 
-#: src/Api/FormsApi.php:715
+#: src/Api/FormsApi.php:768
 msgid "Failed to save draft schema"
 msgstr ""
 
-#: src/Api/FormsApi.php:836
-msgid "This template requires a Pro license."
-msgstr ""
-
 #. translators: %s: reason the form could not be created
-#: src/Api/FormsApi.php:891
+#: src/Api/FormsApi.php:930
 #, php-format
 msgid "The form could not be created: %s"
 msgstr ""
 
-#: src/Api/FormsApi.php:953
+#: src/Api/FormsApi.php:992
 msgid "Cannot publish form: Failed to activate schema."
 msgstr ""
 
-#: src/Api/FormsApi.php:960
+#: src/Api/FormsApi.php:999
 msgid "Cannot publish form: No schema exists. Please save your form first."
 msgstr ""
 
-#: src/Api/FormsApi.php:964
+#: src/Api/FormsApi.php:1003
 msgid "Cannot publish form: No active schema version. Please save and activate a schema first."
 msgstr ""
 
-#: src/Api/FormsApi.php:970
+#: src/Api/FormsApi.php:1009
 msgid "Cannot publish form: Schema data is corrupt or invalid."
 msgstr ""
 
-#: src/Api/FormsApi.php:987
+#: src/Api/FormsApi.php:1026
 msgid "Cannot publish form: Fix validation errors."
 msgstr ""
 
-#: src/Api/FormsApi.php:992
+#: src/Api/FormsApi.php:1031
 msgid "Cannot publish form:"
 msgstr ""
 
-#: src/Api/FormsApi.php:1070
+#: src/Api/FormsApi.php:1109
 msgid "Form is not in the Trash"
 msgstr ""
 
-#: src/Api/FormsApi.php:1075
+#: src/Api/FormsApi.php:1114
 msgid "The form could not be restored. Please try again."
 msgstr ""
 
-#: src/Api/FormsApi.php:1114
+#: src/Api/FormsApi.php:1153
 msgid "Restore this form from the Trash before copying it."
 msgstr ""
 
 #. translators: %s: error message
-#: src/Api/FormsApi.php:1127
+#: src/Api/FormsApi.php:1166
 #, php-format
 msgid "The form could not be copied because its fields could not be read: %s"
 msgstr ""
 
 #. translators: %s: title of the form being copied
 #. translators: %s: form title
-#: src/Api/FormsApi.php:1138
+#: src/Api/FormsApi.php:1177
 #: src/Tools/Import/Importer.php:201
 #: resources/admin/components/FormsList.jsx:498
 #, php-format,js-format
 msgid "%s (copy)"
 msgstr ""
 
-#: src/Api/FormsApi.php:1157
+#: src/Api/FormsApi.php:1196
 msgid "The copy could not be created in the database. Please try again."
 msgstr ""
 
 #. translators: %s: error message
-#: src/Api/FormsApi.php:1168
+#: src/Api/FormsApi.php:1207
 #, php-format
 msgid "The form could not be copied: %s"
 msgstr ""
@@ -585,129 +421,102 @@ msgstr ""
 msgid "Tour completed"
 msgstr ""
 
-#: src/Api/PaymentsApi.php:126
-#: src/Extensions/PaymentsExtension.php:80
-msgid "Your session has expired. Please reload the page and try again."
-msgstr ""
-
-#: src/Api/PaymentsApi.php:148
-#: src/Payments/CouponsRepository.php:142
-msgid "Enter a coupon code."
-msgstr ""
-
-#: src/Api/PaymentsApi.php:202
-msgid "Coupon not found."
-msgstr ""
-
-#: src/Api/PublicSubmitApi.php:235
+#: src/Api/PublicSubmitApi.php:241
 msgid "Preview submissions are only available to administrators."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:275
+#: src/Api/PublicSubmitApi.php:291
+msgid "This form was open for a long time. Please send it again."
+msgstr ""
+
+#: src/Api/PublicSubmitApi.php:309
+#: src/Api/PublicSubmitApi.php:488
 msgid "Thank you."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:302
+#: src/Api/PublicSubmitApi.php:341
 msgid "You have reached the maximum number of submissions for this form."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:318
+#: src/Api/PublicSubmitApi.php:357
 msgid "This form is temporarily unavailable. Please try again later."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:351
-#: src/Api/PublicSubmitApi.php:362
+#: src/Api/PublicSubmitApi.php:390
+#: src/Api/PublicSubmitApi.php:401
 #: src/Support/Captcha/HCaptchaProvider.php:103
-#: src/Support/Captcha/RecaptchaProvider.php:127
+#: src/Support/Captcha/RecaptchaProvider.php:139
+#: src/Support/Captcha/RecaptchaProvider.php:164
+#: src/Support/Captcha/RecaptchaProvider.php:167
 #: src/Support/Captcha/TurnstileProvider.php:104
 msgid "CAPTCHA verification failed."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:459
+#: src/Api/PublicSubmitApi.php:514
 msgid "Failed to create submission record"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:518
+#: src/Api/PublicSubmitApi.php:581
 msgid "This form could not be processed. Please contact the site owner."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:553
-#: src/Api/PublicSubmitApi.php:572
+#: src/Api/PublicSubmitApi.php:617
+#: src/Api/PublicSubmitApi.php:638
 msgid "Form validation failed"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:558
+#: src/Api/PublicSubmitApi.php:623
 msgid "Your submission could not be completed. Please try again later."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:563
+#: src/Api/PublicSubmitApi.php:628
 msgid "An unexpected error occurred"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:643
+#: src/Api/PublicSubmitApi.php:693
 msgid "Failed to save submission data"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:797
-msgid "This total could not be calculated, so the payment was not taken."
-msgstr ""
-
-#: src/Api/PublicSubmitApi.php:881
-#: src/Extensions/PaymentsExtension.php:180
-msgid "Online payment is not available right now. Please contact the site owner."
-msgstr ""
-
-#. translators: %s: form title
-#: src/Api/PublicSubmitApi.php:951
-#, php-format
-msgid "Payment failed: %s"
-msgstr ""
-
-#. translators: 1: entry ID, 2: gateway message, 3: link to the entry
-#: src/Api/PublicSubmitApi.php:954
-#, php-format
-msgid ""
-"The payment for entry #%1$d did not go through, so no receipt or notification was sent.\n"
-"\n"
-"Reason: %2$s\n"
-"\n"
-"Open the entry: %3$s"
-msgstr ""
-
-#: src/Api/PublicSubmitApi.php:956
-msgid "not given"
-msgstr ""
-
-#: src/Api/SettingsApi.php:183
+#: src/Api/SettingsApi.php:203
 msgid "Invalid settings data"
 msgstr ""
 
-#: src/Api/SettingsApi.php:209
+#: src/Api/SettingsApi.php:250
 msgid "Settings updated successfully"
 msgstr ""
 
-#: src/Api/SettingsApi.php:219
+#: src/Api/SettingsApi.php:260
 msgid "Failed to update settings: "
 msgstr ""
 
-#: src/Api/SettingsApi.php:243
+#: src/Api/SettingsApi.php:284
 msgid "Settings reset to defaults"
 msgstr ""
 
-#: src/Api/SettingsApi.php:248
+#: src/Api/SettingsApi.php:289
 msgid "Failed to reset settings: "
 msgstr ""
 
-#: src/Api/SettingsApi.php:272
+#: src/Api/SettingsApi.php:313
 msgid "Choose a density and a reading pane."
 msgstr ""
 
-#: src/Api/SettingsApi.php:312
+#: src/Api/SettingsApi.php:353
 msgid "Settings have been modified by another user. Please refresh and try again."
 msgstr ""
 
-#: src/Api/SettingsApi.php:368
+#: src/Api/SettingsApi.php:409
 msgid "Email address must be valid or left empty"
+msgstr ""
+
+#: src/Api/SettingsApi.php:499
+msgid "Enter at most 100 proxy addresses or ranges."
+msgstr ""
+
+#. translators: %s: the rejected address
+#: src/Api/SettingsApi.php:504
+#, php-format
+msgid "\"%s\" is not an IP address or CIDR range."
 msgstr ""
 
 #: src/Api/SubmissionsApi.php:507
@@ -804,6 +613,19 @@ msgstr ""
 msgid "Form ID"
 msgstr ""
 
+#: src/Api/SubmissionsApi.php:1096
+#: src/Privacy/PrivacyExporter.php:102
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:299
+#: resources/admin/components/builder/webhook/webhookModel.js:273
+#: resources/admin/components/FormsList.jsx:42
+#: resources/admin/components/FormsList.jsx:279
+#: resources/admin/components/FormsList.jsx:957
+#: resources/admin/components/SubmissionsTable.jsx:54
+#: resources/admin/components/SubmissionsTable.jsx:766
+#: resources/admin/pages/ToolsPage.jsx:588
+msgid "Status"
+msgstr ""
+
 #: src/Api/SubmissionsApi.php:1097
 msgid "Submitted At"
 msgstr ""
@@ -870,10 +692,9 @@ msgstr ""
 #: src/Api/WebhooksApi.php:206
 #: src/Fields/CoreFields.php:1429
 #: src/Fields/FieldSettings.php:72
-#: src/Templates/FormTemplates.php:139
-#: src/Templates/FormTemplates.php:197
+#: src/Templates/FormTemplates.php:133
+#: src/Templates/FormTemplates.php:191
 #: src/Tools/Import/FluentMapper.php:259
-#: resources/admin/components/builder/CheckoutPanel.jsx:19
 #: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:171
 #: resources/admin/components/OnboardingWizard.jsx:69
 msgid "Name"
@@ -881,8 +702,7 @@ msgstr ""
 
 #: src/Api/WebhooksApi.php:207
 #: src/Fields/CoreFields.php:74
-#: src/Templates/FormTemplates.php:198
-#: resources/admin/components/builder/CheckoutPanel.jsx:18
+#: src/Templates/FormTemplates.php:192
 #: resources/admin/components/builder/IntegrationsPanel.jsx:108
 #: resources/admin/components/OnboardingWizard.jsx:78
 #: resources/admin/pages/SettingsPage.jsx:46
@@ -890,9 +710,9 @@ msgid "Email"
 msgstr ""
 
 #: src/Api/WebhooksApi.php:208
-#: src/Templates/FormTemplates.php:157
-#: src/Templates/FormTemplates.php:199
-#: src/Templates/FormTemplates.php:229
+#: src/Templates/FormTemplates.php:151
+#: src/Templates/FormTemplates.php:193
+#: src/Templates/FormTemplates.php:223
 #: resources/admin/components/builder/ActionsPanel.jsx:361
 #: resources/admin/components/builder/ActionsPanel.jsx:371
 #: resources/admin/components/builder/FormBehaviorPanels.jsx:68
@@ -911,11 +731,11 @@ msgstr ""
 msgid "The custom JSON body is not valid: %s"
 msgstr ""
 
-#: src/Blocks/SubtleFormsBlock.php:110
+#: src/Blocks/SubtleFormsBlock.php:116
 msgid "This form is not available or has been unpublished."
 msgstr ""
 
-#: src/Engine/Actions/EmailAction.php:146
+#: src/Engine/Actions/EmailAction.php:150
 msgid "A new entry was submitted with no answers."
 msgstr ""
 
@@ -1153,42 +973,34 @@ msgstr ""
 msgid "Coupon codes use only letters, numbers, hyphens and underscores."
 msgstr ""
 
-#: src/Engine/FormRestrictions.php:42
+#: src/Engine/FormRestrictions.php:37
+msgid "This form is not available right now."
+msgstr ""
+
+#: src/Engine/FormRestrictions.php:49
 #: resources/admin/components/builder/FormBehaviorPanels.jsx:181
 msgid "Please log in to fill in this form."
 msgstr ""
 
 #. translators: %s: opening date and time
-#: src/Engine/FormRestrictions.php:55
+#: src/Engine/FormRestrictions.php:62
 #, php-format
 msgid "This form opens on %s."
 msgstr ""
 
-#: src/Engine/FormRestrictions.php:65
+#: src/Engine/FormRestrictions.php:72
 #: resources/admin/components/builder/FormBehaviorPanels.jsx:213
 msgid "This form is closed and no longer accepts entries."
 msgstr ""
 
-#: src/Engine/FormRestrictions.php:74
+#: src/Engine/FormRestrictions.php:81
 #: resources/admin/components/builder/FormBehaviorPanels.jsx:237
 msgid "This form has reached its maximum number of entries."
 msgstr ""
 
-#: src/Engine/SpamProtection.php:290
-#: resources/frontend/components/FormRenderer.jsx:1256
+#: src/Engine/SpamProtection.php:460
+#: resources/frontend/components/FormRenderer.jsx:1266
 msgid "Leave this field empty"
-msgstr ""
-
-#: src/Extensions/PaymentsExtension.php:146
-msgid "There is nothing to pay for this order."
-msgstr ""
-
-#: src/Extensions/PaymentsExtension.php:179
-msgid "Connect Stripe under SubtleForms > Settings > Integrations > Payments to take card payments."
-msgstr ""
-
-#: src/Extensions/PaymentsExtension.php:187
-msgid "Payment processing requires the SubtleForms Pro plugin."
 msgstr ""
 
 #: src/Fields/CoreFields.php:40
@@ -1230,16 +1042,10 @@ msgstr ""
 #: src/Fields/CoreFields.php:1380
 #: src/Fields/CoreFields.php:1446
 #: src/Fields/CoreFields.php:1486
-#: src/Fields/CoreFields.php:1661
-#: src/Fields/CoreFields.php:1720
-#: src/Fields/CoreFields.php:1789
-#: src/Fields/CoreFields.php:1824
 #: src/Fields/FieldSettings.php:280
 #: src/Fields/FieldSettings.php:551
 #: src/Fields/FieldsV2.php:51
 #: src/Fields/FieldsV2.php:103
-#: src/Fields/PaymentFields.php:45
-#: src/Fields/PaymentFields.php:123
 #: resources/admin/components/builder/inspector/panels/OptionsPanel.jsx:108
 msgid "Label"
 msgstr ""
@@ -1255,8 +1061,6 @@ msgstr ""
 #: src/Fields/CoreFields.php:582
 #: src/Fields/CoreFields.php:612
 #: src/Fields/CoreFields.php:663
-#: src/Fields/CoreFields.php:1666
-#: src/Fields/CoreFields.php:1794
 #: src/Fields/FieldSettings.php:292
 #: resources/admin/utils/saveErrors.js:68
 msgid "Placeholder"
@@ -1307,14 +1111,12 @@ msgstr ""
 
 #: src/Fields/CoreFields.php:193
 #: src/Fields/CoreFields.php:946
-#: src/Fields/CoreFields.php:1683
 msgid "Step size"
 msgstr ""
 
 #: src/Fields/CoreFields.php:204
 #: src/Fields/CoreFields.php:594
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:146
-#: resources/admin/components/builder/CheckoutPanel.jsx:21
 #: resources/admin/components/OnboardingWizard.jsx:106
 msgid "Phone"
 msgstr ""
@@ -1392,8 +1194,8 @@ msgid "Checkbox"
 msgstr ""
 
 #: src/Fields/CoreFields.php:361
-#: resources/admin/components/builder/FieldRenderer.jsx:327
-#: resources/frontend/components/FieldRenderer.jsx:784
+#: resources/admin/components/builder/FieldRenderer.jsx:326
+#: resources/frontend/components/FieldRenderer.jsx:779
 msgid "I agree"
 msgstr ""
 
@@ -1411,14 +1213,14 @@ msgid "Consent"
 msgstr ""
 
 #: src/Fields/CoreFields.php:395
-#: resources/admin/components/builder/FieldRenderer.jsx:342
-#: resources/frontend/components/FieldRenderer.jsx:792
+#: resources/admin/components/builder/FieldRenderer.jsx:341
+#: resources/frontend/components/FieldRenderer.jsx:787
 msgid "I agree to the Privacy Policy."
 msgstr ""
 
 #: src/Fields/CoreFields.php:397
-#: resources/admin/components/builder/FieldRenderer.jsx:344
-#: resources/frontend/components/FieldRenderer.jsx:794
+#: resources/admin/components/builder/FieldRenderer.jsx:343
+#: resources/frontend/components/FieldRenderer.jsx:789
 msgid "Privacy Policy"
 msgstr ""
 
@@ -1712,15 +1514,19 @@ msgid "Neutral"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1200
-#: resources/admin/components/builder/FieldRenderer.jsx:174
+#: resources/admin/components/builder/FieldRenderer.jsx:173
 msgid "Section Break"
+msgstr ""
+
+#: src/Fields/CoreFields.php:1215
+#: src/Fields/CoreFields.php:1243
+#: src/Fields/CoreFields.php:1412
+msgid "Title"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1220
 #: src/Fields/CoreFields.php:1417
-#: src/Fields/CoreFields.php:1836
 #: resources/admin/modals/CreateFormModal.jsx:298
-#: resources/admin/pages/PaymentsPage.jsx:211
 #: resources/admin/utils/formNameHelp.js:26
 msgid "Description"
 msgstr ""
@@ -1778,23 +1584,23 @@ msgstr ""
 #: src/Fields/CoreFields.php:1403
 #: resources/admin/components/builder/ContainerRenderer.jsx:38
 #: resources/admin/components/builder/FieldInspector.jsx:46
-#: resources/admin/components/builder/FieldRenderer.jsx:590
+#: resources/admin/components/builder/FieldRenderer.jsx:581
 #: resources/admin/components/OnboardingWizard.jsx:555
 #: resources/frontend/components/StepNavigation.jsx:15
 msgid "Step"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1452
-#: src/Templates/FormTemplates.php:311
-#: src/Templates/FormTemplates.php:340
-#: src/Templates/FormTemplates.php:574
+#: src/Templates/FormTemplates.php:305
+#: src/Templates/FormTemplates.php:334
+#: src/Templates/FormTemplates.php:568
 #: resources/admin/components/builder/utils/schemaTree.js:384
 #: resources/shared/compositeParts.js:42
 msgid "First Name"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1453
-#: src/Templates/FormTemplates.php:341
+#: src/Templates/FormTemplates.php:335
 #: resources/admin/components/builder/utils/schemaTree.js:386
 #: resources/shared/compositeParts.js:43
 msgid "Last Name"
@@ -1816,7 +1622,6 @@ msgstr ""
 #: src/Fields/CoreFields.php:1467
 #: src/Fields/FieldSettings.php:73
 #: src/Tools/Import/FluentMapper.php:262
-#: resources/admin/components/builder/CheckoutPanel.jsx:23
 msgid "Address"
 msgstr ""
 
@@ -1857,9 +1662,9 @@ msgstr ""
 #: src/Fields/CoreFields.php:1523
 #: src/Fields/CoreFields.php:1552
 #: src/Fields/CoreFields.php:1581
-#: resources/admin/components/settings/AdvancedSettings.jsx:181
-#: resources/admin/components/settings/AdvancedSettings.jsx:268
-#: resources/admin/components/settings/AdvancedSettings.jsx:358
+#: resources/admin/components/settings/AdvancedSettings.jsx:249
+#: resources/admin/components/settings/AdvancedSettings.jsx:336
+#: resources/admin/components/settings/AdvancedSettings.jsx:426
 msgid "Site Key"
 msgstr ""
 
@@ -1876,7 +1681,7 @@ msgid "Used to check the answer. Leave blank to use the key saved in Settings fo
 msgstr ""
 
 #: src/Fields/CoreFields.php:1539
-#: resources/admin/components/settings/AdvancedSettings.jsx:236
+#: resources/admin/components/settings/AdvancedSettings.jsx:304
 msgid "hCaptcha"
 msgstr ""
 
@@ -1886,7 +1691,7 @@ msgstr ""
 
 #: src/Fields/CoreFields.php:1597
 #: src/Fields/FieldSettings.php:75
-#: resources/admin/components/builder/FieldRenderer.jsx:562
+#: resources/admin/components/builder/FieldRenderer.jsx:553
 msgid "Action Hook"
 msgstr ""
 
@@ -1904,113 +1709,7 @@ msgstr ""
 msgid "Enabled"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1645
-msgid "Payment Amount"
-msgstr ""
-
-#: src/Fields/CoreFields.php:1671
-msgid "Minimum Amount"
-msgstr ""
-
-#: src/Fields/CoreFields.php:1677
-msgid "Maximum Amount"
-msgstr ""
-
-#: src/Fields/CoreFields.php:1690
-msgid "Show Currency Symbol"
-msgstr ""
-
-#: src/Fields/CoreFields.php:1701
-msgid "Payment Summary"
-msgstr ""
-
-#: src/Fields/CoreFields.php:1711
-#: resources/admin/components/builder/PaymentPreviews.jsx:112
-#: resources/frontend/components/fields/Payments.jsx:378
-msgid "Tax"
-msgstr ""
-
-#: src/Fields/CoreFields.php:1714
-#: resources/admin/components/builder/PaymentPreviews.jsx:125
-#: resources/frontend/components/fields/Payments.jsx:396
-msgid "Have a coupon code?"
-msgstr ""
-
-#: src/Fields/CoreFields.php:1725
-msgid "List each item"
-msgstr ""
-
-#: src/Fields/CoreFields.php:1730
-msgid "Coupon box in the summary"
-msgstr ""
-
-#: src/Fields/CoreFields.php:1731
-msgid "Lets visitors apply a code right where they see the total. Manage codes in SubtleForms › Payments."
-msgstr ""
-
-#: src/Fields/CoreFields.php:1736
-msgid "Coupon link text"
-msgstr ""
-
-#: src/Fields/CoreFields.php:1741
-msgid "Tax label"
-msgstr ""
-
-#: src/Fields/CoreFields.php:1746
-msgid "Show Subtotal"
-msgstr ""
-
-#: src/Fields/CoreFields.php:1751
-msgid "Show Tax"
-msgstr ""
-
-#: src/Fields/CoreFields.php:1756
-msgid "Tax Rate (%)"
-msgstr ""
-
-#: src/Fields/CoreFields.php:1764
-msgid "Show Total"
-msgstr ""
-
-#: src/Fields/CoreFields.php:1775
-msgid "Coupon Code"
-msgstr ""
-
-#: src/Fields/CoreFields.php:1781
-#: resources/admin/components/builder/FieldRenderer.jsx:535
-msgid "Enter coupon code"
-msgstr ""
-
-#: src/Fields/CoreFields.php:1782
-#: resources/admin/components/builder/FieldRenderer.jsx:545
-#: resources/admin/components/builder/inspector/panels/OptionsPanel.jsx:308
-#: resources/frontend/components/fields/Payments.jsx:268
-msgid "Apply"
-msgstr ""
-
-#: src/Fields/CoreFields.php:1799
-msgid "Button Text"
-msgstr ""
-
-#: src/Fields/CoreFields.php:1810
-msgid "Hidden Price"
-msgstr ""
-
-#: src/Fields/CoreFields.php:1825
-msgid "Internal label for reference"
-msgstr ""
-
-#: src/Fields/CoreFields.php:1830
-#: resources/admin/components/builder/webhook/webhookModel.js:284
-#: resources/admin/components/OnboardingWizard.jsx:140
-msgid "Amount"
-msgstr ""
-
-#: src/Fields/CoreFields.php:1837
-msgid "Name of the line in the order summary and receipt. Not shown on the form."
-msgstr ""
-
-#: src/Fields/CoreFields.php:1857
+#: src/Fields/CoreFields.php:1652
 msgid "No default"
 msgstr ""
 
@@ -3084,19 +2783,17 @@ msgid "NPS"
 msgstr ""
 
 #: src/Fields/FieldSettings.php:76
-#: src/Templates/FormTemplates.php:682
-#: src/Templates/FormTemplates.php:752
-#: src/Templates/FormTemplates.php:880
+#: resources/admin/utils/proPlaceholders.js:43
 msgid "Custom Amount"
 msgstr ""
 
 #: src/Fields/FieldSettings.php:77
-#: src/Templates/FormTemplates.php:646
-#: src/Templates/FormTemplates.php:809
+#: resources/admin/utils/proPlaceholders.js:45
 msgid "Order Summary"
 msgstr ""
 
 #: src/Fields/FieldSettings.php:78
+#: resources/admin/utils/proPlaceholders.js:49
 msgid "Fixed Fee"
 msgstr ""
 
@@ -3130,7 +2827,6 @@ msgstr ""
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:157
 #: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:60
 #: resources/admin/components/builder/FieldDock.jsx:25
-#: resources/admin/components/settings/extensions/PdfPanel.jsx:30
 #: resources/admin/pages/CreateFormPage.jsx:418
 msgid "Layout"
 msgstr ""
@@ -3218,7 +2914,7 @@ msgid "Message when left empty"
 msgstr ""
 
 #: src/Fields/FieldSettings.php:502
-#: resources/admin/components/builder/FieldRenderer.jsx:797
+#: resources/admin/components/builder/FieldRenderer.jsx:788
 #: resources/admin/components/builder/FormSettings.jsx:320
 #: resources/frontend/utils/fieldValidation.js:216
 msgid "This field is required."
@@ -3493,7 +3189,7 @@ msgid "Separate discount code field"
 msgstr ""
 
 #: src/Fields/FieldSettings.php:808
-#: resources/admin/components/settings/AdvancedSettings.jsx:116
+#: resources/admin/components/settings/AdvancedSettings.jsx:184
 msgid "Google reCAPTCHA"
 msgstr ""
 
@@ -3502,7 +3198,7 @@ msgid "hCaptcha challenge"
 msgstr ""
 
 #: src/Fields/FieldSettings.php:810
-#: resources/admin/components/settings/AdvancedSettings.jsx:323
+#: resources/admin/components/settings/AdvancedSettings.jsx:391
 msgid "Cloudflare Turnstile"
 msgstr ""
 
@@ -3515,9 +3211,9 @@ msgid "Toggle"
 msgstr ""
 
 #: src/Fields/FieldsV2.php:42
-#: src/Support/AnswerFormatter.php:231
-#: src/Support/AnswerFormatter.php:280
-#: resources/admin/components/builder/FieldRenderer.jsx:267
+#: src/Support/AnswerFormatter.php:239
+#: src/Support/AnswerFormatter.php:288
+#: resources/admin/components/builder/FieldRenderer.jsx:266
 msgid "Yes"
 msgstr ""
 
@@ -3530,8 +3226,7 @@ msgid "Default state"
 msgstr ""
 
 #: src/Fields/FieldsV2.php:64
-#: resources/admin/components/settings/ExtensionsSettings.jsx:70
-#: resources/admin/pages/PaymentsPage.jsx:63
+#: resources/admin/components/settings/ExtensionsSettings.jsx:65
 msgid "Disabled"
 msgstr ""
 
@@ -3548,12 +3243,12 @@ msgid "Opinion Scale"
 msgstr ""
 
 #: src/Fields/FieldsV2.php:96
-#: resources/admin/components/builder/FieldRenderer.jsx:729
+#: resources/admin/components/builder/FieldRenderer.jsx:720
 msgid "Not likely"
 msgstr ""
 
 #: src/Fields/FieldsV2.php:97
-#: resources/admin/components/builder/FieldRenderer.jsx:730
+#: resources/admin/components/builder/FieldRenderer.jsx:721
 msgid "Very likely"
 msgstr ""
 
@@ -3573,197 +3268,19 @@ msgstr ""
 msgid "High end label"
 msgstr ""
 
-#: src/Fields/PaymentFields.php:29
-#: src/Templates/FormTemplates.php:636
-#: src/Templates/FormTemplates.php:637
-#: src/Templates/FormTemplates.php:792
-#: src/Templates/FormTemplates.php:793
-msgid "Product"
-msgstr ""
-
-#: src/Fields/PaymentFields.php:50
-msgid "Name on the order"
-msgstr ""
-
-#: src/Fields/PaymentFields.php:51
-msgid "Shown in the summary and receipts. Defaults to the label."
-msgstr ""
-
-#: src/Fields/PaymentFields.php:58
-msgid "Price"
-msgstr ""
-
-#: src/Fields/PaymentFields.php:66
-msgid "Let visitors choose a quantity"
-msgstr ""
-
-#: src/Fields/PaymentFields.php:72
-msgid "Minimum quantity"
-msgstr ""
-
-#: src/Fields/PaymentFields.php:79
-msgid "Maximum quantity"
-msgstr ""
-
-#: src/Fields/PaymentFields.php:80
-msgid "0 means no limit."
-msgstr ""
-
-#: src/Fields/PaymentFields.php:94
-msgid "Priced Options"
-msgstr ""
-
-#: src/Fields/PaymentFields.php:103
-#: resources/admin/components/builder/FieldDock.jsx:21
-msgid "Basic"
-msgstr ""
-
-#: src/Fields/PaymentFields.php:108
-#: resources/admin/components/builder/appearance/labels.js:74
-#: resources/admin/components/OnboardingWizard.jsx:432
-#: resources/admin/modals/CreateFormModal.jsx:145
-#: resources/admin/modals/CreateFormModal.jsx:343
-#: resources/admin/pages/SubmissionDetailPage.jsx:629
-#: resources/admin/pages/SubmissionDetailPage.jsx:634
-#: resources/admin/utils/formMeta.js:109
-#: resources/admin/utils/formTypeChoices.js:10
-#: resources/admin/utils/formTypeChoices.js:27
-msgid "Standard"
-msgstr ""
-
-#: src/Fields/PaymentFields.php:113
-msgid "Premium"
-msgstr ""
-
-#: src/Fields/PaymentFields.php:128
-msgid "Show as"
-msgstr ""
-
-#: src/Fields/PaymentFields.php:132
-msgid "Radio buttons (pick one)"
-msgstr ""
-
-#: src/Fields/PaymentFields.php:136
-msgid "Cards (pick one)"
-msgstr ""
-
-#: src/Fields/PaymentFields.php:140
-msgid "Dropdown (pick one)"
-msgstr ""
-
-#: src/Fields/PaymentFields.php:144
-msgid "Checkboxes (pick any)"
-msgstr ""
-
-#: src/Fields/PaymentFields.php:151
-msgid "Show prices next to options"
-msgstr ""
-
-#: src/Frontend/FrontendAssets.php:143
-#: resources/frontend/components/FormRenderer.jsx:944
-#: resources/frontend/components/FormRenderer.jsx:1061
-#: resources/frontend/components/FormRenderer.jsx:1115
+#: src/Frontend/FrontendAssets.php:137
+#: resources/frontend/components/FormRenderer.jsx:951
+#: resources/frontend/components/FormRenderer.jsx:1069
+#: resources/frontend/components/FormRenderer.jsx:1123
 msgid "Thank you! Your submission has been received."
 msgstr ""
 
-#: src/Frontend/Shortcode.php:79
+#: src/Frontend/Shortcode.php:71
+msgid "Form not available."
+msgstr ""
+
+#: src/Frontend/Shortcode.php:87
 msgid "Invalid form ID."
-msgstr ""
-
-#: src/Frontend/Shortcode.php:90
-msgid "This form is not published yet."
-msgstr ""
-
-#: src/Payments/CouponsRepository.php:116
-#: resources/admin/pages/PaymentsPage.jsx:83
-msgid "Total uses cannot be negative."
-msgstr ""
-
-#: src/Payments/CouponsRepository.php:117
-#: resources/admin/pages/PaymentsPage.jsx:86
-msgid "Uses per customer cannot be negative."
-msgstr ""
-
-#: src/Payments/CouponsRepository.php:128
-msgid "Enter a valid start date."
-msgstr ""
-
-#: src/Payments/CouponsRepository.php:129
-msgid "Enter a valid expiry date."
-msgstr ""
-
-#: src/Payments/CouponsRepository.php:139
-msgid "The expiry date must be after the start date."
-msgstr ""
-
-#: src/Payments/CouponsRepository.php:145
-#: resources/admin/pages/PaymentsPage.jsx:76
-msgid "Enter a discount greater than zero."
-msgstr ""
-
-#: src/Payments/CouponsRepository.php:148
-#: resources/admin/pages/PaymentsPage.jsx:79
-msgid "A percentage discount cannot be more than 100."
-msgstr ""
-
-#: src/Payments/CouponsRepository.php:152
-msgid "Another coupon already uses this code."
-msgstr ""
-
-#: src/Payments/CouponsRepository.php:164
-#: resources/admin/pages/PaymentsPage.jsx:131
-msgid "The coupon could not be saved."
-msgstr ""
-
-#: src/Payments/CouponsRepository.php:280
-#: resources/frontend/components/FormRenderer.jsx:580
-msgid "This coupon code is not valid."
-msgstr ""
-
-#: src/Payments/CouponsRepository.php:284
-msgid "This coupon is not active yet."
-msgstr ""
-
-#: src/Payments/CouponsRepository.php:287
-msgid "This coupon has expired."
-msgstr ""
-
-#: src/Payments/CouponsRepository.php:290
-msgid "This coupon has reached its usage limit."
-msgstr ""
-
-#: src/Payments/CouponsRepository.php:295
-msgid "You have already used this coupon."
-msgstr ""
-
-#: src/Payments/CouponsRepository.php:296
-msgid "You have used this coupon as many times as allowed."
-msgstr ""
-
-#: src/Payments/CouponsRepository.php:300
-msgid "This coupon cannot be used on this form."
-msgstr ""
-
-#. translators: %s: minimum order amount
-#: src/Payments/CouponsRepository.php:306
-#, php-format
-msgid "This coupon needs an order of at least %s."
-msgstr ""
-
-#. translators: %s: smallest amount, for example "0.50 USD"
-#: src/Payments/Currencies.php:133
-#, php-format
-msgid "Card payments need an order of at least %s. Add to your order or contact the site owner."
-msgstr ""
-
-#: src/Payments/Pricing.php:299
-#: src/Templates/FormTemplates.php:628
-#: resources/admin/components/builder/webhook/webhookModel.js:282
-#: resources/admin/pages/CreateFormPage.jsx:37
-#: resources/admin/pages/SubmissionDetailPage.jsx:632
-#: resources/admin/templates/TemplateSelector.jsx:64
-#: resources/frontend/components/ConversationalFormRenderer.jsx:566
-msgid "Payment"
 msgstr ""
 
 #: src/Privacy/PrivacyEraser.php:54
@@ -3783,17 +3300,35 @@ msgstr ""
 msgid "Error deleting submission #%1$d: %2$s"
 msgstr ""
 
-#: src/Privacy/PrivacyExporter.php:93
+#: src/Privacy/PrivacyExporter.php:94
 #: resources/admin/components/FormsList.jsx:40
 #: resources/admin/components/FormsList.jsx:249
 msgid "Form Name"
 msgstr ""
 
-#: src/Privacy/PrivacyExporter.php:97
+#: src/Privacy/PrivacyExporter.php:98
 msgid "Submission Date"
 msgstr ""
 
-#: src/Privacy/PrivacyExporter.php:127
+#: src/Privacy/PrivacyExporter.php:109
+#: resources/admin/components/builder/webhook/webhookModel.js:275
+#: resources/admin/pages/SubmissionDetailPage.jsx:1200
+msgid "IP address"
+msgstr ""
+
+#: src/Privacy/PrivacyExporter.php:110
+#: resources/admin/components/SubmissionsTable.jsx:55
+#: resources/admin/components/SubmissionsTable.jsx:779
+#: resources/admin/pages/SubmissionDetailPage.jsx:1202
+msgid "Browser"
+msgstr ""
+
+#: src/Privacy/PrivacyExporter.php:121
+#: resources/admin/components/builder/webhook/webhookModel.js:277
+msgid "User ID"
+msgstr ""
+
+#: src/Privacy/PrivacyExporter.php:147
 msgid "Form Submissions"
 msgstr ""
 
@@ -3843,21 +3378,21 @@ msgstr ""
 msgid "Queued"
 msgstr ""
 
-#: src/Support/AnswerFormatter.php:188
+#: src/Support/AnswerFormatter.php:196
 #: src/Support/FieldMapper.php:212
 msgid "Signed"
 msgstr ""
 
-#: src/Support/AnswerFormatter.php:189
+#: src/Support/AnswerFormatter.php:197
 msgid "Signed (the signature image is in the entry)"
 msgstr ""
 
-#: src/Support/AnswerFormatter.php:231
-#: src/Support/AnswerFormatter.php:280
+#: src/Support/AnswerFormatter.php:239
+#: src/Support/AnswerFormatter.php:288
 msgid "No"
 msgstr ""
 
-#: src/Support/AnswerFormatter.php:303
+#: src/Support/AnswerFormatter.php:311
 #: resources/admin/pages/SubmissionDetailPage.jsx:246
 #: resources/admin/pages/SubmissionDetailPage.jsx:908
 #: resources/admin/utils/proFeatureDetector.js:19
@@ -3875,22 +3410,22 @@ msgstr ""
 
 #: src/Support/Captcha/CaptchaManager.php:243
 #: src/Support/Captcha/CaptchaManager.php:271
-#: src/Support/Captcha/CaptchaManager.php:463
+#: src/Support/Captcha/CaptchaManager.php:453
 msgid "CAPTCHA provider not found."
 msgstr ""
 
 #: src/Support/Captcha/CaptchaManager.php:313
-#: resources/frontend/components/ConversationalFormRenderer.jsx:279
-#: resources/frontend/components/FormRenderer.jsx:724
+#: resources/frontend/components/ConversationalFormRenderer.jsx:282
+#: resources/frontend/components/FormRenderer.jsx:731
 msgid "CAPTCHA verification failed. Please try again."
 msgstr ""
 
 #: src/Support/Captcha/CaptchaManager.php:324
-#: src/Support/Captcha/CaptchaManager.php:476
+#: src/Support/Captcha/CaptchaManager.php:466
 msgid "CAPTCHA secret key is missing."
 msgstr ""
 
-#: src/Support/Captcha/CaptchaManager.php:470
+#: src/Support/Captcha/CaptchaManager.php:460
 msgid "Please complete the CAPTCHA."
 msgstr ""
 
@@ -3985,49 +3520,49 @@ msgstr ""
 msgid "WordPress blocks requests to %s. Local and private addresses, and ports other than 80, 443 and 8080, are refused for safety. Use a public address, or ask your developer to allow it with the http_request_host_is_external and http_allowed_safe_ports filters."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:125
+#: src/Templates/FormTemplates.php:119
 #: resources/admin/components/OnboardingWizard.jsx:13
 msgid "Contact Form"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:126
+#: src/Templates/FormTemplates.php:120
 msgid "A simple contact form with name, email, and message fields"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:131
-#: src/Templates/FormTemplates.php:193
-#: src/Templates/FormTemplates.php:222
+#: src/Templates/FormTemplates.php:125
+#: src/Templates/FormTemplates.php:187
+#: src/Templates/FormTemplates.php:216
 msgid "Contact Us"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:133
+#: src/Templates/FormTemplates.php:127
 msgid "Get in touch with us"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:145
-#: src/Templates/FormTemplates.php:227
-#: src/Templates/FormTemplates.php:312
-#: src/Templates/FormTemplates.php:483
-#: src/Templates/FormTemplates.php:581
+#: src/Templates/FormTemplates.php:139
+#: src/Templates/FormTemplates.php:221
+#: src/Templates/FormTemplates.php:306
+#: src/Templates/FormTemplates.php:477
+#: src/Templates/FormTemplates.php:575
 msgid "Email Address"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:151
-#: src/Templates/FormTemplates.php:228
+#: src/Templates/FormTemplates.php:145
+#: src/Templates/FormTemplates.php:222
 #: resources/admin/components/builder/ActionsPanel.jsx:333
 #: resources/admin/components/builder/ActionsPanel.jsx:344
 msgid "Subject"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:159
+#: src/Templates/FormTemplates.php:153
 msgid "Tell us how we can help..."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:175
+#: src/Templates/FormTemplates.php:169
 msgid "New Contact Form Submission"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:176
+#: src/Templates/FormTemplates.php:170
 msgid ""
 "Name: {{name}}\n"
 "Email: {{email}}\n"
@@ -4037,163 +3572,163 @@ msgid ""
 "{{message}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:187
+#: src/Templates/FormTemplates.php:181
 msgid "Simple Contact"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:188
+#: src/Templates/FormTemplates.php:182
 msgid "Minimal contact form: just name, email, and message. Perfect for sidebars and footers."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:205
+#: src/Templates/FormTemplates.php:199
 msgid "New Contact Form Message"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:206
-#: src/Templates/FormTemplates.php:237
+#: src/Templates/FormTemplates.php:200
+#: src/Templates/FormTemplates.php:231
 msgid ""
 "From: {{name}} <{{email}}>\n"
 "\n"
 "{{message}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:216
+#: src/Templates/FormTemplates.php:210
 msgid "Contact + Attachment"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:217
+#: src/Templates/FormTemplates.php:211
 msgid "Contact form that lets visitors attach a file: handy for design briefs, CVs, or support docs."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:226
-#: src/Templates/FormTemplates.php:482
+#: src/Templates/FormTemplates.php:220
+#: src/Templates/FormTemplates.php:476
 msgid "Your Name"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:230
+#: src/Templates/FormTemplates.php:224
 msgid "Attachment (optional)"
 msgstr ""
 
+#: src/Templates/FormTemplates.php:247
 #: src/Templates/FormTemplates.php:253
-#: src/Templates/FormTemplates.php:259
 msgid "Newsletter"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:254
+#: src/Templates/FormTemplates.php:248
 msgid "Email only, with the button on the same row. Made for footers and hero sections."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:262
-#: src/Templates/FormTemplates.php:307
+#: src/Templates/FormTemplates.php:256
+#: src/Templates/FormTemplates.php:301
 msgid "Subscribe"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:276
+#: src/Templates/FormTemplates.php:270
 msgid "Email address"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:277
+#: src/Templates/FormTemplates.php:271
 msgid "you@example.com"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:289
+#: src/Templates/FormTemplates.php:283
 msgid "New subscriber: {field:email}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:290
+#: src/Templates/FormTemplates.php:284
 msgid "A new subscriber joined from {form_title}: {field:email}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:301
+#: src/Templates/FormTemplates.php:295
 msgid "Newsletter Sign-Up"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:302
+#: src/Templates/FormTemplates.php:296
 msgid "Ultra-light sign-up: just first name and email, with consent checkbox."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:313
+#: src/Templates/FormTemplates.php:307
 msgid "I agree to receive emails and accept the Privacy Policy."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:319
+#: src/Templates/FormTemplates.php:313
 msgid "New Newsletter Subscriber: {{first_name}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:320
+#: src/Templates/FormTemplates.php:314
 msgid ""
 "New subscriber:\n"
 "\n"
 "{{first_name}}, {{email}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:330
+#: src/Templates/FormTemplates.php:324
 msgid "Free Resource Download"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:331
+#: src/Templates/FormTemplates.php:325
 msgid "Gated content form: collect name and email before granting access to a guide or ebook."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:336
+#: src/Templates/FormTemplates.php:330
 msgid "Get the Free Guide"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:342
+#: src/Templates/FormTemplates.php:336
 msgid "Work Email"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:343
+#: src/Templates/FormTemplates.php:337
 msgid "Company (optional)"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:349
+#: src/Templates/FormTemplates.php:343
 msgid "New Resource Download Request"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:350
+#: src/Templates/FormTemplates.php:344
 msgid ""
 "{{first_name}} {{last_name}} ({{company}}) requested the guide.\n"
 "Email: {{email}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:360
+#: src/Templates/FormTemplates.php:354
 msgid "Product Feedback"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:361
+#: src/Templates/FormTemplates.php:355
 msgid "Collect star ratings and open-ended feedback about your product."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:366
+#: src/Templates/FormTemplates.php:360
 msgid "Share Your Feedback"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:370
+#: src/Templates/FormTemplates.php:364
 msgid "Overall Rating"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:371
+#: src/Templates/FormTemplates.php:365
 msgid "How are you using our product?"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:372
+#: src/Templates/FormTemplates.php:366
 msgid "What do you like most?"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:373
+#: src/Templates/FormTemplates.php:367
 msgid "What could we improve?"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:374
+#: src/Templates/FormTemplates.php:368
 msgid "Your email (optional, for follow-up)"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:380
+#: src/Templates/FormTemplates.php:374
 msgid "New Product Feedback ({{rating}} stars)"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:381
+#: src/Templates/FormTemplates.php:375
 msgid ""
 "Rating: {{rating}}/5\n"
 "\n"
@@ -4204,48 +3739,48 @@ msgid ""
 "Reply to: {{email}}"
 msgstr ""
 
+#: src/Templates/FormTemplates.php:385
 #: src/Templates/FormTemplates.php:391
-#: src/Templates/FormTemplates.php:397
 msgid "Website Feedback"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:392
+#: src/Templates/FormTemplates.php:386
 msgid "Quick feedback on your website: usability, design, and suggestions."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:404
+#: src/Templates/FormTemplates.php:398
 msgid "How did you find what you needed?"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:407
+#: src/Templates/FormTemplates.php:401
 msgid "Easily"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:408
+#: src/Templates/FormTemplates.php:402
 msgid "With some effort"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:409
+#: src/Templates/FormTemplates.php:403
 msgid "With great difficulty"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:410
+#: src/Templates/FormTemplates.php:404
 msgid "Could not find it"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:413
+#: src/Templates/FormTemplates.php:407
 msgid "Design rating"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:414
+#: src/Templates/FormTemplates.php:408
 msgid "Suggestions for improvement"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:420
+#: src/Templates/FormTemplates.php:414
 msgid "Website Feedback Received"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:421
+#: src/Templates/FormTemplates.php:415
 msgid ""
 "Finding: {{finding}}\n"
 "Design: {{design_rating}}/5\n"
@@ -4254,55 +3789,55 @@ msgid ""
 "{{suggestions}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:431
+#: src/Templates/FormTemplates.php:425
 msgid "Customer Satisfaction (CSAT)"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:432
+#: src/Templates/FormTemplates.php:426
 msgid "Post-purchase or post-support satisfaction survey."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:437
+#: src/Templates/FormTemplates.php:431
 msgid "How did we do?"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:441
+#: src/Templates/FormTemplates.php:435
 msgid "How satisfied are you?"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:445
+#: src/Templates/FormTemplates.php:439
 msgid "Would you recommend us to a friend?"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:448
+#: src/Templates/FormTemplates.php:442
 msgid "Definitely yes"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:449
+#: src/Templates/FormTemplates.php:443
 msgid "Probably yes"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:450
+#: src/Templates/FormTemplates.php:444
 msgid "Not sure"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:451
+#: src/Templates/FormTemplates.php:445
 msgid "Probably not"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:452
+#: src/Templates/FormTemplates.php:446
 msgid "Definitely not"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:455
+#: src/Templates/FormTemplates.php:449
 msgid "Any additional comments?"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:461
+#: src/Templates/FormTemplates.php:455
 msgid "CSAT Response: {{satisfaction}}/5"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:462
+#: src/Templates/FormTemplates.php:456
 msgid ""
 "Satisfaction: {{satisfaction}}/5\n"
 "Recommend: {{recommend}}\n"
@@ -4311,40 +3846,40 @@ msgid ""
 "{{comments}}"
 msgstr ""
 
+#: src/Templates/FormTemplates.php:466
 #: src/Templates/FormTemplates.php:472
-#: src/Templates/FormTemplates.php:478
 msgid "RSVP"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:473
+#: src/Templates/FormTemplates.php:467
 msgid "Event RSVP: yes / no, guest count, and dietary requirements."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:487
+#: src/Templates/FormTemplates.php:481
 msgid "Will you attend?"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:490
+#: src/Templates/FormTemplates.php:484
 msgid "Yes, I will attend"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:491
+#: src/Templates/FormTemplates.php:485
 msgid "No, I cannot attend"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:494
+#: src/Templates/FormTemplates.php:488
 msgid "Number of additional guests"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:495
+#: src/Templates/FormTemplates.php:489
 msgid "Dietary requirements (optional)"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:501
+#: src/Templates/FormTemplates.php:495
 msgid "RSVP: {{name}} ({{attending}})"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:502
+#: src/Templates/FormTemplates.php:496
 msgid ""
 "Name: {{name}}\n"
 "Email: {{email}}\n"
@@ -4353,74 +3888,74 @@ msgid ""
 "Dietary: {{dietary}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:512
+#: src/Templates/FormTemplates.php:506
 msgid "Bug Report"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:513
+#: src/Templates/FormTemplates.php:507
 msgid "Let users report bugs with steps to reproduce, severity, and device info."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:518
+#: src/Templates/FormTemplates.php:512
 msgid "Report a Bug"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:522
+#: src/Templates/FormTemplates.php:516
 msgid "Brief summary of the issue"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:523
+#: src/Templates/FormTemplates.php:517
 msgid "Steps to reproduce"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:524
+#: src/Templates/FormTemplates.php:518
 msgid ""
 "1. Go to…\n"
 "2. Click on…\n"
 "3. See error"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:525
+#: src/Templates/FormTemplates.php:519
 msgid "Expected behaviour"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:526
+#: src/Templates/FormTemplates.php:520
 msgid "Actual behaviour"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:530
+#: src/Templates/FormTemplates.php:524
 msgid "Severity"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:533
+#: src/Templates/FormTemplates.php:527
 msgid "Critical: app is unusable"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:534
+#: src/Templates/FormTemplates.php:528
 msgid "High: major feature broken"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:535
+#: src/Templates/FormTemplates.php:529
 msgid "Medium: partial functionality affected"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:536
+#: src/Templates/FormTemplates.php:530
 msgid "Low: minor inconvenience"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:539
+#: src/Templates/FormTemplates.php:533
 msgid "Browser & OS"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:540
+#: src/Templates/FormTemplates.php:534
 msgid "Your email (for follow-up)"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:546
+#: src/Templates/FormTemplates.php:540
 msgid "[{{severity}}] Bug: {{summary}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:547
+#: src/Templates/FormTemplates.php:541
 msgid ""
 "Summary: {{summary}}\n"
 "Severity: {{severity}}\n"
@@ -4435,40 +3970,40 @@ msgid ""
 "Contact: {{email}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:560
+#: src/Templates/FormTemplates.php:554
 #: resources/admin/components/OnboardingWizard.jsx:20
 msgid "Lead Capture"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:561
+#: src/Templates/FormTemplates.php:555
 msgid "Simple lead capture form with name and email"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:566
+#: src/Templates/FormTemplates.php:560
 msgid "Stay Updated"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:568
+#: src/Templates/FormTemplates.php:562
 msgid "Subscribe to our newsletter"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:576
+#: src/Templates/FormTemplates.php:570
 msgid "John"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:583
+#: src/Templates/FormTemplates.php:577
 msgid "john@example.com"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:588
+#: src/Templates/FormTemplates.php:582
 msgid "I agree to receive marketing emails"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:604
+#: src/Templates/FormTemplates.php:598
 msgid "New Lead: {{first_name}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:605
+#: src/Templates/FormTemplates.php:599
 msgid ""
 "New lead captured:\n"
 "\n"
@@ -4478,40 +4013,7 @@ msgid ""
 "Consent: {{consent}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:621
-#: resources/admin/components/builder/FormSettings.jsx:262
-#: resources/admin/components/OnboardingWizard.jsx:34
-msgid "Payment Form"
-msgstr ""
-
-#: src/Templates/FormTemplates.php:622
-msgid "A product and an order summary. Card payment needs SubtleForms Pro."
-msgstr ""
-
-#: src/Templates/FormTemplates.php:651
-#: src/Templates/FormTemplates.php:823
-#: resources/admin/components/tools/SiteImport.jsx:20
-msgid "Note"
-msgstr ""
-
-#: src/Templates/FormTemplates.php:652
-#: src/Templates/FormTemplates.php:824
-msgid "Card payment needs SubtleForms Pro."
-msgstr ""
-
-#: src/Templates/FormTemplates.php:667
-msgid "Donation Form"
-msgstr ""
-
-#: src/Templates/FormTemplates.php:668
-msgid "A donation with a custom amount."
-msgstr ""
-
-#: src/Templates/FormTemplates.php:674
-msgid "Donation"
-msgstr ""
-
-#: src/Templates/FormTemplates.php:965
+#: src/Templates/FormTemplates.php:707
 #: src/Tools/Import/SchemaBuilder.php:353
 #: src/Tools/Import/SchemaBuilder.php:371
 #: resources/admin/components/builder/ActionsPanel.jsx:101
@@ -5066,31 +4568,31 @@ msgstr ""
 msgid "Download file"
 msgstr ""
 
-#: subtleforms.php:112
+#: subtleforms.php:125
 msgid "Cookie nonce is invalid. Please refresh and try again."
 msgstr ""
 
-#: subtleforms.php:129
+#: subtleforms.php:142
 msgid "SubtleForms Data Collection"
 msgstr ""
 
-#: subtleforms.php:130
+#: subtleforms.php:143
 msgid "When you submit a form on this website, SubtleForms collects and stores the following information:"
 msgstr ""
 
-#: subtleforms.php:131
+#: subtleforms.php:144
 msgid "Form field data (as entered by you)"
 msgstr ""
 
-#: subtleforms.php:132
+#: subtleforms.php:145
 msgid "Your IP address (for spam prevention)"
 msgstr ""
 
-#: subtleforms.php:133
+#: subtleforms.php:146
 msgid "Your browser user agent (for spam prevention)"
 msgstr ""
 
-#: subtleforms.php:134
+#: subtleforms.php:147
 msgid "This data is stored according to the configured data retention policy. Contact the site administrator for more information about data retention and deletion."
 msgstr ""
 
@@ -5106,6 +4608,20 @@ msgstr ""
 #: resources/admin/app/AdminApp.jsx:207
 #: resources/admin/app/AdminApp.jsx:215
 msgid "Form Builder"
+msgstr ""
+
+#: resources/admin/app/AdminApp.jsx:210
+#: resources/admin/pages/DashboardPage.jsx:183
+#: resources/admin/pages/ExtensionsPage.jsx:165
+msgid "Extensions"
+msgstr ""
+
+#: resources/admin/app/AdminApp.jsx:211
+#: resources/admin/components/builder/FieldDock.jsx:26
+#: resources/admin/components/builder/FormSettings.jsx:192
+#: resources/admin/pages/PaymentsUpsell.jsx:12
+#: resources/admin/templates/categories.js:17
+msgid "Payments"
 msgstr ""
 
 #: resources/admin/app/AdminApp.jsx:218
@@ -5139,14 +4655,14 @@ msgid "Rename"
 msgstr ""
 
 #: resources/admin/components/AdminHeader.jsx:170
-#: resources/admin/components/builder/FieldRenderer.jsx:101
+#: resources/admin/components/builder/FieldRenderer.jsx:100
 #: resources/admin/components/builder/StepNavigator.jsx:81
 msgid "Untitled"
 msgstr ""
 
 #: resources/admin/components/AdminShell.jsx:64
 #: resources/admin/pages/SettingsPage.jsx:313
-#: resources/frontend/components/fields/lazyFields.jsx:190
+#: resources/frontend/components/fields/lazyFields.jsx:183
 msgid "Loading…"
 msgstr ""
 
@@ -5160,7 +4676,7 @@ msgstr ""
 msgid "Try again"
 msgstr ""
 
-#: resources/admin/components/AppNav.jsx:117
+#: resources/admin/components/AppNav.jsx:101
 msgid "unread"
 msgstr ""
 
@@ -5214,7 +4730,6 @@ msgstr ""
 
 #: resources/admin/components/builder/ActionsPanel.jsx:271
 #: resources/admin/components/builder/IntegrationsPanel.jsx:75
-#: resources/frontend/components/fields/Payments.jsx:233
 #: resources/frontend/components/fields/RepeaterField.jsx:189
 msgid "Remove"
 msgstr ""
@@ -5272,7 +4787,6 @@ msgstr ""
 
 #: resources/admin/components/builder/ActionsPanel.jsx:409
 #: resources/admin/components/builder/IntegrationsPanel.jsx:446
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:111
 msgid "Webhook URL"
 msgstr ""
 
@@ -5363,7 +4877,7 @@ msgstr ""
 #: resources/admin/pages/ToolsPage.jsx:309
 #: resources/admin/pages/ToolsPage.jsx:498
 #: resources/admin/pages/ToolsPage.jsx:518
-#: resources/frontend/components/FormRenderer.jsx:1243
+#: resources/frontend/components/FormRenderer.jsx:1253
 msgid "Form"
 msgstr ""
 
@@ -5722,6 +5236,18 @@ msgstr ""
 msgid "Narrow"
 msgstr ""
 
+#: resources/admin/components/builder/appearance/labels.js:74
+#: resources/admin/components/OnboardingWizard.jsx:432
+#: resources/admin/modals/CreateFormModal.jsx:145
+#: resources/admin/modals/CreateFormModal.jsx:343
+#: resources/admin/pages/SubmissionDetailPage.jsx:629
+#: resources/admin/pages/SubmissionDetailPage.jsx:634
+#: resources/admin/utils/formMeta.js:109
+#: resources/admin/utils/formTypeChoices.js:10
+#: resources/admin/utils/formTypeChoices.js:27
+msgid "Standard"
+msgstr ""
+
 #: resources/admin/components/builder/appearance/labels.js:75
 msgid "Wide"
 msgstr ""
@@ -5856,81 +5382,8 @@ msgid "Serif"
 msgstr ""
 
 #: resources/admin/components/builder/canvas/renderers/ChoiceFieldRenderer.jsx:95
-#: resources/admin/components/builder/PaymentPreviews.jsx:51
 #: resources/frontend/components/fields/ChoiceSelect.jsx:123
 msgid "Select an option"
-msgstr ""
-
-#: resources/admin/components/builder/CheckoutPanel.jsx:20
-msgid "Last name (if separate)"
-msgstr ""
-
-#: resources/admin/components/builder/CheckoutPanel.jsx:22
-#: resources/admin/components/OnboardingWizard.jsx:97
-msgid "Company"
-msgstr ""
-
-#: resources/admin/components/builder/CheckoutPanel.jsx:74
-msgid "Take payments through"
-msgstr ""
-
-#: resources/admin/components/builder/CheckoutPanel.jsx:78
-#: resources/admin/components/builder/CheckoutPanel.jsx:90
-#: resources/admin/components/builder/CheckoutPanel.jsx:104
-#: resources/admin/ui/UpgradeModal.jsx:155
-msgid "WooCommerce checkout"
-msgstr ""
-
-#: resources/admin/components/builder/CheckoutPanel.jsx:80
-msgid "Visitors go to your store checkout after sending the form, with their choices in the cart."
-msgstr ""
-
-#: resources/admin/components/builder/CheckoutPanel.jsx:85
-msgid "Visitors pay on the form with the Card Payment field."
-msgstr ""
-
-#: resources/admin/components/builder/CheckoutPanel.jsx:101
-msgid "The WooCommerce checkout comes with SubtleForms Pro."
-msgstr ""
-
-#: resources/admin/components/builder/CheckoutPanel.jsx:105
-msgid "Upgrade"
-msgstr ""
-
-#. translators: %s: currency code
-#: resources/admin/components/builder/CheckoutPanel.jsx:115
-#, js-format
-msgid "Prices are charged in your store currency (%s). Coupons entered on this form are WooCommerce coupons."
-msgstr ""
-
-#: resources/admin/components/builder/CheckoutPanel.jsx:118
-msgid "The Card Payment field is not used with this checkout; you can remove it."
-msgstr ""
-
-#: resources/admin/components/builder/CheckoutPanel.jsx:119
-msgid "Add a WooCommerce Product or another priced field to build the order."
-msgstr ""
-
-#: resources/admin/components/builder/CheckoutPanel.jsx:123
-msgid "Billing details from"
-msgstr ""
-
-#: resources/admin/components/builder/CheckoutPanel.jsx:125
-msgid "These answers fill in the checkout so visitors do not type them twice."
-msgstr ""
-
-#. translators: %s: field label
-#: resources/admin/components/builder/CheckoutPanel.jsx:134
-#, js-format
-msgid "Automatic (%s)"
-msgstr ""
-
-#: resources/admin/components/builder/CheckoutPanel.jsx:137
-msgid "Automatic (none found)"
-msgstr ""
-
-#: resources/admin/components/builder/CheckoutPanel.jsx:146
-msgid "Do not fill"
 msgstr ""
 
 #: resources/admin/components/builder/ColumnDropZone.jsx:64
@@ -6040,7 +5493,7 @@ msgid "Drag container"
 msgstr ""
 
 #: resources/admin/components/builder/ContainerRenderer.jsx:119
-#: resources/admin/components/builder/FieldRenderer.jsx:218
+#: resources/admin/components/builder/FieldRenderer.jsx:217
 msgid "Label hidden"
 msgstr ""
 
@@ -6073,6 +5526,12 @@ msgstr ""
 msgid "Duplicate"
 msgstr ""
 
+#: resources/admin/components/builder/ContainerWrapper.jsx:77
+#: resources/admin/components/builder/FieldInspector.jsx:229
+#: resources/admin/components/builder/layout/BuilderModalsController.jsx:54
+msgid "Delete"
+msgstr ""
+
 #: resources/admin/components/builder/ContainerWrapper.jsx:89
 msgid "Repeatable items will appear here"
 msgstr ""
@@ -6101,7 +5560,7 @@ msgstr ""
 
 #. translators: 1: question number, 2: number of questions
 #: resources/admin/components/builder/ConversationalCanvas.jsx:178
-#: resources/frontend/components/ConversationalFormRenderer.jsx:656
+#: resources/frontend/components/ConversationalFormRenderer.jsx:659
 #, js-format
 msgid "Question %1$d of %2$d"
 msgstr ""
@@ -6128,14 +5587,13 @@ msgstr ""
 #: resources/admin/modals/ConfirmModal.jsx:32
 #: resources/admin/modals/CreateFormModal.jsx:395
 #: resources/admin/pages/CreateFormPage.jsx:264
-#: resources/admin/pages/PaymentsPage.jsx:299
 #: resources/admin/utils/confirmDialog.js:59
 msgid "Cancel"
 msgstr ""
 
 #: resources/admin/components/builder/ConversationalCanvas.jsx:239
 #: resources/admin/pages/ToolsPage.jsx:620
-#: resources/frontend/components/FormRenderer.jsx:1319
+#: resources/frontend/components/FormRenderer.jsx:1329
 msgid "Previous"
 msgstr ""
 
@@ -6154,8 +5612,8 @@ msgstr ""
 #: resources/admin/components/CreateFormWizard.jsx:54
 #: resources/admin/components/OnboardingWizard.jsx:606
 #: resources/admin/pages/ToolsPage.jsx:627
-#: resources/frontend/components/ConversationalFormRenderer.jsx:699
-#: resources/frontend/components/FormRenderer.jsx:1329
+#: resources/frontend/components/ConversationalFormRenderer.jsx:702
+#: resources/frontend/components/FormRenderer.jsx:1339
 msgid "Next"
 msgstr ""
 
@@ -6202,6 +5660,10 @@ msgstr ""
 msgid "Field group. Press Enter to select."
 msgstr ""
 
+#: resources/admin/components/builder/FieldDock.jsx:21
+msgid "Basic"
+msgstr ""
+
 #: resources/admin/components/builder/FieldDock.jsx:22
 #: resources/admin/components/builder/FieldInspector.jsx:287
 msgid "Choices"
@@ -6211,7 +5673,7 @@ msgstr ""
 #: resources/admin/components/builder/FieldInspector.jsx:417
 #: resources/admin/components/builder/FormSettings.jsx:201
 #: resources/admin/components/builder/FormSettings.jsx:203
-#: resources/blocks/form/edit.jsx:335
+#: resources/blocks/form/edit.jsx:347
 msgid "Advanced"
 msgstr ""
 
@@ -6436,94 +5898,103 @@ msgstr ""
 msgid "Earlier entries keep %s."
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:193
+#: resources/admin/components/builder/FieldRenderer.jsx:192
 #: resources/admin/utils/saveErrors.js:66
 msgid "Field label"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:303
+#: resources/admin/components/builder/FieldRenderer.jsx:302
 msgid "Add the disclaimer text in the field settings. Empty disclaimers are hidden on the live form."
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:409
+#: resources/admin/components/builder/FieldRenderer.jsx:408
 msgid "Add choices in the field settings to show them here."
 msgstr ""
 
 #. translators: %s: value sent with the entry
-#: resources/admin/components/builder/FieldRenderer.jsx:442
+#: resources/admin/components/builder/FieldRenderer.jsx:441
 #, js-format
 msgid "Sends \"%s\". Visitors do not see this."
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:445
+#: resources/admin/components/builder/FieldRenderer.jsx:444
 msgid "Hidden value. Visitors do not see this."
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:461
+#: resources/admin/components/builder/FieldRenderer.jsx:460
 msgid "Add HTML content in the field settings."
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:470
+#: resources/admin/components/builder/FieldRenderer.jsx:469
 msgid "Click to upload or drag image here"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:479
+#: resources/admin/components/builder/FieldRenderer.jsx:478
 msgid "Click to upload or drag file here"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:514
+#: resources/admin/components/builder/FieldRenderer.jsx:505
 msgid "Needs SubtleForms Pro for pictures. Visitors see these choices without images until Pro is active."
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:521
+#: resources/admin/components/builder/FieldRenderer.jsx:512
 msgid "Needs SubtleForms Pro. Visitors do not see this field until Pro is active."
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:552
+#: resources/admin/components/builder/FieldRenderer.jsx:526
+msgid "Enter coupon code"
+msgstr ""
+
+#: resources/admin/components/builder/FieldRenderer.jsx:536
+#: resources/admin/components/builder/inspector/panels/OptionsPanel.jsx:308
+msgid "Apply"
+msgstr ""
+
+#: resources/admin/components/builder/FieldRenderer.jsx:543
 msgid "Hidden pricing field (not visible to users)"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:565
+#: resources/admin/components/builder/FieldRenderer.jsx:556
 msgid "WordPress Action Integration"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:593
+#: resources/admin/components/builder/FieldRenderer.jsx:584
 msgid "Multi-step form container"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:614
+#: resources/admin/components/builder/FieldRenderer.jsx:605
 msgid "Verify you're human"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:622
+#: resources/admin/components/builder/FieldRenderer.jsx:613
 msgid "I'm not a robot"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:629
+#: resources/admin/components/builder/FieldRenderer.jsx:620
 msgid "CAPTCHA will appear here on the live form"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:629
+#: resources/admin/components/builder/FieldRenderer.jsx:620
 msgid "Add a site key and a secret key, or this check will not run."
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:660
+#: resources/admin/components/builder/FieldRenderer.jsx:651
 msgid "#000000"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:715
+#: resources/admin/components/builder/FieldRenderer.jsx:706
 msgid "Rich text content…"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:739
+#: resources/admin/components/builder/FieldRenderer.jsx:730
 msgid "Add at least one row and one column in the field settings."
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:778
+#: resources/admin/components/builder/FieldRenderer.jsx:769
 msgid "Unsupported field (legacy)"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:790
+#: resources/admin/components/builder/FieldRenderer.jsx:781
 #: resources/admin/components/builder/inspector/panels/ValidationPanel.jsx:20
 #: resources/admin/components/OnboardingWizard.jsx:457
 #: resources/admin/pages/CreateFormPage.jsx:448
@@ -6586,7 +6057,7 @@ msgid "Heading"
 msgstr ""
 
 #: resources/admin/components/builder/FormBehaviorPanels.jsx:62
-#: resources/frontend/components/ConversationalFormRenderer.jsx:410
+#: resources/frontend/components/ConversationalFormRenderer.jsx:413
 msgid "Thank you!"
 msgstr ""
 
@@ -6626,8 +6097,8 @@ msgid "Submit button text"
 msgstr ""
 
 #: resources/admin/components/builder/FormBehaviorPanels.jsx:117
-#: resources/frontend/components/ConversationalFormRenderer.jsx:544
-#: resources/frontend/components/FormRenderer.jsx:1349
+#: resources/frontend/components/ConversationalFormRenderer.jsx:547
+#: resources/frontend/components/FormRenderer.jsx:1359
 msgid "Submit"
 msgstr ""
 
@@ -6735,8 +6206,6 @@ msgstr ""
 
 #: resources/admin/components/builder/FormCurrencyControl.jsx:30
 #: resources/admin/components/builder/webhook/webhookModel.js:285
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:74
-#: resources/admin/pages/PaymentsPage.jsx:422
 msgid "Currency"
 msgstr ""
 
@@ -6869,12 +6338,17 @@ msgid "Builder width and the internal name used by developers."
 msgstr ""
 
 #: resources/admin/components/builder/FormSettings.jsx:216
-#: resources/blocks/form/edit.jsx:291
+#: resources/blocks/form/edit.jsx:303
 msgid "Form Settings"
 msgstr ""
 
 #: resources/admin/components/builder/FormSettings.jsx:221
 msgid "Form settings sections"
+msgstr ""
+
+#: resources/admin/components/builder/FormSettings.jsx:262
+#: resources/admin/components/OnboardingWizard.jsx:34
+msgid "Payment Form"
 msgstr ""
 
 #: resources/admin/components/builder/FormSettings.jsx:265
@@ -6922,7 +6396,6 @@ msgid "Payment gateway integration will be added in a future update. These setti
 msgstr ""
 
 #: resources/admin/components/builder/FormSettings.jsx:382
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:39
 msgid "Enable Payments"
 msgstr ""
 
@@ -6979,75 +6452,75 @@ msgstr ""
 msgid "Field that contains the payment amount"
 msgstr ""
 
-#: resources/admin/components/builder/FormSettings.jsx:464
+#: resources/admin/components/builder/FormSettings.jsx:463
 msgid "Builder canvas width"
 msgstr ""
 
-#: resources/admin/components/builder/FormSettings.jsx:467
+#: resources/admin/components/builder/FormSettings.jsx:466
 msgid "Narrow (640px)"
 msgstr ""
 
-#: resources/admin/components/builder/FormSettings.jsx:468
+#: resources/admin/components/builder/FormSettings.jsx:467
 msgid "Standard (768px)"
 msgstr ""
 
-#: resources/admin/components/builder/FormSettings.jsx:469
+#: resources/admin/components/builder/FormSettings.jsx:468
 msgid "Wide (1024px)"
 msgstr ""
 
-#: resources/admin/components/builder/FormSettings.jsx:472
+#: resources/admin/components/builder/FormSettings.jsx:471
 msgid "Editing width inside the builder only. The published form’s width is set under Preview."
 msgstr ""
 
-#: resources/admin/components/builder/FormSettings.jsx:475
+#: resources/admin/components/builder/FormSettings.jsx:474
 msgid "Internal identifier"
 msgstr ""
 
-#: resources/admin/components/builder/FormSettings.jsx:478
+#: resources/admin/components/builder/FormSettings.jsx:477
 msgid "Machine name used in exports and developer hooks. Most forms can leave this as it is."
 msgstr ""
 
-#: resources/admin/components/builder/FormSettings.jsx:533
+#: resources/admin/components/builder/FormSettings.jsx:532
 #: resources/admin/utils/initialSchema.js:80
 msgid "Step 1"
 msgstr ""
 
-#: resources/admin/components/builder/FormSettings.jsx:558
+#: resources/admin/components/builder/FormSettings.jsx:557
 msgid "All fields on one page. Adding a Page Break makes the form Multi-step."
 msgstr ""
 
-#: resources/admin/components/builder/FormSettings.jsx:559
+#: resources/admin/components/builder/FormSettings.jsx:558
 msgid "Fields are split into steps by Page Breaks. Removing the last Page Break makes the form Standard."
 msgstr ""
 
-#: resources/admin/components/builder/FormSettings.jsx:560
+#: resources/admin/components/builder/FormSettings.jsx:559
 #: resources/admin/pages/CreateFormPage.jsx:130
 msgid "One question at a time, full screen."
 msgstr ""
 
-#: resources/admin/components/builder/FormSettings.jsx:570
+#: resources/admin/components/builder/FormSettings.jsx:569
 #: resources/admin/components/CreateFormWizard.jsx:18
 #: resources/admin/pages/SubmissionDetailPage.jsx:1188
 msgid "Form type"
 msgstr ""
 
-#: resources/admin/components/builder/FormSettings.jsx:586
+#: resources/admin/components/builder/FormSettings.jsx:585
 msgid "Change to Conversational?"
 msgstr ""
 
-#: resources/admin/components/builder/FormSettings.jsx:587
+#: resources/admin/components/builder/FormSettings.jsx:586
 msgid "Change to Standard?"
 msgstr ""
 
 #. translators: 1: number of steps, 2: number of fields
-#: resources/admin/components/builder/FormSettings.jsx:591
+#: resources/admin/components/builder/FormSettings.jsx:590
 #, js-format
 msgid "The %1$d step is removed. All %2$d fields stay, in the same order. You can undo this."
 msgid_plural "The %1$d steps are removed. All %2$d fields stay, in the same order. You can undo this."
 msgstr[0] ""
 msgstr[1] ""
 
-#: resources/admin/components/builder/FormSettings.jsx:600
+#: resources/admin/components/builder/FormSettings.jsx:599
 msgid "Remove steps"
 msgstr ""
 
@@ -7450,7 +6923,7 @@ msgstr ""
 
 #: resources/admin/components/builder/IntegrationsPanel.jsx:228
 #: resources/admin/components/builder/IntegrationsPanel.jsx:242
-#: resources/admin/ui/UpgradeModal.jsx:119
+#: resources/admin/ui/UpgradeModal.jsx:131
 msgid "Email marketing"
 msgstr ""
 
@@ -7539,6 +7012,11 @@ msgstr ""
 msgid "Sends a sample contact with your email address through this mapping, so you can check every field arrives."
 msgstr ""
 
+#: resources/admin/components/builder/IntegrationsPanel.jsx:350
+#: resources/admin/ui/UpgradeModal.jsx:143
+msgid "CRM"
+msgstr ""
+
 #. translators: %s: CRM name
 #: resources/admin/components/builder/IntegrationsPanel.jsx:354
 #, js-format
@@ -7585,7 +7063,7 @@ msgstr ""
 msgid "Kept from an older version and still sent. Add a Webhook action under Actions instead for headers, signing and retries, then clear this field."
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:61
+#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:54
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:199
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:208
 #: resources/admin/components/FormsList.jsx:810
@@ -7597,21 +7075,21 @@ msgstr ""
 msgid "Retry"
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:71
+#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:64
 msgid "Validation issues detected. Publishing is blocked until these are fixed:"
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:79
+#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:72
 msgid "Validation error"
 msgstr ""
 
 #. translators: %1$d: number of additional validation issues
-#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:87
+#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:80
 #, js-format
 msgid "…and %1$d more"
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:134
+#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:127
 msgid "Save the form first to view entries"
 msgstr ""
 
@@ -7771,7 +7249,7 @@ msgstr ""
 #: resources/admin/components/form-preview/FormPreviewModal.jsx:27
 #: resources/admin/pages/CreateFormPage.jsx:340
 #: resources/admin/utils/submissionStatus.js:19
-#: resources/blocks/form/edit.jsx:211
+#: resources/blocks/form/edit.jsx:222
 msgid "Preview"
 msgstr ""
 
@@ -7915,31 +7393,6 @@ msgstr ""
 
 #: resources/admin/components/builder/LogicEditor.jsx:369
 msgid "Add rule"
-msgstr ""
-
-#: resources/admin/components/builder/PaymentPreviews.jsx:94
-msgid "Add a Product or Priced Options field to build the order."
-msgstr ""
-
-#: resources/admin/components/builder/PaymentPreviews.jsx:118
-#: resources/admin/pages/SubmissionDetailPage.jsx:1120
-#: resources/frontend/components/fields/Payments.jsx:384
-msgid "Total"
-msgstr ""
-
-#: resources/admin/components/builder/PaymentPreviews.jsx:135
-#: resources/frontend/components/fields/Payments.jsx:464
-msgid "Card number"
-msgstr ""
-
-#: resources/admin/components/builder/PaymentPreviews.jsx:136
-#: resources/frontend/components/fields/Payments.jsx:465
-msgid "MM / YY"
-msgstr ""
-
-#: resources/admin/components/builder/PaymentPreviews.jsx:137
-#: resources/frontend/components/fields/Payments.jsx:466
-msgid "CVC"
 msgstr ""
 
 #: resources/admin/components/builder/PreviewWorkspace.jsx:36
@@ -8363,17 +7816,21 @@ msgstr ""
 msgid "Submitted date"
 msgstr ""
 
-#: resources/admin/components/builder/webhook/webhookModel.js:275
-#: resources/admin/pages/SubmissionDetailPage.jsx:1200
-msgid "IP address"
-msgstr ""
-
 #: resources/admin/components/builder/webhook/webhookModel.js:276
 msgid "User agent"
 msgstr ""
 
-#: resources/admin/components/builder/webhook/webhookModel.js:277
-msgid "User ID"
+#: resources/admin/components/builder/webhook/webhookModel.js:282
+#: resources/admin/pages/CreateFormPage.jsx:37
+#: resources/admin/pages/SubmissionDetailPage.jsx:632
+#: resources/admin/templates/TemplateSelector.jsx:64
+#: resources/frontend/components/ConversationalFormRenderer.jsx:569
+msgid "Payment"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:284
+#: resources/admin/components/OnboardingWizard.jsx:140
+msgid "Amount"
 msgstr ""
 
 #: resources/admin/components/builder/webhook/webhookModel.js:286
@@ -8510,8 +7967,8 @@ msgstr ""
 #: resources/admin/components/CreateFormWizard.jsx:185
 #: resources/admin/components/OnboardingWizard.jsx:595
 #: resources/admin/pages/CreateFormPage.jsx:475
-#: resources/frontend/components/ConversationalFormRenderer.jsx:534
-#: resources/frontend/components/ConversationalFormRenderer.jsx:688
+#: resources/frontend/components/ConversationalFormRenderer.jsx:537
+#: resources/frontend/components/ConversationalFormRenderer.jsx:691
 msgid "Back"
 msgstr ""
 
@@ -8793,8 +8250,7 @@ msgid "%d new"
 msgstr ""
 
 #: resources/admin/components/FormsList.jsx:389
-#: resources/admin/pages/PaymentsPage.jsx:572
-#: resources/frontend/components/ConversationalFormRenderer.jsx:521
+#: resources/frontend/components/ConversationalFormRenderer.jsx:524
 msgid "Edit"
 msgstr ""
 
@@ -9199,6 +8655,10 @@ msgstr ""
 msgid "Your message..."
 msgstr ""
 
+#: resources/admin/components/OnboardingWizard.jsx:97
+msgid "Company"
+msgstr ""
+
 #: resources/admin/components/OnboardingWizard.jsx:98
 msgid "Company name"
 msgstr ""
@@ -9418,14 +8878,18 @@ msgstr ""
 msgid "contact support"
 msgstr ""
 
+#: resources/admin/components/ProDowngradeBanner.jsx:20
+msgid "This form takes payments, which needs SubtleForms Pro. Until Pro is active, visitors see \"This form is not available right now.\" and no entries are accepted."
+msgstr ""
+
 #. translators: %s: list of field types, for example "Signature, Calculation"
-#: resources/admin/components/ProDowngradeBanner.jsx:22
+#: resources/admin/components/ProDowngradeBanner.jsx:30
 #, js-format
 msgid "This form has fields from SubtleForms Pro: %s. They are kept in the form, but the live form leaves them out until SubtleForms Pro is active."
 msgstr ""
 
 #. translators: %s: list of features, for example "Picture Choice (shown without pictures)"
-#: resources/admin/components/ProDowngradeBanner.jsx:34
+#: resources/admin/components/ProDowngradeBanner.jsx:42
 #, js-format
 msgid "This form uses features from SubtleForms Pro: %s. Everything stays saved and works again when SubtleForms Pro is active."
 msgstr ""
@@ -9434,125 +8898,153 @@ msgstr ""
 msgid "Loading..."
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:33
-msgid "Debug Mode"
+#: resources/admin/components/settings/AdvancedSettings.jsx:40
+msgid "Visitor IP behind a proxy"
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:38
-msgid "Enable detailed logging for troubleshooting"
+#: resources/admin/components/settings/AdvancedSettings.jsx:43
+msgid "Site is behind Cloudflare"
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:49
-msgid "Spam Protection"
+#: resources/admin/components/settings/AdvancedSettings.jsx:48
+msgid "Read the visitor address from Cloudflare when the request really comes from Cloudflare. Leave this off if the site is not behind Cloudflare."
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:52
-msgid "Hidden trap field on new forms"
+#: resources/admin/components/settings/AdvancedSettings.jsx:55
+msgid "Trusted proxy addresses"
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:60
-msgid "New forms start with a field that visitors never see and robots fill in. Each form can change this under Form settings, Spam protection."
-msgstr ""
-
-#: resources/admin/components/settings/AdvancedSettings.jsx:70
-msgid "Too-fast check (seconds)"
-msgstr ""
-
-#: resources/admin/components/settings/AdvancedSettings.jsx:84
-msgid "Anything sent sooner than this after the form loaded is dropped quietly. 0 turns the check off for new forms and for forms that have no setting of their own."
+#: resources/admin/components/settings/AdvancedSettings.jsx:62
+msgid "One IP address or range (such as 10.0.0.0/8) per line. Only requests from these addresses may say who the visitor is. Leave empty unless a load balancer or reverse proxy sits in front of the site."
 msgstr ""
 
 #: resources/admin/components/settings/AdvancedSettings.jsx:95
-msgid "CAPTCHA"
+msgid "Debug Mode"
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:98
-msgid "Enable CAPTCHA"
+#: resources/admin/components/settings/AdvancedSettings.jsx:100
+msgid "Enable detailed logging for troubleshooting"
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:103
-msgid "Require CAPTCHA verification on forms to prevent spam and bot submissions"
+#: resources/admin/components/settings/AdvancedSettings.jsx:111
+msgid "Spam Protection"
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:119
-msgid "Enable reCAPTCHA"
+#: resources/admin/components/settings/AdvancedSettings.jsx:114
+msgid "Hidden trap field on new forms"
+msgstr ""
+
+#: resources/admin/components/settings/AdvancedSettings.jsx:122
+msgid "New forms start with a field that visitors never see and robots fill in. Each form can change this under Form settings, Spam protection."
 msgstr ""
 
 #: resources/admin/components/settings/AdvancedSettings.jsx:132
+msgid "Too-fast check (seconds)"
+msgstr ""
+
+#: resources/admin/components/settings/AdvancedSettings.jsx:146
+msgid "Anything sent sooner than this after the form loaded is dropped quietly. 0 turns the check off for new forms and for forms that have no setting of their own."
+msgstr ""
+
+#: resources/admin/components/settings/AdvancedSettings.jsx:163
+msgid "CAPTCHA"
+msgstr ""
+
+#: resources/admin/components/settings/AdvancedSettings.jsx:166
+msgid "Enable CAPTCHA"
+msgstr ""
+
+#: resources/admin/components/settings/AdvancedSettings.jsx:171
+msgid "Require CAPTCHA verification on forms to prevent spam and bot submissions"
+msgstr ""
+
+#: resources/admin/components/settings/AdvancedSettings.jsx:187
+msgid "Enable reCAPTCHA"
+msgstr ""
+
+#: resources/admin/components/settings/AdvancedSettings.jsx:200
 msgid "Allow forms to use Google reCAPTCHA"
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:148
+#: resources/admin/components/settings/AdvancedSettings.jsx:216
 msgid "reCAPTCHA Version"
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:195
+#: resources/admin/components/settings/AdvancedSettings.jsx:263
 msgid "Get your keys from https://www.google.com/recaptcha/admin"
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:208
-#: resources/admin/components/settings/AdvancedSettings.jsx:295
-#: resources/admin/components/settings/AdvancedSettings.jsx:385
+#: resources/admin/components/settings/AdvancedSettings.jsx:276
+#: resources/admin/components/settings/AdvancedSettings.jsx:363
+#: resources/admin/components/settings/AdvancedSettings.jsx:453
 msgid "Secret Key"
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:239
+#: resources/admin/components/settings/AdvancedSettings.jsx:307
 msgid "Enable hCaptcha"
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:252
+#: resources/admin/components/settings/AdvancedSettings.jsx:320
 msgid "Allow forms to use hCaptcha"
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:282
+#: resources/admin/components/settings/AdvancedSettings.jsx:350
 msgid "Get your keys from https://dashboard.hcaptcha.com/"
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:329
+#: resources/admin/components/settings/AdvancedSettings.jsx:397
 msgid "Enable Turnstile"
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:342
+#: resources/admin/components/settings/AdvancedSettings.jsx:410
 msgid "Allow forms to use Cloudflare Turnstile"
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:372
+#: resources/admin/components/settings/AdvancedSettings.jsx:440
 msgid "Get your keys from https://dash.cloudflare.com/?to=/:account/turnstile"
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:415
+#: resources/admin/components/settings/AdvancedSettings.jsx:483
 msgid "Privacy & GDPR"
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:418
+#: resources/admin/components/settings/AdvancedSettings.jsx:486
 msgid "Data Retention Period (days)"
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:432
+#: resources/admin/components/settings/AdvancedSettings.jsx:500
 msgid "Automatically delete submissions older than this many days. Set to 0 to keep submissions forever. Recommended: 365-730 days for GDPR compliance."
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:439
+#: resources/admin/components/settings/AdvancedSettings.jsx:507
 msgid "Empty the entries Trash after (days)"
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:447
+#: resources/admin/components/settings/AdvancedSettings.jsx:515
 msgid "Deleted entries stay in the Trash for this many days and can be restored. After that they are deleted permanently, with their uploaded files."
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:454
+#: resources/admin/components/settings/AdvancedSettings.jsx:522
+msgid "Keep my data when the plugin is deleted"
+msgstr ""
+
+#: resources/admin/components/settings/AdvancedSettings.jsx:530
+msgid "Off by default. When this is off, deleting SubtleForms from the Plugins screen removes its forms, entries, settings and uploaded files. SubtleForms Pro settings and license are never removed."
+msgstr ""
+
+#: resources/admin/components/settings/AdvancedSettings.jsx:537
 msgid "Note: Submissions can also be exported or erased via WordPress Privacy Tools (Tools → Export/Erase Personal Data)."
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:463
+#: resources/admin/components/settings/AdvancedSettings.jsx:546
 msgid "Danger Zone"
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:465
+#: resources/admin/components/settings/AdvancedSettings.jsx:548
 msgid "Resetting will restore all settings to their default values. This action cannot be undone."
 msgstr ""
 
-#: resources/admin/components/settings/AdvancedSettings.jsx:476
+#: resources/admin/components/settings/AdvancedSettings.jsx:559
 msgid "Reset All Settings"
 msgstr ""
 
@@ -9642,409 +9134,6 @@ msgstr ""
 msgid "Connection tests need SubtleForms Pro to be active."
 msgstr ""
 
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:8
-msgid "Zapier, Make or another webhook"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:23
-msgid "Create or update a contact for each entry, matched by email address. Connect the CRM here, then switch it on and map fields for each form under Form settings > Integrations."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:33
-msgid "Enable CRM"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:36
-msgid "Turning this off pauses CRM updates on every form."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:45
-msgid "Send contacts to"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:51
-msgid "Use this for Salesforce, Pipedrive, Zoho and others through Zapier or Make."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:61
-msgid "Private app access token"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:66
-msgid "In HubSpot: Settings > Integrations > Private apps > Create a private app. Give it the crm.objects.contacts.read and crm.objects.contacts.write scopes, then copy the access token."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:83
-msgid "Hub ID (optional)"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:86
-msgid "Adds a link to the HubSpot contact in each entry's activity log. Shown in HubSpot under your account menu."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:96
-msgid "Add the answers as a note"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:99
-msgid "Adds a note with every answer to the contact's timeline. Forms can turn this off."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:116
-msgid "Zapier: \"Webhooks by Zapier\" > Catch Hook. Make: \"Webhooks\" > Custom webhook. Each entry is posted as JSON with email, first_name, last_name, properties and answers."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:125
-msgid "Send a test contact"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:136
-msgid "Contacts are matched by email: an existing contact is updated, otherwise one is created. Each form sets which fields fill first name, last name and other HubSpot properties."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:140
-msgid "Each form sets which fields fill email, first name, last name and any other properties sent to the webhook."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:24
-msgid "One checkout for your whole site: payment forms can send their order to the WooCommerce cart, and the WooCommerce Product field sells store products from any form."
-msgstr ""
-
-#. translators: %s: WooCommerce version
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:41
-#, js-format
-msgid "WooCommerce %s detected"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:44
-msgid "WooCommerce is not active"
-msgstr ""
-
-#. translators: 1: currency code, 2: currency symbol
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:50
-#, js-format
-msgid "Store currency: %1$s (%2$s). Forms that check out through WooCommerce use it."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:54
-msgid "Install and activate WooCommerce to take form payments through its checkout. Until then, payment forms use the SubtleForms checkout."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:61
-msgid "Checkout for new payment forms"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:65
-msgid "WooCommerce checkout (recommended)"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:69
-msgid "SubtleForms checkout (Card Payment field)"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:74
-msgid "Applied when a form gets its first priced field. Each form can change it under Form settings › Checkout."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:85
-msgid "Empty the cart before adding form items"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:88
-msgid "Visitors check out exactly what they chose in the form. Turn off to add form items to whatever is already in their cart."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:99
-msgid "After the form is sent, take visitors to"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:102
-msgid "Checkout"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:103
-msgid "Cart"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:114
-msgid "Prices for WooCommerce products always come from your store, never from the browser."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:117
-msgid "Forms that use the WooCommerce checkout validate WooCommerce coupons, and the code is applied to the cart."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:120
-msgid "Entries link to their order, and the entry is marked paid when the order is processing or completed."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:123
-msgid "Read the WooCommerce guide"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:14
-msgid "Mailchimp: Profile > Extras > API keys. The key ends with your data center, for example -us21."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:15
-msgid "Brevo: SMTP & API > API keys. Use a v3 API key, not the SMTP password."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:16
-msgid "Kit: Settings > Developer > API keys. Use a v4 API key."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:20
-msgid "Default audience"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:21
-msgid "Default list"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:22
-msgid "Default Kit form"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:26
-msgid "New subscribers join this audience unless a form picks another one."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:27
-msgid "New contacts are added to this list unless a form picks another one."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:28
-msgid "Subscribers are added to this Kit form (optional). Leave empty to only create the subscriber."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:41
-msgid "No default (choose per form)"
-msgstr ""
-
-#. translators: 1: list name, 2: number of contacts
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:47
-#, js-format
-msgid "%1$s (%2$s)"
-msgstr ""
-
-#. translators: %s: list ID
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:59
-#, js-format
-msgid "%s (not found)"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:72
-msgid "Add people who fill in your forms to Mailchimp, Brevo or Kit. Connect your account here, then switch it on for each form under Form settings > Integrations."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:82
-msgid "Enable Email Marketing"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:85
-msgid "Turning this off pauses subscriptions on every form."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:94
-msgid "Provider"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:107
-msgid "API key"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:121
-msgid "Test connection and load lists"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:146
-msgid "Test the connection to pick from your lists."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:155
-msgid "Double opt-in"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:158
-msgid "New subscribers are added as \"pending\" and Mailchimp emails them to confirm. Existing members keep their current status."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:170
-msgid "Each form maps its email, first name (FNAME), last name (LNAME) and any other merge tags, and can add tags. Someone who already unsubscribed is never subscribed again."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:175
-msgid "Each form maps its email, first name (FIRSTNAME), last name (LASTNAME) and any other contact attributes. Existing contacts are updated."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:180
-msgid "Each form maps its email and first name, any custom fields that exist in Kit, and can apply tags that already exist in Kit."
-msgstr ""
-
-#. translators: 1: number of strings, 2: number of forms
-#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:47
-#, js-format
-msgid "Registered %1$d string from %2$d form."
-msgid_plural "Registered %1$d strings from %2$d forms."
-msgstr[0] ""
-msgstr[1] ""
-
-#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:53
-msgid "Strings could not be registered."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:66
-msgid "Translate forms with WPML or Polylang. Labels, placeholders, help text, options, buttons, messages and confirmations are registered when you publish a form, and visitors see the form in their language."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:76
-msgid "Translate forms"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:79
-msgid "Register form strings on publish and show translated forms."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:90
-msgid "Translation plugin:"
-msgstr ""
-
-#. translators: %s: plugin name, e.g. WPML
-#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:94
-#, js-format
-msgid "%s detected"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:98
-msgid "None found. Activate WPML (with String Translation) or Polylang."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:99
-msgid "WPML or Polylang, detected automatically."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:103
-msgid "Registered strings:"
-msgstr ""
-
-#. translators: 1: number of strings, 2: number of forms
-#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:106
-#, js-format
-msgid "%1$d from %2$d form"
-msgid_plural "%1$d from %2$d forms"
-msgstr[0] ""
-msgstr[1] ""
-
-#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:129
-msgid "Register strings now"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:133
-msgid "Translate them under Languages › Translations, group “SubtleForms”."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:134
-msgid "Translate them under WPML › String Translation, domain “SubtleForms”."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:11
-msgid "Test / Sandbox"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:12
-#: resources/admin/pages/PaymentsPage.jsx:411
-msgid "Live"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:29
-msgid "Take card, Apple Pay and Google Pay payments through Stripe. Products, order totals and coupons work without a gateway too."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:42
-msgid "Accept payments through SubtleForms forms."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:51
-msgid "Payment Provider"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:60
-msgid "Mode"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:64
-msgid "Use Test mode for development and Live mode for real transactions."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:84
-msgid "Email me when a payment fails"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:87
-msgid "When the card is declined after the entry is saved, no receipt or notification is sent. This email tells you instead."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:99
-msgid "Stripe Publishable Key"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:102
-msgid "Your Stripe publishable key (starts with pk_)."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:109
-msgid "Stripe Secret Key"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:113
-msgid "Your Stripe secret key (starts with sk_). Never share this publicly."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:124
-msgid "PayPal Client ID"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:127
-msgid "Your PayPal REST API Client ID."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:134
-msgid "PayPal Client Secret"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:138
-msgid "Your PayPal REST API Client Secret. Never share this publicly."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PdfPanel.jsx:6
-msgid "Default: logo, title band and answers"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PdfPanel.jsx:7
-msgid "Minimal: plain header, answers only"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PdfPanel.jsx:8
-msgid "Detailed: adds entry details and consent records"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PdfPanel.jsx:20
-msgid "A printable PDF of each entry with your site logo, the form title, the entry number and date, every answer and the order summary for payment forms. Download it from the entry screen or attach it to notification emails."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PdfPanel.jsx:34
-msgid "Used for downloads and email attachments. The logo comes from Appearance > Customize > Site Identity."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PdfPanel.jsx:41
-msgid "Attach the PDF to notification emails"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PdfPanel.jsx:47
-msgid "Adds the entry PDF to emails sent to you and your team. Emails sent to the person who filled in the form (a recipient like {{email}}) are left as they are. The PDF is created after the visitor's submission, so it never slows the form down."
-msgstr ""
-
 #: resources/admin/components/settings/extensions/WebhooksPanel.jsx:12
 msgid "Do not retry"
 msgstr ""
@@ -10090,7 +9179,6 @@ msgid "Used by webhook actions that have HMAC-SHA256 signing on but no secret of
 msgstr ""
 
 #: resources/admin/components/settings/extensions/WebhooksPanel.jsx:88
-#: resources/admin/pages/PaymentsPage.jsx:176
 msgid "Generate"
 msgstr ""
 
@@ -10115,28 +9203,26 @@ msgstr ""
 msgid "The default body contains the form and entry IDs, every answer keyed by field and with its label, and a link to the entry. Choose a custom JSON body, method, headers and signing on each webhook action."
 msgstr ""
 
-#: resources/admin/components/settings/ExtensionsSettings.jsx:68
+#: resources/admin/components/settings/ExtensionsSettings.jsx:63
 #: resources/admin/pages/ExtensionsPage.jsx:28
-#: resources/admin/pages/PaymentsPage.jsx:69
-#: resources/admin/pages/PaymentsPage.jsx:291
 msgid "Active"
 msgstr ""
 
-#: resources/admin/components/settings/ExtensionsSettings.jsx:69
+#: resources/admin/components/settings/ExtensionsSettings.jsx:64
 msgid "Enabled, needs configuration"
 msgstr ""
 
 #. translators: %s: plan name, for example Agency
-#: resources/admin/components/settings/ExtensionsSettings.jsx:133
+#: resources/admin/components/settings/ExtensionsSettings.jsx:122
 #, js-format
 msgid "Needs %s"
 msgstr ""
 
-#: resources/admin/components/settings/ExtensionsSettings.jsx:144
+#: resources/admin/components/settings/ExtensionsSettings.jsx:133
 msgid "SubtleForms Pro adds Mailchimp, Brevo, HubSpot, WooCommerce, entry PDFs, WPML and Polylang, and Stripe."
 msgstr ""
 
-#: resources/admin/components/settings/ExtensionsSettings.jsx:146
+#: resources/admin/components/settings/ExtensionsSettings.jsx:135
 #: resources/admin/ui/UpgradeModal.jsx:25
 #: resources/admin/ui/UpgradeModal.jsx:37
 #: resources/admin/ui/UpgradeModal.jsx:49
@@ -10151,17 +9237,18 @@ msgstr ""
 #: resources/admin/ui/UpgradeModal.jsx:157
 #: resources/admin/ui/UpgradeModal.jsx:169
 #: resources/admin/ui/UpgradeModal.jsx:181
-#: resources/admin/ui/UpgradeModal.jsx:200
+#: resources/admin/ui/UpgradeModal.jsx:193
+#: resources/admin/ui/UpgradeModal.jsx:212
 msgid "About SubtleForms Pro"
 msgstr ""
 
 #. translators: %s: plan name, for example Agency
-#: resources/admin/components/settings/ExtensionsSettings.jsx:161
+#: resources/admin/components/settings/ExtensionsSettings.jsx:150
 #, js-format
 msgid "Included with the %s plan. Your license does not include it."
 msgstr ""
 
-#: resources/admin/components/settings/ExtensionsSettings.jsx:167
+#: resources/admin/components/settings/ExtensionsSettings.jsx:156
 #: resources/admin/pages/ExtensionsPage.jsx:107
 #: resources/admin/pages/ExtensionsPage.jsx:217
 msgid "Compare plans"
@@ -10468,12 +9555,6 @@ msgstr ""
 msgid "Flag"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:55
-#: resources/admin/components/SubmissionsTable.jsx:779
-#: resources/admin/pages/SubmissionDetailPage.jsx:1202
-msgid "Browser"
-msgstr ""
-
 #: resources/admin/components/SubmissionsTable.jsx:56
 #: resources/admin/components/SubmissionsTable.jsx:786
 #: resources/admin/pages/SubmissionDetailPage.jsx:1204
@@ -10660,6 +9741,10 @@ msgstr ""
 
 #: resources/admin/components/tools/SiteImport.jsx:19
 msgid "Changed"
+msgstr ""
+
+#: resources/admin/components/tools/SiteImport.jsx:20
+msgid "Note"
 msgstr ""
 
 #: resources/admin/components/tools/SiteImport.jsx:26
@@ -10862,7 +9947,7 @@ msgid "Stripe payments"
 msgstr ""
 
 #: resources/admin/data/proCatalog.js:26
-msgid "A Card Payment field for the free Product, Priced Options and Coupon fields."
+msgid "Product, Priced Options, Custom Amount, Order Summary and Coupon fields, with a Card Payment field for Stripe."
 msgstr ""
 
 #: resources/admin/data/proCatalog.js:31
@@ -11075,39 +10160,39 @@ msgstr ""
 msgid "Form deleted"
 msgstr ""
 
-#: resources/admin/hooks/useSettingsState.js:100
+#: resources/admin/hooks/useSettingsState.js:92
 msgid "Failed to load settings. Please try again."
 msgstr ""
 
-#: resources/admin/hooks/useSettingsState.js:126
+#: resources/admin/hooks/useSettingsState.js:118
 msgid "Must be a valid number"
 msgstr ""
 
-#: resources/admin/hooks/useSettingsState.js:167
+#: resources/admin/hooks/useSettingsState.js:159
 msgid "Please fix the validation errors below before saving."
 msgstr ""
 
-#: resources/admin/hooks/useSettingsState.js:186
+#: resources/admin/hooks/useSettingsState.js:178
 msgid "Settings saved successfully!"
 msgstr ""
 
-#: resources/admin/hooks/useSettingsState.js:201
+#: resources/admin/hooks/useSettingsState.js:193
 msgid "Failed to save settings. Please try again."
 msgstr ""
 
-#: resources/admin/hooks/useSettingsState.js:217
+#: resources/admin/hooks/useSettingsState.js:209
 msgid "Reset settings"
 msgstr ""
 
-#: resources/admin/hooks/useSettingsState.js:218
+#: resources/admin/hooks/useSettingsState.js:210
 msgid "Are you sure you want to reset all settings to defaults? This cannot be undone."
 msgstr ""
 
-#: resources/admin/hooks/useSettingsState.js:241
+#: resources/admin/hooks/useSettingsState.js:233
 msgid "Settings reset successfully!"
 msgstr ""
 
-#: resources/admin/hooks/useSettingsState.js:254
+#: resources/admin/hooks/useSettingsState.js:246
 msgid "Failed to reset settings. Please try again."
 msgstr ""
 
@@ -11117,7 +10202,7 @@ msgstr ""
 
 #: resources/admin/modals/ConfirmModal.jsx:76
 #: resources/admin/ui/modals/AccessibleModal.jsx:160
-#: resources/frontend/components/ConversationalFormRenderer.jsx:624
+#: resources/frontend/components/ConversationalFormRenderer.jsx:627
 msgid "Processing..."
 msgstr ""
 
@@ -11479,7 +10564,6 @@ msgid "Recently edited forms"
 msgstr ""
 
 #: resources/admin/pages/DashboardPage.jsx:272
-#: resources/admin/pages/PaymentsPage.jsx:540
 #: resources/admin/pages/SubmissionsPage.jsx:330
 msgid "All forms"
 msgstr ""
@@ -11570,8 +10654,8 @@ msgid "Set up"
 msgstr ""
 
 #: resources/admin/pages/ExtensionsPage.jsx:84
-#: resources/admin/ui/UpgradeModal.jsx:198
-#: resources/admin/ui/UpgradeModal.jsx:250
+#: resources/admin/ui/UpgradeModal.jsx:210
+#: resources/admin/ui/UpgradeModal.jsx:262
 msgid "SubtleForms Pro"
 msgstr ""
 
@@ -11584,7 +10668,7 @@ msgid "SubtleForms Pro is a separate plugin that adds Stripe payments, marketing
 msgstr ""
 
 #: resources/admin/pages/ExtensionsPage.jsx:98
-#: resources/admin/ui/UpgradeModal.jsx:275
+#: resources/admin/ui/UpgradeModal.jsx:287
 msgid "Activate your license"
 msgstr ""
 
@@ -11650,289 +10734,16 @@ msgstr ""
 msgid "Search forms"
 msgstr ""
 
-#: resources/admin/pages/PaymentsPage.jsx:65
-msgid "Expired"
+#: resources/admin/pages/PaymentsUpsell.jsx:17
+msgid "Take card payments on a form"
 msgstr ""
 
-#: resources/admin/pages/PaymentsPage.jsx:67
-msgid "Scheduled"
+#: resources/admin/pages/PaymentsUpsell.jsx:18
+msgid "Coupons and order summaries"
 msgstr ""
 
-#: resources/admin/pages/PaymentsPage.jsx:68
-msgid "Used up"
-msgstr ""
-
-#. translators: %s: percentage
-#: resources/admin/pages/PaymentsPage.jsx:143
-#, js-format
-msgid "%s%% off the order"
-msgstr ""
-
-#. translators: %s: amount
-#: resources/admin/pages/PaymentsPage.jsx:148
-#, js-format
-msgid "%s off the order"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:155
-msgid "Edit coupon"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:155
-#: resources/admin/pages/PaymentsPage.jsx:384
-msgid "New coupon"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:170
-#: resources/admin/pages/PaymentsPage.jsx:506
-msgid "Code"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:173
-msgid "Letters, numbers, dashes. Not case sensitive for visitors."
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:184
-msgid "Discount type"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:187
-msgid "Percentage"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:188
-msgid "Fixed amount"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:198
-msgid "Percent off"
-msgstr ""
-
-#. translators: %s: currency code
-#: resources/admin/pages/PaymentsPage.jsx:200
-#, js-format
-msgid "Amount off (%s)"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:213
-msgid "Spring sale, partner code…"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:215
-msgid "Only you see this."
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:219
-msgid "Limits"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:227
-msgid "Minimum order"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:228
-msgid "No minimum"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:237
-msgid "Total uses"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:238
-#: resources/admin/pages/PaymentsPage.jsx:264
-msgid "Unlimited"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:246
-msgid "Starts"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:254
-msgid "Expires"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:263
-msgid "Uses per customer"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:267
-msgid "Customers are told apart by the email they enter, or their account when logged in."
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:274
-msgid "Only on these forms"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:285
-msgid "All payment forms"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:302
-msgid "Save coupon"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:302
-msgid "Create coupon"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:338
-msgid "Payments could not be loaded."
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:355
-msgid "Delete coupon"
-msgstr ""
-
-#. translators: %s: coupon code
-#: resources/admin/pages/PaymentsPage.jsx:356
-#, js-format
-msgid "Delete coupon %s? Orders that used it keep their discount."
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:363
-msgid "The coupon could not be deleted."
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:377
-msgid "Take payments on any form, with live order totals and discount codes."
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:381
-msgid "Gateway settings"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:404
-msgid "Gateway"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:406
-msgid "Not connected"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:411
-msgid "Test mode"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:414
-msgid "Offline only"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:431
-msgid "Active coupons"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:450
-msgid "Connect Stripe to take card payments"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:450
-msgid "Card payments come with SubtleForms Pro"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:454
-msgid "Add your Stripe keys in Gateway settings. Until then, a form with a Card Payment field tells visitors that online payment is not available and saves no entry. A form without a Card Payment field saves the entry as “Payment pending” so you can collect payment offline."
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:455
-msgid "Products, priced options, order summaries and coupons are part of SubtleForms. Entries from these forms are saved as “Payment pending” so you can collect payment offline. SubtleForms Pro adds a Card Payment field for Stripe card, Apple Pay and Google Pay."
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:459
-msgid "Add products"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:459
-msgid "Product or Priced Options fields"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:460
-msgid "Show the total"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:460
-msgid "Order Summary, with its coupon box"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:461
-msgid "Collect payment"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:461
-msgid "Card Payment field"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:472
-msgid "WooCommerce is active. Forms that check out through WooCommerce use WooCommerce coupons, not the coupons below."
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:474
-msgid "Manage them in Marketing › Coupons"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:483
-msgid "Coupons"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:485
-msgid "Visitors enter a code in the Order Summary or a Coupon field. Uses are counted only when an order goes through."
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:495
-msgid "No coupons yet"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:496
-msgid "Create a percentage or fixed discount, limit it by date, order size or number of uses."
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:498
-msgid "Create your first coupon"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:507
-msgid "Discount"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:508
-msgid "Applies to"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:509
-msgid "Used"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:510
-msgid "Valid"
-msgstr ""
-
-#. translators: %s: amount
-#: resources/admin/pages/PaymentsPage.jsx:532
-#, js-format
-msgid "Orders over %s"
-msgstr ""
-
-#. translators: %d: uses allowed per customer
-#: resources/admin/pages/PaymentsPage.jsx:550
-#, js-format
-msgid "%d per customer"
-msgid_plural "%d per customer"
-msgstr[0] ""
-msgstr[1] ""
-
-#. translators: %s: date
-#: resources/admin/pages/PaymentsPage.jsx:561
-#, js-format
-msgid "Until %s"
-msgstr ""
-
-#. translators: %s: date
-#: resources/admin/pages/PaymentsPage.jsx:562
-#, js-format
-msgid "From %s"
-msgstr ""
-
-#: resources/admin/pages/PaymentsPage.jsx:563
-msgid "Always"
+#: resources/admin/pages/PaymentsUpsell.jsx:19
+msgid "See orders next to each entry"
 msgstr ""
 
 #: resources/admin/pages/ReportsPage.jsx:26
@@ -12296,6 +11107,10 @@ msgstr ""
 #: resources/admin/pages/SubmissionDetailPage.jsx:1116
 #, js-format
 msgid "Tax (%s%%)"
+msgstr ""
+
+#: resources/admin/pages/SubmissionDetailPage.jsx:1120
+msgid "Total"
 msgstr ""
 
 #. translators: 1: order number, 2: order status
@@ -12917,135 +11732,163 @@ msgid "New templates added with updates"
 msgstr ""
 
 #: resources/admin/ui/UpgradeModal.jsx:95
-#: resources/admin/ui/UpgradeModal.jsx:107
-msgid "Card payments"
+msgid "Payment fields"
 msgstr ""
 
 #: resources/admin/ui/UpgradeModal.jsx:96
-#: resources/admin/ui/UpgradeModal.jsx:108
-msgid "SubtleForms Pro adds a Card Payment field that takes payments with Stripe."
+msgid "SubtleForms Pro adds the fields that price an order: Custom Amount, Order Summary, Coupon and Fixed Fee."
 msgstr ""
 
 #: resources/admin/ui/UpgradeModal.jsx:100
-#: resources/admin/ui/UpgradeModal.jsx:112
-msgid "Cards, wallets and bank payments through Stripe"
+msgid "Let visitors enter an amount, or add a fixed fee to every order"
 msgstr ""
 
 #: resources/admin/ui/UpgradeModal.jsx:101
-#: resources/admin/ui/UpgradeModal.jsx:113
-msgid "Works with the free Product, Priced Options and Coupon fields"
+msgid "Show the order total with a coupon box"
 msgstr ""
 
 #: resources/admin/ui/UpgradeModal.jsx:102
+msgid "Forms that use these fields keep them and leave them off the live form without Pro"
+msgstr ""
+
+#: resources/admin/ui/UpgradeModal.jsx:107
+#: resources/admin/ui/UpgradeModal.jsx:119
+msgid "Card payments"
+msgstr ""
+
+#: resources/admin/ui/UpgradeModal.jsx:108
+#: resources/admin/ui/UpgradeModal.jsx:120
+msgid "SubtleForms Pro adds a Card Payment field that takes payments with Stripe."
+msgstr ""
+
+#: resources/admin/ui/UpgradeModal.jsx:112
+#: resources/admin/ui/UpgradeModal.jsx:124
+msgid "Cards, wallets and bank payments through Stripe"
+msgstr ""
+
+#: resources/admin/ui/UpgradeModal.jsx:113
+#: resources/admin/ui/UpgradeModal.jsx:125
+msgid "Works with the Product, Priced Options, Custom Amount and Coupon fields"
+msgstr ""
+
 #: resources/admin/ui/UpgradeModal.jsx:114
+#: resources/admin/ui/UpgradeModal.jsx:126
 msgid "Payment status on every entry"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:120
+#: resources/admin/ui/UpgradeModal.jsx:132
 msgid "SubtleForms Pro adds people who send a form to Mailchimp, Brevo or Kit."
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:124
+#: resources/admin/ui/UpgradeModal.jsx:136
 msgid "Choose the list and map fields per form"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:125
+#: resources/admin/ui/UpgradeModal.jsx:137
 msgid "Only add people who ticked a consent box"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:126
 #: resources/admin/ui/UpgradeModal.jsx:138
+#: resources/admin/ui/UpgradeModal.jsx:150
 msgid "Every delivery is listed on the entry"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:132
+#: resources/admin/ui/UpgradeModal.jsx:144
 msgid "SubtleForms Pro creates HubSpot contacts from form entries."
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:136
+#: resources/admin/ui/UpgradeModal.jsx:148
 msgid "Map form fields to contact properties"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:137
+#: resources/admin/ui/UpgradeModal.jsx:149
 msgid "Update the contact when the email already exists"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:144
-msgid "SubtleForms Pro sends payment forms through the WooCommerce checkout and adds a WooCommerce Product field."
-msgstr ""
-
-#: resources/admin/ui/UpgradeModal.jsx:148
-#: resources/admin/ui/UpgradeModal.jsx:160
-msgid "Use the payment methods WooCommerce already has"
-msgstr ""
-
-#: resources/admin/ui/UpgradeModal.jsx:149
-#: resources/admin/ui/UpgradeModal.jsx:161
-msgid "Orders link back to the form entry"
-msgstr ""
-
-#: resources/admin/ui/UpgradeModal.jsx:150
-#: resources/admin/ui/UpgradeModal.jsx:162
-msgid "Sell existing WooCommerce products from a form"
+#: resources/admin/ui/UpgradeModal.jsx:155
+msgid "WooCommerce"
 msgstr ""
 
 #: resources/admin/ui/UpgradeModal.jsx:156
-msgid "SubtleForms Pro sends payment forms through the WooCommerce checkout."
+msgid "SubtleForms Pro sends payment forms through the WooCommerce checkout and adds a WooCommerce Product field."
+msgstr ""
+
+#: resources/admin/ui/UpgradeModal.jsx:160
+#: resources/admin/ui/UpgradeModal.jsx:172
+msgid "Use the payment methods WooCommerce already has"
+msgstr ""
+
+#: resources/admin/ui/UpgradeModal.jsx:161
+#: resources/admin/ui/UpgradeModal.jsx:173
+msgid "Orders link back to the form entry"
+msgstr ""
+
+#: resources/admin/ui/UpgradeModal.jsx:162
+#: resources/admin/ui/UpgradeModal.jsx:174
+msgid "Sell existing WooCommerce products from a form"
 msgstr ""
 
 #: resources/admin/ui/UpgradeModal.jsx:167
-msgid "Entry PDFs"
+msgid "WooCommerce checkout"
 msgstr ""
 
 #: resources/admin/ui/UpgradeModal.jsx:168
-msgid "SubtleForms Pro makes a PDF of any entry and can attach it to notification emails."
-msgstr ""
-
-#: resources/admin/ui/UpgradeModal.jsx:172
-msgid "Download a PDF from the entry screen"
-msgstr ""
-
-#: resources/admin/ui/UpgradeModal.jsx:173
-msgid "Attach it to admin notification emails"
-msgstr ""
-
-#: resources/admin/ui/UpgradeModal.jsx:174
-msgid "Your logo and colours on every page"
+msgid "SubtleForms Pro sends payment forms through the WooCommerce checkout."
 msgstr ""
 
 #: resources/admin/ui/UpgradeModal.jsx:179
-msgid "Translation with WPML and Polylang"
+msgid "Entry PDFs"
 msgstr ""
 
 #: resources/admin/ui/UpgradeModal.jsx:180
-msgid "SubtleForms Pro lets WPML or Polylang translate form labels, messages and emails."
+msgid "SubtleForms Pro makes a PDF of any entry and can attach it to notification emails."
 msgstr ""
 
 #: resources/admin/ui/UpgradeModal.jsx:184
-msgid "Translate labels, help text and options"
+msgid "Download a PDF from the entry screen"
 msgstr ""
 
 #: resources/admin/ui/UpgradeModal.jsx:185
-msgid "Translate confirmation messages and emails"
+msgid "Attach it to admin notification emails"
 msgstr ""
 
 #: resources/admin/ui/UpgradeModal.jsx:186
+msgid "Your logo and colours on every page"
+msgstr ""
+
+#: resources/admin/ui/UpgradeModal.jsx:191
+msgid "Translation with WPML and Polylang"
+msgstr ""
+
+#: resources/admin/ui/UpgradeModal.jsx:192
+msgid "SubtleForms Pro lets WPML or Polylang translate form labels, messages and emails."
+msgstr ""
+
+#: resources/admin/ui/UpgradeModal.jsx:196
+msgid "Translate labels, help text and options"
+msgstr ""
+
+#: resources/admin/ui/UpgradeModal.jsx:197
+msgid "Translate confirmation messages and emails"
+msgstr ""
+
+#: resources/admin/ui/UpgradeModal.jsx:198
 msgid "One form for every language"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:199
+#: resources/admin/ui/UpgradeModal.jsx:211
 msgid "This is part of SubtleForms Pro, a separate plugin."
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:284
+#: resources/admin/ui/UpgradeModal.jsx:296
 msgid "Not now"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:290
+#: resources/admin/ui/UpgradeModal.jsx:302
 msgid "SubtleForms Pro is installed. Add your license key to use it."
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:291
+#: resources/admin/ui/UpgradeModal.jsx:303
 msgid "SubtleForms Pro is a separate plugin. Your forms and entries stay as they are."
 msgstr ""
 
@@ -13109,10 +11952,6 @@ msgstr ""
 msgid "Section 1"
 msgstr ""
 
-#: resources/admin/utils/paymentNotes.js:39
-msgid "This form has prices but no Card Payment field, so entries are saved as \"Payment pending\" and you collect payment yourself. Add a Card Payment field (SubtleForms Pro) to take card payments online."
-msgstr ""
-
 #: resources/admin/utils/proFeatureDetector.js:20
 msgid "Calculation"
 msgstr ""
@@ -13121,24 +11960,44 @@ msgstr ""
 msgid "Card Payment"
 msgstr ""
 
-#: resources/admin/utils/proFeatureDetector.js:140
+#: resources/admin/utils/proFeatureDetector.js:157
 msgid "Picture Choice (shown without pictures)"
 msgstr ""
 
-#: resources/admin/utils/proFeatureDetector.js:141
+#: resources/admin/utils/proFeatureDetector.js:158
 msgid "Several files per upload (one file is accepted)"
 msgstr ""
 
-#: resources/admin/utils/proFeatureDetector.js:142
+#: resources/admin/utils/proFeatureDetector.js:159
 msgid "Advanced conditional logic (ignored)"
 msgstr ""
 
-#: resources/admin/utils/proPlaceholders.js:16
+#: resources/admin/utils/proPlaceholders.js:31
 msgid "Picture Choice"
 msgstr ""
 
-#: resources/admin/utils/proPlaceholders.js:22
+#: resources/admin/utils/proPlaceholders.js:37
 msgid "Visitors pick one or more images. Part of SubtleForms Pro."
+msgstr ""
+
+#: resources/admin/utils/proPlaceholders.js:44
+msgid "Visitors enter the amount to pay. Part of SubtleForms Pro."
+msgstr ""
+
+#: resources/admin/utils/proPlaceholders.js:46
+msgid "Order summary with totals. Part of SubtleForms Pro."
+msgstr ""
+
+#: resources/admin/utils/proPlaceholders.js:47
+msgid "Coupon Code"
+msgstr ""
+
+#: resources/admin/utils/proPlaceholders.js:48
+msgid "Separate discount code field. Part of SubtleForms Pro."
+msgstr ""
+
+#: resources/admin/utils/proPlaceholders.js:50
+msgid "Fixed fee added to every order. Part of SubtleForms Pro."
 msgstr ""
 
 #: resources/admin/utils/saveErrors.js:9
@@ -13423,196 +12282,196 @@ msgstr ""
 msgid "Turnstile secret key cannot exceed 100 characters"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:136
+#: resources/blocks/form/edit.jsx:139
 msgid "Form not available or has been unpublished"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:160
+#: resources/blocks/form/edit.jsx:182
 msgid "Form renderer not loaded. Frontend preview unavailable."
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:193
+#: resources/blocks/form/edit.jsx:204
 msgid "Loading form preview..."
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:262
+#: resources/blocks/form/edit.jsx:274
 msgid "Select a form"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:274
+#: resources/blocks/form/edit.jsx:286
 msgid "Form's own style"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:293
+#: resources/blocks/form/edit.jsx:305
 msgid "Select Form"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:303
+#: resources/blocks/form/edit.jsx:315
 msgid "Show form title"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:308
+#: resources/blocks/form/edit.jsx:320
 msgid "Show form description"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:314
+#: resources/blocks/form/edit.jsx:326
 msgid "Form Styling"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:316
+#: resources/blocks/form/edit.jsx:328
 msgid "Form Theme"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:320
+#: resources/blocks/form/edit.jsx:332
 msgid "Keeps the form's own styling, or applies a built-in theme instead. Updates the preview instantly."
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:331
+#: resources/blocks/form/edit.jsx:343
 msgid "Reset to defaults"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:337
+#: resources/blocks/form/edit.jsx:349
 msgid "Enable AJAX submission"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:340
+#: resources/blocks/form/edit.jsx:352
 msgid "Submit the form without reloading the page."
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:347
+#: resources/blocks/form/edit.jsx:359
 msgid "Tab Index"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:355
+#: resources/blocks/form/edit.jsx:367
 msgid "Field Values"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:358
+#: resources/blocks/form/edit.jsx:370
 msgid "One field per line, as key=value pairs, to prefill the form."
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:377
+#: resources/blocks/form/edit.jsx:389
 msgid "Select a published form to embed"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:245
-#: resources/frontend/components/FormRenderer.jsx:689
+#: resources/frontend/components/ConversationalFormRenderer.jsx:248
+#: resources/frontend/components/FormRenderer.jsx:696
 msgid "Save the form first, then submit the preview."
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:376
-#: resources/frontend/components/FormRenderer.jsx:973
+#: resources/frontend/components/ConversationalFormRenderer.jsx:379
+#: resources/frontend/components/FormRenderer.jsx:980
 #: resources/frontend/utils/classicResult.js:59
 msgid "Submission failed."
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:380
-#: resources/frontend/components/FormRenderer.jsx:978
+#: resources/frontend/components/ConversationalFormRenderer.jsx:383
+#: resources/frontend/components/FormRenderer.jsx:985
 msgid "Network error. Please try again."
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:416
+#: resources/frontend/components/ConversationalFormRenderer.jsx:419
 msgid "Your response has been submitted successfully."
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:448
+#: resources/frontend/components/ConversationalFormRenderer.jsx:451
 msgid "This form has no questions."
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:487
+#: resources/frontend/components/ConversationalFormRenderer.jsx:490
 msgid "Review Your Answers"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:493
+#: resources/frontend/components/ConversationalFormRenderer.jsx:496
 msgid "Please review your answers"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:543
+#: resources/frontend/components/ConversationalFormRenderer.jsx:546
 msgid "Continue to Payment"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:572
+#: resources/frontend/components/ConversationalFormRenderer.jsx:575
 msgid "Complete Payment"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:582
+#: resources/frontend/components/ConversationalFormRenderer.jsx:585
 msgid "Amount Due:"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:592
+#: resources/frontend/components/ConversationalFormRenderer.jsx:595
 msgid "⚠️ Test Mode: No actual payment will be processed"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:601
+#: resources/frontend/components/ConversationalFormRenderer.jsx:604
 msgid "Payment gateway integration will appear here. For now, click Submit to complete the form."
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:615
+#: resources/frontend/components/ConversationalFormRenderer.jsx:618
 msgid "Back to Review"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:625
+#: resources/frontend/components/ConversationalFormRenderer.jsx:628
 msgid "Complete Submission"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:647
+#: resources/frontend/components/ConversationalFormRenderer.jsx:650
 msgid "Complete"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:698
+#: resources/frontend/components/ConversationalFormRenderer.jsx:701
 msgid "Review"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:706
+#: resources/frontend/components/ConversationalFormRenderer.jsx:709
 msgid "Press Enter ↵"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:732
+#: resources/frontend/components/ConversationalFormRenderer.jsx:735
 msgid "Question"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:466
+#: resources/frontend/components/FieldRenderer.jsx:458
 msgid "This CAPTCHA is not set up yet."
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:666
+#: resources/frontend/components/FieldRenderer.jsx:661
 msgid "Strong password"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:668
+#: resources/frontend/components/FieldRenderer.jsx:663
 msgid "Fair password"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:669
+#: resources/frontend/components/FieldRenderer.jsx:664
 msgid "Weak password"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:679
-#: resources/frontend/components/FieldRenderer.jsx:680
+#: resources/frontend/components/FieldRenderer.jsx:674
+#: resources/frontend/components/FieldRenderer.jsx:675
 msgid "Confirm password"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:1060
+#: resources/frontend/components/FieldRenderer.jsx:1011
 msgid "Select Country"
 msgstr ""
 
 #. translators: 1: chosen rating, 2: highest rating
 #. translators: 1: groups added, 2: maximum groups
-#: resources/frontend/components/FieldRenderer.jsx:1120
+#: resources/frontend/components/FieldRenderer.jsx:1071
 #: resources/frontend/components/fields/RepeaterField.jsx:224
 #, js-format
 msgid "%1$d of %2$d"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:1211
+#: resources/frontend/components/FieldRenderer.jsx:1162
 msgid "Not at all likely"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:1212
+#: resources/frontend/components/FieldRenderer.jsx:1163
 msgid "Extremely likely"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:1407
+#: resources/frontend/components/FieldRenderer.jsx:1358
 msgid "Colour hex value"
 msgstr ""
 
@@ -13711,106 +12570,6 @@ msgstr ""
 msgid "Uploading %s"
 msgstr ""
 
-#: resources/frontend/components/fields/Payments.jsx:44
-msgid "Quantity"
-msgstr ""
-
-#: resources/frontend/components/fields/Payments.jsx:48
-msgid "Decrease quantity"
-msgstr ""
-
-#: resources/frontend/components/fields/Payments.jsx:68
-msgid "Increase quantity"
-msgstr ""
-
-#: resources/frontend/components/fields/Payments.jsx:190
-msgid "Included"
-msgstr ""
-
-#. translators: %s: percentage
-#: resources/frontend/components/fields/Payments.jsx:222
-#, js-format
-msgid "%s%% off"
-msgstr ""
-
-#. translators: %s: amount
-#: resources/frontend/components/fields/Payments.jsx:227
-#, js-format
-msgid "%s off"
-msgstr ""
-
-#: resources/frontend/components/fields/Payments.jsx:250
-#: resources/frontend/components/fields/Payments.jsx:251
-msgid "Coupon code"
-msgstr ""
-
-#: resources/frontend/components/fields/Payments.jsx:268
-msgid "Checking…"
-msgstr ""
-
-#. translators: %d: number of uses left
-#: resources/frontend/components/fields/Payments.jsx:296
-#, js-format
-msgid "%d use left"
-msgid_plural "%d uses left"
-msgstr[0] ""
-msgstr[1] ""
-
-#. translators: %s: date
-#: resources/frontend/components/fields/Payments.jsx:307
-#, js-format
-msgid "Expires %s"
-msgstr ""
-
-#. translators: %d: uses allowed per customer
-#: resources/frontend/components/fields/Payments.jsx:317
-#, js-format
-msgid "%d use per customer"
-msgid_plural "%d uses per customer"
-msgstr[0] ""
-msgstr[1] ""
-
-#: resources/frontend/components/fields/Payments.jsx:340
-msgid "Nothing selected yet"
-msgstr ""
-
-#: resources/frontend/components/fields/Payments.jsx:357
-msgid "Subtotal"
-msgstr ""
-
-#. translators: %s: coupon code
-#: resources/frontend/components/fields/Payments.jsx:366
-#, js-format
-msgid "Discount (%s)"
-msgstr ""
-
-#: resources/frontend/components/fields/Payments.jsx:438
-msgid "Payment form could not be loaded."
-msgstr ""
-
-#: resources/frontend/components/fields/Payments.jsx:455
-msgid "You will pay securely at checkout after sending this form."
-msgstr ""
-
-#: resources/frontend/components/fields/Payments.jsx:470
-msgid "Secure card fields from your payment gateway appear here on the live form."
-msgstr ""
-
-#: resources/frontend/components/fields/Payments.jsx:471
-#: resources/frontend/components/FormRenderer.jsx:839
-msgid "Online payment is not available right now."
-msgstr ""
-
-#. translators: %s: smallest amount, for example $0.50
-#: resources/frontend/components/fields/Payments.jsx:484
-#, js-format
-msgid "Card payments need an order of at least %s."
-msgstr ""
-
-#: resources/frontend/components/fields/Payments.jsx:499
-msgid "Payments are encrypted and processed securely."
-msgstr ""
-
 #: resources/frontend/components/fields/PhoneField.jsx:152
 #: resources/frontend/components/fields/PhoneField.jsx:153
 msgid "Search country or code"
@@ -13860,45 +12619,53 @@ msgstr ""
 msgid "This form couldn’t load. Please refresh the page and try again."
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:61
-#: resources/frontend/components/FormRenderer.jsx:1090
+#: resources/frontend/components/FormRenderer.jsx:62
+#: resources/frontend/components/FormRenderer.jsx:1098
 msgid "Loading form..."
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:157
-#: resources/frontend/components/FormRenderer.jsx:166
+#: resources/frontend/components/FormRenderer.jsx:161
+#: resources/frontend/components/FormRenderer.jsx:170
 msgid "Failed to load form."
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:584
+#: resources/frontend/components/FormRenderer.jsx:587
+msgid "This coupon code is not valid."
+msgstr ""
+
+#: resources/frontend/components/FormRenderer.jsx:591
 msgid "The code could not be checked. Please try again."
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:858
+#: resources/frontend/components/FormRenderer.jsx:846
+msgid "Online payment is not available right now."
+msgstr ""
+
+#: resources/frontend/components/FormRenderer.jsx:865
 msgid "Your payment could not be completed."
 msgstr ""
 
 #. translators: %s: URL
-#: resources/frontend/components/FormRenderer.jsx:940
+#: resources/frontend/components/FormRenderer.jsx:947
 #, js-format
 msgid "Visitors will be sent to %s."
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:1139
+#: resources/frontend/components/FormRenderer.jsx:1147
 msgid "Submit another response"
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:1339
+#: resources/frontend/components/FormRenderer.jsx:1349
 msgid "Submitting…"
 msgstr ""
 
 #. translators: %s: order total
-#: resources/frontend/components/FormRenderer.jsx:1344
+#: resources/frontend/components/FormRenderer.jsx:1354
 #, js-format
 msgid "Pay %s"
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:1348
+#: resources/frontend/components/FormRenderer.jsx:1358
 msgid "Continue to checkout"
 msgstr ""
 

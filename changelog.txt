@@ -4,6 +4,15 @@ This file keeps the full release history. readme.txt lists only the latest versi
 
 == Changelog ==
 
+= 2.7.1 - 2026-10-23 =
+* Change: Payments, coupons and the Payments page moved to SubtleForms Pro. Forms with payment fields show a not available message until Pro 2.7.0 is active.
+* Change: Forms that inherit the theme load no SubtleForms stylesheet, and the stylesheet has an RTL version.
+* Change: Choice groups use a fieldset with a legend, and error and success boxes use theme-neutral colours.
+* Fix: The keep-data uninstall setting is now saved and honoured.
+* Fix: The per-user entry limit works.
+* Security: Form schemas need the manage_options capability, reCAPTCHA v3 checks the score and action, and time tokens expire after two hours and work once.
+* Security: The client IP honours trusted proxies, and queued mail and webhook details stay out of the cron option.
+
 = 2.7.0 - 2026-10-23 =
 * New: Web addresses and links written as [text](https://example.com) in a form's confirmation message are now clickable; only http, https and site-relative links are allowed and anything else stays plain text.
 * New: Add-ons can register their own panel in the form builder under Integrations, so Pro can offer Salesforce, Pipedrive and Close there.
