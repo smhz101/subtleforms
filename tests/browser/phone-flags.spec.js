@@ -144,9 +144,11 @@ for (const [name, size] of [['1280', { width: 1280, height: 900 }], ['390', { wi
     });
     const listed = codes(seen).filter((code) => code !== 'gb');
     expect(listed.length).toBeGreaterThan(0);
-    // The browser also loads rows just below the view; never the whole list.
+    // The browser also loads rows ahead of the view (how far depends on the
+    // browser and connection: about 40 locally, about 90 on CI); never the
+    // whole list of over 250 countries.
     expect(listed.length).toBeGreaterThanOrEqual(visible - 1);
-    expect(listed.length).toBeLessThan(60);
+    expect(listed.length).toBeLessThan(150);
     expect(listed).not.toContain('zw');
     const sizes = seen.flags.map((hit) => hit.bytes);
     console.log(`open list at ${name}px: ${visible} rows visible, ${seen.flags.length} flag files loaded, median ${median(sizes)} bytes, total ${sizes.reduce((n, b) => n + b, 0)} bytes`);
