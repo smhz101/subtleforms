@@ -15,7 +15,7 @@ import { warnOnce } from '../utils/warnOnce';
 import { serverFieldErrors, fixFieldsSummary } from '../utils/serverErrors';
 import { getFormClassNames } from '../utils/formStyles';
 import { structuralType } from '../../shared/formType';
-import { formFieldDefaults } from '../../shared/fieldDisplay';
+import { formFieldDefaults, formHasRequiredFields, requiredIndicatorMark } from '../../shared/fieldDisplay';
 import { debug } from '../../shared/debug';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { computeQuote, isPricedForm, formatMoney, isPricedType } from '../../shared/pricing';
@@ -1300,6 +1300,16 @@ export default function FormRenderer({
           {currentStepConfig.description && (
             <p className='subtleforms-step-description'>
               {currentStepConfig.description}
+            </p>
+          )}
+
+          {formHasRequiredFields(schema) && (
+            <p className='subtleforms-required-legend'>
+              <span className='subtleforms-required' aria-hidden='true'>
+                {requiredIndicatorMark(fieldDefaults)}
+              </span>
+              {' '}
+              {__('indicates required fields', 'subtleforms')}
             </p>
           )}
 

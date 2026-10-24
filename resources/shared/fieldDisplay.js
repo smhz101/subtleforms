@@ -44,14 +44,77 @@ export function formFieldDefaults(metadata) {
 export function requiredIndicatorMark(defaults = {}) {
   const mode = defaults.requiredIndicator || 'asterisk';
   if (mode === 'text') {
-    const text = typeof defaults.requiredIndicatorText === 'string' ? defaults.requiredIndicatorText.trim() : '';
-    return text || '(Required)';
+    return '(Required)';
   }
   if (mode === 'custom') {
     const custom = typeof defaults.requiredIndicatorText === 'string' ? defaults.requiredIndicatorText : '';
     return custom || '*';
   }
   return '*';
+}
+
+/**
+ * Whether a schema (fields list, schema object, or builder tree) has any required field.
+ *
+ * @param {Object|Array} schema Schema, fields array, or builder tree with nodes.
+ * @return {boolean}
+ */
+export function formHasRequiredFields(schema) {
+  if (!schema) {
+    return false;
+  }
+  if (schema.nodes && typeof schema.nodes === 'object' && !Array.isArray(schema.nodes)) {
+    return Object.values(schema.nodes).some((node) => !!fieldConfig(node).required);
+  }
+  const list = Array.isArray(schema) ? schema : schema.fields;
+  if (!Array.isArray(list)) {
+    return false;
+  }
+  return list.some((node) => walkRequiredNode(node));
+}
+
+/**
+ * @param {Object} node Field or container node.
+ * @return {boolean}
+ */
+function walkRequiredNode(node) {
+  if (!node || typeof node !== 'object') {
+    return false;
+  }
+  if (fieldConfig(node).required) {
+    return true;
+  }
+  const kids = [];
+  if (Array.isArray(node.children)) {
+    kids.push(...node.children);
+  }
+  if (Array.isArray(node.fields)) {
+    kids.push(...node.fields);
+  }
+  if (Array.isArray(node.config?.children)) {
+    kids.push(...node.config.children);
+  }
+  if (Array.isArray(node.subFields)) {
+    kids.push(...node.subFields);
+  }
+  if (Array.isArray(node.columns)) {
+    node.columns.forEach((col) => {
+      if (Array.isArray(col)) {
+        kids.push(...col);
+      }
+    });
+  }
+  return kids.some((child) => typeof child === 'object' && walkRequiredNode(child));
+}
+
+/**
+ * Parts used to render the required-fields legend.
+ *
+ * @param {Object} defaults formFieldDefaults() result.
+ * @return {{mark: string}}
+ */
+export function requiredFieldsLegendParts(defaults = {}) {
+  return { mark: requiredIndicatorMark(defaults) };
 }
 
 /**

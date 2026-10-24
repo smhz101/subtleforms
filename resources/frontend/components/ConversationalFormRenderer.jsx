@@ -17,7 +17,7 @@ import { computeLogicState } from '../../shared/conditions';
 import { FormContext } from './fields/contexts';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { questionFields } from '../../shared/conversational';
-import { formFieldDefaults } from '../../shared/fieldDisplay';
+import { formFieldDefaults, formHasRequiredFields, requiredIndicatorMark } from '../../shared/fieldDisplay';
 import { collectDefaultValues } from '../utils/defaults';
 import { validateFields } from '../utils/fieldValidation';
 
@@ -650,6 +650,16 @@ export default function ConversationalFormRenderer({
           {Math.round(progressPercent)}% {__('Complete', 'subtleforms')}
         </div>
       </div>
+
+      {formHasRequiredFields(schema) && (
+        <p className='subtleforms-required-legend'>
+          <span className='subtleforms-required' aria-hidden='true'>
+            {requiredIndicatorMark(fieldDefaults)}
+          </span>
+          {' '}
+          {__('indicates required fields', 'subtleforms')}
+        </p>
+      )}
 
       {/* Question Card */}
       <div className='subtleforms-question-card'>

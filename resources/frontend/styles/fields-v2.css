@@ -719,7 +719,7 @@
 	border: 0;
 }
 
-.subtleforms-upload__drop {
+.subtleforms-upload__zone {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
@@ -735,13 +735,13 @@
 	text-align: center;
 }
 
-.subtleforms-upload__drop:hover,
-.subtleforms-upload__drop:focus-within,
-.subtleforms-upload__drop.is-dragover {
+.subtleforms-upload__zone:hover,
+.subtleforms-upload__zone:focus-within,
+.subtleforms-upload__zone.is-dragover {
 	border-color: var(--subtleforms-color-primary, #3858e9);
 }
 
-.subtleforms-upload__drop.is-dragover {
+.subtleforms-upload__zone.is-dragover {
 	background: color-mix(in srgb, var(--subtleforms-color-primary, #3858e9) 8%, transparent);
 }
 

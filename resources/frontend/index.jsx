@@ -57,7 +57,7 @@ async function resolveSchema(formId, optionSchema) {
  *   the Gutenberg block or shortcode.
  */
 function mount(container, options = {}) {
-  const { formId, schema: optionSchema, preview = false, onSubmit, blockOptions } = options;
+  const { formId, schema: optionSchema } = options;
 
   if (!formId) {
     console.error('SubtleForms: formId is required for mount()');
@@ -70,32 +70,39 @@ function mount(container, options = {}) {
   const root = existing || createRoot(container);
   container._subtleformsRoot = root;
 
-  const draw = (schema, spamToken) => {
+  const draw = (opts, schema, spamToken) => {
     // Unmounted while the field code was downloading.
     if (!existing && container._subtleformsRoot !== root) {
       return;
     }
+    const {
+      formId: drawFormId,
+      preview: drawPreview = false,
+      onSubmit: drawOnSubmit,
+      blockOptions: drawBlockOptions,
+    } = opts;
     root.render(
       <FormErrorBoundary>
         <FormRenderer
-          formId={formId}
+          formId={drawFormId}
           preloadedSchema={schema || null}
           preloadedSpamToken={spamToken || ''}
-          preview={preview}
-          onSubmit={onSubmit}
-          blockOptions={blockOptions}
+          preview={drawPreview}
+          onSubmit={drawOnSubmit}
+          blockOptions={drawBlockOptions}
         />
       </FormErrorBoundary>
     );
   };
 
   // Remounts keep the live tree; FormRenderer loads if no schema is handed in.
-  // While the first paint is still preparing, skip so the form is not loaded twice.
+  // While the first paint is still preparing, keep the latest options for draw.
   if (existing) {
     if (container._subtleformsPreparing) {
+      container._subtleformsPendingMount = options;
       return;
     }
-    draw(optionSchema || null, '');
+    draw(options, optionSchema || null, '');
     return;
   }
 
@@ -122,7 +129,31 @@ function mount(container, options = {}) {
     if (container._subtleformsRoot !== root) {
       return;
     }
-    draw(schema, spamToken);
+
+    const pending = container._subtleformsPendingMount;
+    delete container._subtleformsPendingMount;
+
+    if (pending) {
+      let pendingSchema = null;
+      let pendingSpam = '';
+      try {
+        const resolved = await resolveSchema(pending.formId, pending.schema || null);
+        pendingSchema = resolved.schema;
+        pendingSpam = resolved.spamToken;
+      } catch (e) {
+        pendingSchema = null;
+        pendingSpam = '';
+      }
+      if (pendingSchema) {
+        await loadFieldsFor(pendingSchema);
+      }
+      if (container._subtleformsRoot !== root) {
+        return;
+      }
+      draw(pending, pendingSchema, pendingSpam);
+    } else {
+      draw(options, schema, spamToken);
+    }
     releaseReserve(container);
   })().finally(() => {
     delete container._subtleformsPreparing;
@@ -140,6 +171,7 @@ function unmount(container) {
     delete container._subtleformsRoot;
   }
   delete container._subtleformsPreparing;
+  delete container._subtleformsPendingMount;
 }
 
 // Expose public API

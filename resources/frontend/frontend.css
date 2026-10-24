@@ -331,8 +331,18 @@ fieldset.subtleforms-field > legend.subtleforms-field-label {
 }
 
 .subtleforms-required {
-	color: var(--subtleforms-color-error);
+	color: var(--subtleforms-color-error, #b42318);
 	margin-left: 2px;
+}
+
+.subtleforms-required-legend {
+	margin: 0 0 0.75rem;
+	font-size: 0.875em;
+	color: var(--subtleforms-color-text-light, #646970);
+}
+
+.subtleforms-required-legend .subtleforms-required {
+	margin-left: 0;
 }
 
 .subtleforms-input,

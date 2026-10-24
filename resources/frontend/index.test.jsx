@@ -116,3 +116,64 @@ test('a hanging schema fetch never flashes Loading form text', async () => {
   expect(container.textContent).not.toContain('Loading form');
   expect(container.querySelector('.subtleforms-skeleton')).not.toBeNull();
 });
+
+test('a remount during prepare uses the latest options', async () => {
+  jest.resetModules();
+  document.body.innerHTML =
+    '<div class="subtleforms-form-container" data-form-id="12"></div>';
+  let resolveFetch;
+  global.fetch = jest.fn(
+    () =>
+      new Promise((resolve) => {
+        resolveFetch = resolve;
+      })
+  );
+  delete window.SubtleForms;
+
+  await act(async () => {
+    require('./index');
+  });
+
+  const container = document.querySelector('.subtleforms-form-container');
+  for (let i = 0; i < 50 && !container._subtleformsPreparing; i++) {
+    // eslint-disable-next-line no-await-in-loop
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    });
+  }
+  expect(container._subtleformsPreparing).toBeTruthy();
+
+  await act(async () => {
+    window.SubtleForms.mount(container, {
+      formId: 12,
+      schema: {
+        metadata: {},
+        fields: [{ id: 'f', key: 'n', type: 'text', label: 'From pending' }],
+      },
+    });
+  });
+
+  await act(async () => {
+    resolveFetch({
+      ok: true,
+      json: async () => ({
+        data: {
+          schema: {
+            metadata: {},
+            fields: [{ id: 'f', key: 'n', type: 'text', label: 'From first' }],
+          },
+          spam_token: '',
+        },
+      }),
+    });
+  });
+
+  for (let i = 0; i < 50 && !container.textContent.includes('From pending'); i++) {
+    // eslint-disable-next-line no-await-in-loop
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    });
+  }
+  expect(container.textContent).toContain('From pending');
+  expect(container.textContent).not.toContain('From first');
+});

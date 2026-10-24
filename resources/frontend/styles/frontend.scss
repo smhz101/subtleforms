@@ -432,6 +432,22 @@
 /*! inherit: keep-end */
 
 
+
+.subtleforms-required {
+	color: var(--subtleforms-color-error, #b42318);
+	margin-left: 2px;
+}
+
+.subtleforms-required-legend {
+	margin: 0 0 0.75rem;
+	font-size: 0.875em;
+	color: var(--subtleforms-color-text-light, #646970);
+
+	.subtleforms-required {
+		margin-left: 0;
+	}
+}
+
 /* File upload drop zone */
 .subtleforms-upload {
 	.subtleforms-file-input {
@@ -446,7 +462,7 @@
 		border: 0;
 	}
 
-	&__drop {
+	&__zone {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;

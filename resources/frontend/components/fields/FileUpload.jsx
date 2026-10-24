@@ -197,7 +197,7 @@ export default function FileUpload({ field, config, value, onChange, inputId, er
 
       {canAdd && (
         <div
-          className={['subtleforms-upload__drop', dragOver ? 'is-dragover' : ''].filter(Boolean).join(' ')}
+          className={['subtleforms-upload__zone', dragOver ? 'is-dragover' : ''].filter(Boolean).join(' ')}
           onClick={openPicker}
           onDragEnter={(e) => {
             e.preventDefault();

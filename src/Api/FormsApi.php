@@ -1278,6 +1278,9 @@ final class FormsApi {
 				'descriptionPlacement',
 				'requiredMessage',
 				'validationMessage',
+				'validationSummary',
+				'requiredIndicator',
+				'requiredIndicatorText',
 			);
 
 			$public['metadata'] = array();
