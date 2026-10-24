@@ -20,7 +20,7 @@ export function RouteLoadingFallback() {
 
 				{/* Loading Text */}
 				<p className="sf-route-transition__text">
-					{__('Loading...', 'subtleforms')}
+					{__('Loading…', 'subtleforms')}
 				</p>
 			</div>
 		</div>

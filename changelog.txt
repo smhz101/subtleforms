@@ -9,6 +9,7 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: The Preview tab uses one scrollbar for the canvas and styling controls.
 * Change: Appearance presets no longer set form width; Layout / Form width stays a separate control so columns flex at full content width.
 * Fix: The date picker trigger matches other fields, and the calendar panel is easier to read.
+* Fix: The first-load route spinner uses the brand colour on the white stage, matching the admin shell.
 
 = 2.7.1 - 2026-10-23 =
 * Change: Payments, coupons and the Payments page moved to SubtleForms Pro. Forms with payment fields show a not available message until Pro 2.7.0 is active.

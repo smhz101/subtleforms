@@ -329,6 +329,7 @@ The full history is in changelog.txt in the plugin folder.
 
 = 2.7.2 =
 Forms load without a flash, file uploads use a drop zone, and appearance presets no longer change form width. The Preview tab uses one scrollbar, and the date picker matches other fields.
+Fix: The first-load route spinner uses the brand colour on the white stage, matching the admin shell.
 
 = 2.7.1 =
 Payments, coupons and the Payments page moved to SubtleForms Pro. Forms with payment fields now need Pro 2.7.0; without it they show a not available message instead of taking unpaid orders.
