@@ -528,7 +528,7 @@ export default function AdvancedSettings( {
 						updateSetting( 'keep_data_on_uninstall', !! value )
 					}
 					help={ __(
-						'Off by default. When this is off, deleting SubtleForms from the Plugins screen removes its forms, entries, settings and uploaded files. SubtleForms Pro settings and license are never removed.',
+						'Off by default. When this is off, deleting SubtleForms from the Plugins screen removes its forms, entries, settings and uploaded files. Data that other plugins store is not removed.',
 						'subtleforms'
 					) }
 				/>

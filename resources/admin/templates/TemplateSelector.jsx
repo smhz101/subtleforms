@@ -1,13 +1,11 @@
 import React from 'react';
 import { useState, useMemo } from '@wordpress/element';
-import { TextControl, Notice, Modal } from '@wordpress/components';
+import { TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useTemplates } from '../data';
-import { useAbility } from '../policies';
 import clsx from 'clsx';
 import Icon from '../ui/Icon';
 import { formTypeLabel } from '../utils/formTypeChoices';
-import { UpgradePrompt } from '../ui';
 import { TEMPLATE_CATEGORIES } from './index';
 
 export default function TemplateSelector({
@@ -16,11 +14,8 @@ export default function TemplateSelector({
 }) {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [selectedProTemplate, setSelectedProTemplate] = useState(null);
-  
+
   const { data: templatesResponse, isLoading } = useTemplates();
-  const { can: canUseProTemplates } = useAbility('templates.pro');
   
   const templates = templatesResponse?.success && templatesResponse?.templates 
     ? Object.values(templatesResponse.templates) 
@@ -49,13 +44,6 @@ export default function TemplateSelector({
   }, [templates, searchQuery, selectedCategory]);
 
   const handleTemplateClick = (template) => {
-    if (template.is_pro && !canUseProTemplates) {
-      // Show contextual upgrade prompt
-      setSelectedProTemplate(template);
-      setShowUpgradeModal(true);
-      return;
-    }
-    
     onSelectTemplate(template);
   };
 
@@ -113,9 +101,6 @@ export default function TemplateSelector({
           ) : (
             <div className='sf-template-selector__grid'>
               {filteredTemplates.map((template) => {
-                // Use server-supplied is_locked flag; fall back to JS capability check.
-                const isLocked = template.is_locked || (template.is_pro && !canUseProTemplates);
-                
                 // Check if this template is selected (handle both ID string and full object)
                 const isSelected = selectedTemplate?.id ? 
                   selectedTemplate.id === template.id : 
@@ -128,20 +113,10 @@ export default function TemplateSelector({
                     onClick={() => handleTemplateClick(template)}
                     className={clsx(
                       'sf-template-card',
-                      isSelected && 'sf-template-card--selected',
-                      isLocked && 'sf-template-card--locked'
+                      isSelected && 'sf-template-card--selected'
                     )}>
                   {/* Badge */}
                   <div className='sf-template-card__badge-wrapper'>
-                    {template.is_pro ? (
-                      <span className='sf-template-card__badge sf-template-card__badge--pro'>
-                        {__('Pro', 'subtleforms')}
-                      </span>
-                    ) : (
-                      <span className='sf-template-card__badge sf-template-card__badge--free'>
-                        {__('Free', 'subtleforms')}
-                      </span>
-                    )}
                     <span className='sf-template-card__badge sf-template-card__badge--type'>
                       {getFormTypeLabel(template.schema?.metadata?.type)}
                     </span>
@@ -160,12 +135,6 @@ export default function TemplateSelector({
                     <Icon.CheckCircle className='sf-template-card__check-icon' />
                   )}
 
-                  {/* Pro Lock Icon - only show if locked */}
-                  {isLocked && (
-                    <div className='sf-template-card__lock'>
-                      <Icon.Lock className='sf-template-card__lock-icon' />
-                    </div>
-                  )}
                 </button>
               );
             })}
@@ -174,25 +143,6 @@ export default function TemplateSelector({
         </div>
       </div>
       
-      {/* Upgrade Modal */}
-      {showUpgradeModal && selectedProTemplate && (
-        <Modal
-          title={__('Unlock this template', 'subtleforms')}
-          onRequestClose={() => setShowUpgradeModal(false)}
-          className='sf-upgrade-modal'>
-          <UpgradePrompt
-            variant='card'
-            feature={selectedProTemplate.name}
-            benefits={[
-              __('Access all premium templates', 'subtleforms'),
-              __('Advanced form types (multi-step, conversational)', 'subtleforms'),
-              __('Priority support', 'subtleforms'),
-              __('Regular template updates', 'subtleforms'),
-            ]}
-            ctaText={__('View Pro Plans', 'subtleforms')}
-          />
-        </Modal>
-      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { useMemo } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import Icon from '../../ui/Icon';
 import LogicEditor, { readLogic, countRules } from './LogicEditor';
+import { getLogicEditor } from '../../../shared/extend';
 import ChainedLevelsControl from './inspector/controls/ChainedLevelsControl';
 import ChainedDisplayControl from './inspector/controls/ChainedDisplayControl';
 import ChainedSourceControl from './inspector/controls/ChainedSourceControl';
@@ -169,6 +170,10 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
   // (Computed directly: a hook here would follow the early return above.)
   const usedKeys = tree ? namespaceKeys(denormalizeTree(tree), selectedId) : new Set();
 
+  // Step rules come from an add-on's logic editor; without one the tab is
+  // shown only to say that saved rules are kept.
+  const showLogicOnlyTab = !isStep || !!getLogicEditor() || ruleCount > 0;
+
   const tabs = [
     { name: 'settings', title: __('Field', 'subtleforms') },
     ...(isInputLike
@@ -186,7 +191,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
           },
           logicTab,
         ]
-      : LOGIC_ONLY_TYPES.includes(field.type)
+      : LOGIC_ONLY_TYPES.includes(field.type) && showLogicOnlyTab
       ? [logicTab]
       : []),
     ...(supportsAppearance(field.type)

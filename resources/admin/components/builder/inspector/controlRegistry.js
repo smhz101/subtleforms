@@ -14,7 +14,6 @@ import OptionsInspectorControl from './controls/OptionsInspectorControl';
 import SubfieldInspectorControl from './controls/SubfieldInspectorControl';
 import LinesInspectorControl from './controls/LinesInspectorControl';
 import ChainedLevelsControl from './controls/ChainedLevelsControl';
-import ProNoticeControl from './controls/ProNoticeControl';
 import { getInspectorControl } from '../../../../shared/extend';
 
 /**
@@ -31,7 +30,6 @@ import { getInspectorControl } from '../../../../shared/extend';
  *   radio    → select fallback (renders as dropdown)
  *   options  → add/remove/edit list of choice options
  *   subfield → composite sub-field config (toggle + label + placeholder per sub-field)
- *   pro_notice → a setting SubtleForms Pro provides: label, Pro tag, upgrade link (no control)
  */
 const CONTROL_REGISTRY = {
 	text: TextInspectorControl,
@@ -46,7 +44,6 @@ const CONTROL_REGISTRY = {
 	subfield: SubfieldInspectorControl,
 	lines: LinesInspectorControl,
 	chained_levels: ChainedLevelsControl,
-	pro_notice: ProNoticeControl,
 };
 
 /**

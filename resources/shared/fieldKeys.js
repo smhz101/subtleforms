@@ -214,7 +214,7 @@ const REFERENCE_PROPS = new Set([
 /**
  * Properties that hold a field ID only inside a given part of the schema:
  * the email marketing and CRM identity fields (metadata.integrations), and
- * the billing details a SubtleForms Pro WooCommerce checkout takes from the
+ * the billing details an add-on WooCommerce checkout takes from the
  * form (metadata.payment.billing).
  */
 const CONTEXT_PROPS = {

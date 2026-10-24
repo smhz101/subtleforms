@@ -1,10 +1,10 @@
 /**
  * Add-on field detection.
  *
- * Signature, Calculation and Card Payment fields come from SubtleForms Pro.
- * A form keeps them when Pro is not active; the live form leaves them out
- * until Pro is back. This module finds them in a schema. It never locks the
- * builder: everything in the free plugin stays editable.
+ * Signature, Calculation and Card Payment fields come from an add-on. A form
+ * keeps them when the add-on is not active; the live form leaves them out.
+ * This module finds them in a schema so the builder can say so. It never
+ * changes or locks anything in the builder.
  *
  * @package SubtleForms
  */
@@ -12,7 +12,7 @@
 import { __ } from '@wordpress/i18n';
 import { normalizeLogic, isBasic } from '../../shared/conditions';
 
-/** Field types provided by SubtleForms Pro. */
+/** Field types provided by an add-on. */
 export const ADDON_FIELD_TYPES = ['signature', 'calculation', 'payment_card'];
 
 const LABELS = {
@@ -43,32 +43,8 @@ function collectTypes(fields, out = new Set()) {
 }
 
 /**
- * Whether a schema contains fields that SubtleForms Pro provides.
- *
- * @param {Object} schema Form schema.
- * @return {boolean} True when it does.
- */
-export function formUsesProFeatures(schema) {
-  if (!schema) return false;
-  const types = collectTypes(schema.fields);
-  return ADDON_FIELD_TYPES.some((type) => types.has(type));
-}
-
-/**
- * Labels of the Pro field types a schema uses.
- *
- * @param {Object} schema Form schema.
- * @return {string[]} Labels.
- */
-export function getProFeaturesUsed(schema) {
-  if (!schema) return [];
-  const types = collectTypes(schema.fields);
-  return ADDON_FIELD_TYPES.filter((type) => types.has(type)).map((type) => LABELS[type]());
-}
-
-/**
  * Whether a schema has a payment field that no active plugin provides. Such a
- * form is not shown to visitors until SubtleForms Pro is active.
+ * form is not shown to visitors.
  *
  * @param {Object}   schema  Form schema.
  * @param {string[]} missing Missing types (default: from the server).
@@ -117,8 +93,8 @@ function eachNode(fields, visit) {
 }
 
 /**
- * Features a form uses that need SubtleForms Pro to work in full. The form
- * still works without Pro: this only says how. Nothing is removed from it.
+ * Settings a form uses that an add-on provides and no active plugin provides
+ * now. The form still works: this only says how. Nothing is removed from it.
  *
  * - Picture Choice: shown as a plain choice, images ignored.
  * - Several files per upload field: one file is accepted.

@@ -24,10 +24,7 @@ export {
   useSubmission,
 } from './queries/submissions';
 
-export {
-  useSettings,
-  useLicense,
-} from './queries/settings';
+export { useSettings } from './queries/settings';
 
 export { useDashboardStats } from './queries/dashboard';
 
@@ -51,9 +48,4 @@ export {
   useMarkSubmissionRead,
 } from './mutations/submissions';
 
-export {
-  useUpdateSettings,
-  useActivateLicense,
-  useDeactivateLicense,
-  useValidateLicense,
-} from './mutations/settings';
+export { useUpdateSettings } from './mutations/settings';

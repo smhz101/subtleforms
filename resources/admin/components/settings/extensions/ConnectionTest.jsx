@@ -6,7 +6,7 @@ import Icon from '../../../ui/Icon';
 import './extensions.scss';
 
 /**
- * Call one of the SubtleForms Pro integration test endpoints.
+ * Call an integration test endpoint.
  *
  * @param {string} path REST path under /subtleforms/v1.
  * @param {Object} data Request body.
@@ -29,9 +29,8 @@ export function callIntegration(path, data) {
  * @param {Function} props.onSuccess Receives the response body.
  * @param {string}   props.label     Button label.
  * @param {boolean}  props.disabled  Disable the button.
- * @param {boolean}  props.requiresPro The route belongs to SubtleForms Pro
- *                                     (webhook tests are part of the free
- *                                     plugin since 2.4.1).
+ * @param {boolean}  props.addonRoute The route belongs to an add-on (webhook
+ *                                    tests are part of this plugin).
  */
 export default function ConnectionTest({
   path,
@@ -39,16 +38,15 @@ export default function ConnectionTest({
   onSuccess,
   label = __('Test connection', 'subtleforms'),
   disabled = false,
-  requiresPro = true,
+  addonRoute = true,
 }) {
   const [state, setState] = useState({ status: 'idle', message: '' });
-  const hasPro = !!window.subtleformsAdmin?.hasProPlugin;
 
   const run = async () => {
     setState({ status: 'busy', message: '' });
     try {
       const raw = await callIntegration(path, getBody ? getBody() : {});
-      // Free routes answer in the { data } envelope; Pro test routes answer flat.
+      // This plugin's routes answer in the { data } envelope; add-on routes may answer flat.
       const res = raw && typeof raw === 'object' && !('ok' in raw) && raw.data && typeof raw.data === 'object' ? raw.data : raw;
       const ok = res?.ok !== false;
       setState({
@@ -62,8 +60,8 @@ export default function ConnectionTest({
       setState({
         status: 'error',
         message:
-          requiresPro && error?.code === 'rest_no_route'
-            ? __('Connection tests need SubtleForms Pro to be active.', 'subtleforms')
+          addonRoute && error?.code === 'rest_no_route'
+            ? __('This test is provided by an add-on that is not active.', 'subtleforms')
             : error?.error?.message || error?.message || __('The connection failed.', 'subtleforms'),
       });
     }
@@ -75,7 +73,7 @@ export default function ConnectionTest({
         variant='secondary'
         size='compact'
         onClick={run}
-        disabled={disabled || (requiresPro && !hasPro) || state.status === 'busy'}
+        disabled={disabled || state.status === 'busy'}
         aria-describedby={state.message ? `${path}-result` : undefined}>
         {state.status === 'busy' ? <Spinner /> : null}
         {label}

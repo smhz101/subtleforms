@@ -109,6 +109,10 @@ jobs:
       - name: Front-end bundle size budget
         run: npm run size
 
+      # The built files ship to every site: no licence or upgrade wording.
+      - name: Built files carry no licence or upgrade wording
+        run: npm run check:words
+
       - name: Start WordPress (wp-env)
         run: |
           started=0

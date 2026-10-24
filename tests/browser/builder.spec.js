@@ -119,9 +119,9 @@ test('placeholders and checkbox conversion on the canvas (bugs 7, 8, 9, 10)', as
   if (await hasFieldTypes(client, ['calculation'])) {
     await expect(page.getByText('Add a formula in the field settings')).toBeVisible();
   } else {
-    // Calculation is a SubtleForms Pro field since 2.3.9: without Pro the
-    // canvas keeps the field and says it needs Pro.
-    await expect(page.locator('.sf-field-chrome', { hasText: 'Total' })).toContainText('Needs SubtleForms Pro');
+    // Calculation is an add-on field since 2.3.9: without the add-on the
+    // canvas keeps the field and says so, without naming a paid plugin.
+    await expect(page.locator('.sf-field-chrome', { hasText: 'Total' })).toContainText('provided by an add-on that is not active');
   }
   await expect(page.getByText(/Add the disclaimer text in the field settings/)).toBeVisible();
   await expect(page.getByText('Add at least one row and one column in the field settings.')).toBeVisible();

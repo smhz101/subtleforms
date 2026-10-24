@@ -4,7 +4,7 @@ import AdminApp from './app/AdminApp';
 import '../shared/extend';
 import * as pricing from '../shared/pricing';
 
-// Shared with SubtleForms Pro's payment screens: formatMoney, computeQuote, isPricedForm.
+// Shared with add-on payment screens: formatMoney, computeQuote, isPricedForm.
 window.SubtleFormsExtend = Object.assign(window.SubtleFormsExtend || {}, { pricing });
 
 // Import aggregated admin styles

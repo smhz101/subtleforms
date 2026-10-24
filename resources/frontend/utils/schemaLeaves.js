@@ -38,7 +38,7 @@ const INPUT_FIELD_TYPES = new Set([
   'checkbox_grid',
   // 2.0 fields. Missing here meant their answers never reached the server:
   // Toggle and Opinion scale (2.2.1, bug 15) and Picture choice (bug 14).
-  // Add-on types (Pro Signature and Calculation) are leaves through
+  // Add-on types (Signature and Calculation) are leaves through
   // isRegisteredInputType().
   'toggle',
   'scale',

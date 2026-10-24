@@ -8,19 +8,15 @@
  *   { action, groups: [ { match: 'all' | 'any', rules: [ { field, operator, value, value2 } ] } ] }
  *
  * This editor writes the basic form: one group whose rules must all match,
- * with the basic operators, on a field. Condition groups, the "any" match,
- * the other operators and conditions on steps, emails, webhooks and
- * confirmations are SubtleForms Pro. Where Pro is active it registers its own
- * editor (registerLogicEditor in shared/extend.js) and this one steps aside.
- * Without Pro those options show as Pro notes with an upgrade link, and
- * saved rules this editor cannot show are left as they are.
+ * with the basic operators, on a field. An add-on may register its own
+ * editor (registerLogicEditor in shared/extend.js) for more, and this one
+ * steps aside. Saved rules this editor cannot show are left as they are.
  */
 import { Button, SelectControl, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import Icon from '../../ui/Icon';
 import { nodeLogics, normalizeLogic, isBasic, VALUELESS_OPERATORS } from '../../../shared/conditions';
 import { getLogicEditor } from '../../../shared/extend';
-import ProNotice, { ProTag, ProUpgradeLink } from '../../ui/ProNotice';
 import { logicOperatorsFor, logicValueChoices } from '../../../shared/logicFields';
 import { orderedCountries } from '../../../shared/countries';
 import './LogicEditor.scss';
@@ -101,71 +97,37 @@ function optionPairs(options) {
     .filter((o) => o.value !== '');
 }
 
-const PRO_FEATURE = 'logic.conditional.advanced';
-
-/** Whether saved logic needs Pro: it is more than the basic form on a field. */
-function needsPro(logic, scope) {
+/** Whether saved logic is more than the basic form on a field. */
+function beyondBasic(logic, scope) {
   const l = normalizeLogic(logic);
   return l !== null && !isBasic(l, scope);
 }
 
 /**
- * Condition options that are part of Pro, shown as a note. Nothing here
- * changes the rules.
- */
-function AdvancedOptionsNote() {
-  return (
-    <div className='sf-logic-editor__pro'>
-      <div className='sf-logic-editor__pro-head'>
-        <span>{__('More ways to match', 'subtleforms')}</span>
-        <ProTag />
-      </div>
-      <p>
-        {__('Match any rule, add “or” groups, and use starts with, ends with, is one of, is between, is before and is after.', 'subtleforms')}
-      </p>
-      <ProUpgradeLink feature={PRO_FEATURE} label={__('Advanced conditional logic', 'subtleforms')} />
-    </div>
-  );
-}
-
-const SCOPE_NOTES = {
-  step: __('Skipping a step based on answers is part of SubtleForms Pro.', 'subtleforms'),
-  action: __('Running an email, webhook or other action only for some answers is part of SubtleForms Pro.', 'subtleforms'),
-  confirmation: __('Showing a confirmation based on answers is part of SubtleForms Pro.', 'subtleforms'),
-};
-
-/**
- * The editor in the plugin: rules on a field, basic form. Other places
- * (steps, actions, confirmations) show a Pro note.
+ * The editor in the plugin: rules on a field, basic form. Elsewhere (steps,
+ * actions, confirmations) it only says that saved rules are kept.
  */
 function BasicLogicEditor(props) {
   const { logic, scope = 'field', onChange, disabled = false } = props;
   const hasSaved = countRules(logic) > 0;
 
   if (scope !== 'field') {
+    if (!hasSaved) return null;
     return (
       <div className='sf-logic-editor'>
-        <ProNotice
-          label={__('Conditions', 'subtleforms')}
-          help={SCOPE_NOTES[scope] || SCOPE_NOTES.step}
-          feature={PRO_FEATURE}
-        />
-        {hasSaved && (
-          <p className='sf-logic-editor__empty'>
-            {__('A condition is saved here. It is ignored until SubtleForms Pro is active, then it applies again.', 'subtleforms')}
-          </p>
-        )}
+        <p className='sf-logic-editor__empty'>
+          {__('A condition is saved here. It is handled by an add-on that is not active, so it is ignored.', 'subtleforms')}
+        </p>
       </div>
     );
   }
 
-  if (hasSaved && needsPro(logic, scope)) {
+  if (hasSaved && beyondBasic(logic, scope)) {
     return (
       <div className='sf-logic-editor'>
         <p className='sf-logic-editor__empty'>
-          {__('These rules use advanced options. They are ignored and the field is always shown until SubtleForms Pro is active, then they apply again.', 'subtleforms')}
+          {__('These rules use options that are handled by an add-on that is not active. They are ignored and the field is always shown.', 'subtleforms')}
         </p>
-        <AdvancedOptionsNote />
         <div className='sf-logic-editor__footer'>
           <Button
             variant='tertiary'
@@ -183,7 +145,7 @@ function BasicLogicEditor(props) {
   return <FieldLogicEditor {...props} />;
 }
 
-/** Pro's editor when registered, else the basic one. */
+/** The editor an add-on registered, else the basic one. */
 export default function LogicEditor(props) {
   const Registered = getLogicEditor();
   if (Registered) {
@@ -370,8 +332,6 @@ function FieldLogicEditor({
           </Button>
         ) : null}
       </div>
-
-      <AdvancedOptionsNote />
     </div>
   );
 }

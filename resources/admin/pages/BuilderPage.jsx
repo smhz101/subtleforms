@@ -45,7 +45,7 @@ import {
 import BuilderViewSwitcher from '../components/builder/layout/BuilderViewSwitcher';
 import BuilderCanvasArea from '../components/builder/layout/BuilderCanvasArea';
 import BuilderModalsController from '../components/builder/layout/BuilderModalsController';
-import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
+import { withOwnMetadata } from '../utils/schemaCopy';
 import { getFormTypeBadgeConfig } from '../utils/formMeta';
 import { countSchemaFields, fieldDeletedMessage } from '../utils/fieldDeleteNotice';
 import { Skeleton } from '../ui/loading/Skeleton';
@@ -929,8 +929,8 @@ export default function FormBuilderPage(props) {
           startingPoint,
         });
 
-        // Enrich schema with Pro markers before creating form
-        const enrichedSchema = enrichSchemaWithProMarkers(schema);
+        // Own copy of the schema before creating the form
+        const enrichedSchema = withOwnMetadata(schema);
 
         const formRes = await apiPost('/forms', {
           title: resolvedTitle,

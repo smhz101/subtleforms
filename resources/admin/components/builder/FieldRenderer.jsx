@@ -506,14 +506,14 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
 
       {pictureFallback && (
         <p className='sf-field-renderer__placeholder-note'>
-          {__('Needs SubtleForms Pro for pictures. Visitors see these choices without images until Pro is active.', 'subtleforms')}
+          {__('This field type is provided by an add-on that is not active. Visitors see these choices without images.', 'subtleforms')}
         </p>
       )}
 
-      {/* A field from an add-on that is not active (SubtleForms Pro). */}
+      {/* A field from an add-on that is not active. */}
       {addonMissing && (
         <p className='sf-field-renderer__placeholder-note'>
-          {__('Needs SubtleForms Pro. Visitors do not see this field until Pro is active.', 'subtleforms')}
+          {__('This field type is provided by an add-on that is not active. Visitors do not see this field.', 'subtleforms')}
         </p>
       )}
 

@@ -298,7 +298,7 @@ export default function FormRenderer({
     }
   }, [defaultValues]);
 
-  // Computed fields that add-ons register (Pro Calculation) are worked out
+  // Computed fields that add-ons register (Calculation) are worked out
   // whenever an answer changes. The server recomputes them on submit, so
   // this is display only.
   useEffect(() => {

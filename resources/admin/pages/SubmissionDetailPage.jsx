@@ -30,7 +30,7 @@ const ACTION_META = {
   pdf:     { iconName: 'FileText', label: 'Entry PDF' },
 };
 
-/** Entry PDF (SubtleForms Pro). Cookie-authenticated REST link with a nonce. */
+/** Entry PDF (from an add-on). Cookie-authenticated REST link with a nonce. */
 const pdfUrl = ( id ) => {
   const base = ( window.subtleformsAdmin?.restUrl || '/wp-json/subtleforms/v1' ).replace( /\/$/, '' );
   const nonce = window.wpApiSettings?.nonce || window.subtleformsAdmin?.restNonce || '';
@@ -679,9 +679,8 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
   const relDate = formatRelDate( submission.created_at );
 
   const isUnread = parseInt( submission.is_read, 10 ) === 0;
-  const canPdf =
-    !! window.subtleformsAdmin?.hasProPlugin &&
-    !! window.subtleformsAdmin?.capabilities?.[ 'extensions.pdf' ];
+  // An add-on that serves entry PDFs adds this key to the capability map.
+  const canPdf = !! window.subtleformsAdmin?.capabilities?.[ 'extensions.pdf' ];
   const isFlagged = submission.status === 'flagged';
   const isStarred = parseInt( submission.starred, 10 ) === 1;
   const notes = Array.isArray( meta.notes ) ? meta.notes : [];
@@ -1013,7 +1012,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
             </TabPanel>
           </section>
 
-          {/* SubtleForms Pro: integration log with request and response, retry (2.3.0). */}
+          {/* An add-on's integration log for this entry, when it provides one (2.3.0). */}
           { window.SubtleFormsPro?.EntryIntegrations && ( () => {
             const EntryIntegrations = window.SubtleFormsPro.EntryIntegrations;
             return <EntryIntegrations submissionId={ submission.id } />;

@@ -17,25 +17,6 @@
 	}
 }
 
-// Small "Pro" tag inside locked buttons.
-.sf-pro-tag {
-	display: inline-flex;
-	align-items: center;
-	height: 16px;
-	margin-inline-start: 6px;
-	padding: 0 5px;
-	border-radius: var(--sf-radius-full);
-	background: #1e1e1e;
-	color: #fff;
-	font-size: 10px;
-	font-weight: var(--sf-weight-semibold);
-	letter-spacing: 0.02em;
-}
-
-.sf-export-btn--locked.components-button svg {
-	fill: none;
-}
-
 .sf-filter-dot {
 	width: 6px;
 	height: 6px;

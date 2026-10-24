@@ -186,7 +186,7 @@ export default function FieldRenderer({
     );
   }
 
-  // An add-on field with nothing to show (for example a Pro Calculation
+  // An add-on field with nothing to show (for example a Calculation
   // without a formula) is not drawn (bug 9).
   const addonType = getFieldType(field.type);
   if (addonType && typeof addonType.isAnswerable === 'function' && !addonType.isAnswerable(config)) {
@@ -1394,7 +1394,7 @@ function renderInput(
       );
 
     default: {
-      // Field types registered by add-ons (SubtleForms Pro).
+      // Field types registered by add-ons.
       const addon = getFieldType(field.type);
       if (addon) {
         return (
@@ -1413,8 +1413,8 @@ function renderInput(
           />
         );
       }
-      // A type no active plugin provides (for example a SubtleForms Pro
-      // field after Pro is deactivated) is left out of the live form.
+      // A type no active plugin provides (for example an add-on field
+      // after the add-on is deactivated) is left out of the live form.
       return null;
     }
   }

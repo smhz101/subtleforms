@@ -29,8 +29,7 @@
 			transition: color var(--sf-transition-fast);
 		}
 
-		&__new-badge,
-		&__pro-badge {
+		&__new-badge {
 			display: inline-flex;
 			align-items: center;
 			height: 18px;
@@ -45,11 +44,6 @@
 		&__new-badge {
 			background: var(--sf-primary-50);
 			color: var(--sf-primary-700);
-		}
-
-		&__pro-badge {
-			background: #1e1e1e;
-			color: #fff;
 		}
 	}
 

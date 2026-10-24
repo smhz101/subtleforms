@@ -1,4 +1,4 @@
-import { formUsesProFeatures, getProFeaturesUsed, getMissingAddonFields, needsMissingPayment } from './proFeatureDetector';
+import { getMissingAddonFields, needsMissingPayment } from './addonFields';
 
 const schema = {
   fields: [
@@ -8,21 +8,15 @@ const schema = {
   ],
 };
 
-describe('add-on field detection (2.3.9, PRO-09)', () => {
-  test('finds Pro field types at any depth', () => {
-    expect(formUsesProFeatures(schema)).toBe(true);
-    expect(getProFeaturesUsed(schema)).toEqual(['Signature', 'Calculation']);
-    expect(formUsesProFeatures({ fields: [{ type: 'picture_choice' }, { type: 'payment_product' }] })).toBe(false);
-  });
-
+describe('add-on field detection (2.3.9)', () => {
   test('names only the add-on fields this site cannot show', () => {
     expect(getMissingAddonFields(schema, ['signature', 'calculation', 'payment_card'])).toEqual(['Signature', 'Calculation']);
     expect(getMissingAddonFields(schema, [])).toEqual([]);
   });
 });
 
-describe('features a form uses that need Pro to work in full', () => {
-  const { getLimitedFeatures } = require('./proFeatureDetector');
+describe('settings a form uses that an inactive add-on provides', () => {
+  const { getLimitedFeatures } = require('./addonFields');
   const rule = (extra = {}) => ({ field: 'a', operator: 'equals', value: '1', ...extra });
   const logic = (groups) => ({ action: 'show', groups });
 

@@ -14,6 +14,7 @@ import './DashboardPage.scss';
 import TrendChart from '../components/TrendChart';
 import SpamBlockedCard from '../components/SpamBlockedCard';
 import SpamProtectionNotice from '../components/SpamProtectionNotice';
+import MoreFeaturesCard from '../components/MoreFeaturesCard';
 
 const formatNumber = (value) => Number(value || 0).toLocaleString();
 
@@ -180,9 +181,10 @@ export default function Dashboard() {
                 />
                 <QuickAction
                   icon={Icon.Puzzle}
-                  title={__('Extensions', 'subtleforms')}
-                  text={__('Webhooks, CRM, payments and more', 'subtleforms')}
-                  to='/extensions'
+                  title={__('Integrations', 'subtleforms')}
+                  text={__('Webhooks and the integrations your add-ons bring', 'subtleforms')}
+                  to='/settings'
+                  hash='tab=extensions'
                 />
               </ul>
             </div>
@@ -193,7 +195,7 @@ export default function Dashboard() {
         <SpamBlockedCard />
 
         {/* Activity */}
-        {/* Panels add-ons bring (views and conversion with SubtleForms Pro). */}
+        {/* Panels add-ons bring. */}
         <ExtensionSlot name='dashboard.panels' forms={recentForms} />
 
         <div className='sf-dash__row'>
@@ -388,6 +390,9 @@ export default function Dashboard() {
             </dl>
           </div>
         </section>
+
+        {/* What the separate SubtleForms Pro plugin adds; dismissible per user. */}
+        <MoreFeaturesCard />
       </div>
     </AdminShell>
   );

@@ -40,7 +40,6 @@ export const queryKeys = {
     all: ['settings'],
     general: () => [...queryKeys.settings.all, 'general'],
     integrations: () => [...queryKeys.settings.all, 'integrations'],
-    license: () => [...queryKeys.settings.all, 'license'],
   },
 
   // Dashboard

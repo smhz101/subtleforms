@@ -1,7 +1,7 @@
 /**
  * Extension registry for add-ons (2.1).
  *
- * Add-ons such as SubtleForms Pro ship their own scripts, so field types,
+ * Add-ons ship their own scripts, so field types,
  * priced types, inspector controls and canvas previews are registered on a
  * store that lives on `window`. The admin and the frontend bundles each
  * import this module, and both read the same store.
@@ -83,7 +83,7 @@ export function chargesMoney(type, config) {
 }
 
 /**
- * Register a function that works out computed values (such as Pro
+ * Register a function that works out computed values (such as
  * Calculation fields) whenever an answer changes. The server recomputes them
  * on submit, so these values are for display.
  *
@@ -153,9 +153,10 @@ export function getCanvasPreview(type) {
 /**
  * Register a Settings tab (Settings screen, left list).
  *
- * `mcp` is a built-in slot in Free: it shows an upgrade note until an add-on
- * registers a component under that name. Any other name adds a tab to the
- * Pro group, which then needs `title` and `description`.
+ * `mcp` has a fixed place right after Tools and a default title, so it needs
+ * only a component. Any other name adds a tab to the Add-ons group, which
+ * then needs `title` and `description`. Nothing is listed for a name until an
+ * add-on registers it.
  *
  * The body manages its own data and saving, so the Settings Save button and
  * save bar are not shown for add-on tabs.
@@ -164,7 +165,7 @@ export function getCanvasPreview(type) {
  *                      value of `#tab=` in the Settings URL.
  * @param {Object} def  { component, title, description, order }.
  *                      `component` takes no props. `order` (number) places a
- *                      new tab among the Pro group tabs; the default is the end.
+ *                      new tab among the Add-ons group tabs; the default is the end.
  */
 export function registerSettingsTab(name, def) {
   if (typeof name === 'string' && /^[a-z0-9-]+$/.test(name) && def && def.component) {
@@ -184,7 +185,7 @@ export function settingsTabs() {
 
 /**
  * Replace how a built-in field type is drawn on the public form when a
- * condition holds. SubtleForms Pro uses this to draw an upload field that
+ * condition holds. An add-on can use this to draw an upload field that
  * takes several files. The built-in renderer stays the fallback, so a form
  * is always usable without the add-on.
  *
@@ -252,8 +253,8 @@ export function getLogicEditor() {
 }
 
 /**
- * Register an item in a named admin slot. Free defines the slots and shows a
- * Pro placeholder where nothing is registered:
+ * Register an item in a named admin slot. This plugin defines the slots and
+ * shows nothing in a slot where nothing is registered:
  *
  *   reports.panels       Reports screen, below the totals. { component, order }
  *   dashboard.panels     Dashboard, below the totals.
