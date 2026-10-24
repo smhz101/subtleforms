@@ -475,20 +475,6 @@ final class FieldSettings {
 						)
 					);
 				}
-				// Several files per field is a SubtleForms Pro feature. Without
-				// it the builder shows a note with an upgrade link in its place;
-				// Pro swaps this control for the real ones through the
-				// `subtleforms/fields/inspector_controls` filter.
-				$add(
-					array(
-						'type'    => 'pro_notice',
-						'name'    => 'multiple',
-						'label'   => __( 'Allow several files', 'subtleforms' ),
-						'help'    => __( 'Visitors can drop or pick several files, with upload progress. Part of SubtleForms Pro.', 'subtleforms' ),
-						'feature' => 'uploads.multiple',
-						'section' => 'appearance',
-					)
-				);
 			}
 
 			// Every input that can be required or checked has both messages,
@@ -692,8 +678,7 @@ final class FieldSettings {
 		/**
 		 * The settings a field type shows in the builder, after the plugin
 		 * added its own. Add-ons add, change or replace controls here (for
-		 * example SubtleForms Pro swaps the several files note on upload fields
-		 * for its settings).
+		 * example a setting for several files on upload fields).
 		 *
 		 * @param array  $controls Controls, each with type, name, label and section.
 		 * @param string $type     Field type.

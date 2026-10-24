@@ -2,7 +2,7 @@
 /**
  * Report totals: forms, entries and a seven day chart of entries.
  *
- * Views, conversion and the form funnel are provided by SubtleForms Pro.
+ * Add-ons can add their own panels to the Reports screen.
  *
  * @package SubtleForms\Api
  */

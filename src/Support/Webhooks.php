@@ -119,8 +119,7 @@ final class Webhooks {
 
 	/**
 	 * The default JSON body: the form and entry, every answer keyed by
-	 * field, and every answer with its label. SubtleForms Pro sends the same
-	 * shape.
+	 * field, and every answer with its label.
 	 *
 	 * @param array $schema  Form schema.
 	 * @param array $answers Answers from answers().

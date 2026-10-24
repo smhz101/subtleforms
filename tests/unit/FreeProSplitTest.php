@@ -146,12 +146,10 @@ final class FreeProSplitTest extends TestCase {
 	/** WP2-09, FF2-19: upsell copy is factual, and no sample data poses as a report. */
 	public function test_upsell_copy_is_factual(): void {
 		$files = array(
-			'resources/admin/ui/UpgradeModal.jsx',
-			'resources/admin/pages/ExtensionsPage.jsx',
 			'resources/admin/pages/ReportsPage.jsx',
 			'resources/admin/pages/ToolsPage.jsx',
-			'resources/admin/ui/ProNotice.jsx',
 			'resources/admin/components/settings/ExtensionsSettings.jsx',
+			'resources/admin/components/MoreFeaturesCard.jsx',
 		);
 		foreach ( $files as $file ) {
 			$source = (string) file_get_contents( self::root() . '/' . $file );

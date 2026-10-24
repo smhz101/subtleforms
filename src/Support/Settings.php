@@ -254,8 +254,8 @@ class Settings {
 		$validatedSettings = $this->validate( $mergedSettings );
 
 		// Keep what an add-on stored here before: a value this plugin has no
-		// rule for (for example the form analytics options of SubtleForms Pro,
-		// which older versions kept here) must not be lost by saving another
+		// rule for (for example form analytics options that
+		// older versions kept here) must not be lost by saving another
 		// setting. New keys without a rule are still refused.
 		foreach ( $currentSettings as $key => $value ) {
 			if ( ! isset( self::VALIDATION_RULES[ $key ] ) && ! array_key_exists( $key, self::DEFAULTS ) && ! array_key_exists( $key, $validatedSettings ) ) {

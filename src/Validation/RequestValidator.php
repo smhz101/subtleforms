@@ -298,7 +298,7 @@ class RequestValidator {
 		}
 
 		// Open schemas keep keys they do not declare (2.0). Field definitions and
-		// form metadata are extended by field types, extensions and Pro, so a
+		// form metadata are extended by field types, extensions and add-ons, so a
 		// closed list silently dropped settings such as conditions, min/max,
 		// prefixes and formulas on every save. Declared keys are still
 		// validated above; undeclared ones are sanitised and kept.

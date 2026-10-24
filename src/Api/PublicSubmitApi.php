@@ -87,6 +87,13 @@ final class PublicSubmitApi {
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( $this, 'submit_form' ),
+				// Public on purpose: logged-out visitors send the form. Protected
+				// by: a rate limit per client address (10 a minute), the form must
+				// exist and be published (404 otherwise; drafts only for admins
+				// in preview), the honeypot, minimum time and single-use spam
+				// token, the CAPTCHA when one is on, the form's login, schedule
+				// and entry limit rules, and server-side validation of every
+				// answer. The answer holds only the confirmation, never entries.
 				'permission_callback' => '__return_true',
 				'args'                => array(
 					'form_id' => array(
@@ -424,7 +431,7 @@ final class PublicSubmitApi {
 			$activeSchema['schema'] ?? $activeSchema
 		);
 
-		// Computed fields (Pro Calculation) are worked out on the server so a
+		// Computed fields (from an add-on) are worked out on the server so a
 		// visitor cannot post a tampered total.
 		$payload = self::applyComputedValues( $payload, $activeSchema['schema'] ?? $activeSchema );
 
@@ -823,8 +830,8 @@ final class PublicSubmitApi {
 	/**
 	 * Price the order for a form that takes payment.
 	 *
-	 * This plugin prices nothing itself. A payment add-on (SubtleForms Pro)
-	 * answers the filter; without one every form is free and no order is made.
+	 * This plugin prices nothing itself. A payment add-on answers the
+	 * filter the filter; without one every form is free and no order is made.
 	 *
 	 * @param int             $formId      Form ID.
 	 * @param mixed           $schema      Active schema.
@@ -893,7 +900,7 @@ final class PublicSubmitApi {
 	}
 
 	/**
-	 * A value that a computed field (such as a Pro Calculation) could not work
+	 * A value that a computed field (from an add-on) could not work
 	 * out. It is never stored, shown or charged.
 	 */
 	const COMPUTE_ERROR = '__formula_error__';
@@ -902,7 +909,7 @@ final class PublicSubmitApi {
 	 * Let add-ons work out computed fields from the submitted values.
 	 *
 	 * The server always recomputes these values, so a visitor cannot post a
-	 * tampered result. SubtleForms Pro fills its Calculation fields here.
+	 * tampered result. An add-on fills its computed fields here.
 	 *
 	 * @param array $payload Sanitized payload.
 	 * @param mixed $schema  Active schema.

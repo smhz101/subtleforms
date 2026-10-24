@@ -14,20 +14,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Site cleanup used by uninstall.php. The "Keep my data when the plugin is
  * deleted" setting (keep_data_on_uninstall, off by default) skips the site it
- * is set on. Options, tables, user meta and cron events that belong to
- * SubtleForms Pro are never removed here: Pro names most of them with the
- * subtleforms_pro_ prefix, and the few that do not (coupons, stats, funnel,
- * the license options) are listed in the PRO_* constants below.
+ * is set on. Options, tables, user meta and cron events that belong to the
+ * SubtleForms Pro add-on are never removed here: it names most of them with
+ * the subtleforms_pro_ prefix, and the few tables that do not (coupons,
+ * stats, funnel) are listed in the PRO_* constants below.
  */
 final class Uninstaller {
 
 	/** Prefix of everything SubtleForms Pro owns (without the leading subtleforms). */
 	private const PRO_SUFFIX = '_pro_';
-
-	/**
-	 * Pro options that do not carry the Pro prefix.
-	 */
-	private const PRO_OPTIONS = array( 'subtleforms_license_key', 'subtleforms_license_data' );
 
 	/**
 	 * Pro tables and their "installed version" options that do not carry the
@@ -49,7 +44,7 @@ final class Uninstaller {
 	 * @return string[]
 	 */
 	private static function pro_options(): array {
-		$options = self::PRO_OPTIONS;
+		$options = array();
 		foreach ( self::PRO_STEMS as $stem ) {
 			$options[] = 'subtleforms_' . $stem . '_db';
 		}

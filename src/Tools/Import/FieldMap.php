@@ -107,7 +107,7 @@ final class FieldMap {
 		'post_category'     => '!post',
 		'post_image'        => '!post',
 		'post_custom_field' => '!post',
-		'signature'         => '!pro',
+		'signature'         => '!signature',
 		'repeater'          => '!repeater',
 	);
 
@@ -161,7 +161,7 @@ final class FieldMap {
 		'post_excerpt'           => '!post',
 		'featured_image'         => '!post',
 		'taxonomy'               => '!post',
-		'signature'              => '!pro',
+		'signature'              => '!signature',
 	);
 
 	/**
@@ -219,14 +219,14 @@ final class FieldMap {
 		$target = self::table( $source )[ strtolower( $type ) ] ?? '';
 		$key    = '' !== $target && '!' === $target[0] ? substr( $target, 1 ) : 'unknown';
 		$why    = array(
-			'payment'  => __( 'payments are not imported', 'subtleforms' ),
-			'captcha'  => __( 'SubtleForms has its own spam protection and CAPTCHA settings', 'subtleforms' ),
-			'quiz'     => __( 'quizzes, polls, surveys and ratings are not imported', 'subtleforms' ),
-			'post'     => __( 'post creation fields are not imported', 'subtleforms' ),
-			'list'     => __( 'list fields have no SubtleForms equivalent', 'subtleforms' ),
-			'repeater' => __( 'repeating fields are not imported', 'subtleforms' ),
-			'pro'      => __( 'this field needs SubtleForms Pro', 'subtleforms' ),
-			'unknown'  => __( 'this field type has no SubtleForms equivalent', 'subtleforms' ),
+			'payment'   => __( 'payments are not imported', 'subtleforms' ),
+			'captcha'   => __( 'SubtleForms has its own spam protection and CAPTCHA settings', 'subtleforms' ),
+			'quiz'      => __( 'quizzes, polls, surveys and ratings are not imported', 'subtleforms' ),
+			'post'      => __( 'post creation fields are not imported', 'subtleforms' ),
+			'list'      => __( 'list fields have no SubtleForms equivalent', 'subtleforms' ),
+			'repeater'  => __( 'repeating fields are not imported', 'subtleforms' ),
+			'signature' => __( 'signature fields are not imported', 'subtleforms' ),
+			'unknown'   => __( 'this field type has no SubtleForms equivalent', 'subtleforms' ),
 		);
 		return $why[ $key ] ?? $why['unknown'];
 	}

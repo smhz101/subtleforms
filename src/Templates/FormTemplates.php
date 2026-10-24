@@ -38,7 +38,8 @@ class FormTemplates {
 		/**
 		 * Filter available form templates.
 		 *
-		 * Allows extensions (like Pro) to add additional templates.
+		 * Allows add-ons to add templates. An add-on template may set
+		 * `addon` to true to keep its own fields as they are.
 		 *
 		 * @param array $templates Associative array of template definitions.
 		 * @since 1.5.0
@@ -615,9 +616,10 @@ class FormTemplates {
 	private static function prepare_template( string $id, array $template ): array {
 		$schema = ( isset( $template['schema'] ) && is_array( $template['schema'] ) ) ? $template['schema'] : array();
 
-		// Templates from add-ons (SubtleForms Pro) keep their fields, such as
-		// the Card Payment field; only their actions are checked here.
-		if ( ! empty( $template['is_pro'] ) ) {
+		// Templates an add-on marks as its own (`addon`, or `is_pro` from
+		// older add-ons) keep their fields, such as the Card Payment field;
+		// only their actions are checked here.
+		if ( ! empty( $template['addon'] ) || ! empty( $template['is_pro'] ) ) {
 			if ( isset( $schema['actions'] ) || isset( $schema['fields'] ) ) {
 				$schema['actions']  = self::owner_actions( is_array( $schema['actions'] ?? null ) ? $schema['actions'] : array() );
 				$template['schema'] = $schema;

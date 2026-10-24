@@ -2,8 +2,8 @@
 /**
  * Field types that add-ons provide.
  *
- * Signature, Calculation and Card Payment fields are registered by SubtleForms
- * Pro. A form keeps such fields when the add-on is not active, so nothing is
+ * Signature, Calculation and Card Payment fields are registered by an
+ * add-on. A form keeps such fields when the add-on is not active, so nothing is
  * lost, but the live form leaves them out until the add-on is back.
  *
  * @package SubtleForms\Fields
@@ -156,7 +156,7 @@ final class AddonFieldTypes {
 
 	/**
 	 * Whether a schema has a payment field and nothing registers it. Without
-	 * SubtleForms Pro such a form cannot take its payment, so it is not shown
+	 * the add-on such a form cannot take its payment, so it is not shown
 	 * and does not accept entries.
 	 *
 	 * @param mixed $schema Form schema (the `schema` part of a version row).

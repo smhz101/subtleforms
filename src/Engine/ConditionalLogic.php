@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * This plugin evaluates the basic form of logic on fields: one group whose
  * rules must all match, with the basic operators. Everything beyond that is
- * left to an add-on (SubtleForms Pro): several groups (OR), the "any" match,
+ * left to an add-on: several groups (OR), the "any" match,
  * the other operators, and conditions on steps, actions and confirmations.
  * Logic this plugin does not evaluate and no add-on claims through
  * `subtleforms/logic/supports` is ignored, as if the field had no rule: it is

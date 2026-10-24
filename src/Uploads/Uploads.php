@@ -92,8 +92,13 @@ final class Uploads {
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( self::class, 'handleUpload' ),
-				// Public: visitors upload before they submit. Each request is
-				// checked against a published form's upload field and rate limited.
+				// Public on purpose: logged-out visitors attach a file before they
+				// submit the form. Protected by: a rate limit per client address
+				// (30 per 10 minutes), the form must exist and be published, the
+				// field must be an upload field of that form, the form must be
+				// open (login, schedule and entry limit rules), and the file must
+				// pass the field's type and size rules. The file is stored as
+				// pending in a private folder and the answer holds only a token.
 				'permission_callback' => '__return_true',
 				'args'                => array(
 					'form_id' => array(
@@ -131,6 +136,13 @@ final class Uploads {
 		$field    = self::findUploadField( $formId, $fieldKey );
 		if ( $field === null ) {
 			return self::error( 'subtleforms_upload_field', __( 'This form does not accept uploads here.', 'subtleforms' ), 404 );
+		}
+
+		// A form that is closed to entries (login, schedule, entry limit or a
+		// payment nobody can take) takes no files either.
+		$blocked = self::blockedReason( $formId );
+		if ( null !== $blocked ) {
+			return self::error( 'subtleforms_upload_closed', $blocked, 403 );
 		}
 
 		$files = $request->get_file_params();
@@ -767,6 +779,22 @@ final class Uploads {
 		$schema = is_array( $active ) ? ( $active['schema'] ?? $active ) : array();
 		$fields = self::uploadFields( is_array( $schema ) ? ( $schema['fields'] ?? array() ) : array() );
 		return $fields[ $key ] ?? null;
+	}
+
+	/**
+	 * Why a published form takes no entries right now, or null when it does.
+	 *
+	 * @param int $formId Form ID.
+	 * @return string|null Message for the visitor.
+	 */
+	private static function blockedReason( int $formId ): ?string {
+		try {
+			$active = ( new FormsRepository() )->loadSchemaVersion( $formId );
+		} catch ( \RuntimeException $e ) {
+			return null;
+		}
+		$schema = is_array( $active ) ? ( $active['schema'] ?? $active ) : null;
+		return \SubtleForms\Engine\FormRestrictions::blockedReason( $formId, $schema );
 	}
 
 	/**

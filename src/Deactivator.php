@@ -45,7 +45,7 @@ final class Deactivator {
 			wp_unschedule_event( $timestamp, 'subtleforms_daily_cleanup' );
 		}
 
-		// The analytics clean-up event moved to SubtleForms Pro in 2.7.0. A site
+		// The analytics clean-up event left this plugin in 2.7.0. A site
 		// that scheduled it before keeps no stray event once this plugin is
 		// deactivated.
 		wp_clear_scheduled_hook( 'subtleforms_stats_prune' );

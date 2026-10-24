@@ -16,9 +16,4 @@ interface ExtensionInterface {
 	public function slug(): string;
 
 	public function register(): void;
-
-	/**
-	 * @return string[] Required capabilities to enable this extension.
-	 */
-	public function requiredCapabilities(): array;
 }

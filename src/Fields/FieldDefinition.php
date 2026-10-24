@@ -86,7 +86,10 @@ final class FieldDefinition {
 	public $inspectorControls;
 
 	/**
-	 * @var array Required capabilities to use this field
+	 * Capability keys an add-on attaches to its own field type. Kept for the
+	 * add-on to read; this plugin does not read them.
+	 *
+	 * @var array
 	 */
 	public $requiredCapabilities;
 
@@ -119,7 +122,7 @@ final class FieldDefinition {
 	 * @param array  $baseAttributes Common attributes for all fields
 	 * @param array  $fieldSpecificAttributes Field-type specific config
 	 * @param array  $inspectorControls Inspector UI controls configuration
-	 * @param array  $requiredCapabilities Required capabilities to use this field
+	 * @param array  $requiredCapabilities Capability keys for the add-on's own use (not read here)
 	 * @param array  $meta Field meta (category: regular|composite|layout|system)
 	 * @param array  $layoutControls Inspector controls for layout/container fields
 	 * @param bool   $paletteHidden Whether to hide this field from the builder palette
@@ -185,7 +188,6 @@ final class FieldDefinition {
 			'baseAttributes'          => $this->baseAttributes,
 			'fieldSpecificAttributes' => $this->fieldSpecificAttributes,
 			'inspectorControls'       => $this->inspectorControls,
-			'requiredCapabilities'    => $this->requiredCapabilities,
 			'meta'                    => $this->meta,
 			'layoutControls'          => $this->layoutControls,
 			'paletteHidden'           => $this->paletteHidden,
@@ -203,14 +205,5 @@ final class FieldDefinition {
 			$this->baseAttributes,
 			$this->fieldSpecificAttributes
 		);
-	}
-
-	/**
-	 * Check if this field requires any premium capabilities.
-	 *
-	 * @return bool
-	 */
-	public function isPremium(): bool {
-		return ! empty( $this->requiredCapabilities );
 	}
 }

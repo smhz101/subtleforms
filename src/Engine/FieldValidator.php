@@ -374,7 +374,7 @@ final class FieldValidator {
 	 * Whether a field type collects an answer that can be required.
 	 *
 	 * Layout and system types never do. Neither does a type no plugin has
-	 * registered (for example a Pro field on a site without SubtleForms Pro):
+	 * registered (for example an add-on field while the add-on is inactive):
 	 * the live form does not show it, so it cannot be required either.
 	 *
 	 * @param string $type Field type.
@@ -589,7 +589,7 @@ final class FieldValidator {
 				// Individual sub-parts are strings and will be sanitized by SaveAction
 				return null;
 			case 'signature':
-				// The Signature field (SubtleForms Pro) answers with a drawn
+				// The Signature field (from an add-on) answers with a drawn
 				// PNG or JPEG. Anything else is not a signature (FA-01).
 				if ( ! $this->isEmpty( $value ) && ! \SubtleForms\Support\EntryValues::isSignatureImage( $value ) ) {
 					return __( 'The signature could not be read. Please sign again.', 'subtleforms' );

@@ -73,7 +73,7 @@ final class ExtensionPoints {
 	 */
 	public static function provided(): array {
 		/**
-		 * Which extension points an active add-on provides. SubtleForms Pro
+		 * Which extension points an active add-on provides. An add-on
 		 * adds the names of the features it runs, so the builder can tell
 		 * "this form uses a feature that is not active" from "it is".
 		 *

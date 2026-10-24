@@ -14,7 +14,7 @@ use SubtleForms\Engine\PipelineEvent;
 use Throwable;
 
 /**
- * Executes steps in order with capability enforcement.
+ * Executes steps in order.
  *
  * This is the authoritative layer: UI/REST/CLI all feed into this.
  */
@@ -82,19 +82,6 @@ final class Pipeline {
 
 				// Log start
 				$this->logEvent( $ctx, $step, 'started', null, $ts );
-
-				foreach ( $step->requires() as $cap ) {
-					if ( $this->gate->allows( $cap ) ) {
-						continue;
-					}
-
-					if ( $step->skippable() ) {
-						$this->logEvent( $ctx, $step, 'skipped', 'capability_denied', $ts );
-						continue 2; // skip this step entirely
-					}
-
-					$this->gate->require( $cap, sprintf( 'Step "%s" requires capability "%s".', $step->id(), $cap ) );
-				}
 
 				// Expose current step id/settings in context for action implementations
 				$ctx->setMeta( 'current_step_id', $step->id() );

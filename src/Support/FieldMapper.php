@@ -512,7 +512,7 @@ final class FieldMapper {
 			$seen[ $key ] = true;
 			if ( Repeater::TYPE === $field['type'] ) {
 				// One numbered line per group; `groups` carries the cells for
-				// renderers that draw a table (the Pro PDF, 2.3.1).
+				// renderers that draw a table (2.3.1).
 				$text = Repeater::toText( $payload[ $key ], $field['field'], $context );
 				if ( $skipEmpty && '' === $text ) {
 					continue;

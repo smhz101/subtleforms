@@ -3,14 +3,15 @@
 /**
  * SubtleForms Feature Gate
  *
- * Single entry point for both capability checks (freemium gate)
- * and license checks (Pro gate). The optional LicenseManager can
- * be injected when the licensing module is available, through the
- * constructor or setLicenseManager().
+ * Reads the capability map (Support\Capabilities). Everything this plugin
+ * ships is on by default and this plugin never switches its own code off
+ * through the gate. Add-ons may add their own capability keys through the
+ * `subtleforms/capabilities` filter and read them here for their own code.
  *
  * @package SubtleForms\Support
  * @since   0.1.0
- * @since   1.9.0 Merged Licensing\FeatureGate into this class.
+ * @since   2.7.2 Capability map only. Add-ons decide for themselves which of
+ *                their features are available.
  */
 
 namespace SubtleForms\Support;
@@ -22,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 use RuntimeException;
 
 /**
- * Unified feature gate for capabilities and licensing.
+ * Capability map lookup shared by the services in the container.
  */
 final class FeatureGate {
 
@@ -32,28 +33,18 @@ final class FeatureGate {
 	private $caps;
 
 	/**
-	 * An add-on's license manager (an object with isValid() and hasFeature()),
-	 * or null.
+	 * Older add-ons pass a second argument; it is ignored.
 	 *
-	 * @var object|null
+	 * @param Capabilities $caps Capability map.
 	 */
-	private $licenseManager;
-
-	/**
-	 * @param Capabilities $caps           Capability map.
-	 * @param object|null  $licenseManager Optional license manager supplied by an add-on.
-	 */
-	public function __construct( $caps, $licenseManager = null ) {
-		$this->caps           = $caps;
-		$this->licenseManager = $licenseManager;
+	public function __construct( $caps ) {
+		$this->caps = $caps;
 	}
 
-	// ── Capability checks (freemium gate) ──────────────────────────────
-
 	/**
-	 * Check if a capability is allowed.
+	 * Check if a capability is on in the map.
 	 *
-	 * @param string $capability Capability key from Capabilities::defaults().
+	 * @param string $capability Capability key from Capabilities::defaults() or an add-on.
 	 * @return bool
 	 */
 	public function allows( string $capability ) {
@@ -84,65 +75,8 @@ final class FeatureGate {
 		return $this->caps;
 	}
 
-	// ── License checks (Pro gate) ──────────────────────────────────────
-
 	/**
-	 * Whether a LicenseManager is available.
-	 *
-	 * @return bool
-	 */
-	public function hasLicensing(): bool {
-		return $this->licenseManager !== null;
-	}
-
-	/**
-	 * Check if a valid Pro license is active.
-	 *
-	 * @return bool Always false when no LicenseManager is injected.
-	 */
-	public function isPro(): bool {
-		return $this->licenseManager ? $this->licenseManager->isValid() : false;
-	}
-
-	/**
-	 * Check if a specific Pro feature is available.
-	 *
-	 * Falls back to capabilities map when no LicenseManager is set, so
-	 * freemium defaults still work.
-	 *
-	 * @param string $feature Feature key (e.g. 'conditional_logic').
-	 * @return bool
-	 */
-	public function hasFeature( string $feature ): bool {
-		if ( $this->licenseManager ) {
-			return $this->licenseManager->hasFeature( $feature );
-		}
-
-		// Fall back to capability map for freemium gating.
-		return $this->allows( $feature );
-	}
-
-	/**
-	 * Inject the license manager into this gate.
-	 *
-	 * The container keeps one FeatureGate, and services built before an
-	 * add-on boots hold that same instance, so setting the manager here
-	 * reaches all of them. Use this instead of replacing the container entry.
-	 *
-	 * @since 2.7.1
-	 *
-	 * @param object|null $licenseManager An object with isValid() and hasFeature(), or null to remove it.
-	 * @throws \InvalidArgumentException When the object lacks either method.
-	 */
-	public function setLicenseManager( ?object $licenseManager ): void {
-		if ( null !== $licenseManager && ( ! method_exists( $licenseManager, 'isValid' ) || ! method_exists( $licenseManager, 'hasFeature' ) ) ) {
-			throw new \InvalidArgumentException( 'A license manager needs isValid() and hasFeature().' );
-		}
-		$this->licenseManager = $licenseManager;
-	}
-
-	/**
-	 * Swap the capability map this gate checks, for example after an add-on
+	 * Swap the capability map this gate reads, for example after an add-on
 	 * has added its `subtleforms/capabilities` filter.
 	 *
 	 * @since 2.7.1
@@ -151,14 +85,5 @@ final class FeatureGate {
 	 */
 	public function setCapabilities( Capabilities $caps ): void {
 		$this->caps = $caps;
-	}
-
-	/**
-	 * Get the LicenseManager, if available.
-	 *
-	 * @return object|null
-	 */
-	public function getLicenseManager(): ?object {
-		return $this->licenseManager;
 	}
 }
