@@ -17,7 +17,7 @@ import { getFieldType, getFieldOverride } from '../../shared/extend';
 import { effectiveFieldType } from '../../shared/fieldFallback';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { flagsOn } from '../../shared/flagsOn';
-import { fieldDisplay } from '../../shared/fieldDisplay';
+import { fieldDisplay, requiredIndicatorMark } from '../../shared/fieldDisplay';
 import { toggleIsOn } from '../../shared/toggleState';
 
 // Heavier fields are only downloaded for forms that have them (rich text
@@ -71,6 +71,7 @@ export default function FieldRenderer({
   // Label visibility and help text placement, with the form's defaults (2.3.2).
   const { fieldDefaults } = useContext(FormContext) || {};
   const display = fieldDisplay(field, fieldDefaults);
+  const requiredMark = requiredIndicatorMark(fieldDefaults);
 
   const ownKey = config.key || field.key;
   const resolvedPath = fieldPath || (ownKey ? `${pathPrefix}${ownKey}` : ownKey);
@@ -185,7 +186,7 @@ export default function FieldRenderer({
     );
   }
 
-  // An add-on field with nothing to show (for example a Pro Calculation
+  // An add-on field with nothing to show (for example a Calculation
   // without a formula) is not drawn (bug 9).
   const addonType = getFieldType(field.type);
   if (addonType && typeof addonType.isAnswerable === 'function' && !addonType.isAnswerable(config)) {
@@ -378,7 +379,7 @@ export default function FieldRenderer({
         <span id={`${inputId}-label`} className='subtleforms-field-label subtleforms-group-label'>
           {label}
           {required && (
-            <span className='subtleforms-required' aria-label=', required'>*</span>
+            <span className='subtleforms-required' aria-label=', required'>{requiredMark}</span>
           )}
         </span>
         {config.description && display.descriptionAbove && (
@@ -492,7 +493,7 @@ export default function FieldRenderer({
             {...(grouped ? {} : { htmlFor: inputId })}>
             {label}
             {required && (
-              <span className='subtleforms-required' aria-label={', required'}>*</span>
+              <span className='subtleforms-required' aria-label={', required'}>{requiredMark}</span>
             )}
           </LabelTag>
         );
@@ -1393,7 +1394,7 @@ function renderInput(
       );
 
     default: {
-      // Field types registered by add-ons (SubtleForms Pro).
+      // Field types registered by add-ons.
       const addon = getFieldType(field.type);
       if (addon) {
         return (
@@ -1412,8 +1413,8 @@ function renderInput(
           />
         );
       }
-      // A type no active plugin provides (for example a SubtleForms Pro
-      // field after Pro is deactivated) is left out of the live form.
+      // A type no active plugin provides (for example an add-on field
+      // after the add-on is deactivated) is left out of the live form.
       return null;
     }
   }

@@ -239,8 +239,8 @@ export default function FormsList({
   }, [currentPage, pagesLoaded, totalItems, perPage]);
 
   // Define table columns
-  // A column an add-on brings (conversion and completion with SubtleForms
-  // Pro). Nothing is shown, fetched or reserved without one.
+  // A column an add-on brings (for example conversion and completion).
+  // Nothing is shown, fetched or reserved without one.
   const [extraColumn] = getSlotItems('forms.list.column');
 
   const columns = [

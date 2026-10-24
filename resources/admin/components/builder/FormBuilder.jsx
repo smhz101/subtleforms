@@ -15,6 +15,8 @@ import {
 } from '../../../shared/appearance';
 import { useThemeStyles, injectThemeStyles, themeSurfaceStyle, THEME_SCOPE_CLASS } from '../../data/themeStyles';
 import { useBuilder } from './context/BuilderContext';
+import { useConfig } from './context/ConfigContext';
+import { formHasRequiredFields, requiredIndicatorMark } from '../../../shared/fieldDisplay';
 import FieldRenderer from './FieldRenderer';
 import ContainerRenderer from './ContainerRenderer';
 import GroupRenderer from './GroupRenderer';
@@ -294,6 +296,7 @@ export default function FormBuilder({ appearance } = {}) {
     validationErrors,
     validationErrorsByFieldKey: validationErrorsByFieldKeyFromContext,
   } = useBuilder();
+  const { fieldDefaults } = useConfig();
 
   const [previewValidation, setPreviewValidation] = useState(false);
 
@@ -700,7 +703,17 @@ export default function FormBuilder({ appearance } = {}) {
               <Icon.ShieldCheck size={14} aria-hidden='true' />
               {previewValidation ? __('Hide validation', 'subtleforms') : __('Test validation', 'subtleforms')}
             </button>
-          </div>          {isMultiStepForm && activeStep ? (
+          </div>
+          {formHasRequiredFields(tree) && (
+            <p className='subtleforms-required-legend'>
+              <span className='subtleforms-required' aria-hidden='true'>
+                {requiredIndicatorMark(fieldDefaults || {})}
+              </span>
+              {' '}
+              {__('indicates required fields', 'subtleforms')}
+            </p>
+          )}
+          {isMultiStepForm && activeStep ? (
             /* Multi-step form: Show step-scoped canvas */
             <StepCanvas
               stepId={selectedStepId}

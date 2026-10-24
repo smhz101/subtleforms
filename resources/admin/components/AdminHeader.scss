@@ -169,61 +169,6 @@
 	gap: 8px;
 }
 
-.sf-plan-chip {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	height: 28px;
-	padding: 0 12px;
-	border: 1px solid transparent;
-	border-radius: var(--sf-radius-full);
-	font-size: var(--sf-text-xs);
-	font-weight: var(--sf-weight-medium);
-	line-height: 1;
-	text-decoration: none;
-	white-space: nowrap;
-	transition:
-		background-color var(--sf-transition-fast),
-		border-color var(--sf-transition-fast),
-		color var(--sf-transition-fast);
-
-	&:focus {
-		outline: none;
-		box-shadow: var(--sf-shadow-focus);
-	}
-
-	&--upgrade {
-		background: var(--sf-primary-50);
-		border-color: var(--sf-primary-200);
-		color: var(--sf-primary-700);
-
-		&:hover {
-			background: var(--sf-primary-100);
-			color: var(--sf-primary-800);
-		}
-	}
-
-	&--pending {
-		background: var(--sf-warning-bg);
-		border-color: var(--sf-warning-border);
-		color: var(--sf-warning-strong);
-
-		&:hover {
-			color: var(--sf-warning-strong);
-			border-color: var(--sf-warning);
-		}
-	}
-
-	&--active {
-		background: #1e1e1e;
-		color: #fff;
-
-		svg {
-			color: #f0c33c;
-		}
-	}
-}
-
 .sf-topbar-icon-button.components-button {
 	width: 32px;
 	min-width: 32px;

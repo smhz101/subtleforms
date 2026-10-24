@@ -196,21 +196,19 @@ final class MoveToPro270Test extends TestCase {
 
 	// ── Placeholders and the settings of the moved fields ───────────
 
-	public function test_the_upload_toggle_is_a_pro_notice_not_a_control(): void {
+	public function test_uploads_have_no_locked_several_files_control(): void {
 		$controls = self::uploadControls();
-		$notice   = array_values( array_filter( $controls, static fn( $c ) => 'multiple' === ( $c['name'] ?? '' ) ) );
-		$this->assertCount( 1, $notice );
-		$this->assertSame( 'pro_notice', $notice[0]['type'] );
-		$this->assertSame( 'uploads.multiple', $notice[0]['feature'] );
+		$this->assertEmpty( array_filter( $controls, static fn( $c ) => 'multiple' === ( $c['name'] ?? '' ) ), 'No several files control or note without an add-on.' );
+		$this->assertEmpty( array_filter( $controls, static fn( $c ) => 'pro_notice' === ( $c['type'] ?? '' ) ) );
 		$this->assertEmpty( array_filter( $controls, static fn( $c ) => 'maxFiles' === ( $c['name'] ?? '' ) ), 'No limit control without the feature.' );
 	}
 
-	public function test_an_add_on_replaces_the_upload_notice_through_the_filter(): void {
+	public function test_an_add_on_adds_its_upload_controls_through_the_filter(): void {
 		$GLOBALS['sf_test_filters']['subtleforms/fields/inspector_controls'] = static function ( $controls, $type ) {
-			return array_map(
-				static fn( $c ) => 'multiple' === ( $c['name'] ?? '' ) ? array( 'type' => 'toggle', 'name' => 'multiple', 'label' => 'Allow several files' ) : $c,
-				$controls
-			);
+			if ( 'file_upload' === $type ) {
+				$controls[] = array( 'type' => 'toggle', 'name' => 'multiple', 'label' => 'Allow several files' );
+			}
+			return $controls;
 		};
 		try {
 			$controls = self::uploadControls();

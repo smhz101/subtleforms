@@ -230,8 +230,7 @@
 		color: var(--sf-danger);
 	}
 
-	&[data-type='ai'],
-	&[data-type='pro'] {
+	&[data-type='ai'] {
 		background: #1e1e1e;
 		color: #fff;
 	}
@@ -246,7 +245,7 @@
 		color: var(--sf-warning);
 	}
 
-	// Modifier classes used by the license screens.
+	// Modifier classes.
 	&--success,
 	&--active {
 		background: var(--sf-success-bg);

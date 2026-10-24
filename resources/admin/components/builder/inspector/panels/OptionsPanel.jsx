@@ -1,7 +1,8 @@
 /**
  * Choices editor for Dropdown, Radio Buttons, Checkboxes and Picture Choice.
  * A Picture Choice field edits its labels here; the images are edited by
- * SubtleForms Pro, and an image already saved on an option is kept.
+ * the add-on that provides the field, and an image already saved on an
+ * option is kept.
  *
  * - Drag the handle (or use Alt+↑/↓) to reorder.
  * - "Show values" reveals the stored value beside each label; values are

@@ -7,21 +7,17 @@ import GeneralSettings from '../components/settings/GeneralSettings';
 import FrontendSettings from '../components/settings/FrontendSettings';
 import EmailSettings from '../components/settings/EmailSettings';
 import AdvancedSettings from '../components/settings/AdvancedSettings';
-import LicenseSettings from '../components/settings/LicenseSettings';
 import ExtensionsSettings from '../components/settings/ExtensionsSettings';
-import McpPlaceholder from '../components/settings/McpPlaceholder';
 import lazyWithRetry from '../utils/lazyWithRetry';
 import { settingsTabs, getSettingsTab } from '../../shared/extend';
-import { getBranding } from '../utils/branding';
 import Icon from '../ui/Icon';
-import { getPlanState } from '../data/proCatalog';
 import './SettingsPage.scss';
 
 const ToolsPanel = lazyWithRetry(() => import(/* webpackChunkName: "page-tools" */ './ToolsPage'));
 
 /**
  * Settings sections, grouped like core's Site Settings: what the plugin does
- * day to day (ending with Tools, then MCP), then Pro.
+ * day to day (ending with Tools), then the tabs add-ons register.
  */
 const GROUPS = [
   {
@@ -56,7 +52,7 @@ const GROUPS = [
         name: 'extensions',
         icon: Icon.Puzzle,
         title: __('Integrations', 'subtleforms'),
-        description: __('Webhook defaults, form analytics and the integrations your add-ons bring.', 'subtleforms'),
+        description: __('Webhook defaults and the integrations your add-ons bring.', 'subtleforms'),
       },
       {
         name: 'tools',
@@ -64,72 +60,59 @@ const GROUPS = [
         title: __('Tools', 'subtleforms'),
         description: __('Move forms and entries, bring a form across from another plugin, and read what the site has been doing.', 'subtleforms'),
       },
-      // MCP comes right after Tools. Pro registers the body with
-      // SubtleFormsExtend.registerSettingsTab('mcp', ...) and the tab keeps
-      // this slot; without Pro it explains what MCP is and where to get it.
-      {
-        name: 'mcp',
-        icon: Icon.Bot,
-        pro: true,
-        title: __('MCP', 'subtleforms'),
-        description: __('Connect AI tools to your forms through the Model Context Protocol.', 'subtleforms'),
-      },
     ],
   },
   {
-    key: 'pro',
-    title: __('Pro', 'subtleforms'),
-    tabs: [
-      {
-        name: 'license',
-        icon: Icon.KeyRound,
-        title: __('License', 'subtleforms'),
-        description: __('Your plan, license key and what it unlocks.', 'subtleforms'),
-      },
-    ],
+    key: 'addons',
+    title: __('Add-ons', 'subtleforms'),
+    tabs: [],
   },
 ];
 
-// White label can limit the License screen to one admin.
-const VISIBLE_GROUPS = getBranding().showLicense
-  ? GROUPS
-  : GROUPS.map((g) => ({
-      ...g,
-      tabs: g.tabs.filter((t) => t.name !== 'license'),
-    }));
+/**
+ * Tabs an add-on may register without a title of its own, with the place
+ * they take: right after Tools. They are listed only when an add-on
+ * registers them.
+ */
+const SLOT_TABS = [
+  {
+    name: 'mcp',
+    icon: Icon.Bot,
+    title: __('MCP', 'subtleforms'),
+    description: __('Connect AI tools to your forms through the Model Context Protocol.', 'subtleforms'),
+  },
+];
 
-// A group with no tab left (Pro without License and no add-on tab) is not shown.
+// A group with no tab (no add-on tab registered) is not shown.
 const withTabs = (groups) => groups.filter((g) => g.tabs.length > 0);
 
-export const ALL_TABS = VISIBLE_GROUPS.flatMap((g) => g.tabs);
+export const ALL_TABS = GROUPS.flatMap((g) => g.tabs);
 
 const BUILT_IN = ALL_TABS.map((t) => t.name);
+const SLOT_NAMES = SLOT_TABS.map((t) => t.name);
 
 /**
  * The groups with the tabs add-ons registered (SubtleFormsExtend.registerSettingsTab).
- * A registered name that Free already lists keeps its place and can set its
- * own title and description (so Pro's MCP tab stays right after Tools,
- * whatever order it asks for); a new name joins the Pro group.
+ * A slot tab (see SLOT_TABS) goes right after Tools and may set its own title
+ * and description; any other name with a title joins the Add-ons group.
  *
  * @return {Array} Groups.
  */
 export function getGroups() {
-  const added = settingsTabs();
-  if (!added.length) return withTabs(VISIBLE_GROUPS);
+  const added = settingsTabs().filter((t) => !BUILT_IN.includes(t.name));
+  if (!added.length) return withTabs(GROUPS);
   const byName = Object.fromEntries(added.map((t) => [t.name, t]));
+  const slots = SLOT_TABS.filter((tab) => byName[tab.name]).map((tab) => {
+    const over = byName[tab.name];
+    return { ...tab, title: over.title || tab.title, description: over.description || tab.description };
+  });
   const fresh = added
-    .filter((t) => !BUILT_IN.includes(t.name) && t.title)
+    .filter((t) => !SLOT_NAMES.includes(t.name) && t.title)
     .sort((a, b) => (a.order ?? 100) - (b.order ?? 100))
     .map((t) => ({ name: t.name, icon: Icon.Puzzle, title: t.title, description: t.description || '' }));
-  return withTabs(VISIBLE_GROUPS.map((g) => ({
+  return withTabs(GROUPS.map((g) => ({
     ...g,
-    tabs: [
-      ...g.tabs.map((tab) => {
-        const over = byName[tab.name];
-        return over ? { ...tab, title: over.title || tab.title, description: over.description || tab.description } : tab;
-      }),
-      ...(g.key === 'pro' ? fresh : []),
-    ],
+    tabs: g.key === 'site' ? [...g.tabs, ...slots] : [...g.tabs, ...fresh],
   })));
 }
 
@@ -143,19 +126,13 @@ export function resolveTab(name, tabs = getGroups().flatMap((g) => g.tabs)) {
 
 // Tabs with nothing to save (they manage their own state).
 // Tabs from add-ons look after their own data too.
-const READ_ONLY_TABS = ['license', 'tools', 'mcp'];
+const READ_ONLY_TABS = ['tools'];
 const isReadOnly = (name) => READ_ONLY_TABS.includes(name) || !BUILT_IN.includes(name);
 
 /** Body of a tab an add-on registered. */
 function AddonTab({ name }) {
   const Body = getSettingsTab(name)?.component;
   return Body ? <Body /> : null;
-}
-
-/** MCP: Pro's screen when it is registered, otherwise the Free note. */
-function McpTab() {
-  const Body = getSettingsTab('mcp')?.component;
-  return Body ? <Body /> : <McpPlaceholder />;
 }
 
 export default function Settings() {
@@ -175,7 +152,6 @@ export default function Settings() {
     resetSettings,
   } = useSettingsState();
 
-  const { licensed } = getPlanState();
   const groups = getGroups();
   const current = resolveTab(activeTab, groups.flatMap((g) => g.tabs));
 
@@ -258,9 +234,6 @@ export default function Settings() {
                         onClick={() => setActiveTab(tab.name)}>
                         <TabIcon size={18} aria-hidden='true' />
                         <span>{tab.title}</span>
-                        {tab.pro && !licensed && (
-                          <span className='sf-settings__nav-pro'>{__('Pro', 'subtleforms')}</span>
-                        )}
                       </button>
                     </li>
                   );
@@ -296,7 +269,6 @@ export default function Settings() {
             {current.name === 'email' && (
               <EmailSettings settings={settings} updateSetting={updateSetting} fieldErrors={fieldErrors} />
             )}
-            {current.name === 'license' && <LicenseSettings />}
             {current.name === 'advanced' && (
               <AdvancedSettings
                 settings={settings}
@@ -314,7 +286,6 @@ export default function Settings() {
                 <ToolsPanel embedded />
               </Suspense>
             )}
-            {current.name === 'mcp' && <McpTab />}
             {!BUILT_IN.includes(current.name) && <AddonTab name={current.name} />}
           </div>
         </div>

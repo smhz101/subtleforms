@@ -97,9 +97,9 @@
 	&__legend {
 		float: left;
 		padding: 0;
-		font-weight: 600;
-		font-size: 0.95em;
-		color: var(--subtleforms-color-text, inherit);
+		font-weight: 500;
+		font-size: 0.875em;
+		color: var(--subtleforms-color-text-light, #646970);
 	}
 
 	&__fields {
@@ -216,7 +216,7 @@
 	padding: 0 10px;
 	border: 1px solid var(--subtleforms-color-border, var(--sf-border-strong, #c3c4c7));
 	border-radius: var(--subtleforms-radius-md, 4px);
-	background: var(--subtleforms-color-bg, #fff);
+	background: var(--subtleforms-color-surface, var(--subtleforms-color-bg, Canvas));
 	color: inherit;
 	font: inherit;
 	cursor: pointer;
@@ -266,7 +266,7 @@
 	padding: 8px;
 	border: 1px solid var(--subtleforms-color-border, #c3c4c7);
 	border-radius: 6px;
-	background: #fff;
+	background: var(--subtleforms-color-surface, var(--subtleforms-color-bg, Canvas));
 	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
@@ -430,3 +430,81 @@
 /*! inherit: keep-end */
 
 /*! inherit: keep-end */
+
+
+
+.subtleforms-required {
+	color: var(--subtleforms-color-error, #b42318);
+	margin-left: 2px;
+}
+
+.subtleforms-required-legend {
+	margin: 0 0 0.75rem;
+	font-size: 0.875em;
+	color: var(--subtleforms-color-text-light, #646970);
+
+	.subtleforms-required {
+		margin-left: 0;
+	}
+}
+
+/* File upload drop zone */
+.subtleforms-upload {
+	.subtleforms-file-input {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+
+	&__zone {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: center;
+		gap: 6px 8px;
+		padding: 20px 16px;
+		border: 1px dashed var(--subtleforms-color-border, #d0d5dd);
+		border-radius: var(--subtleforms-radius-md, 8px);
+		background: var(--subtleforms-color-bg, transparent);
+		color: var(--subtleforms-color-text, inherit);
+		font-size: 0.9375em;
+		cursor: pointer;
+		text-align: center;
+		transition: border-color 0.15s ease, background-color 0.15s ease;
+
+		&:hover,
+		&:focus-within {
+			border-color: var(--subtleforms-color-primary, #3858e9);
+		}
+
+		&.is-dragover {
+			border-color: var(--subtleforms-color-primary, #3858e9);
+			background: color-mix(in srgb, var(--subtleforms-color-primary, #3858e9) 8%, transparent);
+		}
+	}
+
+	&__select {
+		display: inline-flex;
+		align-items: center;
+		padding: 4px 10px;
+		border: 1px solid var(--subtleforms-color-border, #d0d5dd);
+		border-radius: var(--subtleforms-radius-sm, 4px);
+		background: var(--subtleforms-color-surface, var(--subtleforms-color-bg, Canvas));
+		color: var(--subtleforms-color-text, inherit);
+		font: inherit;
+		font-size: 0.875em;
+		cursor: pointer;
+
+		&:hover,
+		&:focus-visible {
+			border-color: var(--subtleforms-color-primary, #3858e9);
+			color: var(--subtleforms-color-primary, #3858e9);
+		}
+	}
+}

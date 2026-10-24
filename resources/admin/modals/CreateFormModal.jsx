@@ -7,7 +7,7 @@ import { useNotice } from '../ui/feedback';
 import Icon from '../ui/Icon';
 import clsx from 'clsx';
 import TemplateSelector from '../templates/TemplateSelector';
-import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
+import { withOwnMetadata } from '../utils/schemaCopy';
 import { schemaFromTemplate } from '../utils/templateSchema';
 import { createInitialSchema } from '../utils/initialSchema';
 
@@ -89,7 +89,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
         formType: schemaType,
         startingPoint: 'blank',
       });
-      schemaToSend = enrichSchemaWithProMarkers(schema);
+      schemaToSend = withOwnMetadata(schema);
       schemaToSend.metadata = {
         ...schemaToSend.metadata,
         template: 'blank',

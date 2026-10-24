@@ -1,0 +1,38 @@
+/**
+ * More features card (Dashboard, bottom).
+ */
+
+.sf-more-features {
+	.sf-panel__header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+	}
+
+	&__dismiss.components-button {
+		color: var(--sf-text-muted);
+
+		svg { fill: none; }
+	}
+
+	&__intro {
+		margin: 0 0 8px;
+		color: var(--sf-text-secondary);
+		font-size: var(--sf-text-sm);
+	}
+
+	&__list {
+		margin: 0 0 12px;
+		padding-inline-start: 18px;
+		list-style: disc;
+		color: var(--sf-text-secondary);
+		font-size: var(--sf-text-sm);
+
+		li { margin: 0 0 4px; }
+	}
+
+	&__link {
+		font-size: var(--sf-text-sm);
+	}
+}

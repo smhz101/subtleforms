@@ -208,7 +208,7 @@ final class Container {
 				/**
 				 * Fires when extensions should be registered into ExtensionManager.
 				 *
-				 * Pro plugin or third-party add-ons hook into this action at priority 10
+				 * Add-ons hook into this action at priority 10
 				 * to register their extension instances.
 				 *
 				 * @since 2.1.0

@@ -231,12 +231,12 @@ class Release239Test extends PHPUnit\Framework\TestCase {
 				'subtleforms_stats_prune'            => array( array( 'args' => array() ) ),
 			),
 		);
-		$GLOBALS['wpdb']->option_names = array( 'subtleforms_settings', 'subtleforms_coupons_db', 'subtleforms_license_key', 'subtleforms_pro_state', 'subtleforms_rl_funnel_abc', 'subtleforms_other' );
+		$GLOBALS['wpdb']->option_names = array( 'subtleforms_settings', 'subtleforms_coupons_db', 'subtleforms_pro_state', 'subtleforms_rl_funnel_abc', 'subtleforms_other' );
 		Uninstaller::clean_site();
 		$sql = implode( "\n", $GLOBALS['wpdb']->queries );
 		$this->assertContains( 'subtleforms_settings', $GLOBALS['wpdb']->deleted );
 		$this->assertContains( 'subtleforms_other', $GLOBALS['wpdb']->deleted );
-		foreach ( array( 'subtleforms_coupons_db', 'subtleforms_license_key', 'subtleforms_pro_state', 'subtleforms_rl_funnel_abc' ) as $kept ) {
+		foreach ( array( 'subtleforms_coupons_db', 'subtleforms_pro_state', 'subtleforms_rl_funnel_abc' ) as $kept ) {
 			$this->assertNotContains( $kept, $GLOBALS['wpdb']->deleted, $kept );
 		}
 		$this->assertStringContainsString( 'DROP TABLE IF EXISTS wp_subtleforms_forms', $sql );

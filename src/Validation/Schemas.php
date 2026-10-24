@@ -361,7 +361,7 @@ class Schemas {
 				'appearance'   => 'optional|object|map:FormAppearance',
 				// 2.0: per-form confirmation, submit button and availability rules.
 				'confirmation' => 'optional|object|map:FormConfirmation',
-				// 2.1: conditional confirmations, first match wins (Pro).
+				// 2.1: conditional confirmations, first match wins (add-on).
 				'confirmations' => 'optional|array|list:FormConditionalConfirmation',
 				'submitText'   => 'optional|string|max:100',
 				'restrictions' => 'optional|object|map:FormRestrictions',
@@ -394,7 +394,7 @@ class Schemas {
 			),
 
 			// A confirmation shown only when its rules match (2.1). `logic` is
-			// kept as sent; SubtleForms Pro tidies it on save and the engine
+			// kept as sent; an add-on may tidy it on save and the engine
 			// ignores anything it does not understand.
 			'FormConditionalConfirmation' => array(
 				'id'           => 'optional|string|max:40',
@@ -441,7 +441,7 @@ class Schemas {
 				'enabled'     => 'optional|bool|default:false',
 				// A three-letter code. No default: a form without a currency
 				// follows the site currency (PAY2-02). The payment add-on
-				// (SubtleForms Pro) decides which codes it can charge.
+				// decides which codes it can charge.
 				'currency'    => 'optional|string|max:10',
 				'amountType'  => 'optional|in:fixed,field,calculated|default:fixed',
 				'fixedAmount' => 'optional|number|min:0',

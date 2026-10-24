@@ -89,7 +89,7 @@ final class SchemaCompiler {
 				continue;
 			}
 
-			// Resolve definition first, soft-skip unknown types so that Pro
+			// Resolve definition first, soft-skip unknown types so that add-on
 			// deactivation or schema migration gaps don't break live submissions.
 			$def = $this->registry->getDefinition( $type );
 			if ( $def === null ) {

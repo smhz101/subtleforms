@@ -152,7 +152,7 @@ export default function IntegrationsPanel({ schema, onChange, isReadOnly = false
   const [global, setGlobal] = useState(null);
   const [lists, setLists] = useState(null);
   const [hubspotProps, setHubspotProps] = useState(null);
-  // Provider contact fields for the mapping rows (SubtleForms Pro 2.3.0).
+  // Provider contact fields for the mapping rows (2.3.0).
   const [emFields, setEmFields] = useState(null);
 
   const needsSettings = shown.includes('email_marketing') || shown.includes('crm');
@@ -421,7 +421,7 @@ export default function IntegrationsPanel({ schema, onChange, isReadOnly = false
         </div>
       )}
 
-      {/* Panels and switches from add-ons such as SubtleForms Pro (form.integrations slot) */}
+      {/* Panels and switches from add-ons (form.integrations slot) */}
       {slotItems.map((item) => {
         const Slot = item.component;
         return (

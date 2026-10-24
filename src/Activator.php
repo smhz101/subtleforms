@@ -140,6 +140,7 @@ final class Activator {
 		// New installs start with spam protection on; existing sites are
 		// offered it once on the dashboard and nothing changes on its own.
 		\SubtleForms\Support\SpamDefaults::afterActivate( $fresh_install );
+		\SubtleForms\Support\ImportOffer::afterActivate( $fresh_install );
 
 		// Schedule privacy cron jobs
 		if ( ! wp_next_scheduled( 'subtleforms_daily_cleanup' ) ) {

@@ -3,7 +3,7 @@
  * SubtleForms 2.0 field additions.
  *
  * A toggle and an opinion scale. Signature, Calculation and Picture Choice
- * fields are registered by SubtleForms Pro through the
+ * fields are registered by add-ons through the
  * `subtleforms/fields/register` action (see docs/hooks.md).
  *
  * @package SubtleForms\Fields

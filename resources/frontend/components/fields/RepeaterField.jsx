@@ -96,9 +96,8 @@ export default function RepeaterField({
 
   const groupLabel = (index) =>
     sprintf(
-      /* translators: 1: repeater label, 2: group number */
-      __('%1$s %2$d', 'subtleforms'),
-      label || __('Entry', 'subtleforms'),
+      /* translators: %d: group number */
+      __('Entry %d', 'subtleforms'),
       index + 1
     );
 

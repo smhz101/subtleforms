@@ -185,7 +185,7 @@ export default function FormEditor({
 
   const fieldDefaults = useMemo(
     () => formFieldDefaults(schema?.metadata),
-    [schema?.metadata?.labelVisibility, schema?.metadata?.descriptionPlacement, schema?.metadata?.requiredMessage, schema?.metadata?.validationMessage] // eslint-disable-line react-hooks/exhaustive-deps
+    [schema?.metadata?.labelVisibility, schema?.metadata?.descriptionPlacement, schema?.metadata?.requiredMessage, schema?.metadata?.validationMessage, schema?.metadata?.validationSummary, schema?.metadata?.requiredIndicator, schema?.metadata?.requiredIndicatorText] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   // Command handlers

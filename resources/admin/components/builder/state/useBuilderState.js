@@ -238,7 +238,7 @@ export function useBuilderState(schema, validationErrors, fieldErrors, onChange,
   const updateTree = (updater) => {
     // Block updates in read-only mode
     if (isReadOnly) {
-      console.warn('[SubtleForms] Cannot edit form - Pro license required');
+      console.warn('[SubtleForms] The form is read-only here');
       return;
     }
 

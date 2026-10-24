@@ -1,11 +1,10 @@
 /**
- * 2.3.2 item 2: creating a form from ANY template (free and Pro) gives the
- * full form: its fields, settings and type are saved, the builder shows the
- * fields and the live form renders them.
+ * 2.3.2 item 2: creating a form from ANY template (this plugin's and any an
+ * add-on registers) gives the full form: its fields, settings and type are
+ * saved, the builder shows the fields and the live form renders them.
  *
  * Every template is created through the real New form screen (search, pick,
- * Create form), exactly as a user does it. Pro templates need an active Pro
- * license on the test site; without one they are skipped (they are locked).
+ * Create form), exactly as a user does it. No template is locked.
  */
 const { test, expect } = require('@playwright/test');
 const { adminApi, cleanup, loginPage, BASE } = require('./helpers');
@@ -47,7 +46,8 @@ test('every template creates the full form in the builder and on the site', asyn
   test.setTimeout(Number(process.env.SF_TEMPLATES_TIMEOUT_MIN || 45) * 60 * 1000);
   const res = await client.call('GET', '/templates');
   const all = Object.values(res.body.data.templates);
-  const usable = all.filter((t) => !t.is_locked && t.schema && Array.isArray(t.schema.fields));
+  expect(all.some((t) => 'is_locked' in t)).toBe(false);
+  const usable = all.filter((t) => t.schema && Array.isArray(t.schema.fields));
   expect(usable.length).toBeGreaterThanOrEqual(12);
   const only = process.env.SF_TEMPLATES ? process.env.SF_TEMPLATES.split(',') : null;
 

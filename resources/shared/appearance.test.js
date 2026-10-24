@@ -225,8 +225,15 @@ describe( 'previewBreakpoints', () => {
   } );
 
   it( 'offers an inherit-from-theme preset', () => {
-    expect( getPreset( 'theme' ).variants.width ).toBe( 'theme' );
+    expect( getPreset( 'theme' ).variants.width ).toBeUndefined();
     expect( formAppearanceClasses( { preset: 'theme' } ) ).toContain( 'subtleforms--inherit-theme' );
+  } );
+
+  it( 'presets do not set form width', () => {
+    FORM_PRESETS.forEach( ( preset ) => {
+      expect( preset.variants.width ).toBeUndefined();
+      expect( formAppearanceStyle( { variants: { ...preset.variants } } ).maxWidth ).toBeUndefined();
+    } );
   } );
 } );
 
@@ -301,5 +308,18 @@ describe( 'pure theme forms (2.4.1)', () => {
   test( 'other presets are never theme forms', () => {
     expect( isPureTheme( { preset: 'default' } ) ).toBe( false );
     expect( formAppearanceClasses( { preset: 'minimal', variants: {} } ) ).not.toMatch( /inherit-theme|theme-tuned/ );
+  } );
+} );
+
+describe( 'transparent form root defaults', () => {
+  const { TOKEN_DEFAULTS, getPreset } = require( './appearance' );
+  it( 'defaults colorBackground to transparent and keeps intentional surfaces', () => {
+    expect( TOKEN_DEFAULTS.colorBackground ).toBe( 'transparent' );
+    expect( getPreset( 'soft' ).tokens.colorBackground ).toBe( '#ffffff' );
+    expect( getPreset( 'bordered' ).tokens.colorBackground ).toBe( '#fbfbfc' );
+    expect( getPreset( 'dark-surface' ).tokens.colorBackground ).toBe( '#1b1d24' );
+    expect( getPreset( 'minimal' ).tokens.colorBackground ).toBe( 'transparent' );
+    expect( getPreset( 'compact' ).tokens.colorBackground ).toBe( 'transparent' );
+    expect( getPreset( 'rounded' ).tokens.colorBackground ).toBe( 'transparent' );
   } );
 } );

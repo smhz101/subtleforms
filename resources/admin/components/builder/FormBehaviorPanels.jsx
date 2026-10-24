@@ -11,7 +11,6 @@ import {
   __experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
-import ProNotice from '../../ui/ProNotice';
 import { getSlotItems } from '../../../shared/extend';
 
 /** Collect `{key}` merge tags from the field tree for the hint line. */
@@ -124,10 +123,9 @@ export function ConfirmationPanel({ schema, onMetadata, isReadOnly }) {
 
 /**
  * Conditional confirmations: a different message or page for different
- * answers. They are part of SubtleForms Pro, which fills the
- * `form.confirmations` slot with the editor. Without it this shows a Pro note;
- * confirmations already saved on the form are kept and ignored (the default
- * confirmation is used).
+ * answers, from an add-on that fills the `form.confirmations` slot. Without
+ * one nothing is shown, except a note when confirmations are already saved
+ * on the form: they are kept and ignored (the default confirmation is used).
  */
 function ConditionalConfirmations({ schema, onMetadata, isReadOnly }) {
   const [slot] = getSlotItems('form.confirmations');
@@ -136,18 +134,12 @@ function ConditionalConfirmations({ schema, onMetadata, isReadOnly }) {
     return <Slot schema={schema} onMetadata={onMetadata} isReadOnly={isReadOnly} />;
   }
   const saved = Array.isArray(schema?.metadata?.confirmations) ? schema.metadata.confirmations.length : 0;
+  if (saved === 0) return null;
   return (
     <div className='sf-confirmations'>
-      <ProNotice
-        label={__('Conditional confirmations', 'subtleforms')}
-        help={__('Show a different message or page depending on the answers. Part of SubtleForms Pro.', 'subtleforms')}
-        feature='logic.conditional.advanced'
-      />
-      {saved > 0 && (
-        <p className='sf-confirmations__intro'>
-          {__('Conditional confirmations are saved on this form. They are ignored and the confirmation above is used until SubtleForms Pro is active.', 'subtleforms')}
-        </p>
-      )}
+      <p className='sf-confirmations__intro'>
+        {__('Conditional confirmations are saved on this form. They are handled by an add-on that is not active, so the confirmation above is used.', 'subtleforms')}
+      </p>
     </div>
   );
 }

@@ -7,15 +7,40 @@ import FormErrorBoundary from './components/FormErrorBoundary';
 import './frontend.css';
 import './styles/frontend.scss';
 import { debug } from '../shared/debug';
-import { containerGroups, loadGroups } from './components/fields/lazyFields';
+import { containerGroups, loadGroups, loadFieldsFor } from './components/fields/lazyFields';
 import { readInlineFormData } from './utils/inlineData';
+import { restFetch } from './utils/restFetch';
 import { runFormMountHooks } from '../shared/extend';
 import * as contexts from './components/fields/contexts';
 import * as pricing from '../shared/pricing';
 
-// Shared with SubtleForms Pro's payment fields: the order context and the price maths.
+// Shared with add-on payment fields: the order context and the price maths.
 if (typeof window !== 'undefined') {
   window.SubtleFormsExtend = Object.assign(window.SubtleFormsExtend || {}, { contexts, pricing });
+}
+
+/**
+ * Resolve the public schema (and spam token) before the first paint so the
+ * server outline is never replaced with a loading line.
+ *
+ * @param {number} formId
+ * @param {Object|null} optionSchema
+ * @return {Promise<{schema: Object|null, spamToken: string}>}
+ */
+async function resolveSchema(formId, optionSchema) {
+  if (optionSchema) {
+    return { schema: optionSchema, spamToken: '' };
+  }
+  const inline = readInlineFormData(formId);
+  if (inline) {
+    return { schema: inline.schema, spamToken: inline.spamToken || '' };
+  }
+  const res = await restFetch(`/forms/${formId}/schema`);
+  const data = await res.json();
+  return {
+    schema: data?.data?.schema ?? data?.schema ?? null,
+    spamToken: data?.data?.spam_token || data?.spam_token || '',
+  };
 }
 
 /**
@@ -32,54 +57,107 @@ if (typeof window !== 'undefined') {
  *   the Gutenberg block or shortcode.
  */
 function mount(container, options = {}) {
-  const { formId, schema, preview = false, onSubmit, blockOptions } = options;
+  const { formId, schema: optionSchema } = options;
 
   if (!formId) {
     console.error('SubtleForms: formId is required for mount()');
     return;
   }
 
-  // Start downloading the code of this form's heavier fields now, while the
-  // form itself loads (2.6.0). The server lists them in data-features.
-  const fieldCode = loadGroups(containerGroups(container));
-
   // A container that already has a form gets the new options on the same
   // root: a second root would draw the form twice and load it twice.
   const existing = container._subtleformsRoot;
   const root = existing || createRoot(container);
-  // Store root reference for cleanup
   container._subtleformsRoot = root;
-  const draw = () => {
+
+  const draw = (opts, schema, spamToken) => {
     // Unmounted while the field code was downloading.
     if (!existing && container._subtleformsRoot !== root) {
       return;
     }
+    const {
+      formId: drawFormId,
+      preview: drawPreview = false,
+      onSubmit: drawOnSubmit,
+      blockOptions: drawBlockOptions,
+    } = opts;
     root.render(
       <FormErrorBoundary>
         <FormRenderer
-          formId={formId}
-          preloadedSchema={schema}
-          preview={preview}
-          onSubmit={onSubmit}
-          blockOptions={blockOptions}
+          formId={drawFormId}
+          preloadedSchema={schema || null}
+          preloadedSpamToken={spamToken || ''}
+          preview={drawPreview}
+          onSubmit={drawOnSubmit}
+          blockOptions={drawBlockOptions}
         />
       </FormErrorBoundary>
     );
   };
-  // A form whose data the server printed (2.6.1) keeps the server-drawn
-  // outline in the container until the form can replace it in one go, with
-  // its field code in, instead of showing a loading line first.
-  if (!existing && !schema && readInlineFormData(formId)) {
-    fieldCode.then(draw);
-  } else {
-    draw();
-  }
+
+  // Remounts keep the live tree; FormRenderer loads if no schema is handed in.
+  // While the first paint is still preparing, keep the latest options for draw.
   if (existing) {
+    if (container._subtleformsPreparing) {
+      container._subtleformsPendingMount = options;
+      return;
+    }
+    draw(options, optionSchema || null, '');
     return;
   }
 
-  // Release the height kept for the form once it is drawn (UX2-27).
-  releaseReserve(container);
+  // First mount: keep the server outline until schema and field code are ready,
+  // then paint once. createRoot does not clear the container until render.
+  container._subtleformsPreparing = (async () => {
+    let schema = null;
+    let spamToken = '';
+    try {
+      const resolved = await resolveSchema(formId, optionSchema || null);
+      schema = resolved.schema;
+      spamToken = resolved.spamToken;
+    } catch (e) {
+      // Fall through: paint without a preload so FormRenderer can show the error.
+      schema = null;
+      spamToken = '';
+    }
+
+    await loadGroups(containerGroups(container));
+    if (schema) {
+      await loadFieldsFor(schema);
+    }
+
+    if (container._subtleformsRoot !== root) {
+      return;
+    }
+
+    const pending = container._subtleformsPendingMount;
+    delete container._subtleformsPendingMount;
+
+    if (pending) {
+      let pendingSchema = null;
+      let pendingSpam = '';
+      try {
+        const resolved = await resolveSchema(pending.formId, pending.schema || null);
+        pendingSchema = resolved.schema;
+        pendingSpam = resolved.spamToken;
+      } catch (e) {
+        pendingSchema = null;
+        pendingSpam = '';
+      }
+      if (pendingSchema) {
+        await loadFieldsFor(pendingSchema);
+      }
+      if (container._subtleformsRoot !== root) {
+        return;
+      }
+      draw(pending, pendingSchema, pendingSpam);
+    } else {
+      draw(options, schema, spamToken);
+    }
+    releaseReserve(container);
+  })().finally(() => {
+    delete container._subtleformsPreparing;
+  });
 }
 
 /**
@@ -92,6 +170,8 @@ function unmount(container) {
     container._subtleformsRoot.unmount();
     delete container._subtleformsRoot;
   }
+  delete container._subtleformsPreparing;
+  delete container._subtleformsPendingMount;
 }
 
 // Expose public API

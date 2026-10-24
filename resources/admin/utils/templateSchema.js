@@ -8,7 +8,7 @@
  * follows the structure: a template with Page Breaks is Multi-step.
  */
 
-import { enrichSchemaWithProMarkers } from './schemaEnricher';
+import { withOwnMetadata } from './schemaCopy';
 import { structuralType } from '../../shared/formType';
 
 /** Deep copy of plain JSON data, so a form never shares objects with the template list. */
@@ -36,7 +36,7 @@ export function schemaFromTemplate(template, { title, description = '' } = {}) {
   };
   metadata.type = structuralType({ metadata, fields });
 
-  const schema = enrichSchemaWithProMarkers({
+  const schema = withOwnMetadata({
     schema_version: 1,
     metadata,
     fields,

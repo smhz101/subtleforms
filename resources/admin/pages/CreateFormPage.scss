@@ -191,12 +191,6 @@
 		font-weight: var(--sf-weight-medium);
 		color: var(--sf-text-secondary);
 
-		&--pro {
-			background: #1e1e1e;
-			box-shadow: none;
-			color: #fff;
-		}
-
 		svg { fill: none; }
 	}
 
@@ -220,8 +214,6 @@
 		opacity: 1;
 		transform: translate(-50%, 0);
 	}
-
-	&.is-locked &__hover { background: #1e1e1e; }
 
 	&__meta {
 		display: flex;
@@ -268,20 +260,6 @@
 	}
 
 	&--blank:hover &__blank-icon { background: var(--sf-brand); }
-
-	// "N more templates in SubtleForms Pro": a quiet link card, no lock.
-	&--more {
-		justify-content: center;
-		min-height: 196px;
-		padding: 20px;
-		border: 1px dashed var(--sf-border-strong);
-		border-radius: var(--sf-radius-lg);
-		color: inherit;
-		text-decoration: none;
-
-		&:hover,
-		&:focus-visible { border-color: var(--sf-brand); }
-	}
 
 	&--skeleton {
 		height: 248px;

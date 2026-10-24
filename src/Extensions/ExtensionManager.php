@@ -9,10 +9,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use SubtleForms\Contracts\ExtensionInterface;
-use SubtleForms\Support\FeatureGate;
 
 /**
- * Central extension loader with capability enforcement.
+ * Central extension loader.
  */
 final class ExtensionManager {
 
@@ -22,15 +21,10 @@ final class ExtensionManager {
 	private $extensions = array();
 
 	/**
-	 * @var FeatureGate
+	 * @param mixed $gate Not used since 2.7.2; kept so existing callers work.
 	 */
-	private $gate;
-
-	/**
-	 * @param FeatureGate $gate
-	 */
-	public function __construct( $gate ) {
-		$this->gate = $gate;
+	public function __construct( $gate = null ) {
+		unset( $gate );
 	}
 
 	public function add( ExtensionInterface $ext ): void {
@@ -38,13 +32,9 @@ final class ExtensionManager {
 	}
 
 	public function boot(): void {
+		// Every extension an add-on added is registered. Whether its
+		// features are available is the add-on's own business.
 		foreach ( $this->extensions as $ext ) {
-			foreach ( $ext->requiredCapabilities() as $cap ) {
-				if ( ! $this->gate->allows( $cap ) ) {
-					continue 2; // extension disabled
-				}
-			}
-
 			$ext->register();
 		}
 	}

@@ -1,0 +1,18 @@
+/**
+ * Builder note for fields and features of an add-on that is not active.
+ */
+
+.sf-addon-fields-notice {
+  margin-bottom: 1rem;
+
+  &__notice {
+    margin: 0;
+    padding: 0;
+  }
+
+  &__message {
+    margin: 0;
+    font-size: var(--sf-text-sm);
+    line-height: 1.5;
+  }
+}

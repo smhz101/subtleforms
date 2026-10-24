@@ -1,6 +1,7 @@
 /**
- * Settings has a Tools tab (the old Tools page moved in) and an MCP tab
- * (Pro supplies its screen; Free shows a note with an upgrade link).
+ * Settings has a Tools tab (the old Tools page moved in). It has no License
+ * tab and no MCP tab of its own: an MCP tab is listed only when an add-on
+ * registers it, and nothing in Settings links to an upgrade.
  */
 const { test, expect } = require('@playwright/test');
 const { loginPage } = require('./helpers');
@@ -8,13 +9,15 @@ const { loginPage } = require('./helpers');
 const SETTINGS = '/wp-admin/admin.php?page=subtleforms-settings';
 const nav = (page) => page.getByRole('navigation', { name: 'Settings sections' });
 
-test('Settings lists Tools and MCP, and Tools keeps its sections', async ({ page }) => {
+test('Settings lists Tools, no License or MCP tab, and Tools keeps its sections', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await loginPage(page);
   await page.goto(SETTINGS);
   await expect(nav(page)).toBeVisible({ timeout: 30000 });
   await expect(nav(page).getByRole('button', { name: /^Tools/ })).toBeVisible();
-  await expect(nav(page).getByRole('button', { name: /^MCP/ })).toBeVisible();
+  await expect(nav(page).getByRole('button', { name: /^MCP/ })).toHaveCount(0);
+  await expect(nav(page).getByRole('button', { name: /^Licen/ })).toHaveCount(0);
+  await expect(nav(page)).not.toContainText(/\bPro\b/);
 
   await nav(page).getByRole('button', { name: /^Tools/ }).click();
   await expect(page.locator('.sf-settings__title')).toHaveText('Tools');
@@ -49,17 +52,15 @@ test('there is no separate Tools item in the menus', async ({ page }) => {
   await expect(page.locator('.sf-appnav a[href*="subtleforms-tools"]')).toHaveCount(0);
 });
 
-test('MCP without Pro explains itself with an upgrade link', async ({ page }) => {
+test('an old tab=mcp or tab=license link opens the first tab, with no upgrade link', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await loginPage(page);
-  await page.goto(`${SETTINGS}#tab=mcp`);
-  await expect(page.locator('.sf-settings__title')).toHaveText('MCP', { timeout: 30000 });
-  const note = page.locator('.sf-mcp-placeholder');
-  await expect(note).toContainText('part of SubtleForms Pro');
-  const link = note.getByRole('link', { name: /Upgrade to Pro/ });
-  await expect(link).toHaveAttribute('href', /subtleforms\.com\/pro.*utm_campaign=mcp/);
-  await expect(link).toHaveAttribute('target', '_blank');
-  await page.screenshot({ path: 'test-results/screens-2.5.1/settings-mcp-free.png' });
+  for (const tab of ['mcp', 'license']) {
+    await page.goto(`${SETTINGS}#tab=${tab}`);
+    await expect(page.locator('.sf-settings__title')).toHaveText('General', { timeout: 30000 });
+    await expect(page.getByRole('link', { name: /Upgrade|\bPro\b/ })).toHaveCount(0);
+  }
+  await page.screenshot({ path: 'test-results/screens-2.7.2/settings-no-license-tab.png' });
 });
 
 test('the tab list works from the keyboard', async ({ page }) => {
@@ -72,14 +73,13 @@ test('the tab list works from the keyboard', async ({ page }) => {
   await page.keyboard.press('Enter');
   await expect(page.locator('.sf-settings__title')).toHaveText('Tools');
   await expect(tools).toHaveAttribute('aria-current', 'page');
-  const mcp = nav(page).getByRole('button', { name: /^MCP/ });
-  await mcp.focus();
+  const general = nav(page).getByRole('button', { name: /^General/ });
+  await general.focus();
   await page.keyboard.press('Space');
-  await expect(page.locator('.sf-settings__title')).toHaveText('MCP');
-  await expect(page.getByRole('link', { name: /Upgrade to Pro/ }).first()).toBeVisible();
+  await expect(page.locator('.sf-settings__title')).toHaveText('General');
 });
 
-test('Tools and MCP fit at phone width', async ({ page }) => {
+test('Tools fits at phone width', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await loginPage(page);
   await page.goto(`${SETTINGS}#tab=tools`);

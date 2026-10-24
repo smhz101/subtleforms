@@ -12,7 +12,6 @@ import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { getIcon } from './utils/iconMap';
 import Icon from '../../ui/Icon';
-import { openUpgradeModal } from '../../utils/featureGate';
 
 /**
  * Library section names. Keys are the PHP categories.
@@ -50,9 +49,8 @@ function HighlightMatch({ text, query }) {
 /**
  * Field library, the left panel of the builder.
  *
- * Click (or Enter) adds a field after the current selection. Pro fields are
- * shown in place with a lock; choosing one explains what Pro unlocks rather
- * than hiding the capability.
+ * Click (or Enter) adds a field after the current selection. It lists the
+ * field types this plugin and active add-ons register.
  */
 /**
  * A library tile can be clicked (adds the field to the current step or the
@@ -149,19 +147,12 @@ export default function FieldDock({ fieldGroups, onAddField, onCollapsedChange }
 
   const renderTile = (f) => {
     const isDisabled = f.enabled === false;
-    const isProPlaceholder = f.pro_placeholder === true;
     const FieldIcon = getIcon(f.type);
     const description = f.meta?.description || '';
 
     let title = description ? `${f.label}: ${description}` : f.label;
     if (isDisabled) {
       title = __('Turn this provider on in Settings → Advanced to use it.', 'subtleforms');
-    } else if (isProPlaceholder) {
-      title = sprintf(
-        /* translators: %s: field name */
-        __('%s is part of SubtleForms Pro', 'subtleforms'),
-        f.label
-      );
     }
 
     return (
@@ -169,25 +160,18 @@ export default function FieldDock({ fieldGroups, onAddField, onCollapsedChange }
         key={f.type}
         type={f.type}
         label={f.label}
-        draggable={!isDisabled && !isProPlaceholder}
+        draggable={!isDisabled}
         className={clsx('sf-inserter__item', {
           'is-disabled': isDisabled,
-          'is-locked': isProPlaceholder,
         })}
         disabled={isDisabled}
         title={title}
         onClick={() => {
           if (isDisabled) return;
-          if (isProPlaceholder) {
-            openUpgradeModal(f.upgrade_key || (f.category === 'payment' ? 'actions.payment' : 'fields.advanced'), {
-              label: f.label,
-            });
-            return;
-          }
           handleFieldClick(f.type);
         }}
         onDoubleClick={() => {
-          if (isDisabled || isProPlaceholder) return;
+          if (isDisabled) return;
           handleFieldDoubleClick(f.type);
         }}>
         <span className='sf-inserter__item-icon' aria-hidden='true'>
@@ -196,9 +180,6 @@ export default function FieldDock({ fieldGroups, onAddField, onCollapsedChange }
         <span className='sf-inserter__item-label'>
           <HighlightMatch text={f.label} query={searchQuery} />
         </span>
-        {isProPlaceholder && (
-          <span className='sf-inserter__item-pro'>{__('Pro', 'subtleforms')}</span>
-        )}
       </LibraryTile>
     );
   };
@@ -260,7 +241,7 @@ export default function FieldDock({ fieldGroups, onAddField, onCollapsedChange }
               }
               if (e.key === 'Enter' && searchResults?.length === 1) {
                 const only = searchResults[0];
-                if (only.enabled !== false && !only.pro_placeholder) {
+                if (only.enabled !== false) {
                   onAddField(only.type);
                   setSearchQuery('');
                 }

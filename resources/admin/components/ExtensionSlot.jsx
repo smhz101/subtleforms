@@ -1,7 +1,7 @@
 /**
  * Draws what add-ons registered in an admin slot (registerSlotItem in
- * shared/extend.js). With nothing registered it draws `fallback`, which is
- * where this plugin shows a Pro note, or nothing.
+ * shared/extend.js). With nothing registered it draws `fallback` (nothing by
+ * default).
  */
 import { getSlotItems } from '../../shared/extend';
 

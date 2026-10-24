@@ -18,7 +18,7 @@ function mount(props) {
 
 const field = { type: 'file_upload', key: 'docs' };
 
-test('a field saved with several files shows a single file picker', () => {
+test('a field saved with several files shows a single file drop zone', () => {
   const { container, unmount } = mount({
     field,
     config: { key: 'docs', multiple: true, maxFiles: 5 },
@@ -27,9 +27,11 @@ test('a field saved with several files shows a single file picker', () => {
   const input = container.querySelector('input[type="file"]');
   expect(input.multiple).toBe(false);
   expect(input.name).toBe('docs');
-  expect(container.querySelector('.subtleforms-upload__drop')).toBeNull();
+  expect(container.querySelector('.subtleforms-upload__zone')).not.toBeNull();
   expect(container.querySelector('.subtleforms-upload--multiple')).toBeNull();
-  expect(container.textContent).not.toMatch(/up to \d+ files|Drop files/);
+  expect(container.textContent).toMatch(/Drop files here or/);
+  expect(container.textContent).toMatch(/Select file/);
+  expect(container.textContent).not.toMatch(/up to \d+ files/);
   unmount();
 });
 
@@ -40,6 +42,7 @@ test('the picker is disabled once a file is attached', () => {
     value: [{ id: 'a1', name: 'a.pdf', size: 10, type: 'application/pdf' }],
   });
   expect(container.querySelector('input[type="file"]').disabled).toBe(true);
+  expect(container.querySelector('.subtleforms-upload__zone')).toBeNull();
   expect(container.textContent).toContain('a.pdf');
   unmount();
 });

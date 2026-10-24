@@ -87,8 +87,7 @@ const DEFAULT_WEBHOOK_SETTINGS = {
   payload_mode:   'selected',
   payload_selection: [],
   custom_payload: '',
-  // Signed by default; SubtleForms Pro creates a secret for each webhook
-  // when the form is saved (2.3.0).
+  // Signed by default (2.3.0).
   signing: {
     enabled: true,
     secret:  '',
@@ -161,6 +160,11 @@ function MergeTagField({ label, fields, value, onChange, disabled, allowAll = tr
 function ActionConditions({ settings, fields, disabled, onChange }) {
   const logic = settings.logic && Array.isArray(settings.logic.groups) ? settings.logic : null;
   const count = countRules(logic);
+  const editor = !!getLogicEditor();
+
+  // Conditions on actions come from an add-on's logic editor. Without one
+  // there is nothing to set; saved rules are kept and named as ignored.
+  if (!editor && count === 0) return null;
 
   return (
     <details className='sf-actions-panel__conditions' open={count > 0 || undefined}>
@@ -168,7 +172,7 @@ function ActionConditions({ settings, fields, disabled, onChange }) {
         {__('Only when…', 'subtleforms')}
         <span className='sf-actions-panel__conditions-state'>
           {count > 0
-            ? (getLogicEditor() ? __('Conditional', 'subtleforms') : __('Ignored without Pro', 'subtleforms'))
+            ? (editor ? __('Conditional', 'subtleforms') : __('Ignored', 'subtleforms'))
             : __('Every submission', 'subtleforms')}
         </span>
       </summary>
@@ -476,7 +480,7 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fie
           <div className='sf-webhook-test'>
             <ConnectionTest
               path='/webhooks/test'
-              requiresPro={false}
+              addonRoute={false}
               label={__('Send test', 'subtleforms')}
               disabled={isDisabled || !String(s.url || '').trim()}
               getBody={() => {

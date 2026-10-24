@@ -166,7 +166,7 @@ export default function PreviewWorkspace( {
               <Notice status='info' isDismissible={ false }>
                 <p>
                   { __(
-                    'Styling is read-only: activate your Pro licence to edit. The form keeps working either way.',
+                    'Styling is read-only here.',
                     'subtleforms'
                   ) }
                 </p>

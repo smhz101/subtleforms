@@ -173,14 +173,6 @@ trait ApiGuards {
 			return $nonce_check;
 		}
 
-		if ( ! $this->getGate()->allows( 'api.read' ) ) {
-			return new \WP_Error(
-				'subtleforms_forbidden',
-				__( 'You are not allowed to perform this action.', 'subtleforms' ),
-				array( 'status' => 403 )
-			);
-		}
-
 		return true;
 	}
 
@@ -202,14 +194,6 @@ trait ApiGuards {
 		$nonce_check = $this->verifyNonce( $request );
 		if ( is_wp_error( $nonce_check ) ) {
 			return $nonce_check;
-		}
-
-		if ( ! $this->getGate()->allows( 'api.write' ) ) {
-			return new \WP_Error(
-				'subtleforms_forbidden',
-				__( 'You are not allowed to perform this action.', 'subtleforms' ),
-				array( 'status' => 403 )
-			);
 		}
 
 		return true;

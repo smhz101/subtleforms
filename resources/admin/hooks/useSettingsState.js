@@ -65,7 +65,7 @@ export default function useSettingsState() {
 	const [ hasChanges, setHasChanges ] = useState( false );
 	const [ fieldErrors, setFieldErrors ] = useState( {} );
 	// Initialise from URL hash (e.g. #tab=extensions) so page reloads can
-	// land on a specific tab (e.g. after license activation).
+	// land on a specific tab.
 	const initialTab = ( () => {
 		const match = window.location.hash.match( /[#&]tab=([\w-]+)/ );
 		return match ? match[ 1 ] : 'general';

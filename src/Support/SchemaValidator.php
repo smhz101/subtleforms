@@ -249,7 +249,7 @@ final class SchemaValidator {
 					if ( ! empty( $types ) ) {
 						// include legacy aliases such as 'select'
 						$types[] = 'select';
-						// Add-on fields (Pro Signature, Calculation, Card Payment)
+						// Add-on fields (Signature, Calculation, Card Payment)
 						// stay in a form while the add-on is inactive (2.3.9).
 						$types = array_merge( $types, \SubtleForms\Fields\AddonFieldTypes::knownTypes() );
 						return array_values( array_unique( $types ) );

@@ -15,7 +15,7 @@ import { warnOnce } from '../utils/warnOnce';
 import { serverFieldErrors, fixFieldsSummary } from '../utils/serverErrors';
 import { getFormClassNames } from '../utils/formStyles';
 import { structuralType } from '../../shared/formType';
-import { formFieldDefaults } from '../../shared/fieldDisplay';
+import { formFieldDefaults, formHasRequiredFields, requiredIndicatorMark } from '../../shared/fieldDisplay';
 import { debug } from '../../shared/debug';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { computeQuote, isPricedForm, formatMoney, isPricedType } from '../../shared/pricing';
@@ -58,11 +58,7 @@ export const isEmptyValue = ( value ) =>
 
 /** Shown while the conversational layout downloads (builder preview only). */
 function ConversationalLoading() {
-  return (
-    <div className='subtleforms-loading'>
-      {__('Loading form...', 'subtleforms')}
-    </div>
-  );
+  return null;
 }
 
 // One question at a time is its own download (2.6.0).
@@ -73,6 +69,7 @@ const ConversationalFormRenderer = lazyField('conversational', 'default', Conver
 export default function FormRenderer({
   formId,
   preloadedSchema = null,
+  preloadedSpamToken = '',
   preview = false,
   onSubmit: customOnSubmit = null,
   blockOptions = null,
@@ -86,7 +83,7 @@ export default function FormRenderer({
   );
   const [schema, setSchema] = useState(preloadedSchema || inline?.schema || null);
   // Server-signed load time for the spam time trap (FF-11, FF-12).
-  const [spamToken, setSpamToken] = useState(inline?.spamToken || '');
+  const [spamToken, setSpamToken] = useState(preloadedSpamToken || inline?.spamToken || '');
   const [error, setError] = useState(null);
   const [values, setValues] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -301,7 +298,7 @@ export default function FormRenderer({
     }
   }, [defaultValues]);
 
-  // Computed fields that add-ons register (Pro Calculation) are worked out
+  // Computed fields that add-ons register (Calculation) are worked out
   // whenever an answer changes. The server recomputes them on submit, so
   // this is display only.
   useEffect(() => {
@@ -453,11 +450,13 @@ export default function FormRenderer({
   // Move focus to the first invalid input, scoped to this form's root element
   // so two forms on one page don't steal focus from each other (A2/P1-5).
   const focusFirstInvalid = useCallback((errorCount = 0) => {
-    if (errorCount > 0) {
+    if (errorCount > 0 && fieldDefaults.validationSummary !== false) {
       const summary = fixFieldsSummary(errorCount);
       // One announcement: the visible summary below (role alert). The field
       // errors themselves are not live regions.
       setErrorSummary(summary);
+    } else if (errorCount === 0 || fieldDefaults.validationSummary === false) {
+      setErrorSummary('');
     }
     // Two frames: the error state has to render before aria-invalid exists.
     requestAnimationFrame(() =>
@@ -482,7 +481,7 @@ export default function FormRenderer({
         }
       })
     );
-  }, []);
+  }, [fieldDefaults]);
 
   // Validate current step
   const validateStep = useCallback(() => {
@@ -1093,14 +1092,9 @@ export default function FormRenderer({
   }, [schema]);
 
   if (loading) {
-    // Its own key, so the form replaces this node instead of React reusing
-    // it: a reused node that moves (a block is wider than the form inside
-    // it) counts as a layout shift (2.6.0).
-    return (
-      <div key='subtleforms-loading' className='subtleforms-loading'>
-        {__('Loading form...', 'subtleforms')}
-      </div>
-    );
+    // Keep the server outline (or an empty container) instead of flashing
+    // a loading line over a wiped mount.
+    return null;
   }
 
   if (error) {
@@ -1291,7 +1285,7 @@ export default function FormRenderer({
             aria-hidden='true'
           />
         </div>
-        {(submitError || errorSummary) && (
+        {(submitError || (fieldDefaults.validationSummary !== false && errorSummary)) && (
           <div className='subtleforms-error' role='alert'>
             {submitError || errorSummary}
           </div>
@@ -1306,6 +1300,16 @@ export default function FormRenderer({
           {currentStepConfig.description && (
             <p className='subtleforms-step-description'>
               {currentStepConfig.description}
+            </p>
+          )}
+
+          {formHasRequiredFields(schema) && (
+            <p className='subtleforms-required-legend'>
+              <span className='subtleforms-required' aria-hidden='true'>
+                {requiredIndicatorMark(fieldDefaults)}
+              </span>
+              {' '}
+              {__('indicates required fields', 'subtleforms')}
             </p>
           )}
 

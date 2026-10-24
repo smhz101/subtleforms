@@ -17,8 +17,8 @@ test.afterAll(async () => {
 });
 
 test('a signature answer shows as an image in the entry, not as its code', async ({ page, playwright }) => {
-  // Signature is a SubtleForms Pro field since 2.3.9; without Pro no signature can be submitted.
-  test.skip(!(await hasFieldTypes(client, ['signature'])), 'Signature needs SubtleForms Pro');
+  // Signature is an add-on field since 2.3.9; without the add-on no signature can be submitted.
+  test.skip(!(await hasFieldTypes(client, ['signature'])), 'Signature needs its add-on');
   const form = await publishForm(client, {
     title: 'Signature entry',
     fields: [

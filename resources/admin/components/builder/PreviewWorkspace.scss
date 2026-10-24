@@ -70,6 +70,7 @@
 		grid-template-columns: minmax(0, 1fr) 22rem;
 		flex: 1 1 auto;
 		min-height: 0;
+		overflow-y: auto;
 
 		&.is-controls-hidden {
 			grid-template-columns: minmax(0, 1fr);
@@ -78,8 +79,7 @@
 
 	&__canvas {
 		min-width: 0;
-		overflow-x: hidden;
-		overflow-y: auto;
+		overflow: visible;
 		padding: var(--sf-space-8) var(--sf-space-6);
 	}
 
@@ -111,7 +111,7 @@
 
 	&__controls {
 		min-width: 0;
-		overflow-y: auto;
+		overflow: visible;
 		padding: var(--sf-space-6);
 		background: var(--sf-bg-surface);
 		border-left: 1px solid var(--sf-border);

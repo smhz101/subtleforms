@@ -4,8 +4,16 @@ This file keeps the full release history. readme.txt lists only the latest versi
 
 == Changelog ==
 
+= 2.7.2 - 2026-10-24 =
+* New: On an empty site, SubtleForms offers to import forms from Contact Form 7, Gravity Forms, Fluent Forms and other detected form plugins.
+* Change: Forms load without a loading flash, file uploads use a drop zone with a select button, repeater groups are labelled Entry N, and form settings let you choose the required-field mark and turn the validation summary on or off. Forms that have required fields show a short legend for the mark. Forms no longer paint a background by default, and inherit-from-theme keeps SubtleForms chrome for calendars and similar fields while using theme colours.
+* Fix: The Preview tab uses one scrollbar for the canvas and styling controls.
+* Change: Appearance presets no longer set form width; Layout / Form width stays a separate control so columns flex at full content width.
+* Fix: The date picker trigger matches other fields, and the calendar panel is easier to read.
+* Fix: The first-load route spinner uses the brand colour on the white stage, matching the admin shell.
+
 = 2.7.1 - 2026-10-23 =
-* Change: Payments, coupons and the Payments page moved to SubtleForms Pro. Forms with payment fields show a not available message until Pro 2.7.0 is active.
+* Change: Forms with payment fields show a not available message instead of taking orders.
 * Change: Forms that inherit the theme load no SubtleForms stylesheet, and the stylesheet has an RTL version.
 * Change: Choice groups use a fieldset with a legend, and error and success boxes use theme-neutral colours.
 * Fix: The keep-data uninstall setting is now saved and honoured.
@@ -15,13 +23,8 @@ This file keeps the full release history. readme.txt lists only the latest versi
 
 = 2.7.0 - 2026-10-23 =
 * New: Web addresses and links written as [text](https://example.com) in a form's confirmation message are now clickable; only http, https and site-relative links are allowed and anything else stays plain text.
-* New: Add-ons can register their own panel in the form builder under Integrations, so Pro can offer Salesforce, Pipedrive and Close there.
-* New: Extension points for add-ons: field type overrides, logic evaluators, Reports panel slots, form mount hooks and a form-deleted action, with Pro placeholders in the builder and Reports.
-* Change: Advanced conditional logic (any-match, groups, more operators, step, action and confirmation rules) is now part of SubtleForms Pro; basic show and hide rules stay free and saved advanced rules are ignored without Pro.
-* Change: Form analytics (views, conversion, the form funnel and the Reports panels) is now part of SubtleForms Pro; entry counts, dashboard totals and the spam card stay free and stored counts are kept.
-* Change: Uploading several files in one field is now part of SubtleForms Pro; a saved multi-file field accepts one file without it.
-* Change: Picture Choice is now part of SubtleForms Pro; forms that use it keep working as a plain choice field until Pro is active.
-* Change: The Pro upgrade notes now say SubtleForms Pro has 52 templates, including scored quizzes and five calculators.
+* New: Add-ons can register their own panel in the form builder under Integrations.
+* New: Extension points for add-ons: field type overrides, logic evaluators, Reports panel slots, form mount hooks and a form-deleted action, with placeholders in the builder and Reports.
 * Change: Removed two settings that were saved but never used: the WooCommerce product and currency fields.
 
 = 2.6.1 - 2026-10-23 =
@@ -37,14 +40,14 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Change: Forms load faster: every page with a form now downloads 22 percent less SubtleForms code (46 KB instead of 59 KB compressed), the date picker, phone and country lists, uploads, payments and the conversational layout are only downloaded by forms that use them, pages without a form still load nothing, and on a slow mobile connection a form is ready about a quarter of a second sooner.
 * Change: The SubtleForms screens no longer pin the WordPress admin menu in its own scrolling column on short windows; the menu behaves as in WordPress.
 * Change: The Submissions screen no longer has a New tab, because All already lists unread entries; an old link to the New tab opens All.
-* Change: Tools is now a tab in Settings, with an MCP tab right after it (Pro adds its screen; without Pro it explains MCP and links to the upgrade page). The old Tools address opens the Tools tab.
+* Change: Tools is now a tab in Settings, with an MCP tab right after it that explains MCP. The old Tools address opens the Tools tab.
 * Change: Report panels no longer scroll inside their own boxes: long lists in Form funnel and Each form show the top rows with a Show all button, and every panel fits from phone to wide screens.
 * Fix: The Submissions footer (result count, previous and next, rows per page) stays at the bottom edge of the list pane with no entries, a few or many.
 * Fix: Submissions lists past the first 100 entries when 50 or 100 rows per page are chosen, and an empty page after the last row was removed keeps its real page count so Previous works.
 * Fix: Choosing 50 or 100 rows per page on the Submissions screen lists the entries instead of showing "Entries could not be loaded".
 
 = 2.5.0 - 2026-10-21 =
-* Change: The Branding tab is gone from Settings. White label branding for Agency licences is set once in the licence portal on subtleforms.com and applied by SubtleForms Pro on every site that uses the licence.
+* Change: The Branding tab is gone from Settings.
 * Fix: The date, time and date and time pickers work from the keyboard. Focus moves into the dialog when it opens, the hour and minute columns take the arrow keys, Home, End and Enter, and Escape returns focus to the field.
 * Fix: The Country and phone country search is announced as a combobox with the active country, Escape returns focus to the field instead of the page, and required dropdown, country, date and time fields are marked required for screen readers.
 * Fix: The small grey text in the Columns layout headers, prefix and suffix text and country codes is darker so it reaches the 4.5 to 1 contrast WCAG asks for.
@@ -70,16 +73,16 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Change: Fields on the builder canvas use flat colours instead of gradients.
 * Fix: A webhook address typed without https:// gets it, and an address WordPress refuses (a local or private host, or a port other than 80, 443 and 8080) is listed in the entry's activity log with the reason instead of failing silently.
 * Fix: Webhooks no longer send the form's spam check token, the honeypot or CAPTCHA tokens with the answers.
-* Change: The default webhook body is the one the Webhooks settings describe, and the one SubtleForms Pro sends: the event, form and entry IDs, a link to the entry, the answers keyed by field under "fields", and every answer with its label under "answers". Receivers that read answers at the top level of the body should read them from "fields".
-* Fix: The webhook test in Settings works without SubtleForms Pro. The button is ready as soon as an address is typed, the test uses the same address check, body and signing as real deliveries, and it says why an address is refused.
+* Change: The default webhook body is the one the Webhooks settings describe: the event, form and entry IDs, a link to the entry, the answers keyed by field under "fields", and every answer with its label under "answers". Receivers that read answers at the top level of the body should read them from "fields".
+* Fix: The webhook test in Settings is ready as soon as an address is typed, uses the same address check, body and signing as real deliveries, and says why an address is refused.
 * New: Each webhook action in Form settings has a Send test request button that sends the action's own method, headers, signing and custom body.
 * Change: A field ID can use hyphens and up to 64 characters. Saving a form refuses an ID used by two fields anywhere in the form (inside steps, columns and containers too) or a name SubtleForms reserves for its own values.
 * Change: Gravity Forms and Fluent Forms imports keep each field's name from the other plugin (Fluent's field name, Gravity's parameter name) as its field ID when it is valid, so data and integrations that use those names keep matching.
 * New: Change a field's ID in the field settings. Click the pencil next to the ID, type the new one, press Enter. The ID is checked as you type, and merge tags, formulas, conditional logic, emails, webhooks, confirmations, integrations and payment settings that use it are updated. Undo puts it back, and earlier entries keep their answers under the old ID.
-* Fix: Forms imported in Tools, migrated from Gravity Forms or Fluent Forms, or created with a schema get the same save steps as a builder save, so add-ons such as SubtleForms Pro can finish them (a signed webhook gets its secret, logic rules for missing fields are removed).
+* Fix: Forms imported in Tools, migrated from Gravity Forms or Fluent Forms, or created with a schema get the same save steps as a builder save, so add-ons can finish them (a signed webhook gets its secret, logic rules for missing fields are removed).
 * Fix: The live form sends the page's language with its requests when a translation add-on gives one, so translated labels and confirmations are used.
 * New: An action, subtleforms/submission/deleted, fires when an entry is deleted for good, so add-ons can remove what they keep about it.
-* Fix: Settings, Integrations lists integrations your SubtleForms Pro plan does not include with the plan that has them, and an integration's status dot turns green as soon as it is switched on and set up, without a reload.
+* Fix: An integration's status dot in Settings turns green as soon as it is switched on and set up, without a reload.
 * Fix: Entry ages read 1 hour ago, 1 minute ago and 1 day ago instead of using the plural for one.
 * Fix: Deleting a coupon, discarding changes, deleting forms or steps, resetting settings and export errors use the SubtleForms dialog instead of the browser's confirm and alert boxes.
 * Change: In the builder the field inspector's first tab is called Field and its Appearance section is called Display, so they are not confused with the Settings view and the Style tab.
@@ -105,7 +108,7 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: Product name, price and quantity settings are under General in the builder.
 * Fix: Priced options show no choice as selected on the builder canvas unless one is set as the default.
 * Fix: Entries whose payment failed show Payment failed in the entries list and on the dashboard.
-* Fix: With SubtleForms Pro active and no payment gateway connected, admins are asked to connect Stripe.
+* Fix: Admins are asked to connect Stripe when no payment gateway is connected.
 * Fix: Payment validation messages can be translated.
 * Fix: An order below the smallest card charge for its currency gets a clear message before and at payment.
 * Fix: Submissions exported and imported in Tools keep their order, coupon, totals, payment status, gateway and transaction ID, and a failed payment stays failed.
@@ -185,9 +188,7 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: A webhook that is still waiting says Queued.
 
 = 2.3.9 - 2026-10-19 =
-* Change: Nothing in SubtleForms is switched off without a license. CSV export, Reports (views, submissions and conversion), full conditional logic (any rule, groups, every operator, conditional emails, webhooks and confirmations), Picture choice, several files per upload field, payment fields (Product, Priced options, Custom amount, Fixed fee, Order summary, Coupon), coupons, and the Webhooks and Analytics settings all work in the free plugin.
-* Change: Signature and Calculation fields, the formula engine and the Card Payment field moved to SubtleForms Pro 2.4.0. A form that uses them keeps them: the live form leaves them out and the builder shows a note until Pro is active. Update SubtleForms Pro to 2.4.0 with this release.
-* Change: Upgrade messages say plainly what SubtleForms Pro adds. Reports show real numbers only, and the template screen shows one card for the 47 Pro templates.
+* Change: Reports show real numbers only.
 * Change: Global functions and transients use the subtleforms_ prefix.
 * Fix: Webhook retries and the default signing secret follow Settings, Integrations, Webhooks.
 * Fix: Visitors can send a form from a page served by a page cache. The spam time check uses a token signed by the server, so a wrong device clock no longer blocks a person, and a bot cannot skip it.
@@ -232,7 +233,7 @@ This file keeps the full release history. readme.txt lists only the latest versi
 = 2.3.6 - 2026-10-18 =
 * New: Tools exports and imports SubtleForms forms and submissions as JSON, and imports Gravity Forms and Fluent Forms exports as drafts. Payments, quizzes and add-ons are skipped and listed.
 * New: Tools shows activity logs, webhook calls and a 30-day log of SubtleForms REST calls. Request and response bodies are not stored in the API log.
-* New: Reports shows how many forms, submissions and unread entries you have, and submissions for the last 7 days. Views and conversion stay in SubtleForms Pro.
+* New: Reports shows how many forms, submissions and unread entries you have, and submissions for the last 7 days.
 
 = 2.3.5 - 2026-10-18 =
 * New: Appearance can inherit the active theme. The preset and the custom controls use the theme's type, colours and content width, and a custom value still overrides the theme.
@@ -264,7 +265,7 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: An empty Trash has its own message, and the dashboard form selector lists every form instead of the 10 most recently updated.
 
 = 2.3.2 - 2026-10-13 =
-* Fix: Creating a form from some templates opened an empty form, for example Volunteer Signup, Event Registration and Vendor Application in SubtleForms Pro. Those templates used a single checkbox with a list of options, which the server refused, and the refusal was not reported. Such a checkbox is now saved as a Checkboxes (Multiple choice) field, every template creates its full form with its fields, settings, notifications and type, and a form that cannot be created shows the reason and leaves no empty form behind.
+* Fix: Creating a form from some templates opened an empty form, for example Volunteer Signup, Event Registration and Vendor Application. Those templates used a single checkbox with a list of options, which the server refused, and the refusal was not reported. Such a checkbox is now saved as a Checkboxes (Multiple choice) field, every template creates its full form with its fields, settings, notifications and type, and a form that cannot be created shows the reason and leaves no empty form behind.
 * Fix: The form type follows the form. Adding the first Page Break to a Standard form makes it Multi-step, and removing the last one makes it Standard again with every field kept. The builder badge, the Settings tab, All Forms, the dashboard, the entry details and the live form all show the same type, and a message with Undo tells you when the type changes. Forms saved by older versions are corrected when the plugin updates.
 * New: A Form type setting on the Settings tab. Changing a Standard form to Multi-step puts every field in a first step. Changing a Multi-step form to Standard or Conversational removes the steps and keeps every field in order, after you confirm.
 * Fix: A new conversational form now starts with "Add your first question" instead of a block that could not be edited or removed. Every question, a welcome screen too, can be edited, replaced with another field, moved earlier or later, duplicated and deleted. Clicking a field in the panel fills an empty question, and otherwise adds a new question right after the one you are on. Add question makes an empty question where you are.
@@ -285,7 +286,7 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: Forms saved by older versions with fields outside every step are repaired when they are opened in the builder and when the live form loads. Those fields move into the first step with their order, keys, settings and conditions kept, and the builder says so until you save.
 * New: Every field of a multi-step form has a Step setting in its General settings. Choosing another step moves the field to the end of that step, keeps its key, settings, conditions and payment links, switches the canvas to that step and keeps the field selected. You can also drag a field onto a step tab.
 * Fix: Repeaters now work for visitors. Add and Remove buttons use your button label and respect the minimum and maximum number of groups. Each group has its own inputs, names (for example companies[0][ticker]), required checks, errors and conditions, focus moves to the new group or the next one after a removal, and the buttons have clear names for screen readers. This works on the live form, in the builder Preview and in the block editor preview, and on phones.
-* Fix: The server checks every Repeater group on its own and stores the answer as a list of groups. Entries show the groups as a table, emails list them under {all_fields} (a table in HTML emails), and the PDF data used by SubtleForms Pro includes each group.
+* Fix: The server checks every Repeater group on its own and stores the answer as a list of groups. Entries show the groups as a table, emails list them under {all_fields} (a table in HTML emails), and the PDF data includes each group.
 * Change: CSV export gives a Repeater one column per child field, named "Repeater label: Child label". Each group is one line inside the cell, in the same order in every column of that Repeater, so line 2 of every column belongs to group 2. Exports that mix several forms write each group as a numbered line such as "1. ticker: AAPL; shares: 8".
 * Fix: Fields could not be dragged into a Repeater, Group or columns because pressing anywhere on the container started dragging the container. Containers now accept drops into their drop zone, only the container handle drags the container, the zone that will take the drop is highlighted (also inside nested containers), and fields can be dragged in and out of containers and from the field library. The new Move to menu on each field toolbar does the same from the keyboard.
 * Fix: Clicking a field inside a Repeater, Group or columns, or pressing Enter on it, opened the container's settings. It now opens the field's own Settings, Validation, Logic and Style, and the container is still selected from its header.
@@ -300,7 +301,7 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Database: Adds a trashed_from column to the forms table and trashed_from and trashed_at columns to the entries table. They are added automatically when the plugin updates; no data is changed.
 
 = 2.3.0 - 2026-10-11 =
-* New: Screens for SubtleForms Pro 2.3.0: an integration log with Retry on each entry, a webhook delivery log, "Send test contact" in the form integrations and a custom support link for white label.
+* New: An integration log with Retry on each entry, a webhook delivery log and "Send test contact" in the form integrations.
 * New: Email merge tags. An "Insert tag" menu in the email settings adds {all_fields}, {field:key}, {form_title}, {entry_id}, {site_name}, {admin_email} and {date} at the cursor. Single and double braces both work, so {{all_fields}} and forms made before 2.3 keep working. The help menu explains every tag.
 * New: Emails can be sent as HTML, with line breaks kept and {all_fields} drawn as a table. An empty message now sends every answer instead of raw data.
 * New: Newsletter template with one email field and the button on the same row, an inline field layout for any form, and a Dark surface appearance preset for footers and hero sections. Previews show dark-surface forms on a dark background.
@@ -320,7 +321,6 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: If a card payment was authorised but the entry could not be saved (database error, spam check, CAPTCHA or validation), the hold on the card is now released.
 * Fix: Card declines are shown next to the card field and every other answer stays in the form.
 * New: Coupons can be limited per customer, and the Order Summary shows how many uses are left and when the coupon expires.
-* New: The Payments screen has room for SubtleForms Pro to offer "Use my WooCommerce Stripe account".
 * Fix: Setting a field's width no longer drops its required setting, options, placeholder or help text on the live form. Width only changes the layout.
 * Fix: Errors found by the server are shown on each field, which is marked invalid, linked to its message and focused. The message above the form now reads "Please fix the 4 highlighted fields."
 * Fix: The Country field lists every country again. It and the Address field share one country list.
@@ -337,13 +337,12 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: Toggle, Opinion scale, Picture choice, Signature and Calculation answers were not sent with the entry. They are now saved.
 * Fix: The spam trap field has a random name and no visible label text, so autofill does not fill it.
 * Fix: Email subjects stay on one line.
-* Readme: Describes what the free plugin does in 2.2 and what SubtleForms Pro adds.
+* Readme: Describes what the free plugin does in 2.2.
 
 = 2.2.0 - 2026-10-11 =
 * New: File and image uploads work end to end: files upload as soon as they are picked, are checked for type and size, stored under random names in a protected folder, downloaded by admins through a secure link, and deleted with the entry or by data retention
 * New: Conditional logic rebuilt with one rule engine shared by the browser and the server. Hidden fields are no longer validated or stored
-* New: Form analytics: views, submissions and conversion rate per form (reports with Pro)
-* New: Integrations, PDF, WooCommerce and white label settings for SubtleForms Pro
+* New: Form analytics: views, submissions and conversion rate per form
 * Fix: Conditional logic rules saved in the builder were not applied on the live form
 * Fix: Visitors who were not logged in did not get a form's custom confirmation
 * Fix: Integration settings never loaded because extensions booted too late
@@ -354,7 +353,7 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * New: Payments that add up on the server. Product (price and quantity), Priced Options (radio, cards, dropdown or checkboxes with a price per option), Custom Amount and Fixed Fee fields feed one live order
 * New: Order Summary lists every item with subtotal, discount, tax and total as visitors fill the form, with a coupon box right under the total
 * New: Coupons. SubtleForms › Payments manages percentage or fixed discounts with minimum order, usage limits, start and end dates and per-form rules. Codes are checked when applied and again on submit, and a use is counted only when the order goes through
-* New: Card Payment field for gateways (Stripe in SubtleForms Pro). Entries keep the full order and payment status, shown in an Order panel on the entry
+* New: Card Payment field for gateways (Stripe). Entries keep the full order and payment status, shown in an Order panel on the entry
 * New: Calculation fields can be charged ("Charge this amount")
 * New: Payments screen with gateway status, setup guide and the coupon manager
 * New: The builder canvas is now what you see is what you get: form and field styling (colours, radius, input style, label position, spacing) shows on the canvas as you change it
@@ -369,19 +368,17 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Redesign: Submission detail as a reading pane with answers, activity tabs, previous/next, read/unread, flag and delete
 * Redesign: New form screen is now a template library with wireframe previews and a one-step naming dialog
 * Redesign: Settings use grouped navigation, setting cards and a floating save bar (Ctrl/Cmd+S saves)
-* Redesign: Extensions page is now a Pro hub grouped by job, with clear locked, off, needs-setup and active states
+* Redesign: Extensions page is now grouped by job, with clear off, needs-setup and active states
 * Builder: Gutenberg-style three-panel editor with field library, canvas and tabbed inspector (Settings, Validation, Logic, Style)
 * Builder: Choices editor with drag to reorder, default selection, value column, bulk edit and image options
 * Builder: Form settings gain After submit (message with merge tags or redirect, submit button text) and Availability (logged-in only, open and close dates, entry limit)
-* Fields: New Toggle and Opinion Scale fields; Pro adds Picture Choice, Signature and Calculation (formula builder, recalculated on the server)
+* Fields: New Toggle and Opinion Scale fields.
 * Fields: New settings on existing fields: help text, default value tokens, prefix and suffix, min and max length, pattern, choice limits, option layouts, custom required message, admin label, read-only and CSS class
 * Fields: Field library reorganised and renamed; rarely used and duplicate field types hidden from the library (existing forms keep working)
 * Fix: Field settings not declared in the validator (conditions, min/max, formulas and more) were dropped on save; they are now kept and sanitised
 * Fix: Publishing could replace the latest changes with an older autosave draft
 * Fix: Unread counts used a status value that submissions never have; counts now use the read flag
 * Fix: Marking a submission unread overwrote its processing status
-* Fix: Field library never showed Pro lock badges
-* Pro: Locked features now explain themselves in one consistent dialog and light up in place once a license is active
 * Appearance: Nine style presets drawn as live mini previews, plus a Custom mode for every colour, font, field, button and layout setting
 * Appearance: New tokens for label colour, input text, focus ring, button text and button radius
 * Appearance: Field Style tab with a live sample, visual width picker and colour chips that show the inherited value
@@ -425,8 +422,7 @@ now be reconstructed accurately.
 * Builder: structured group fields as container nodes, with a hierarchy system for nested fields
 * Builder: configurable composite fields, field identity icons, and a rebuilt field picker with search
 * Builder: live preview mode
-* Templates: free templates expanded from 2 to 11 across 5 categories; 13 categories in total with Pro stubs
-* Licensing: capability-based gating replaces the previous LicenseApi and SubscriptionManager
+* Templates: free templates expanded from 2 to 11 across 5 categories.
 * Settings: tab routing via URL hash
 * Database: is_read migration for the submissions table
 * Accessibility and onboarding persistence fixes throughout

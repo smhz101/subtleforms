@@ -13,7 +13,5 @@ export * from './loading';
 // Primitives
 export { default as Icon } from './Icon';
 export { default as ContextualTip } from './ContextualTip';
-export { default as UpgradePrompt, getUpgradeUrl } from './UpgradePrompt';
 export { default as PanelSection } from './PanelSection';
-export { default as UpgradeModal } from './UpgradeModal';
 export { default as ErrorState } from './ErrorState';

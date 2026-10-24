@@ -34,26 +34,6 @@
 		color: var(--sf-text-muted, #757575);
 	}
 
-	&__pro {
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-		padding: 10px;
-		border: 1px dashed var(--sf-border-strong, #c3c4c7);
-		border-radius: var(--sf-radius-md, 4px);
-		color: var(--sf-text-muted, #757575);
-
-		p { margin: 0; font-size: 12px; }
-	}
-
-	&__pro-head {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		font-weight: 500;
-		color: var(--sf-text, #1e1e1e);
-	}
-
 	&__rule {
 		display: flex;
 		flex-direction: column;
@@ -111,7 +91,7 @@
 	color: var(--sf-text-muted, #757575);
 }
 
-// After submit panel: the Pro note for conditional confirmations.
+// After submit panel: conditional confirmations.
 .sf-confirmations {
 	display: flex;
 	flex-direction: column;

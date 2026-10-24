@@ -1,6 +1,7 @@
 /**
- * Branding is set in the licence portal now, so Settings has no Branding tab
- * and a stale tab=branding link lands on the first tab.
+ * Settings has no Branding tab and a stale tab=branding link lands on the
+ * first tab. Settings has no License or MCP placeholder: an MCP tab is listed
+ * only when an add-on registers it.
  */
 import { createRoot } from '@wordpress/element';
 import { act } from 'react';
@@ -11,7 +12,6 @@ jest.mock('../../components/settings/GeneralSettings', () => () => null);
 jest.mock('../../components/settings/FrontendSettings', () => () => null);
 jest.mock('../../components/settings/EmailSettings', () => () => null);
 jest.mock('../../components/settings/AdvancedSettings', () => () => null);
-jest.mock('../../components/settings/LicenseSettings', () => () => null);
 jest.mock('../../components/settings/ExtensionsSettings', () => () => null);
 jest.mock('../../hooks/useSettingsState', () => ({
   __esModule: true,
@@ -79,46 +79,46 @@ test('a stale tab=ai falls back to the first tab', () => {
   unmount();
 });
 
-// Tools moved into Settings, and MCP has its slot for Pro.
+// Tools moved into Settings. MCP is listed only when an add-on registers it.
 describe('Tools and MCP tabs', () => {
   const names = () => ALL_TABS.map((t) => t.name);
 
-  test('Settings lists a Tools tab and an MCP tab', () => {
-    expect(names()).toEqual(expect.arrayContaining(['tools', 'mcp']));
+  afterEach(() => {
+    delete window.__subtleformsExtend.settingsTabs.mcp;
+  });
+
+  test('Settings lists a Tools tab and no License or MCP tab of its own', () => {
+    expect(names()).toContain('tools');
+    expect(names()).not.toContain('mcp');
+    expect(names()).not.toContain('license');
     const { container, unmount } = render('general');
     const items = [...container.querySelectorAll('.sf-settings__nav-item')].map((el) => el.textContent);
     expect(items.some((t) => t.startsWith('Tools'))).toBe(true);
-    expect(items.some((t) => t.startsWith('MCP'))).toBe(true);
+    expect(items.some((t) => t.startsWith('MCP'))).toBe(false);
+    expect(container.textContent).not.toMatch(/License|Licence|Upgrade|\bPro\b/);
     unmount();
+  });
+
+  test('a stale tab=license or tab=mcp falls back to the first tab', () => {
+    expect(resolveTab('license').name).toBe(ALL_TABS[0].name);
+    expect(resolveTab('mcp').name).toBe(ALL_TABS[0].name);
   });
 
   test('every tab is a button, so the list is reachable by keyboard', () => {
     const { container, unmount } = render('general');
     const items = container.querySelectorAll('.sf-settings__nav-item');
-    expect(items.length).toBeGreaterThan(6);
+    expect(items.length).toBeGreaterThan(5);
     items.forEach((el) => expect(el.tagName).toBe('BUTTON'));
     unmount();
   });
 
-  test('MCP without Pro explains itself and links to the upgrade page', () => {
+  test('a component an add-on registers under "mcp" is listed and shown', () => {
+    window.SubtleFormsExtend.registerSettingsTab('mcp', { component: () => <p className='addon-mcp'>MCP screen</p> });
     const { container, unmount } = render('mcp');
     expect(container.querySelector('.sf-settings__title').textContent).toBe('MCP');
-    const note = container.querySelector('.sf-mcp-placeholder');
-    expect(note).not.toBeNull();
-    expect(note.textContent).toMatch(/part of SubtleForms Pro/);
-    const link = note.querySelector('a');
-    expect(link.getAttribute('href')).toMatch(/^https:\/\/subtleforms\.com\/pro\?utm_source=plugin&utm_medium=upgrade&utm_campaign=mcp$/);
-    expect(link.getAttribute('rel')).toContain('noopener');
+    expect(container.querySelector('.addon-mcp').textContent).toBe('MCP screen');
+    expect(container.querySelector('.sf-savebar')).toBeNull();
     unmount();
-  });
-
-  test('a component Pro registers under "mcp" replaces the note', () => {
-    window.SubtleFormsExtend.registerSettingsTab('mcp', { component: () => <p className='pro-mcp'>Pro MCP screen</p> });
-    const { container, unmount } = render('mcp');
-    expect(container.querySelector('.pro-mcp').textContent).toBe('Pro MCP screen');
-    expect(container.querySelector('.sf-mcp-placeholder')).toBeNull();
-    unmount();
-    delete window.__subtleformsExtend.settingsTabs.mcp;
   });
 
   test('an add-on can add a tab of its own and it saves itself', () => {
@@ -136,54 +136,42 @@ describe('Tools and MCP tabs', () => {
   });
 });
 
-// 2.6.0: MCP comes right after Tools, with or without Pro's registered tab.
+// A registered MCP tab sits right after Tools, whatever title or order it asks for.
 describe('MCP sits right after Tools', () => {
   const navNames = (container) =>
-    [...container.querySelectorAll('.sf-settings__nav-item span:not(.sf-settings__nav-pro)')].map((el) => el.textContent);
+    [...container.querySelectorAll('.sf-settings__nav-item span')].map((el) => el.textContent);
   const order = () => getGroups().flatMap((g) => g.tabs.map((t) => t.name));
-  // Tools and MCP in one list, MCP straight after Tools (not under another heading).
-  const sameList = () => {
-    const group = getGroups().find((g) => g.tabs.some((t) => t.name === 'tools'));
-    const names = group.tabs.map((t) => t.name);
-    return names[names.indexOf('tools') + 1] === 'mcp';
-  };
 
   afterEach(() => {
     delete window.__subtleformsExtend.settingsTabs.mcp;
     delete window.__subtleformsExtend.settingsTabs['reports-mail'];
   });
 
-  test('without Pro: the placeholder tab follows Tools in the nav', () => {
-    const names = order();
-    expect(names[names.indexOf('tools') + 1]).toBe('mcp');
-    expect(sameList()).toBe(true);
-    const { container, unmount } = render('general');
-    const labels = navNames(container);
-    expect(labels[labels.indexOf('Tools') + 1]).toBe('MCP');
-    unmount();
+  test('without an add-on there is no MCP tab and no Add-ons group', () => {
+    expect(order()).not.toContain('mcp');
+    expect(getGroups().map((g) => g.key)).toEqual(['site']);
   });
 
-  test("Pro's registered tab lands in the same slot, even with its own title or order", () => {
-    const before = order();
+  test("the add-on's tab lands right after Tools, even with its own title or order", () => {
     window.SubtleFormsExtend.registerSettingsTab('mcp', {
       title: 'MCP server',
       order: 1,
-      component: () => <p className='pro-mcp'>Pro MCP screen</p>,
+      component: () => <p className='addon-mcp'>MCP screen</p>,
     });
     window.SubtleFormsExtend.registerSettingsTab('reports-mail', {
       title: 'Report email',
       component: () => <p>Body</p>,
     });
     const after = order();
-    expect(after.indexOf('mcp')).toBe(before.indexOf('mcp'));
     expect(after[after.indexOf('tools') + 1]).toBe('mcp');
     expect(after.filter((n) => n === 'mcp')).toHaveLength(1);
-    expect(sameList()).toBe(true);
+    const site = getGroups().find((g) => g.key === 'site').tabs.map((t) => t.name);
+    expect(site[site.length - 1]).toBe('mcp');
 
     const { container, unmount } = render('mcp');
     const labels = navNames(container);
     expect(labels[labels.indexOf('Tools') + 1]).toBe('MCP server');
-    expect(container.querySelector('.pro-mcp')).not.toBeNull();
+    expect(container.querySelector('.addon-mcp')).not.toBeNull();
     unmount();
   });
 });

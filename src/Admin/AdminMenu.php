@@ -214,7 +214,7 @@ class AdminMenu {
 			array( $this, 'render_submissions' )
 		);
 
-		// Reports. Views and conversion stay behind Pro.
+		// Reports.
 		add_submenu_page(
 			'subtleforms',
 			__( 'Reports', 'subtleforms' ),
@@ -303,13 +303,8 @@ class AdminMenu {
 			'before'
 		);
 
-		// Get license data, provided by the Pro plugin via filter (no API calls).
-		$license_data = apply_filters( 'subtleforms/license_data', null );
-
-		// Rebuild Capabilities fresh at enqueue time.
-		// AdminMenu is constructed on plugins_loaded BEFORE Pro registers its
-		// subtleforms/capabilities filter, so $this->caps is stale. A fresh
-		// instance picks up all filters that are now in place.
+		// Rebuild Capabilities fresh at enqueue time, so filters that add-ons
+		// added after this class was built are included.
 		$live_caps = new Capabilities();
 
 		$admin_data = array(
@@ -321,16 +316,12 @@ class AdminMenu {
 			'currency'       => 'USD',
 			'unreadCount'    => $this->get_unread_count(),
 			'capabilities'   => $live_caps->all(),
-			'hasProPlugin'   => defined( 'SUBTLEFORMS_PRO_VERSION' ) || subtleforms_is_pro_active(),
+			'hasProPlugin'   => self::companion_active(),
 			'missingFieldTypes' => \SubtleForms\Fields\AddonFieldTypes::missing(),
 			// Features an active add-on provides (see Support\ExtensionPoints).
 			'addonFeatures'  => \SubtleForms\Support\ExtensionPoints::provided(),
-			'license'        => $license_data,
-			'subscription'   => array(
-				'status'    => 'inactive',
-				'plan'      => 'free',
-				'connected' => false,
-			),
+			// The More features card on the Dashboard (see more_features()).
+			'moreFeatures'   => self::more_features(),
 			'extensions'     => $this->buildExtensionsData(),
 			'isDev'          => defined( 'WP_DEBUG' ) && WP_DEBUG,
 			// The builder preview renders the real frontend markup inside an
@@ -457,9 +448,9 @@ class AdminMenu {
 
 	/**
 	 * How the admin app presents the plugin: name, logo and which SubtleForms
-	 * credits, help links and upgrade prompts appear.
+	 * credits, help links and the More features card appear.
 	 *
-	 * @return array{name:string,menuName:string,logoUrl:string,hideCredits:bool,hideHelp:bool,hideUpgrade:bool,showLicense:bool,supportUrl:string}
+	 * @return array{name:string,menuName:string,logoUrl:string,hideCredits:bool,hideHelp:bool,hideUpgrade:bool,supportUrl:string}
 	 */
 	public static function branding(): array {
 		static $cache = null;
@@ -474,13 +465,11 @@ class AdminMenu {
 			'hideCredits' => false,
 			'hideHelp'    => false,
 			'hideUpgrade' => false,
-			'showLicense' => true,
 			'supportUrl'  => '',
 		);
 
 		/**
-		 * Filter the admin branding (white label). SubtleForms Pro's Branding
-		 * settings use this on the Agency plan.
+		 * Filter the admin branding (white label), for example from an add-on.
 		 *
 		 * @param array $branding {
 		 *     @type string $name        Product name in the app header and copy.
@@ -488,8 +477,7 @@ class AdminMenu {
 		 *     @type string $logoUrl     Logo image URL; empty for the default mark.
 		 *     @type bool   $hideCredits Hide SubtleForms credits and links.
 		 *     @type bool   $hideHelp    Hide the Help menu.
-		 *     @type bool   $hideUpgrade Hide upgrade prompts.
-		 *     @type bool   $showLicense Show the License screen to this user.
+		 *     @type bool   $hideUpgrade Hide the More features card on the Dashboard.
 		 *     @type string $supportUrl  Where "Get support" links to; empty for SubtleForms (2.3.0).
 		 * }
 		 * @since 2.1.0
@@ -506,10 +494,47 @@ class AdminMenu {
 			'hideCredits' => (bool) $b['hideCredits'],
 			'hideHelp'    => (bool) $b['hideHelp'],
 			'hideUpgrade' => (bool) $b['hideUpgrade'],
-			'showLicense' => (bool) $b['showLicense'],
 			'supportUrl'  => esc_url_raw( (string) $b['supportUrl'], array( 'http', 'https', 'mailto' ) ),
 		);
 		return $cache;
+	}
+
+	/**
+	 * User meta key that remembers a dismissed More features card.
+	 */
+	public const MORE_FEATURES_META = 'subtleforms_more_features_dismissed';
+
+	/**
+	 * Product page the More features card links to.
+	 */
+	public const MORE_FEATURES_URL = 'https://subtleforms.com/pro/';
+
+	/**
+	 * Whether the companion add-on from the SubtleForms team is active. Used
+	 * only to leave out the More features card, never to switch code on or off.
+	 *
+	 * @return bool
+	 */
+	public static function companion_active(): bool {
+		return defined( 'SUBTLEFORMS_PRO_VERSION' ) || ( function_exists( 'subtleforms_is_pro_active' ) && subtleforms_is_pro_active() );
+	}
+
+	/**
+	 * The More features card on the Dashboard: the one place in this plugin
+	 * that says what the separate add-on adds. Shown to people who can manage
+	 * SubtleForms until they dismiss it, and never when white label hides it
+	 * or the add-on is already active.
+	 *
+	 * @return array{show:bool,url:string}
+	 */
+	public static function more_features(): array {
+		$user_id   = get_current_user_id();
+		$dismissed = $user_id > 0 && (bool) get_user_meta( $user_id, self::MORE_FEATURES_META, true );
+		$show      = ! $dismissed && ! self::companion_active() && ! self::branding()['hideUpgrade'];
+		return array(
+			'show' => $show,
+			'url'  => self::MORE_FEATURES_URL,
+		);
 	}
 
 	/**
@@ -540,7 +565,7 @@ class AdminMenu {
 	 * add-on, which adds its entry through the filter below.
 	 *
 	 * @return array<string, array> Map of slug to { slug, label, description,
-	 *                              available, enabled, configured, requires }.
+	 *                              available, enabled, configured }.
 	 */
 	private function buildExtensionsData(): array {
 		$result = array(
@@ -551,12 +576,11 @@ class AdminMenu {
 				'available'   => true,
 				'enabled'     => true,
 				'configured'  => true,
-				'requires'    => '',
 			),
 		);
 
 		/**
-		 * Integrations an add-on lists in Settings (SubtleForms Pro).
+		 * Integrations an add-on lists in Settings.
 		 *
 		 * @param array<string, array> $integrations Map of slug to integration data.
 		 * @since 2.8.0

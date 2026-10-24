@@ -4,6 +4,8 @@ import clsx from 'clsx';
 import AdminHeader from './AdminHeader';
 import ActionBar from './ActionBar';
 import Notices from './Notices';
+import ImportOfferNotice from './ImportOfferNotice';
+import ImportOfferModal from './ImportOfferModal';
 import './AdminShell.scss';
 
 /**
@@ -145,6 +147,8 @@ export default function AdminShell({
           )}
 
           <Notices />
+          <ImportOfferNotice />
+          <ImportOfferModal />
 
           <div
             className={clsx('sf-app__body', {

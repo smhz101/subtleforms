@@ -119,8 +119,6 @@ final class FieldsApi {
 								$fieldArray['enabled'] = true;
 							}
 
-							$fieldArray['is_pro'] = ! empty( $field->requiredCapabilities );
-
 							return $fieldArray;
 						},
 						$categoryFields
@@ -144,8 +142,6 @@ final class FieldsApi {
 						}
 					}
 
-					$fieldArray['is_pro'] = ! empty( $fieldArray['requiredCapabilities'] );
-
 					return $fieldArray;
 				},
 				$fields
@@ -166,22 +162,9 @@ final class FieldsApi {
 			return $rateLimitResponse;
 		}
 
-		$templates  = \SubtleForms\Templates\FormTemplates::get_all();
-		$canUsePro  = $this->gate->allows( 'templates.pro' );
-
-		// Always set is_locked explicitly on every template so the frontend has a
-		// single authoritative source of truth (avoids stale JS capability state).
-		$templates = array_map(
-			function ( $tpl ) use ( $canUsePro ) {
-				if ( ! empty( $tpl['is_pro'] ) ) {
-					$tpl['is_locked'] = ! $canUsePro;
-				} else {
-					$tpl['is_locked'] = false;
-				}
-				return $tpl;
-			},
-			$templates
-		);
+		// Every template is usable. Add-on templates are listed because the
+		// add-on that registered them is active.
+		$templates = \SubtleForms\Templates\FormTemplates::get_all();
 
 		return ApiResponse::success(
 			array(

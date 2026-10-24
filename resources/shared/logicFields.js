@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 
 const CHECK = ['equals', 'not_equals', 'empty', 'not_empty'];
 const NUMBER = ['equals', 'not_equals', 'greater_than', 'less_than', 'empty', 'not_empty'];
-// Before and after are SubtleForms Pro operators; the editor in Pro has its own list.
+// Before and after are add-on operators; an add-on editor has its own list.
 const DATE = ['equals', 'not_equals', 'empty', 'not_empty'];
 const CHOICE = ['equals', 'not_equals', 'contains', 'not_contains', 'empty', 'not_empty'];
 

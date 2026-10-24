@@ -5,10 +5,10 @@
  *   own and nothing scrolls sideways, from a 390px phone to a 1920px screen.
  *   The report endpoints are answered with a large, fixed data set (many
  *   forms with long titles, every spam reason), so the layout is checked at
- *   its worst. The analytics panels and the funnel moved to SubtleForms Pro
- *   in 2.7.0; their layout checks live in the Pro repository. Here Reports
- *   shows the Pro card in their place.
- * - Settings lists MCP right after Tools.
+ *   its worst. The analytics panels and the funnel come from an add-on;
+ *   their layout checks live in that repository. Without it Reports shows
+ *   entry counts and the chart only.
+ * - Tools is the last Settings tab without an add-on.
  * - Submissions: in the split inbox the pagination footer sits on the bottom
  *   edge of the list pane with one entry and with many.
  * - Settings > Tools > Activity: the two filters stay on one line and fit at
@@ -167,13 +167,11 @@ test.describe('Reports and dashboard cards fit without scrollbars', () => {
     for (const width of WIDTHS) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(REPORTS);
-      // Entry counts stay free; analytics is a Pro card with an upgrade link.
+      // Entry counts and the chart; no analytics card and no upgrade link.
       await expect(page.locator('.sf-kpis')).toBeVisible({ timeout: 30000 });
-      const card = page.locator('.sf-pro-notice').first();
-      await expect(card).toBeVisible();
-      await expect(card).toContainText('Views, conversion rate and form funnel');
-      await expect(card.locator('.sf-pro-tag').first()).toBeVisible();
       await expect(page.locator('.sf-funnel, .sf-analytics-panel')).toHaveCount(0);
+      await expect(page.locator(SCREEN)).not.toContainText('Form analytics');
+      await expect(page.getByRole('link', { name: /Upgrade|Pro\b/ })).toHaveCount(0);
       await expectNoScrollers(page, SCREEN, `Reports ${width}px`);
       await shot(page, `reports-${width}.png`);
     }
@@ -192,16 +190,16 @@ test.describe('Reports and dashboard cards fit without scrollbars', () => {
   });
 });
 
-test('Settings lists MCP right after Tools', async ({ page }) => {
+test('Tools is the last Settings tab without an add-on', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await loginPage(page);
   await page.goto(SETTINGS);
   const nav = page.getByRole('navigation', { name: 'Settings sections' });
   await expect(nav).toBeVisible({ timeout: 30000 });
   const tools = nav.getByRole('button', { name: /^Tools/ });
-  // The next item in the same list as Tools is MCP.
+  // Nothing follows Tools: no MCP placeholder and no License tab.
   const next = tools.locator('xpath=ancestor::li[1]/following-sibling::li[1]//button');
-  await expect(next).toHaveText(/^MCP/);
+  await expect(next).toHaveCount(0);
   await page.screenshot({ path: path.join(SHOTS, 'settings-tab-order.png') });
 });
 

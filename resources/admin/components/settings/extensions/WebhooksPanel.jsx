@@ -112,7 +112,7 @@ export default function WebhooksPanel({ settings, updateSetting, fieldErrors = {
           <div style={{ marginTop: 12 }}>
             <ConnectionTest
               path='/webhooks/test'
-              requiresPro={false}
+              addonRoute={false}
               label={__('Send test request', 'subtleforms')}
               disabled={!testUrl.trim()}
               getBody={() => ({ url: normalizeWebhookUrl(testUrl), method: testMethod, sign: true })}
@@ -129,7 +129,7 @@ export default function WebhooksPanel({ settings, updateSetting, fieldErrors = {
           </p>
         </div>
 
-        {/* SubtleForms Pro: delivery log with request and response bodies and replay (2.3.0). */}
+        {/* An add-on's delivery log, when it provides one (2.3.0). */}
         {window.SubtleFormsPro?.DeliveryLog && (() => {
           const DeliveryLog = window.SubtleFormsPro.DeliveryLog;
           return <DeliveryLog kind='webhook' />;

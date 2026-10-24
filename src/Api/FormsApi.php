@@ -268,6 +268,12 @@ final class FormsApi {
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( $this, 'refresh_spam_token' ),
+				// Public on purpose: a logged-out visitor's browser trades the
+				// page ticket for a submit token before it sends the form.
+				// Protected by: a rate limit per client address (20 a minute),
+				// the form must exist and be published, and the old token must
+				// be validly signed for that form (404 otherwise), so a token can
+				// never be made from nothing. The answer holds only the token.
 				'permission_callback' => '__return_true',
 				'args'                => array(
 					'id'    => array(
@@ -291,6 +297,11 @@ final class FormsApi {
 				array(
 					'methods'             => 'GET',
 					'callback'            => array( $this, 'get_form_schema' ),
+					// Public for published forms: the live form loads its schema.
+					// The permission check answers 404 for a missing or unpublished
+					// form to anyone but an admin; the handler is rate limited and
+					// sends guests only the public schema (fields and display
+					// settings, no actions, recipients or webhook addresses).
 					'permission_callback' => array( $this, 'check_public_schema_permission' ),
 					'args'                => array(
 						'id'      => array(
@@ -1278,6 +1289,9 @@ final class FormsApi {
 				'descriptionPlacement',
 				'requiredMessage',
 				'validationMessage',
+				'validationSummary',
+				'requiredIndicator',
+				'requiredIndicatorText',
 			);
 
 			$public['metadata'] = array();
@@ -1315,8 +1329,7 @@ final class FormsApi {
 	public static function filterPublicSchema( array $schema, int $formId ): array {
 		/**
 		 * Filter the schema sent to the browser to render a form (never the
-		 * builder's copy). SubtleForms Pro translates strings here with WPML
-		 * or Polylang.
+		 * builder's copy). A translation add-on can translate strings here.
 		 *
 		 * @param array $schema Rendering schema (fields, metadata).
 		 * @param int   $formId Form ID.

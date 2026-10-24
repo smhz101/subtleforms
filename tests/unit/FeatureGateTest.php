@@ -69,84 +69,38 @@ final class FeatureGateTest extends TestCase {
 		$this->assertSame( $caps, $gate->capabilities() );
 	}
 
-	// ── licensing (no LicenseManager) ──────────────────────────────────
+	// ── no licence handling (WordPress.org guideline 5) ────────────────
 
-	public function test_has_licensing_false_by_default(): void {
-		$gate = $this->makeGate();
-		$this->assertFalse( $gate->hasLicensing() );
+	public function test_the_gate_only_reads_the_capability_map(): void {
+		$methods = array_map(
+			static fn( \ReflectionMethod $m ) => $m->getName(),
+			( new \ReflectionClass( FeatureGate::class ) )->getMethods( \ReflectionMethod::IS_PUBLIC )
+		);
+		sort( $methods );
+		$this->assertSame( array( '__construct', 'allows', 'capabilities', 'require', 'setCapabilities' ), $methods );
+		$source = (string) file_get_contents( dirname( __DIR__, 2 ) . '/src/Support/FeatureGate.php' );
+		$this->assertDoesNotMatchRegularExpression( '/licen[cs]/i', $source );
 	}
 
-	public function test_is_pro_false_without_license_manager(): void {
-		$gate = $this->makeGate();
-		$this->assertFalse( $gate->isPro() );
+	public function test_an_extra_constructor_argument_from_an_older_add_on_is_ignored(): void {
+		$caps = new Capabilities( array( 'a' => true ) );
+		$gate = new FeatureGate( $caps, new \stdClass() );
+		$this->assertTrue( $gate->allows( 'a' ) );
+		$this->assertFalse( $gate->allows( 'b' ) );
 	}
 
-	public function test_has_feature_falls_back_to_capabilities(): void {
-		$gate = $this->makeGate( array( 'actions.email' => true, 'actions.payment' => false ) );
-		$this->assertTrue( $gate->hasFeature( 'actions.email' ) );
-		$this->assertFalse( $gate->hasFeature( 'actions.payment' ) );
-	}
+	public function test_capabilities_pick_up_a_filter_added_after_they_were_built(): void {
+		$caps = new Capabilities( array( 'a' => true ) );
+		$this->assertFalse( $caps->allows( 'addon.x' ) );
 
-	public function test_get_license_manager_null_by_default(): void {
-		$gate = $this->makeGate();
-		$this->assertNull( $gate->getLicenseManager() );
-	}
-
-	// ── licensing (with mock LicenseManager) ───────────────────────────
-
-	/**
-	 * A license manager as an add-on supplies it: any object with isValid()
-	 * and hasFeature().
-	 *
-	 * @return \PHPUnit\Framework\MockObject\MockObject
-	 */
-	private function licenseManager() {
-		return $this->getMockBuilder( \stdClass::class )->addMethods( array( 'isValid', 'hasFeature' ) )->getMock();
-	}
-
-	public function test_has_licensing_true_with_manager(): void {
-		$mock = $this->licenseManager();
-		$gate = new FeatureGate( new Capabilities(), $mock );
-		$this->assertTrue( $gate->hasLicensing() );
-	}
-
-	public function test_is_pro_delegates_to_license_manager(): void {
-		$mock = $this->licenseManager();
-		$mock->method( 'isValid' )->willReturn( true );
-		$gate = new FeatureGate( new Capabilities(), $mock );
-		$this->assertTrue( $gate->isPro() );
-	}
-
-	public function test_has_feature_delegates_to_license_manager(): void {
-		$mock = $this->licenseManager();
-		$mock->method( 'hasFeature' )->with( 'conditional_logic' )->willReturn( true );
-		$gate = new FeatureGate( new Capabilities(), $mock );
-		$this->assertTrue( $gate->hasFeature( 'conditional_logic' ) );
-	}
-
-	// ── setters (add-on boot) ──────────────────────────────────────────
-
-	public function test_set_license_manager_takes_any_object_with_the_two_methods(): void {
-		$manager = new class() {
-			public function isValid(): bool {
-				return true;
-			}
-			public function hasFeature( string $feature ): bool {
-				return 'x' === $feature;
-			}
-		};
-		$gate = $this->makeGate();
-		$gate->setLicenseManager( $manager );
-		$this->assertTrue( $gate->isPro() );
-		$this->assertTrue( $gate->hasFeature( 'x' ) );
-		$this->assertFalse( $gate->hasFeature( 'y' ) );
-		$gate->setLicenseManager( null );
-		$this->assertFalse( $gate->isPro() );
-	}
-
-	public function test_set_license_manager_refuses_an_object_without_the_methods(): void {
-		$this->expectException( \InvalidArgumentException::class );
-		$this->makeGate()->setLicenseManager( new \stdClass() );
+		$GLOBALS['sf_test_filters']['subtleforms/capabilities'] = static fn( $map ) => $map + array( 'addon.x' => true );
+		$GLOBALS['wp_filter']['subtleforms/capabilities']       = (object) array( 'callbacks' => array( 10 => array( 'addon' => array() ) ) );
+		try {
+			$this->assertTrue( $caps->allows( 'addon.x' ) );
+			$this->assertTrue( $caps->all()['a'] );
+		} finally {
+			unset( $GLOBALS['sf_test_filters']['subtleforms/capabilities'], $GLOBALS['wp_filter']['subtleforms/capabilities'] );
+		}
 	}
 
 	public function test_set_capabilities_swaps_the_map(): void {

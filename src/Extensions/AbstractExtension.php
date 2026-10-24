@@ -16,8 +16,7 @@ use SubtleForms\Support\Settings;
  * Base class for all built-in extensions.
  *
  * Concrete extensions only need to implement slug(), label(), and register().
- * requiredCapabilities() defaults to ["extensions.{slug}"], and isEnabled()
- * reads the matching ext_{slug}_enabled setting key.
+ * isEnabled() reads the matching ext_{slug}_enabled setting key.
  */
 abstract class AbstractExtension implements ExtensionInterface {
 
@@ -33,13 +32,6 @@ abstract class AbstractExtension implements ExtensionInterface {
 	 * Human-readable label shown in the Extensions UI.
 	 */
 	abstract public function label(): string;
-
-	/**
-	 * Returns the single capability key that guards this extension.
-	 */
-	public function requiredCapabilities(): array {
-		return array( 'extensions.' . $this->slug() );
-	}
 
 	/**
 	 * Whether the admin has turned this extension on via settings.

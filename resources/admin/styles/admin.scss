@@ -21,7 +21,6 @@
 @use '../ui/loading/loading.scss';
 @use '../ui/PanelSection.scss';
 @use '../ui/ContextualTip.scss';
-@use '../ui/UpgradePrompt.scss';
 
 // Component Styles
 @use '../components/AdminShell.scss';
@@ -53,7 +52,6 @@
 @use '../pages/FormsPage.scss';
 @use '../pages/SubmissionsPage.scss';
 @use '../pages/SubmissionDetailPage.scss';
-@use '../pages/ExtensionsPage.scss';
 
 // Builder Component Styles
 @use '../components/builder/FormEditor.scss';

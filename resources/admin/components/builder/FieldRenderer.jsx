@@ -6,7 +6,7 @@ import Icon from '../../ui/Icon';
 import NameFieldRenderer from './NameFieldRenderer';
 import AddressFieldRenderer from './AddressFieldRenderer';
 import { getCanvasPreview, addonProvides } from '../../../shared/extend';
-import { fieldDisplay } from '../../../shared/fieldDisplay';
+import { fieldDisplay, requiredIndicatorMark } from '../../../shared/fieldDisplay';
 import { fieldConfig } from '../../../shared/fieldConfig';
 import { flagsOn } from '../../../shared/flagsOn';
 import { choiceChecked, choiceShowsDefault } from '../../../shared/canvasDefaults';
@@ -156,6 +156,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
   }
 
   const showRequired = required && !NON_INPUT_TYPES.has(type);
+  const requiredMark = requiredIndicatorMark(builderConfig?.fieldDefaults || {});
   const FieldIcon = getFieldIcon(type);
 
   // ── Section Break ───────────────────────────────────────────────────────────
@@ -209,7 +210,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           >
             {label || field.name}
             {showRequired && (
-              <span className='sf-field-renderer__required-mark'>*</span>
+              <span className='sf-field-renderer__required-mark'>{requiredMark}</span>
             )}
           </label>
           {display.labelHidden && !NON_INPUT_TYPES.has(type) && (
@@ -505,14 +506,14 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
 
       {pictureFallback && (
         <p className='sf-field-renderer__placeholder-note'>
-          {__('Needs SubtleForms Pro for pictures. Visitors see these choices without images until Pro is active.', 'subtleforms')}
+          {__('This field type is provided by an add-on that is not active. Visitors see these choices without images.', 'subtleforms')}
         </p>
       )}
 
-      {/* A field from an add-on that is not active (SubtleForms Pro). */}
+      {/* A field from an add-on that is not active. */}
       {addonMissing && (
         <p className='sf-field-renderer__placeholder-note'>
-          {__('Needs SubtleForms Pro. Visitors do not see this field until Pro is active.', 'subtleforms')}
+          {__('This field type is provided by an add-on that is not active. Visitors do not see this field.', 'subtleforms')}
         </p>
       )}
 

@@ -61,7 +61,7 @@ test('visitors add and remove groups within min and max, with focus and names (l
   await expect(page.locator('.subtleforms-repeater__group')).toHaveCount(1);
   await expect(add).toBeVisible();
   // At the minimum there is nothing to remove.
-  await expect(page.getByRole('button', { name: /^Remove Companies/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /^Remove Entry/ })).toHaveCount(0);
 
   await input(page, 0, 'ticker').fill('AAPL');
   await input(page, 0, 'company').fill('Apple');
@@ -87,7 +87,7 @@ test('visitors add and remove groups within min and max, with focus and names (l
   await page.screenshot({ path: 'test-results/shots/free231/qa09-repeater-max.png', fullPage: true });
 
   // Remove the middle group: the last group's answers move up intact.
-  await page.getByRole('button', { name: 'Remove Companies 2' }).click();
+  await page.getByRole('button', { name: 'Remove Entry 2' }).click();
   await expect(page.locator('.subtleforms-repeater__group')).toHaveCount(2);
   await expect(input(page, 1, 'ticker')).toHaveValue('MSFT');
   await expect(input(page, 1, 'shares')).toHaveValue('2');

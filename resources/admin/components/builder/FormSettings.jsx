@@ -313,6 +313,46 @@ export default function FormSettings({
                   disabled={isReadOnly}
                   onChange={(v) => handleMetadataChange('descriptionPlacement', v)}
                 />
+                <ToggleControl
+                  __nextHasNoMarginBottom
+                  label={__('Validation summary', 'subtleforms')}
+                  help={__('Show a short note above the form when highlighted fields need fixing.', 'subtleforms')}
+                  checked={metadata.validationSummary !== false}
+                  disabled={isReadOnly}
+                  onChange={(v) => handleMetadataChange('validationSummary', v)}
+                />
+                <div className='sf-form-settings__required-indicator'>
+                  <RadioControl
+                    label={__('Required field indicator', 'subtleforms')}
+                    help={__('Shown next to the label of required fields.', 'subtleforms')}
+                    selected={
+                      metadata.requiredIndicator === 'text' || metadata.requiredIndicator === 'custom'
+                        ? metadata.requiredIndicator
+                        : 'asterisk'
+                    }
+                    options={[
+                      { value: 'text', label: __('Text: (Required)', 'subtleforms') },
+                      { value: 'asterisk', label: __('Asterisk: *', 'subtleforms') },
+                      { value: 'custom', label: __('Custom:', 'subtleforms') },
+                    ]}
+                    onChange={(v) => {
+                      if (!isReadOnly) {
+                        handleMetadataChange('requiredIndicator', v);
+                      }
+                    }}
+                  />
+                  {metadata.requiredIndicator === 'custom' && (
+                    <TextControl
+                      __nextHasNoMarginBottom
+                      __next40pxDefaultSize
+                      label={__('Custom required mark', 'subtleforms')}
+                      value={metadata.requiredIndicatorText || ''}
+                      placeholder='*'
+                      disabled={isReadOnly}
+                      onChange={(v) => handleMetadataChange('requiredIndicatorText', v)}
+                    />
+                  )}
+                </div>
                 <TextControl
                   __nextHasNoMarginBottom
                   __next40pxDefaultSize

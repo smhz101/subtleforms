@@ -21,7 +21,7 @@ import {
 	getFieldErrors,
 } from '../utils/api';
 import { BUILDER_ACTIONS } from '../hooks/useBuilderReducer';
-import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
+import { withOwnMetadata } from '../utils/schemaCopy';
 import { describeSaveError } from '../utils/saveErrors';
 
 /**
@@ -135,9 +135,9 @@ export default function useBuilderOrchestrator({
 			}
 
 			try {
-				// Enrich schema with Pro markers before save
+				// Own copy of the schema before save
 				const enrichedSchema =
-					enrichSchemaWithProMarkers(draftSchema);
+					withOwnMetadata(draftSchema);
 
 				// Guarantee metadata.title is always non-empty before persisting.
 				// The server requires it when the form is published; setting it here

@@ -13,7 +13,6 @@
  *   /submissions            → Submissions list  (?form_id=N for filtered view)
  *   /submissions/:id        → Submission detail (?form_id=N for back navigation)
  *   /settings               → Settings
- *   /extensions             → Extensions
  */
 
 import { useState, useEffect, useLayoutEffect, useRef, Suspense } from '@wordpress/element';
@@ -36,7 +35,6 @@ import { ModalProvider } from '../ui/modals';
 import PageErrorBoundary from '../components/PageErrorBoundary';
 import { RouteLoadingFallback } from '../components/RouteTransition';
 import { CreateFormModal } from '../modals';
-import { UpgradeModal } from '../ui';
 import useWpAdminSync from './useWpAdminSync';
 
 // ─── Query Client ─────────────────────────────────────────────────────────────
@@ -64,8 +62,6 @@ const FormsPage          = lazyWithRetry(() => import(/* webpackChunkName: "page
 const SubmissionsPage    = lazyWithRetry(() => import(/* webpackChunkName: "page-submissions" */    '../pages/SubmissionsPage'));
 const SubmissionDetailPage = lazyWithRetry(() => import(/* webpackChunkName: "page-submission-detail" */ '../pages/SubmissionDetailPage'));
 const BuilderPage        = lazyWithRetry(() => import(/* webpackChunkName: "page-builder" */        '../pages/BuilderPage'));
-const ExtensionsPage     = lazyWithRetry(() => import(/* webpackChunkName: "page-extensions" */     '../pages/ExtensionsPage'));
-const PaymentsPage       = lazyWithRetry(() => import(/* webpackChunkName: "page-payments" */       '../pages/PaymentsUpsell'));
 const ReportsPage        = lazyWithRetry(() => import(/* webpackChunkName: "page-reports" */        '../pages/ReportsPage'));
 const CreateFormPage     = lazyWithRetry(() => import(/* webpackChunkName: "page-create-form" */    '../pages/CreateFormPage'));
 
@@ -141,11 +137,7 @@ function getInitialPath() {
 		case 'subtleforms-settings':
 			return '/settings';
 
-		case 'subtleforms-extensions':
-			return '/extensions';
 
-		case 'subtleforms-payments':
-			return '/payments';
 
 		// Tools is the Tools tab of Settings (the server redirects the old
 		// URL; this covers a page that is already open).
@@ -207,8 +199,6 @@ function getPageNameFromPath(pathname) {
 		'/forms/new': __('Form Builder', 'subtleforms'),
 		'/submissions': __('Submissions', 'subtleforms'),
 		'/settings': __('Settings', 'subtleforms'),
-		'/extensions': __('Extensions', 'subtleforms'),
-		'/payments': __('Payments', 'subtleforms'),
 		'/reports': __('Reports', 'subtleforms'),
 	};
 	if (pathname.startsWith('/forms/') && pathname !== '/forms/new') {
@@ -385,22 +375,6 @@ function AppContent() {
 							</PageErrorBoundary>
 						}
 					/>
-					<Route
-						path='/payments'
-						element={
-							<PageErrorBoundary pageName='Payments'>
-								<PaymentsPage />
-							</PageErrorBoundary>
-						}
-					/>
-					<Route
-						path='/extensions'
-						element={
-							<PageErrorBoundary pageName='Extensions'>
-								<ExtensionsPage />
-							</PageErrorBoundary>
-						}
-					/>
 				</Routes>
 			</Suspense>
 
@@ -409,7 +383,6 @@ function AppContent() {
 				onClose={handleModalClose}
 				onFormCreated={handleFormCreated}
 			/>
-			<UpgradeModal />
 		</>
 	);
 }

@@ -40,7 +40,6 @@ export const queryKeys = {
     all: ['settings'],
     general: () => [...queryKeys.settings.all, 'general'],
     integrations: () => [...queryKeys.settings.all, 'integrations'],
-    license: () => [...queryKeys.settings.all, 'license'],
   },
 
   // Dashboard
@@ -54,6 +53,12 @@ export const queryKeys = {
     all: ['spam'],
     stats: (days, formId) => ['spam', 'stats', { days, formId }],
     protection: () => ['spam', 'protection'],
+  },
+
+  // Fresh-install import offer (2.7.2)
+  importOffer: {
+    all: ['importOffer'],
+    status: () => ['importOffer', 'status'],
   },
 
   // Extensions

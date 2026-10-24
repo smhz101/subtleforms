@@ -21,7 +21,7 @@ import { getLogicExtensions } from './extend';
  * This plugin evaluates the basic form on fields: one group whose rules must
  * all match, with the basic operators. Several groups (OR), the "any" match,
  * the other operators and logic on steps, actions and confirmations belong to
- * an add-on (SubtleForms Pro) that registers a logic extension (see
+ * an add-on that registers a logic extension (see
  * registerLogicExtension in extend.js). Logic nobody evaluates is ignored, as
  * if the field had no rule, exactly like the server.
  *

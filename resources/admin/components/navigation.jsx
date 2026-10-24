@@ -20,10 +20,6 @@ function wpPageToPath(page, params = {}) {
       return '/forms';
     case 'subtleforms-settings':
       return '/settings';
-    case 'subtleforms-extensions':
-      return '/extensions';
-    case 'subtleforms-payments':
-      return '/payments';
     case 'subtleforms-submissions': {
       const subId  = params.submission_id;
       const formId = params.form_id;

@@ -2,7 +2,7 @@
  * Admin branding (white label, 2.1).
  *
  * Comes from `subtleformsAdmin.branding`, built by AdminMenu::branding() and
- * filtered by `subtleforms/admin_branding` (SubtleForms Pro, Agency plan).
+ * filtered by `subtleforms/admin_branding` (for example by an add-on).
  */
 const DEFAULTS = {
   name: 'SubtleForms',
@@ -10,8 +10,8 @@ const DEFAULTS = {
   logoUrl: '',
   hideCredits: false,
   hideHelp: false,
+  // Hides the More features card on the Dashboard.
   hideUpgrade: false,
-  showLicense: true,
   // Custom "Get support" link (white label, 2.3.0).
   supportUrl: '',
 };

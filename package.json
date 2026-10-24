@@ -1,6 +1,6 @@
 {
   "name": "subtleforms-admin",
-  "version": "2.7.1",
+  "version": "2.7.2",
   "private": true,
   "engines": {
     "node": ">=20.0.0"
@@ -16,6 +16,7 @@
     "build:flags": "node bin/build-flag-files.js",
     "build:all": "npm run build && npm run build:frontend && npm run build:block && npm run build:flags",
     "size": "node bin/check-bundle-size.js",
+    "check:words": "node bin/check-built-words.js",
     "test": "wp-scripts test-unit-js",
     "lint:js": "wp-scripts lint-js",
     "test:e2e": "playwright test",

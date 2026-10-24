@@ -1,23 +1,48 @@
 /**
  * RouteTransition Styles
+ *
+ * Matches AdminShell frame + white stage so the Suspense fallback
+ * (outside the shell) does not show a lime spinner on dark chrome.
  */
 
 .sf-route-transition {
+	box-sizing: border-box;
 	display: flex;
-	align-items: center;
-	justify-content: center;
-	min-height: 400px;
-	padding: var(--space-6);
+	flex-direction: column;
+	height: calc(100vh - var(--wp-admin--admin-bar--height, 32px));
+	height: calc(100dvh - var(--wp-admin--admin-bar--height, 32px));
+	padding: 0 8px 8px 0;
+	background: var(--sf-bg-frame);
+
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
+
+	@media (max-width: 782px) {
+		padding: 0;
+	}
 }
 
 .sf-route-transition__container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	flex: 1 1 auto;
+	min-height: 0;
+	padding: 48px 16px;
 	text-align: center;
+	background: var(--sf-bg-page);
+	border-radius: var(--sf-radius-xl);
 	animation: sf-fade-in var(--sf-duration-base) ease-out;
 }
 
 .sf-route-transition__spinner {
-	margin: 0 auto var(--space-3);
-	color: var(--sf-lime-500);
+	margin: 0;
+	color: var(--sf-brand, var(--sf-primary-500, #3858e9));
 
 	svg {
 		display: block;
@@ -31,11 +56,9 @@
 }
 
 .sf-route-transition__text {
-	font-family: var(--font-mono);
-	font-size: var(--sf-text-base);
-	color: var(--sf-stone-600);
-	text-transform: uppercase;
-	letter-spacing: 0.05em;
+	margin: 0;
+	font-size: var(--sf-text-sm);
+	color: var(--sf-text-muted);
 }
 
 /* Loading Bar - Top of page */
@@ -54,9 +77,9 @@
 	height: 100%;
 	background: linear-gradient(
 		90deg,
-		var(--sf-lime-500) 0%,
-		var(--sf-lime-400) 50%,
-		var(--sf-lime-500) 100%
+		var(--sf-brand, var(--sf-primary-500, #3858e9)) 0%,
+		var(--sf-brand-hover, var(--sf-primary-600, #2145e6)) 50%,
+		var(--sf-brand, var(--sf-primary-500, #3858e9)) 100%
 	);
 	animation: sf-loading-bar 1.5s ease-in-out infinite;
 	transform-origin: left;

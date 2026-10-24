@@ -11,7 +11,7 @@
  * for fields that ask for it. Without one, a field saved with "allow multiple
  * files" still works and takes a single file, matching the server.
  */
-import { useContext, useState } from '@wordpress/element';
+import { useContext, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 import { FormContext } from './contexts';
@@ -89,6 +89,8 @@ export default function FileUpload({ field, config, value, onChange, inputId, er
   const { formId, preview } = useContext(FormContext);
   const [pending, setPending] = useState([]);
   const [localError, setLocalError] = useState('');
+  const [dragOver, setDragOver] = useState(false);
+  const inputRef = useRef(null);
 
   const type = field.type;
   const fieldKey = config.key || field.key;
@@ -168,9 +170,16 @@ export default function FileUpload({ field, config, value, onChange, inputId, er
     formatBytes(max)
   );
 
+  const openPicker = () => {
+    if (canAdd && inputRef.current) {
+      inputRef.current.click();
+    }
+  };
+
   return (
     <div className='subtleforms-upload'>
       <input
+        ref={inputRef}
         id={inputId}
         name={fieldKey || undefined}
         type='file'
@@ -185,6 +194,44 @@ export default function FileUpload({ field, config, value, onChange, inputId, er
         aria-invalid={!!(error || localError)}
         aria-describedby={describedBy}
       />
+
+      {canAdd && (
+        <div
+          className={['subtleforms-upload__zone', dragOver ? 'is-dragover' : ''].filter(Boolean).join(' ')}
+          onClick={openPicker}
+          onDragEnter={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setDragOver(true);
+          }}
+          onDragOver={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setDragOver(true);
+          }}
+          onDragLeave={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setDragOver(false);
+          }}
+          onDrop={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setDragOver(false);
+            addFiles(e.dataTransfer?.files);
+          }}>
+          <span>{__('Drop files here or', 'subtleforms')}</span>
+          <button
+            type='button'
+            className='subtleforms-upload__select'
+            onClick={(e) => {
+              e.stopPropagation();
+              openPicker();
+            }}>
+            {__('Select file', 'subtleforms')}
+          </button>
+        </div>
+      )}
 
       <p id={`${inputId}-hint`} className='subtleforms-upload__hint'>
         {hint}

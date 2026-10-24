@@ -1,7 +1,7 @@
 /**
- * The logic editor in the free plugin writes the basic form of logic only.
- * The advanced options are a Pro note with an upgrade link, nothing else, and
- * rules saved by SubtleForms Pro are kept untouched.
+ * The logic editor in this plugin writes the basic form of logic only. It
+ * shows no locked options and no upgrade links, and rules saved by an add-on
+ * are kept untouched.
  */
 import { createRoot } from '@wordpress/element';
 import { act } from 'react';
@@ -9,7 +9,6 @@ import LogicEditor from './LogicEditor';
 import { registerLogicEditor } from '../../../shared/extend';
 
 jest.mock('./LogicEditor.scss', () => ({}));
-jest.mock('../../ui/ProNotice.scss', () => ({}));
 
 global.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -31,10 +30,7 @@ function mount(props = {}) {
   return { container, unmount: () => { act(() => root.unmount()); container.remove(); } };
 }
 
-describe('logic editor without SubtleForms Pro', () => {
-  beforeEach(() => {
-    window.subtleformsAdmin = { proUrl: 'https://example.test/pro' };
-  });
+describe('logic editor without an add-on', () => {
 
   test('offers the basic operators only', () => {
     const { container, unmount } = mount();
@@ -47,16 +43,12 @@ describe('logic editor without SubtleForms Pro', () => {
     unmount();
   });
 
-  test('has no match select and no add group button, only a Pro note with an upgrade link', () => {
+  test('has no match select, no add group button and no locked or upgrade note', () => {
     const { container, unmount } = mount();
     expect(container.textContent).not.toMatch(/Any of these rules/);
     expect(container.textContent).not.toMatch(/Add “or” group/);
-    const note = container.querySelector('.sf-logic-editor__pro');
-    expect(note).not.toBeNull();
-    expect(note.textContent).toMatch(/Pro/);
-    const link = note.querySelector('a');
-    expect(link.getAttribute('href')).toContain('example.test/pro');
-    expect(link.getAttribute('href')).toContain('logic.conditional.advanced');
+    expect(container.textContent).not.toMatch(/\bPro\b|upgrade|licen/i);
+    expect(container.querySelectorAll('a').length).toBe(0);
     unmount();
   });
 
@@ -78,10 +70,9 @@ describe('logic editor without SubtleForms Pro', () => {
     unmount();
   });
 
-  test.each(['step', 'action', 'confirmation'])('conditions on a %s are a Pro note, with no editor', (scope) => {
+  test.each(['step', 'action', 'confirmation'])('conditions on a %s show nothing without an add-on editor', (scope) => {
     const { container, unmount } = mount({ scope, logic: null });
-    expect(container.querySelector('.sf-pro-notice')).not.toBeNull();
-    expect(container.querySelectorAll('select').length).toBe(0);
+    expect(container.innerHTML).toBe('');
     unmount();
   });
 
@@ -93,7 +84,7 @@ describe('logic editor without SubtleForms Pro', () => {
     unmount();
   });
 
-  test('uses the editor SubtleForms Pro registers', () => {
+  test('uses the editor an add-on registers', () => {
     registerLogicEditor(() => <p className='pro-editor'>pro</p>);
     const { container, unmount } = mount();
     expect(container.querySelector('.pro-editor')).not.toBeNull();

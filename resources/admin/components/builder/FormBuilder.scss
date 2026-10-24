@@ -89,3 +89,15 @@
 		white-space: nowrap;
 	}
 }
+
+
+.subtleforms-builder-canvas .subtleforms-required-legend {
+	margin: 0 0 12px;
+	font-size: 0.875em;
+	color: var(--sf-text-muted, #646970);
+}
+
+.subtleforms-builder-canvas .subtleforms-required {
+	color: var(--sf-danger, #b42318);
+	margin-left: 0;
+}

@@ -147,18 +147,6 @@
 		}
 	}
 
-	&--locked {
-		opacity: 0.7;
-		cursor: not-allowed;
-		background-color: var(--sf-gray-50);
-
-		&:hover {
-			border-color: var(--sf-gray-200);
-			box-shadow: none;
-			transform: translateY(0);
-		}
-	}
-
 	&__badge-wrapper {
 		margin-bottom: 0.75rem;
 		display: flex;
@@ -174,16 +162,6 @@
 		text-transform: uppercase;
 		letter-spacing: 0.025em;
 		border-radius: var(--sf-radius-sm);
-
-		&--free {
-			background-color: var(--sf-green-100);
-			color: var(--sf-emerald-800);
-		}
-
-		&--pro {
-			background-color: var(--sf-amber-100);
-			color: var(--sf-amber-800);
-		}
 
 		&--type {
 			background-color: var(--sf-indigo-100);
@@ -219,24 +197,4 @@
 		color: var(--sf-blue-600);
 	}
 
-	&__lock {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 3rem;
-		height: 3rem;
-		background-color: rgba(255, 255, 255, 0.95);
-		border-radius: 50%;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-	}
-
-	&__lock-icon {
-		width: 1.5rem;
-		height: 1.5rem;
-		color: var(--sf-gray-500);
-	}
-}
+		}

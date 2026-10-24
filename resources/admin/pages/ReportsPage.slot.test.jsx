@@ -1,13 +1,11 @@
 /**
- * Reports keeps entry counts and the chart. Form analytics (views,
- * conversion, funnel) is a Pro card until SubtleForms Pro registers panels in
- * the `reports.panels` slot.
+ * Reports keeps entry counts and the chart. Add-ons draw more panels in the
+ * `reports.panels` slot; without one nothing else is shown (no locked card).
  */
 import { createRoot } from '@wordpress/element';
 import { act } from 'react';
 
 jest.mock('./DashboardPage.scss', () => ({}));
-jest.mock('../ui/ProNotice.scss', () => ({}));
 jest.mock('../components/AdminShell', () => ({ children, title }) => (
   <div data-title={title}>{children}</div>
 ));
@@ -52,23 +50,19 @@ test('shows entry counts and the chart, and asks the server for nothing about vi
   unmount();
 });
 
-test('shows a Pro card for analytics, with an upgrade link', async () => {
-  window.subtleformsAdmin = { proUrl: 'https://example.test/pro' };
+test('shows no analytics card and no upgrade link without an add-on', async () => {
   const { container, unmount } = await mount();
-  const card = container.querySelector('.sf-pro-notice');
-  expect(card).not.toBeNull();
-  expect(container.textContent).toContain('Form analytics');
-  expect(container.textContent).not.toMatch(/Conversion is submissions divided by views/);
-  expect(card.querySelector('a').getAttribute('href')).toContain('extensions.analytics');
+  expect(container.textContent).not.toContain('Form analytics');
+  expect(container.textContent).not.toMatch(/\bPro\b|upgrade|licen/i);
+  expect(container.querySelectorAll('a[href*="subtleforms.com"]').length).toBe(0);
   unmount();
 });
 
-test('draws the panels SubtleForms Pro registers, in place of the card', async () => {
+test('draws the panels an add-on registers', async () => {
   registerSlotItem('reports.panels', 'analytics', {
     component: ({ forms }) => <section className='pro-panel'>{forms.length} forms</section>,
   });
   const { container, unmount } = await mount();
   expect(container.querySelector('.pro-panel').textContent).toBe('1 forms');
-  expect(container.querySelector('.sf-pro-notice')).toBeNull();
   unmount();
 });

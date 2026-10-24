@@ -253,9 +253,9 @@ final class Release2404Test extends TestCase {
 		$start = strpos( $css, '.subtleforms.subtleforms--inherit-theme' );
 		$block = substr( $css, (int) $start, (int) strpos( $css, '}', (int) $start ) - (int) $start );
 		$this->assertStringContainsString( 'width: 100%', $block );
-		foreach ( array( 'color', 'background', 'font', 'border', 'padding' ) as $look ) {
-			$this->assertStringNotContainsString( $look, $block, $look );
-		}
+		$this->assertStringContainsString( 'background: transparent', $block );
+		$this->assertStringContainsString( '--subtleforms-color-surface', $block );
+		$this->assertStringContainsString( '--subtleforms-color-primary', $block );
 		$js = (string) file_get_contents( dirname( __DIR__, 2 ) . '/resources/shared/appearance.js' );
 		$this->assertStringContainsString( "isPureTheme( appearance ) ? 'wp-element-button'", $js );
 		$renderer = (string) file_get_contents( dirname( __DIR__, 2 ) . '/resources/frontend/components/FormRenderer.jsx' );

@@ -3,7 +3,6 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import AdminShell from '../components/AdminShell';
 import ExtensionSlot from '../components/ExtensionSlot';
-import ProNotice from '../ui/ProNotice';
 import { apiGet } from '../utils/api';
 import './DashboardPage.scss';
 import { chartColumnProps } from '../utils/chartA11y';
@@ -71,28 +70,8 @@ export default function ReportsPage() {
             </div>
           </section>
 
-          { /* Form analytics (views, conversion, funnel) come from SubtleForms Pro. */ }
-          <ExtensionSlot
-            name='reports.panels'
-            forms={ forms }
-            fallback={
-              <section className='sf-panel'>
-                <header className='sf-panel__header'>
-                  <div>
-                    <h2 className='sf-panel__title'>{ __( 'Form analytics', 'subtleforms' ) }</h2>
-                    <p className='sf-panel__subtitle'>{ __( 'Views, conversion and where visitors leave', 'subtleforms' ) }</p>
-                  </div>
-                </header>
-                <div className='sf-panel__body'>
-                  <ProNotice
-                    label={ __( 'Views, conversion rate and form funnel', 'subtleforms' ) }
-                    help={ __( 'See how many people view each form, how many send it and which field or step they leave on. Entry counts above stay free. Analytics are part of SubtleForms Pro; data already counted is kept and shows once Pro is active.', 'subtleforms' ) }
-                    feature='extensions.analytics'
-                  />
-                </div>
-              </section>
-            }
-          />
+          { /* Panels add-ons bring. */ }
+          <ExtensionSlot name='reports.panels' forms={ forms } />
         </div>
       ) }
     </AdminShell>

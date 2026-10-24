@@ -223,8 +223,27 @@
    the rest for `.subtleforms--inherit-theme` (bin/postcss/inherit-theme-scope.js).
    The width comes from the theme's content column. */
 .subtleforms.subtleforms--inherit-theme {
+	color: var(--wp--preset--color--foreground, inherit);
+	font-family: var(--subtleforms-font-family, var(--wp--preset--font-family--body, inherit));
+	font-size: var(--wp--preset--font-size--medium, inherit);
+	background: transparent;
+	box-shadow: none;
 	width: 100%;
 	max-width: 100%;
+	--subtleforms-color-text: var(--wp--preset--color--foreground, inherit);
+	--subtleforms-label-color: var(--wp--preset--color--foreground, inherit);
+	--subtleforms-input-text: var(--wp--preset--color--foreground, inherit);
+	--subtleforms-color-text-light: var(--wp--preset--color--secondary, inherit);
+	--subtleforms-color-primary: var(--wp--preset--color--primary, var(--wp--preset--color--accent, var(--wp--elements--button--color--background, var(--button--color-background, var(--global--color-primary, #1e1e1e)))));
+	--subtleforms-color-primary-hover: var(--wp--preset--color--primary, var(--wp--preset--color--accent, var(--wp--elements--button--color--background, var(--button--color-background, var(--global--color-primary, #1e1e1e)))));
+	--subtleforms-color-bg: transparent;
+	--subtleforms-color-surface: var(--wp--preset--color--background, Canvas);
+	--subtleforms-color-bg-subtle: var(--wp--preset--color--secondary, color-mix(in srgb, var(--subtleforms-color-surface, Canvas) 92%, var(--subtleforms-color-text, CanvasText) 8%));
+	--subtleforms-color-border: var(--wp--preset--color--border, currentColor);
+	--subtleforms-color-border-focus: var(--wp--preset--color--primary, var(--wp--preset--color--accent, var(--wp--elements--button--color--background, currentColor)));
+	--subtleforms-font-family: var(--wp--preset--font-family--body, inherit);
+	--subtleforms-font-size-base: var(--wp--preset--font-size--medium, inherit);
+	--subtleforms-radius-button: var(--wp--elements--button--border--radius, var(--wp--preset--border-radius--button, var(--button--border-radius, 4px)));
 }
 
 /* "Inherit from theme" with changes (2.4.1): the plugin styles the form from
@@ -247,6 +266,7 @@
 	--subtleforms-color-primary: var(--wp--preset--color--primary, var(--wp--preset--color--accent, var(--wp--elements--button--color--background, var(--button--color-background, var(--global--color-primary, #1e1e1e)))));
 	--subtleforms-color-primary-hover: var(--wp--preset--color--primary, var(--wp--preset--color--accent, var(--wp--elements--button--color--background, var(--button--color-background, var(--global--color-primary, #1e1e1e)))));
 	--subtleforms-color-bg: transparent;
+	--subtleforms-color-surface: var(--wp--preset--color--background, Canvas);
 	--subtleforms-color-bg-subtle: transparent;
 	--subtleforms-color-border: var(--wp--preset--color--border, currentColor);
 	--subtleforms-color-border-focus: var(--wp--preset--color--primary, var(--wp--preset--color--accent, var(--wp--elements--button--color--background, currentColor)));
@@ -258,6 +278,14 @@
 .subtleforms.subtleforms--theme-tuned .subtleforms-button-next,
 .subtleforms.subtleforms--theme-tuned .subtleforms-button-submit {
 	border-radius: var(--subtleforms-button-radius, var(--subtleforms-radius-button, 4px));
+}
+
+.subtleforms.subtleforms--preset-soft,
+.subtleforms.subtleforms--preset-bordered,
+.subtleforms.subtleforms--preset-dark,
+.subtleforms.subtleforms--preset-classic,
+.subtleforms.subtleforms--preset-bold {
+	background: var(--subtleforms-color-bg);
 }
 
 /* A form on a dark footer or hero: no card of its own. */

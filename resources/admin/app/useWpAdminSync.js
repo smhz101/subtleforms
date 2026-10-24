@@ -64,14 +64,6 @@ export function routeToAdminQuery(pathname, search = '') {
 		return { page: 'subtleforms-settings', params };
 	}
 
-	if (pathname === '/extensions') {
-		return { page: 'subtleforms-extensions', params };
-	}
-
-	if (pathname === '/payments') {
-		return { page: 'subtleforms-payments', params };
-	}
-
 	if (pathname === '/reports') {
 		return { page: 'subtleforms-reports', params };
 	}

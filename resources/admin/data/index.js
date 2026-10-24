@@ -24,15 +24,15 @@ export {
   useSubmission,
 } from './queries/submissions';
 
-export {
-  useSettings,
-  useLicense,
-} from './queries/settings';
+export { useSettings } from './queries/settings';
 
 export { useDashboardStats } from './queries/dashboard';
 
 export { useSpamStats, useSpamProtection } from './queries/spam';
 export { useSpamProtectionAction } from './mutations/spam';
+
+export { useImportOffer } from './queries/importOffer';
+export { useImportOfferAction } from './mutations/importOffer';
 
 // Mutations
 export {
@@ -48,9 +48,4 @@ export {
   useMarkSubmissionRead,
 } from './mutations/submissions';
 
-export {
-  useUpdateSettings,
-  useActivateLicense,
-  useDeactivateLicense,
-  useValidateLicense,
-} from './mutations/settings';
+export { useUpdateSettings } from './mutations/settings';

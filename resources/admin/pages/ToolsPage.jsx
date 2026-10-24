@@ -47,8 +47,26 @@ function messageFrom( result ) {
  * @param {Object}  props
  * @param {boolean} props.embedded Laid out inside the Settings content column.
  */
+/**
+ * Initial Tools section from the URL hash (e.g. #tab=tools&section=migrate).
+ *
+ * @return {string}
+ */
+function sectionFromHash() {
+  try {
+    const hash = window.location.hash.replace( /^#/, '' );
+    const section = new URLSearchParams( hash ).get( 'section' );
+    if ( section && SECTIONS.some( ( item ) => item.id === section ) ) {
+      return section;
+    }
+  } catch ( e ) {
+    // Fall through to the default.
+  }
+  return 'transfer';
+}
+
 export default function ToolsPanel( { embedded = false } ) {
-  const [ section, setSection ] = useState( 'transfer' );
+  const [ section, setSection ] = useState( sectionFromHash );
   const [ forms, setForms ] = useState( [] );
   const [ notice, setNotice ] = useState( null );
   const [ busy, setBusy ] = useState( false );

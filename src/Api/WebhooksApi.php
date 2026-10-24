@@ -5,8 +5,7 @@
  * Settings > Integrations > Webhooks and each webhook action can send a
  * sample entry to an address and show the answer. The request uses the same
  * address check, body and signing as a real delivery, so a test that
- * succeeds means entries are delivered too. Before 2.4.1 the test needed a
- * licensed SubtleForms Pro, so the button never worked on its own.
+ * succeeds means entries are delivered too.
  *
  * @package SubtleForms
  * @since   2.4.1

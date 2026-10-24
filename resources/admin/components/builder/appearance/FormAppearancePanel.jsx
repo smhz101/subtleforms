@@ -157,10 +157,12 @@ export default function FormAppearancePanel( {
 
   const applyPreset = ( preset ) => {
     // The form's own CSS is not part of a preset, so it stays.
+    // Form width is a separate control; presets never set it.
+    const { width: _presetWidth, ...presetVariants } = preset.variants || {};
     writeAppearance( {
       preset: preset.id,
       tokens: { ...preset.tokens },
-      variants: { ...preset.variants },
+      variants: { ...presetVariants },
       ...( appearance.customCss ? { customCss: appearance.customCss } : {} ),
     } );
     setConfirmingPreset( null );
@@ -170,10 +172,11 @@ export default function FormAppearancePanel( {
   // this person may not change it.
   const resetAllToTheme = () => {
     const base = getPreset( 'theme' );
+    const { width: _presetWidth, ...presetVariants } = base.variants || {};
     writeAppearance( {
       preset: base.id,
       tokens: { ...base.tokens },
-      variants: { ...base.variants },
+      variants: { ...presetVariants },
       ...( ! canCustomCss && appearance.customCss ? { customCss: appearance.customCss } : {} ),
     } );
     setConfirmingReset( false );

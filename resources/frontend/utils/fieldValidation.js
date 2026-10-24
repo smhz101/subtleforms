@@ -158,7 +158,7 @@ function emailIsValid(value, config = {}) {
  * @return {boolean}
  */
 export function isAnswerable(type, config = {}) {
-  // Add-on field types (SubtleForms Pro) can say when they show anything.
+  // Add-on field types can say when they show anything.
   const addon = getFieldType(type);
   if (addon && typeof addon.isAnswerable === 'function') return !!addon.isAnswerable(config);
   if (type === 'checkbox_grid') {

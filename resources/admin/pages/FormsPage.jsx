@@ -46,7 +46,7 @@ export default function FormsPage() {
     }
   });
   const [showColPicker, setShowColPicker] = useState(false);
-  // A column an add-on brings (conversion with SubtleForms Pro); no toggle without one.
+  // A column an add-on brings; no toggle without one.
   const [extraColumn] = getSlotItems('forms.list.column');
   const colPickerRef = useRef(null);
 

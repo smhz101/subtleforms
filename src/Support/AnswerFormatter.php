@@ -120,8 +120,8 @@ final class AnswerFormatter {
 	 */
 	public static function context( $schema, array $extra = array() ): array {
 		/**
-		 * The currency used for prices on this form. The payment add-on
-		 * (SubtleForms Pro) supplies it; empty when none is active.
+		 * The currency used for prices on this form. A payment add-on
+		 * supplies it; empty when none is active.
 		 *
 		 * @param string $currency ISO code.
 		 * @param mixed  $schema   Form schema.

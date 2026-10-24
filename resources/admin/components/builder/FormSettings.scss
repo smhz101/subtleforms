@@ -624,21 +624,6 @@
 
 // ── Checkout (2.1) ───────────────────────────────────────────────────────────
 .sf-checkout-panel {
-	&__upgrade {
-		display: flex;
-		align-items: center;
-		gap: var(--sf-space-2);
-		padding: var(--sf-space-3) var(--sf-space-4);
-		border: 1px solid var(--sf-border);
-		border-radius: var(--sf-radius-md);
-		background: var(--sf-bg-subtle);
-		font-size: var(--sf-text-sm);
-		color: var(--sf-text-secondary);
-
-		svg { flex-shrink: 0; fill: none; }
-		span { flex: 1 1 auto; }
-	}
-
 	&__billing {
 		padding-top: var(--sf-space-4);
 		border-top: 1px solid var(--sf-border-subtle);
@@ -896,5 +881,12 @@
 
 	li {
 		margin: 0;
+	}
+}
+
+.sf-form-settings__required-indicator {
+	.components-radio-control__option {
+		display: inline-flex;
+		margin-right: 16px;
 	}
 }

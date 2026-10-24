@@ -68,7 +68,7 @@ export const FIELD_ICON_MAP = {
   payment_amount: Icon.CircleDollarSign,
   payment_card: Icon.CreditCard,
   payment_product: Icon.ShoppingCart,
-  woo_product: Icon.Package, // SubtleForms Pro: WooCommerce Product
+  woo_product: Icon.Package, // Add-on: WooCommerce Product
   payment_choice: Icon.ListChecks || Icon.Tag,
   payment_currency: Icon.Coins,
   payment_coupon: Icon.Tag,
@@ -103,7 +103,6 @@ export const FIELD_ICON_MAP = {
 export const UI_ICON_MAP = {
   // Settings page tab names
   general: Icon.Settings,
-  license: Icon.Key,
   frontend: Icon.Monitor,
   email: Icon.Mail,
   ai: Icon.Sparkles,

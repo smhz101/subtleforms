@@ -9,14 +9,10 @@ import { useCreateForm, useTemplates } from '../data';
 import { useNotice } from '../ui/feedback';
 import Icon from '../ui/Icon';
 import AdminShell from '../components/AdminShell';
-import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
+import { withOwnMetadata } from '../utils/schemaCopy';
 import { createInitialSchema } from '../utils/initialSchema';
 import { schemaFromTemplate } from '../utils/templateSchema';
 import { TEMPLATE_CATEGORIES } from '../templates';
-import { requirePro } from '../utils/featureGate';
-
-/** Templates SubtleForms Pro adds. */
-const PRO_TEMPLATE_COUNT = 52;
 import './CreateFormPage.scss';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -191,10 +187,6 @@ export default function CreateFormPage() {
   }, [chosen]);
 
   const choose = (tpl) => {
-    if (tpl.is_locked) {
-      requirePro('templates.pro', () => {}, { label: tpl.name });
-      return;
-    }
     setChosen(tpl);
     setTitle(tpl.id === 'blank' ? generateDefaultTitle() : tpl.name);
     setDescription('');
@@ -212,7 +204,7 @@ export default function CreateFormPage() {
     } else {
       const formType =
         structure === 'conversational' ? 'conversational' : structure === 'multi-step' ? 'multi-step' : 'regular';
-      schema = enrichSchemaWithProMarkers(
+      schema = withOwnMetadata(
         createInitialSchema({ title: safeTitle, description, formType, startingPoint: 'blank' })
       );
       schema.metadata = { ...schema.metadata, template: 'blank' };
@@ -240,12 +232,6 @@ export default function CreateFormPage() {
   }, [chosen, title, description, structure, createFormMutation, navigate, showError]);
 
   const categories = TEMPLATE_CATEGORIES.filter((c) => c.id === 'all' || counts[c.id]);
-  // Without SubtleForms Pro, one card says how many more templates Pro adds.
-  const showProTemplatesCard =
-    category === 'all' &&
-    !query.trim() &&
-    !window.subtleformsAdmin?.hasProPlugin &&
-    !templates.some((t) => t.is_pro);
 
   return (
     <AdminShell
@@ -323,21 +309,15 @@ export default function CreateFormPage() {
                   <button
                     key={tpl.id}
                     type='button'
-                    className={clsx('sf-tpl', tpl.is_locked && 'is-locked')}
+                    className='sf-tpl'
                     onClick={() => choose(tpl)}>
                     <span className='sf-tpl__preview'>
                       <Wireframe fields={tpl._fields} />
                       <span className='sf-tpl__tags'>
                         {type && <span className='sf-tpl__tag'>{type}</span>}
-                        {tpl.is_pro && (
-                          <span className='sf-tpl__tag sf-tpl__tag--pro'>
-                            {tpl.is_locked && <Icon.Lock size={10} aria-hidden='true' />}
-                            {__('Pro', 'subtleforms')}
-                          </span>
-                        )}
                       </span>
                       <span className='sf-tpl__hover' aria-hidden='true'>
-                        {tpl.is_locked ? __('Preview', 'subtleforms') : __('Use template', 'subtleforms')}
+                        {__('Use template', 'subtleforms')}
                       </span>
                     </span>
                     <span className='sf-tpl__meta'>
@@ -347,27 +327,6 @@ export default function CreateFormPage() {
                   </button>
                 );
               })}
-
-              {showProTemplatesCard && (
-                <a
-                  className='sf-tpl sf-tpl--more'
-                  href='https://subtleforms.com/templates/'
-                  target='_blank'
-                  rel='noopener noreferrer'>
-                  <span className='sf-tpl__meta'>
-                    <span className='sf-tpl__name'>
-                      {sprintf(
-                        /* translators: %d: number of templates */
-                        __('%d more templates in SubtleForms Pro', 'subtleforms'),
-                        PRO_TEMPLATE_COUNT
-                      )}
-                    </span>
-                    <span className='sf-tpl__desc'>
-                      {__('Event registration, job applications, payments and more. Opens subtleforms.com.', 'subtleforms')}
-                    </span>
-                  </span>
-                </a>
-              )}
 
               {visible.length === 0 && (
                 <div className='sf-empty sf-tpl-grid__empty'>

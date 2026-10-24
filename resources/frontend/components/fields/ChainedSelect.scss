@@ -27,7 +27,7 @@
 		padding: 6px 12px;
 		border: 1px solid var(--subtleforms-color-border, #d8dbe2);
 		border-radius: 999px;
-		background: var(--subtleforms-color-bg, #fff);
+		background: var(--subtleforms-color-surface, var(--subtleforms-color-bg, Canvas));
 		color: var(--subtleforms-color-text, #1d2327);
 		font: inherit;
 		font-size: 0.875rem;
@@ -68,7 +68,7 @@
 	overflow: hidden;
 	border: 1px solid var(--subtleforms-color-border, #d8dbe2);
 	border-radius: var(--subtleforms-radius-md, 8px);
-	background: var(--subtleforms-color-bg, #fff);
+	background: var(--subtleforms-color-surface, var(--subtleforms-color-bg, Canvas));
 
 	.subtleforms-chained-select__level {
 		display: flex;

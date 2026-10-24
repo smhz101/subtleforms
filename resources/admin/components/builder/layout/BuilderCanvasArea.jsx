@@ -10,10 +10,10 @@ import { __, sprintf } from '@wordpress/i18n';
 import FormEditor from '../FormEditor';
 import FormSettings from '../FormSettings';
 import SubmissionsTable from '../../SubmissionsTable';
-import ProDowngradeBanner from '../../ProDowngradeBanner';
+import AddonFieldsNotice from '../../AddonFieldsNotice';
 import EmptyFormWelcome from '../EmptyFormWelcome';
 import PreviewWorkspace from '../PreviewWorkspace';
-import { getMissingAddonFields, getLimitedFeatures, needsMissingPayment } from '../../../utils/proFeatureDetector';
+import { getMissingAddonFields, getLimitedFeatures, needsMissingPayment } from '../../../utils/addonFields';
 import ExtensionSlot from '../../ExtensionSlot';
 import './BuilderCanvasArea.scss';
 
@@ -39,7 +39,7 @@ export default function BuilderCanvasArea({
   const limitedFeatures = useMemo(() => getLimitedFeatures(draftSchema), [draftSchema]);
   return (
     <>
-      <ProDowngradeBanner featuresUsed={missingAddonFields} limited={limitedFeatures} paymentForm={paymentMissing} />
+      <AddonFieldsNotice featuresUsed={missingAddonFields} limited={limitedFeatures} paymentForm={paymentMissing} />
 
       {/* Notes from add-ons about the form being built (for example how a payment form takes money). */}
       {view === 'build' && <ExtensionSlot name='builder.canvas.notes' schema={draftSchema} />}

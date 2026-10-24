@@ -1,6 +1,7 @@
 /**
- * PRO-30: the status dot follows the settings being edited.
- * PRO-08: an integration the plan does not include says which plan has it.
+ * Settings > Integrations: the status dot follows the settings being edited,
+ * and only integrations that are available and have a panel are listed.
+ * Nothing is shown as locked or as needing a plan.
  */
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -10,7 +11,7 @@ import ExtensionsSettings, { extensionStatus, listedExtensions } from './Extensi
 
 global.IS_REACT_ACT_ENVIRONMENT = true;
 
-describe('extensionStatus (PRO-30)', () => {
+describe('extensionStatus', () => {
   test('webhooks are always configured', () => {
     expect(extensionStatus('webhooks', { enabled: true })).toEqual({ enabled: true, configured: true });
   });
@@ -21,20 +22,18 @@ describe('extensionStatus (PRO-30)', () => {
 });
 
 describe('listed integrations', () => {
-  test('the removed Free panels are gone: only Webhooks and locked cards are listed', () => {
+  test('only Webhooks and integrations with a registered panel are listed', () => {
     const list = listedExtensions({
       webhooks: { available: true },
       email_marketing: { available: true },
       crm: { available: true },
-      payments: { available: true },
-      pdf: { available: true },
       multilanguage: { available: false, requires: 'Agency' },
     });
-    expect(list).toEqual(['webhooks', 'multilanguage']);
+    expect(list).toEqual(['webhooks']);
   });
 });
 
-describe('locked integrations (PRO-08)', () => {
+describe('no locked integrations', () => {
   let container;
   let root;
   afterEach(() => {
@@ -43,13 +42,11 @@ describe('locked integrations (PRO-08)', () => {
     delete window.subtleformsAdmin;
   });
 
-  test('a Starter license lists Multilanguage with the plan that has it', async () => {
+  test('an integration that is not available is not listed and no plan is named', async () => {
     window.subtleformsAdmin = {
-      hasProPlugin: true,
       extensions: {
         webhooks: { slug: 'webhooks', label: 'Webhooks', available: true, enabled: true, configured: true },
         multilanguage: { slug: 'multilanguage', label: 'Multilanguage', description: 'Translate forms.', available: false, enabled: false, configured: true, requires: 'Agency' },
-        crm: { slug: 'crm', label: 'CRM', available: false, requires: '' },
       },
     };
     window.location.hash = '#ext=multilanguage';
@@ -58,8 +55,8 @@ describe('locked integrations (PRO-08)', () => {
     root = createRoot(container);
     await act(async () => root.render(<ExtensionsSettings settings={{}} updateSetting={() => {}} />));
 
-    expect(container.textContent).toContain('Needs Agency');
-    expect(container.textContent).toContain('Included with the Agency plan.');
-    expect(container.textContent).not.toContain('CRM');
+    expect(container.textContent).toContain('Webhooks');
+    expect(container.textContent).not.toContain('Multilanguage');
+    expect(container.textContent).not.toMatch(/Needs|plan|Pro\b|licen/i);
   });
 });
