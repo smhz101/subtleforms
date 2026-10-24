@@ -4,7 +4,7 @@ Tags: form builder, contact form, forms, multi-step form, file upload
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.7.1
+Stable tag: 2.7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -130,6 +130,12 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 6. The form preview with appearance presets.
 
 == Changelog ==
+
+= 2.7.2 - 2026-10-24 =
+* Change: Forms load without a loading flash, file uploads use a drop zone with a select button, repeater groups are labelled Entry N, and form settings let you choose the required-field mark and turn the validation summary on or off. Forms that have required fields show a short legend for the mark. Forms no longer paint a background by default, and inherit-from-theme keeps SubtleForms chrome for calendars and similar fields while using theme colours.
+* Fix: The Preview tab uses one scrollbar for the canvas and styling controls.
+* Change: Appearance presets no longer set form width; Layout / Form width stays a separate control so columns flex at full content width.
+* Fix: The date picker trigger matches other fields, and the calendar panel is easier to read.
 
 = 2.7.1 - 2026-10-23 =
 * Change: Payments, coupons and the Payments page moved to SubtleForms Pro. Forms with payment fields show a not available message until Pro 2.7.0 is active.
@@ -320,6 +326,9 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 The full history is in changelog.txt in the plugin folder.
 
 == Upgrade Notice ==
+
+= 2.7.2 =
+Forms load without a flash, file uploads use a drop zone, and appearance presets no longer change form width. The Preview tab uses one scrollbar, and the date picker matches other fields.
 
 = 2.7.1 =
 Payments, coupons and the Payments page moved to SubtleForms Pro. Forms with payment fields now need Pro 2.7.0; without it they show a not available message instead of taking unpaid orders.

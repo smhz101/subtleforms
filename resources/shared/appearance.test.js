@@ -225,8 +225,15 @@ describe( 'previewBreakpoints', () => {
   } );
 
   it( 'offers an inherit-from-theme preset', () => {
-    expect( getPreset( 'theme' ).variants.width ).toBe( 'theme' );
+    expect( getPreset( 'theme' ).variants.width ).toBeUndefined();
     expect( formAppearanceClasses( { preset: 'theme' } ) ).toContain( 'subtleforms--inherit-theme' );
+  } );
+
+  it( 'presets do not set form width', () => {
+    FORM_PRESETS.forEach( ( preset ) => {
+      expect( preset.variants.width ).toBeUndefined();
+      expect( formAppearanceStyle( { variants: { ...preset.variants } } ).maxWidth ).toBeUndefined();
+    } );
   } );
 } );
 

@@ -188,7 +188,8 @@ export const FORM_PRESETS = [
     description: 'Uses the active theme\'s type, colours and content width. Nothing here overrides the theme unless you set it.',
     swatch: ['currentColor', 'transparent', 'transparent'],
     tokens: { fontFamily: 'inherit', colorBackground: 'transparent' },
-    variants: { input: 'outlined', button: 'solid', buttonAlign: 'left', layout: 'inherit', width: 'theme' },
+    // Layout / Form width is a separate control; presets never set it.
+    variants: { input: 'outlined', button: 'solid', buttonAlign: 'left', layout: 'inherit' },
   },
   {
     id: 'default',
@@ -196,7 +197,7 @@ export const FORM_PRESETS = [
     description: 'Inherits the plugin defaults. Neutral and unopinionated.',
     swatch: ['#4f5bd5', '#131417', '#ffffff'],
     tokens: {},
-    variants: { input: 'outlined', button: 'solid', buttonAlign: 'left', width: 'standard' },
+    variants: { input: 'outlined', button: 'solid', buttonAlign: 'left' },
   },
   {
     id: 'minimal',
@@ -218,7 +219,7 @@ export const FORM_PRESETS = [
       labelWeight: '500',
       fontSize: '1rem',
     },
-    variants: { input: 'underlined', button: 'solid', buttonAlign: 'left', width: 'narrow' },
+    variants: { input: 'underlined', button: 'solid', buttonAlign: 'left' },
   },
   {
     id: 'soft',
@@ -239,7 +240,7 @@ export const FORM_PRESETS = [
       inputPaddingY: '12px',
       labelWeight: '500',
     },
-    variants: { input: 'filled', button: 'solid', buttonAlign: 'full', width: 'standard' },
+    variants: { input: 'filled', button: 'solid', buttonAlign: 'full' },
   },
   {
     id: 'bordered',
@@ -260,7 +261,7 @@ export const FORM_PRESETS = [
       inputPaddingY: '9px',
       labelWeight: '600',
     },
-    variants: { input: 'outlined', button: 'solid', buttonAlign: 'left', width: 'standard' },
+    variants: { input: 'outlined', button: 'solid', buttonAlign: 'left' },
   },
   {
     id: 'dark',
@@ -283,7 +284,7 @@ export const FORM_PRESETS = [
       inputPaddingY: '11px',
       labelWeight: '500',
     },
-    variants: { input: 'filled', button: 'solid', buttonAlign: 'left', width: 'standard' },
+    variants: { input: 'filled', button: 'solid', buttonAlign: 'left' },
   },
   {
     id: 'compact',
@@ -305,7 +306,7 @@ export const FORM_PRESETS = [
       fontSize: '0.875rem',
       labelWeight: '500',
     },
-    variants: { input: 'outlined', button: 'solid', buttonAlign: 'left', width: 'standard' },
+    variants: { input: 'outlined', button: 'solid', buttonAlign: 'left' },
   },
   {
     id: 'rounded',
@@ -328,7 +329,7 @@ export const FORM_PRESETS = [
       inputPaddingY: '12px',
       labelWeight: '500',
     },
-    variants: { input: 'filled', button: 'solid', buttonAlign: 'left', width: 'standard' },
+    variants: { input: 'filled', button: 'solid', buttonAlign: 'left' },
   },
   {
     id: 'classic',
@@ -353,7 +354,7 @@ export const FORM_PRESETS = [
       inputPaddingY: '11px',
       labelWeight: '600',
     },
-    variants: { input: 'outlined', button: 'solid', buttonAlign: 'left', width: 'standard' },
+    variants: { input: 'outlined', button: 'solid', buttonAlign: 'left' },
   },
   {
     id: 'bold',
@@ -376,7 +377,7 @@ export const FORM_PRESETS = [
       inputPaddingY: '12px',
       labelWeight: '700',
     },
-    variants: { input: 'outlined', button: 'solid', buttonAlign: 'full', width: 'standard' },
+    variants: { input: 'outlined', button: 'solid', buttonAlign: 'full' },
   },
   {
     id: 'dark-surface',
@@ -404,7 +405,7 @@ export const FORM_PRESETS = [
       inputPaddingY: '11px',
       labelWeight: '500',
     },
-    variants: { input: 'outlined', button: 'solid', buttonAlign: 'left', width: 'full' },
+    variants: { input: 'outlined', button: 'solid', buttonAlign: 'left' },
   },
 ];
 
@@ -587,7 +588,8 @@ export function formAppearanceStyle( appearance ) {
   } );
   const width = appearance?.variants?.width;
 
-  if ( width && FORM_WIDTHS[ width ] ) {
+  // Only when the user set Form width (presets never write variants.width).
+  if ( isSet( width ) && FORM_WIDTHS[ width ] ) {
     style.maxWidth = FORM_WIDTHS[ width ];
   }
 
