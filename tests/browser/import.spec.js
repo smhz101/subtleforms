@@ -39,7 +39,16 @@ function wp(args) {
 
 async function openMigrate(page) {
   await page.goto(MIGRATE);
+  // On a site with no forms and other form plugins' data, the import offer
+  // opens as a modal and hides the page from assistive technology until it is
+  // answered. Take its "Import forms" action, which lands on this same screen.
+  const offer = page.getByRole('dialog', { name: 'Import your existing forms?' });
   const sections = page.getByRole('navigation', { name: 'Tools' });
+  await expect(offer.or(sections)).toBeVisible({ timeout: 30000 });
+  if (await offer.isVisible()) {
+    await offer.getByRole('button', { name: 'Import forms' }).click();
+    await expect(offer).toBeHidden();
+  }
   await expect(sections).toBeVisible({ timeout: 30000 });
   await sections.getByRole('button', { name: 'Migrate' }).click();
   await expect(page.getByRole('heading', { name: 'From this site' })).toBeVisible({ timeout: 30000 });
