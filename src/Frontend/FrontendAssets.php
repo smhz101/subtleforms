@@ -195,7 +195,6 @@ final class FrontendAssets {
 		'password',
 		'textarea',
 		'select',
-		'dropdown',
 		'radio',
 		'multiple_choice',
 		'checkbox',

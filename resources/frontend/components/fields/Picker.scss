@@ -15,7 +15,7 @@
 	padding: 10px 12px;
 	border: 1px solid var(--subtleforms-color-border, var(--sf-gray-300, #d8dbe2));
 	border-radius: var(--subtleforms-radius-md, var(--sf-radius-md, 8px));
-	background: var(--subtleforms-color-bg, var(--sf-surface, #fff));
+	background: var(--subtleforms-color-surface, var(--subtleforms-color-bg, var(--sf-surface, Canvas)));
 	color: var(--subtleforms-color-text, var(--sf-gray-800, #1e1e1e));
 	font: inherit;
 	font-size: var(--subtleforms-font-size-base, var(--sf-text-base, 1rem));
@@ -84,7 +84,7 @@
 	padding: 6px;
 	border: 1px solid var(--subtleforms-color-border, var(--sf-border, #d8dbe2));
 	border-radius: var(--subtleforms-radius-md, 8px);
-	background: var(--subtleforms-color-bg, #fff);
+	background: var(--subtleforms-color-surface, var(--subtleforms-color-bg, Canvas));
 	box-shadow: var(--subtleforms-shadow-md, 0 8px 24px rgba(19, 20, 23, 0.12));
 }
 

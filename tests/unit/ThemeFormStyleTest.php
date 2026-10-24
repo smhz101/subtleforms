@@ -40,6 +40,12 @@ final class ThemeFormStyleTest extends TestCase {
 		$this->assertFalse( FrontendAssets::isPlainThemeForm( null ) );
 	}
 
+
+	public function test_theme_preset_with_dropdown_keeps_the_stylesheet(): void {
+		$theme = array( 'preset' => 'theme' );
+		$this->assertFalse( FrontendAssets::isPlainThemeForm( $this->schema( $theme, array( array( 'type' => 'dropdown', 'key' => 'choice' ) ) ) ) );
+	}
+
 	public function test_widgets_and_step_forms_keep_the_stylesheet(): void {
 		$theme = array( 'preset' => 'theme' );
 		$this->assertFalse( FrontendAssets::isPlainThemeForm( $this->schema( $theme, array( array( 'type' => 'signature', 'key' => 's' ) ) ) ) );
