@@ -37,7 +37,7 @@ Add-on scripts call these on `window.SubtleFormsExtend`. Load your script after 
 
 ## Settings tabs (JavaScript)
 
-The Settings screen lists Tools and MCP. Add-ons register the body of a tab on `window.SubtleFormsExtend` from a script that loads after the `subtleforms-admin` script on SubtleForms admin pages:
+The Settings screen lists its own tabs, ending with Tools. Add-ons register a tab on `window.SubtleFormsExtend` from a script that loads after the `subtleforms-admin` script on SubtleForms admin pages:
 
 ```js
 window.SubtleFormsExtend.registerSettingsTab( 'mcp', {
@@ -49,18 +49,18 @@ window.SubtleFormsExtend.registerSettingsTab( 'mcp', {
 
 | Name | Result |
 | --- | --- |
-| `mcp` | Replaces the note that Free shows (what MCP is, with an upgrade link) in the existing MCP tab. |
-| any other `[a-z0-9-]+` name | Adds a tab to the Pro group. `title` is required; `description` and `order` (a number, default last) are optional. |
+| `mcp` | Adds the MCP tab right after Tools, with the default title MCP. Without a registration there is no MCP tab. |
+| any other `[a-z0-9-]+` name | Adds a tab to the Add-ons group. `title` is required; `description` and `order` (a number, default last) are optional. |
 
 The tab opens at `admin.php?page=subtleforms-settings#tab=<name>`. The body looks after its own data and saving, so Settings shows no Save button or save bar for it. Tools is part of Settings now: `admin.php?page=subtleforms-tools` redirects to `#tab=tools`.
 
 ## Capabilities
 
-`subtleforms/capabilities` filters the capability map. The free plugin only reads capabilities that are on by default. Keys such as `fields.advanced`, `actions.payment`, `extensions.*`, `templates.pro` and `branding.white_label` belong to SubtleForms Pro: Pro adds them and only Pro code reads them.
+`subtleforms/capabilities` filters the capability map. This plugin never switches its own code off through the map and does not check add-on keys: an extension, field type, action or template an add-on registers is used. Keys such as `fields.advanced`, `actions.payment`, `extensions.*` and `branding.white_label` belong to the add-on that adds them, and only that add-on reads them. The one exception is `extensions.pdf`: when an add-on sets it, the entry screen shows its PDF link.
 
 ## Moved to Pro in 2.7.0
 
-Picture choice, several files per upload field, advanced conditional logic and form analytics are part of SubtleForms Pro. The free plugin holds no working code for them. It keeps the extension points below, a plain fallback for forms that already use them, and Pro placeholders in the screens.
+Picture choice, several files per upload field, advanced conditional logic and form analytics are provided by an add-on. This plugin holds no code for them and shows no placeholders, badges or upgrade links for them. It keeps the extension points below and a plain fallback for forms that already use them.
 
 `SubtleForms\Support\ExtensionPoints` names the four points (`picture_choice`, `multi_file_uploads`, `advanced_logic`, `analytics`) and its `LEVEL` constant (2) is the contract version. Level 2 adds the logic, upload and add-on feature hooks of 2.7.0 and the `FeatureGate` setters. An add-on checks `ExtensionPoints::has( $name )` before it registers, so it never registers twice against an older plugin that still ships the feature. It reports what it runs through:
 
@@ -76,7 +76,7 @@ Picture choice, several files per upload field, advanced conditional logic and f
 | `subtleforms/fields/register` | action `( FieldRegistry $registry )` | Register `picture_choice` with a `FieldDefinition`. Existing hook. |
 | `subtleforms/fields/validate_value` | filter | Validate the type. Existing hook. |
 | `subtleforms/uploads/max_files` | filter `( int $max, array $field )` | Files accepted for one upload field. Default 1. Pro returns the field's own limit. |
-| `subtleforms/fields/inspector_controls` | filter `( array $controls, string $type )` | Change the settings controls of a field type. Free ships a `pro_notice` control named `multiple` on file uploads; Pro replaces it with the real toggle and a `maxFiles` number. |
+| `subtleforms/fields/inspector_controls` | filter `( array $controls, string $type )` | Change the settings controls of a field type. Since 2.7.2 this plugin ships no `multiple` control on file uploads; an add-on adds its own toggle and `maxFiles` number here. |
 
 Without Pro, a saved `picture_choice` is shown, checked and stored as a radio group, or as a multiple choice when `allowMultiple` is true. A saved multi-file upload accepts one file, and a request that posts more is refused with "You can attach up to 1 file". Nothing in the saved form JSON is changed.
 
@@ -117,16 +117,15 @@ Slots: `reports.panels` and `dashboard.panels` (props: `forms`), `forms.list.col
 
 The front end dispatches the `subtleforms:submitted` event on `document` with `detail.formId` after a successful send. Field wrappers carry `data-sf-key` and steps carry `data-sf-step`, which Pro reads for the funnel.
 
-Upgrade keys used by the placeholders: `fields.picture_choice`, `uploads.multiple`, `logic.conditional.advanced`, `extensions.analytics`.
-
 ## Add-on boot and gate (PHP)
 
 `SubtleForms\Support\FeatureGate` is the one gate in the container. An add-on sets its own pieces on it instead of replacing the container entry, so every service that already holds the gate sees them.
 
 | Method | Use |
 | --- | --- |
-| `FeatureGate::setLicenseManager( ?object $manager )` | Give the gate a license manager: any object with `isValid()` and `hasFeature( string )`. Pass null to remove it. An object without both methods throws `InvalidArgumentException`. Since 2.7.1. |
 | `FeatureGate::setCapabilities( Capabilities $caps )` | Swap the capability map, for example after the add-on has added its `subtleforms/capabilities` filter. Since 2.7.1. |
+
+Since 2.7.2 the gate only reads the capability map. It has no other setter, and an extra constructor argument is ignored. A `Capabilities` map rebuilds itself when callbacks are added to `subtleforms/capabilities` after it was built, so services that hold the gate see an add-on's keys. An add-on decides for itself which of its features are available.
 
 ## Orders (PHP, 2.8.0)
 

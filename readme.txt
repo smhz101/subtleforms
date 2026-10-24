@@ -12,7 +12,7 @@ Build contact, multi-step and conversational forms on a visual canvas, then read
 
 == Description ==
 
-SubtleForms is a form builder for WordPress. You build a form on a canvas that looks like the live form, publish it with a shortcode or the SubtleForms block, and read the entries in an inbox inside wp-admin. Everything listed here is in this plugin and works without an account or a license. A few extras (Picture choice, several files per upload field, advanced conditional logic, form analytics, integrations and card payments) are part of the separate SubtleForms Pro plugin.
+SubtleForms is a form builder for WordPress. You build a form on a canvas that looks like the live form, publish it with a shortcode or the SubtleForms block, and read the entries in an inbox inside wp-admin. Everything listed here is in this plugin and works without an account.
 
 = Building forms =
 
@@ -28,12 +28,12 @@ SubtleForms is a form builder for WordPress. You build a form on a canvas that l
 * Text, Paragraph, Email, Number, Phone, Website, Password, Name and Address
 * Dropdown, Radio buttons, Checkboxes, Single checkbox, Toggle, Country, Consent and Dependent dropdowns (as menus, buttons or columns, typed in or loaded from CSV)
 * Date, Time, Date and time, Rating, Opinion scale, NPS, Slider, Matrix, Colour picker and Rich text
-* File and image uploads, one file per field (several files per field need SubtleForms Pro), with allowed types and size limits, stored in a private folder and downloaded by admins only
+* File and image uploads, one file per field, with allowed types and size limits, stored in a private folder and downloaded by admins only
 * Hidden fields with merge values such as {user_email} and {get:param}, HTML blocks, section breaks, Repeater, Group and Columns
 
 = Logic and after submit =
 
-* Show or hide fields when all of their rules match, with the basic operators: equals, does not equal, contains, does not contain, is empty, is not empty, greater than and less than. Hidden fields are not validated or saved, in the browser and on the server. Any-match rules, groups, more operators and rules for steps, emails, webhooks and confirmations need SubtleForms Pro
+* Show or hide fields when all of their rules match, with these operators: equals, does not equal, contains, does not contain, is empty, is not empty, greater than and less than. Hidden fields are not validated or saved, in the browser and on the server
 * Email notifications and webhooks after each entry, with merge tags such as {all_fields}, {field:email} and {entry_id}, plain text or HTML
 * A confirmation message with answers merged in and clickable links, or a redirect
 * Availability rules: logged-in visitors only, open and close dates, and an entry limit
@@ -43,7 +43,7 @@ SubtleForms is a form builder for WordPress. You build a form on a canvas that l
 * An inbox with tabs, search, filters and a reading pane
 * Read and unread, star, flag, notes, resend notifications and a Trash, one entry at a time or in bulk
 * CSV export of entries, JSON export and import of forms and entries, and import of Gravity Forms and Fluent Forms export files as draft forms
-* Reports: submissions, unread entries and a chart of the last days. Form views, conversion and the form funnel are part of SubtleForms Pro
+* Reports: submissions, unread entries and a chart of the last days
 * Activity, webhook and API logs
 
 = Spam protection and privacy =
@@ -52,9 +52,7 @@ SubtleForms is a form builder for WordPress. You build a form on a canvas that l
 * Optional Google reCAPTCHA (v2 and v3), hCaptcha or Cloudflare Turnstile (see External services)
 * Data retention settings and the WordPress personal data export and erase tools
 
-= SubtleForms Pro =
-
-SubtleForms Pro is a separate, paid add-on available at [subtleforms.com](https://subtleforms.com/pricing/). It adds Signature and Calculation fields, Stripe card checkout, WooCommerce checkout, Mailchimp, Brevo, Kit, HubSpot and Zapier integrations, entry PDFs, more templates, white label branding (Agency licences set it in the licence portal on subtleforms.com) and WPML or Polylang support. This plugin does not need Pro, and nothing in this plugin is disabled without it.
+SubtleForms Pro is a separate plugin that adds Signature, Calculation and Picture choice fields, several files per upload field, Stripe payments, WooCommerce checkout, marketing and CRM integrations, more conditional logic options, form analytics, entry PDFs and translation support. See [subtleforms.com](https://subtleforms.com/pro/).
 
 == Installation ==
 
@@ -70,7 +68,7 @@ Publish the form, then add the SubtleForms block, or paste the shortcode shown i
 
 = Does SubtleForms contact any outside server? =
 
-Not by default. It only contacts a CAPTCHA provider if you turn one on, and the URLs you enter yourself for webhooks. See External services.
+Not by default. It only contacts a CAPTCHA provider if you turn one on, and the URLs you enter yourself for webhooks. It sends no usage data or telemetry. See External services.
 
 = How do I stop spam? =
 
@@ -88,33 +86,29 @@ Files are saved under a folder with a random name, without file extensions, and 
 
 The answers a visitor sends, the time, and the visitor's IP address and browser user agent for spam checks. You can set how long entries are kept, and the WordPress privacy tools can export or erase a person's entries.
 
-= Does the form funnel track visitors? =
-
-The form funnel is part of SubtleForms Pro, not this plugin. It keeps daily totals per form of how many people saw, started and left a form and the last field touched. It sets no cookies and stores no answers, IP addresses or other personal data.
-
 = Where are the docs and support? =
 
 Documentation is at [subtleforms.com/docs](https://subtleforms.com/docs/). Ask questions in the support forum on WordPress.org.
 
 == External services ==
 
-SubtleForms works without any external service. The services below are used only when a site administrator turns them on.
+SubtleForms works without any external service and sends no usage data or telemetry. The services below are used only when a site administrator turns them on, and only for forms on that site.
 
 = Google reCAPTCHA =
 
-Used to check that a form is sent by a person. When reCAPTCHA is enabled under Settings, Security and privacy, the form page loads the reCAPTCHA script from google.com, which collects data about the visitor's browser and interaction. On submit, the site sends the visitor's response token and IP address to https://www.google.com/recaptcha/api/siteverify. [Terms of Service](https://policies.google.com/terms), [Privacy Policy](https://policies.google.com/privacy).
+Used to check that a form is sent by a person. When reCAPTCHA is enabled under Settings, Security and privacy, the form page loads the reCAPTCHA script from google.com, which collects data about the visitor's browser and interaction. On submit, the site sends your secret key, the visitor's response token and IP address to https://www.google.com/recaptcha/api/siteverify. [Terms of Service](https://policies.google.com/terms), [Privacy Policy](https://policies.google.com/privacy).
 
 = hCaptcha =
 
-Used for the same purpose when hCaptcha is enabled. The form page loads the script from js.hcaptcha.com, and on submit the site sends the response token and the visitor's IP address to https://hcaptcha.com/siteverify. [Terms of Service](https://www.hcaptcha.com/terms), [Privacy Policy](https://www.hcaptcha.com/privacy).
+Used for the same purpose when hCaptcha is enabled. The form page loads the script from js.hcaptcha.com, and on submit the site sends your secret key, the response token and the visitor's IP address to https://hcaptcha.com/siteverify. [Terms of Service](https://www.hcaptcha.com/terms), [Privacy Policy](https://www.hcaptcha.com/privacy).
 
 = Cloudflare Turnstile =
 
-Used for the same purpose when Turnstile is enabled. The form page loads the script from challenges.cloudflare.com, and on submit the site sends the response token and the visitor's IP address to https://challenges.cloudflare.com/turnstile/v0/siteverify. [Terms of Use](https://www.cloudflare.com/website-terms/), [Privacy Policy](https://www.cloudflare.com/privacypolicy/).
+Used for the same purpose when Turnstile is enabled. The form page loads the script from challenges.cloudflare.com, and on submit the site sends your secret key, the response token and the visitor's IP address to https://challenges.cloudflare.com/turnstile/v0/siteverify. [Terms of Use](https://www.cloudflare.com/website-terms/), [Privacy Policy](https://www.cloudflare.com/privacypolicy/).
 
 = Webhooks =
 
-When you add a webhook action to a form, each new entry is sent as JSON to the URL you enter. Nothing is sent to SubtleForms or any address you did not enter.
+When you add a webhook action to a form, each new entry is sent as JSON to the URL you, the site owner, enter, after the entry is saved (and when you press Test). The data goes only to that URL: nothing is sent to SubtleForms or to any address you did not enter. What that service does with it is set by its own terms.
 
 == Source code and build ==
 
