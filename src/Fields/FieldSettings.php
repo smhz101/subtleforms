@@ -573,7 +573,9 @@ final class FieldSettings {
 				'type'    => 'textarea',
 				'name'    => 'description',
 				'label'   => __( 'Help text', 'subtleforms' ),
-				'help'    => __( 'Shown under the label, above the fields.', 'subtleforms' ),
+				'help'    => ( 'repeat_container' === $type )
+					? __( 'Shown once above the groups visitors add.', 'subtleforms' )
+					: __( 'Shown under the label, above the fields.', 'subtleforms' ),
 				'rows'    => 2,
 				'section' => 'general',
 			);

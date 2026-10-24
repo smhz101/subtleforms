@@ -5,6 +5,7 @@
 import { createRoot } from '@wordpress/element';
 import { act } from 'react';
 import FieldRenderer, { hasVisibleText } from './FieldRenderer';
+import { FormContext } from './fields/contexts';
 import { registerFieldType } from '../../shared/extend';
 import { loadAllFieldGroups } from './fields/lazyFields';
 
@@ -454,6 +455,47 @@ describe('column containers (review #20)', () => {
     const { container, unmount } = render(field);
     expect(container.querySelector('[name="left_name"]')).not.toBeNull();
     expect(container.querySelector('[name="right_name"]')).not.toBeNull();
+    unmount();
+  });
+});
+
+
+describe('required indicator mark from form defaults', () => {
+  function renderWithDefaults(field, fieldDefaults) {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    act(() => {
+      root.render(
+        <FormContext.Provider value={{ formId: 1, preview: false, fieldDefaults }}>
+          <FieldRenderer field={field} values={{}} onChange={() => {}} errors={{}} />
+        </FormContext.Provider>
+      );
+    });
+    return {
+      container,
+      unmount: () => {
+        act(() => root.unmount());
+        container.remove();
+      },
+    };
+  }
+
+  test('shows (Required) for text mode', () => {
+    const { container, unmount } = renderWithDefaults(
+      { key: 'n', type: 'text', label: 'Name', required: true },
+      { requiredIndicator: 'text' }
+    );
+    expect(container.querySelector('.subtleforms-required').textContent).toBe('(Required)');
+    unmount();
+  });
+
+  test('shows a custom mark', () => {
+    const { container, unmount } = renderWithDefaults(
+      { key: 'n', type: 'text', label: 'Name', required: true },
+      { requiredIndicator: 'custom', requiredIndicatorText: '†' }
+    );
+    expect(container.querySelector('.subtleforms-required').textContent).toBe('†');
     unmount();
   });
 });

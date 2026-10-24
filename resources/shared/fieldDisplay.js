@@ -8,6 +8,7 @@
  * - Help text placement: 'below' (default) or 'above' the input.
  * - Admin label: the name used in entries, emails, exports and integrations
  *   instead of the public label.
+ * - Required field indicator and validation summary (form settings).
  *
  * Shared by the builder canvas and the live form so both look the same.
  */
@@ -18,16 +19,39 @@ import { fieldConfig } from './fieldConfig';
  * Form-level defaults from schema metadata.
  *
  * @param {Object} metadata schema.metadata
- * @return {{labelVisibility: string, descriptionPlacement: string, requiredMessage: string, validationMessage: string}}
+ * @return {{labelVisibility: string, descriptionPlacement: string, requiredMessage: string, validationMessage: string, validationSummary: boolean, requiredIndicator: string, requiredIndicatorText: string}}
  */
 export function formFieldDefaults(metadata) {
   const m = metadata && typeof metadata === 'object' ? metadata : {};
+  const indicator = m.requiredIndicator;
   return {
     labelVisibility: m.labelVisibility === 'hidden' ? 'hidden' : 'visible',
     descriptionPlacement: m.descriptionPlacement === 'above' ? 'above' : 'below',
     requiredMessage: typeof m.requiredMessage === 'string' ? m.requiredMessage.trim() : '',
     validationMessage: typeof m.validationMessage === 'string' ? m.validationMessage.trim() : '',
+    validationSummary: m.validationSummary === false ? false : true,
+    requiredIndicator: indicator === 'text' || indicator === 'custom' ? indicator : 'asterisk',
+    requiredIndicatorText: typeof m.requiredIndicatorText === 'string' ? m.requiredIndicatorText : '',
   };
+}
+
+/**
+ * Visible mark for required fields from form defaults.
+ *
+ * @param {Object} defaults formFieldDefaults() result.
+ * @return {string}
+ */
+export function requiredIndicatorMark(defaults = {}) {
+  const mode = defaults.requiredIndicator || 'asterisk';
+  if (mode === 'text') {
+    const text = typeof defaults.requiredIndicatorText === 'string' ? defaults.requiredIndicatorText.trim() : '';
+    return text || '(Required)';
+  }
+  if (mode === 'custom') {
+    const custom = typeof defaults.requiredIndicatorText === 'string' ? defaults.requiredIndicatorText : '';
+    return custom || '*';
+  }
+  return '*';
 }
 
 /**

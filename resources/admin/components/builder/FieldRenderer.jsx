@@ -6,7 +6,7 @@ import Icon from '../../ui/Icon';
 import NameFieldRenderer from './NameFieldRenderer';
 import AddressFieldRenderer from './AddressFieldRenderer';
 import { getCanvasPreview, addonProvides } from '../../../shared/extend';
-import { fieldDisplay } from '../../../shared/fieldDisplay';
+import { fieldDisplay, requiredIndicatorMark } from '../../../shared/fieldDisplay';
 import { fieldConfig } from '../../../shared/fieldConfig';
 import { flagsOn } from '../../../shared/flagsOn';
 import { choiceChecked, choiceShowsDefault } from '../../../shared/canvasDefaults';
@@ -156,6 +156,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
   }
 
   const showRequired = required && !NON_INPUT_TYPES.has(type);
+  const requiredMark = requiredIndicatorMark(builderConfig?.fieldDefaults || {});
   const FieldIcon = getFieldIcon(type);
 
   // ── Section Break ───────────────────────────────────────────────────────────
@@ -209,7 +210,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           >
             {label || field.name}
             {showRequired && (
-              <span className='sf-field-renderer__required-mark'>*</span>
+              <span className='sf-field-renderer__required-mark'>{requiredMark}</span>
             )}
           </label>
           {display.labelHidden && !NON_INPUT_TYPES.has(type) && (

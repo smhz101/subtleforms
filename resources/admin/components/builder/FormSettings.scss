@@ -898,3 +898,10 @@
 		margin: 0;
 	}
 }
+
+.sf-form-settings__required-indicator {
+	.components-radio-control__option {
+		display: inline-flex;
+		margin-right: 16px;
+	}
+}

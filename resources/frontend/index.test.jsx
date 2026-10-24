@@ -22,7 +22,14 @@ test('each form container is mounted and loaded once', async () => {
     require('./index');
   });
 
+  // Mount resolves schema before paint; wait for the route calls.
   const schemaCalls = (id) => calls.filter((url) => url.endsWith(`/forms/${id}/schema`)).length;
+  for (let i = 0; i < 50 && (schemaCalls(7) === 0 || schemaCalls(8) === 0); i++) {
+    // eslint-disable-next-line no-await-in-loop
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    });
+  }
   expect(schemaCalls(7)).toBe(1);
   expect(schemaCalls(8)).toBe(1);
 
@@ -88,4 +95,24 @@ test('without printed data the form is still loaded from the route', async () =>
     });
   }
   expect(routeCalls()).toHaveLength(1);
+});
+
+test('a hanging schema fetch never flashes Loading form text', async () => {
+  jest.resetModules();
+  document.body.innerHTML =
+    '<div class="subtleforms-form-container" data-form-id="11"><div class="subtleforms-skeleton">Keep me</div></div>';
+  global.fetch = jest.fn(() => new Promise(() => {}));
+  delete window.SubtleForms;
+
+  await act(async () => {
+    require('./index');
+  });
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 40));
+  });
+
+  const container = document.querySelector('.subtleforms-form-container');
+  expect(container.querySelector('.subtleforms-loading')).toBeNull();
+  expect(container.textContent).not.toContain('Loading form');
+  expect(container.querySelector('.subtleforms-skeleton')).not.toBeNull();
 });
