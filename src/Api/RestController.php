@@ -164,6 +164,9 @@ final class RestController {
 		// Blocked spam counts and the spam protection offer (2.6.0).
 		( new SpamApi( $this->formsRepo, $this->gate ) )->registerRoutes();
 
+		// Fresh-install import offer (2.7.2).
+		( new ImportOfferApi( $this->gate ) )->registerRoutes();
+
 		\SubtleForms\Tools\ApiLog::register();
 	}
 }

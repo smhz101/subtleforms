@@ -56,6 +56,12 @@ export const queryKeys = {
     protection: () => ['spam', 'protection'],
   },
 
+  // Fresh-install import offer (2.7.2)
+  importOffer: {
+    all: ['importOffer'],
+    status: () => ['importOffer', 'status'],
+  },
+
   // Extensions
   extensions: {
     all: ['extensions'],

@@ -34,6 +34,9 @@ export { useDashboardStats } from './queries/dashboard';
 export { useSpamStats, useSpamProtection } from './queries/spam';
 export { useSpamProtectionAction } from './mutations/spam';
 
+export { useImportOffer } from './queries/importOffer';
+export { useImportOfferAction } from './mutations/importOffer';
+
 // Mutations
 export {
   useCreateForm,

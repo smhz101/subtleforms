@@ -132,6 +132,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 == Changelog ==
 
 = 2.7.2 - 2026-10-24 =
+* New: On an empty site, SubtleForms offers to import forms from Contact Form 7, Gravity Forms, Fluent Forms and other detected form plugins.
 * Change: Forms load without a loading flash, file uploads use a drop zone with a select button, repeater groups are labelled Entry N, and form settings let you choose the required-field mark and turn the validation summary on or off. Forms that have required fields show a short legend for the mark. Forms no longer paint a background by default, and inherit-from-theme keeps SubtleForms chrome for calendars and similar fields while using theme colours.
 * Fix: The Preview tab uses one scrollbar for the canvas and styling controls.
 * Change: Appearance presets no longer set form width; Layout / Form width stays a separate control so columns flex at full content width.
