@@ -196,8 +196,8 @@ final class FieldTypeAvailability {
 	 * type nothing registers. Such a form cannot work as its author built it,
 	 * so it is not shown and does not accept entries until a plugin that
 	 * registers the type is active again. The form itself is kept as saved.
-	 * Settings stored in the schema (for example `metadata.payment`) are not
-	 * looked at; only registered field types decide.
+	 * Settings stored in the schema are not looked at; only registered field
+	 * types decide.
 	 *
 	 * @param mixed              $schema   Form schema.
 	 * @param FieldRegistry|null $registry Registry (null: the plugin's own).
