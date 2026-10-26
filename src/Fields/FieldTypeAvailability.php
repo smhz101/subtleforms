@@ -1,10 +1,12 @@
 <?php
 /**
- * Field types that add-ons provide.
+ * Which field types a saved form uses that nothing registers right now.
  *
- * Some field types (for example Signature and Calculation) are registered by
- * an add-on. A form keeps such fields when the add-on is not active, so nothing is
- * lost, but the live form leaves them out until the add-on is back.
+ * Add-ons register their own field types on `subtleforms/fields/register`.
+ * A form keeps a field whose type is not registered (for example after the
+ * add-on that provided it was deactivated), so nothing is lost, but the live
+ * form does not show it. This class reads only the field type registry; it
+ * holds no list of add-on field types.
  *
  * @package SubtleForms\Fields
  * @since   2.3.9
@@ -16,12 +18,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-final class AddonFieldTypes {
+final class FieldTypeAvailability {
 
 	/**
-	 * Field types this plugin knows belong to add-ons.
+	 * Types this plugin shipped in earlier versions and still reads. A saved
+	 * form that uses one keeps working while nothing registers it: the field is
+	 * left out of the live form and the form stays open.
 	 */
-	const TYPES = array( 'signature', 'calculation', 'payment_card', 'payment_product', 'payment_choice', 'payment_amount', 'payment_summary', 'payment_coupon', 'payment_hidden_price' );
+	const LEGACY_TYPES = array( 'signature', 'calculation' );
 
 	/**
 	 * Field types an add-on provides that still work without it, as a plain
@@ -36,22 +40,6 @@ final class AddonFieldTypes {
 	 */
 	public static function register(): void {
 		add_filter( 'subtleforms/public_schema', array( self::class, 'filterPublicSchema' ), 5 );
-	}
-
-	/**
-	 * Add-on field types, filterable so other add-ons can declare theirs.
-	 *
-	 * @return string[]
-	 */
-	public static function types(): array {
-		/**
-		 * Field types that only exist while an add-on registers them.
-		 *
-		 * @since 2.3.9
-		 *
-		 * @param string[] $types Field types.
-		 */
-		return array_values( array_filter( (array) apply_filters( 'subtleforms/fields/addon_types', self::TYPES ), 'is_string' ) );
 	}
 
 	/**
@@ -85,14 +73,8 @@ final class AddonFieldTypes {
 	 * @return array<string,array<string,bool>> Type to flags.
 	 */
 	public static function typeFlags( ?FieldRegistry $registry = null ): array {
-		if ( null === $registry ) {
-			try {
-				$registry = \SubtleForms\Plugin::instance()->container()->get( FieldRegistry::class );
-			} catch ( \Throwable $e ) {
-				$registry = null;
-			}
-		}
-		$out = array();
+		$registry = self::registry( $registry );
+		$out      = array();
 		if ( $registry instanceof FieldRegistry ) {
 			foreach ( $registry->all() as $type => $definition ) {
 				$meta = is_array( $definition->meta ?? null ) ? $definition->meta : array();
@@ -110,12 +92,20 @@ final class AddonFieldTypes {
 	}
 
 	/**
-	 * Types a saved form may contain: add-on types plus those with a fallback.
+	 * Field types a form may use and this site understands: every registered
+	 * type (this plugin's and any add-on's), the types this plugin reads
+	 * through a fallback, and the older names its schema check accepts.
 	 *
+	 * @param FieldRegistry|null $registry Registry (null: the plugin's own).
 	 * @return string[]
 	 */
-	public static function knownTypes(): array {
-		return array_values( array_unique( array_merge( self::types(), self::FALLBACKS ) ) );
+	public static function knownTypes( ?FieldRegistry $registry = null ): array {
+		$registry = self::registry( $registry );
+		$types    = array_merge( \SubtleForms\Support\SchemaValidator::CORE_TYPES, self::FALLBACKS );
+		if ( $registry instanceof FieldRegistry ) {
+			$types = array_merge( $types, array_map( 'strval', array_keys( $registry->all() ) ) );
+		}
+		return array_values( array_unique( $types ) );
 	}
 
 	/**
@@ -131,13 +121,7 @@ final class AddonFieldTypes {
 		if ( ! in_array( $type, self::FALLBACKS, true ) ) {
 			return $type;
 		}
-		if ( null === $registry ) {
-			try {
-				$registry = \SubtleForms\Plugin::instance()->container()->get( FieldRegistry::class );
-			} catch ( \Throwable $e ) {
-				$registry = null;
-			}
-		}
+		$registry = self::registry( $registry );
 		if ( $registry instanceof FieldRegistry && $registry->has( $type ) ) {
 			return $type;
 		}
@@ -165,34 +149,65 @@ final class AddonFieldTypes {
 	}
 
 	/**
-	 * Add-on types that no active plugin registers right now.
+	 * The field registry (null when the plugin is not booted).
 	 *
 	 * @param FieldRegistry|null $registry Registry (null: the plugin's own).
-	 * @return string[]
 	 */
-	public static function missing( ?FieldRegistry $registry = null ): array {
-		if ( null === $registry ) {
-			try {
-				$registry = \SubtleForms\Plugin::instance()->container()->get( FieldRegistry::class );
-			} catch ( \Throwable $e ) {
-				return array();
-			}
+	private static function registry( ?FieldRegistry $registry = null ): ?FieldRegistry {
+		if ( null !== $registry ) {
+			return $registry;
 		}
-		if ( ! $registry instanceof FieldRegistry ) {
-			return array();
+		try {
+			$found = \SubtleForms\Plugin::instance()->container()->get( FieldRegistry::class );
+		} catch ( \Throwable $e ) {
+			return null;
 		}
-		return array_values(
-			array_filter(
-				self::types(),
-				static function ( $type ) use ( $registry ) {
-					return ! $registry->has( $type );
-				}
-			)
-		);
+		return $found instanceof FieldRegistry ? $found : null;
 	}
 
 	/**
-	 * Remove fields whose add-on is not active from the schema sent to visitors.
+	 * Field types a schema uses that nothing registers right now.
+	 *
+	 * @param mixed              $schema   Form schema (the `schema` part of a version row).
+	 * @param FieldRegistry|null $registry Registry (null: the plugin's own).
+	 * @return string[]
+	 */
+	public static function unregistered( $schema, ?FieldRegistry $registry = null ): array {
+		if ( ! is_array( $schema ) ) {
+			return array();
+		}
+		$registry = self::registry( $registry );
+		if ( ! $registry instanceof FieldRegistry ) {
+			return array();
+		}
+		$known = array_flip( self::knownTypes( $registry ) );
+		$out   = array();
+		foreach ( \SubtleForms\Support\SchemaFields::flat( $schema ) as $field ) {
+			$type = $field['type'] ?? '';
+			if ( is_string( $type ) && '' !== $type && ! isset( $known[ $type ] ) ) {
+				$out[ $type ] = true;
+			}
+		}
+		return array_keys( $out );
+	}
+
+	/**
+	 * Whether a saved form is not available to visitors: it holds a field whose
+	 * type nothing registers. Such a form cannot work as its author built it,
+	 * so it is not shown and does not accept entries until a plugin that
+	 * registers the type is active again. The form itself is kept as saved.
+	 * Settings stored in the schema (for example `metadata.payment`) are not
+	 * looked at; only registered field types decide.
+	 *
+	 * @param mixed              $schema   Form schema.
+	 * @param FieldRegistry|null $registry Registry (null: the plugin's own).
+	 */
+	public static function closesForm( $schema, ?FieldRegistry $registry = null ): bool {
+		return (bool) array_diff( self::unregistered( $schema, $registry ), self::LEGACY_TYPES );
+	}
+
+	/**
+	 * Remove fields nothing registers from the schema sent to visitors.
 	 *
 	 * @param mixed $schema Public schema.
 	 * @return mixed
@@ -201,7 +216,7 @@ final class AddonFieldTypes {
 		if ( ! is_array( $schema ) || empty( $schema['fields'] ) || ! is_array( $schema['fields'] ) ) {
 			return $schema;
 		}
-		$missing = self::missing();
+		$missing = self::unregistered( $schema );
 		if ( empty( $missing ) ) {
 			return $schema;
 		}
@@ -210,48 +225,16 @@ final class AddonFieldTypes {
 	}
 
 	/**
-	 * Whether a schema takes a payment that nothing handles: it has a payment
-	 * field nobody registers, or it was saved by an earlier version with
-	 * payment settings turned on (`metadata.payment.enabled`) and nothing
-	 * registers the Card Payment field. Without the add-on such a form cannot
-	 * take its payment, so it is not shown and does not accept entries.
-	 *
-	 * @param mixed $schema Form schema (the `schema` part of a version row).
-	 */
-	public static function needsMissingPayment( $schema ): bool {
-		if ( ! is_array( $schema ) ) {
-			return false;
-		}
-		$isPayment = static function ( $type ) {
-			return 0 === strpos( (string) $type, 'payment_' );
-		};
-		$missing   = array_filter( self::missing(), $isPayment );
-		if ( ! $missing ) {
-			return false;
-		}
-		$saved = $schema['metadata']['payment'] ?? null;
-		if ( is_array( $saved ) && ! empty( $saved['enabled'] ) && in_array( 'payment_card', $missing, true ) ) {
-			return true;
-		}
-		foreach ( \SubtleForms\Support\SchemaFields::flat( $schema ) as $field ) {
-			if ( in_array( (string) ( $field['type'] ?? '' ), $missing, true ) ) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Drop answers to fields whose add-on is not active: the live form does
-	 * not show them, so a value can only come from a crafted request.
+	 * Drop answers to fields nothing registers: the live form does not show
+	 * them, so a value can only come from a crafted request.
 	 *
 	 * @param array $payload Submitted values.
 	 * @param mixed $schema  Form schema.
 	 * @return array
 	 */
 	public static function dropMissingAnswers( array $payload, $schema ): array {
-		$missing = self::missing();
-		if ( ! $missing || ! is_array( $schema ) ) {
+		$missing = self::unregistered( $schema );
+		if ( ! $missing ) {
 			return $payload;
 		}
 		foreach ( \SubtleForms\Support\SchemaFields::flat( $schema ) as $field ) {

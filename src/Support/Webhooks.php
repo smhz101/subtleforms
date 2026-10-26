@@ -288,7 +288,7 @@ final class Webhooks {
 	public static function sendableFields( array $schema ): array {
 		$out = array();
 		foreach ( FieldMapper::fields( $schema ) as $row ) {
-			if ( in_array( $row['type'], self::SENSITIVE_TYPES, true ) || in_array( $row['type'], \SubtleForms\Fields\AddonFieldTypes::noAnswerTypes(), true ) || EntryValues::isSecret( $row['field'] ) || isset( $out[ $row['key'] ] ) ) {
+			if ( in_array( $row['type'], self::SENSITIVE_TYPES, true ) || in_array( $row['type'], \SubtleForms\Fields\FieldTypeAvailability::noAnswerTypes(), true ) || EntryValues::isSecret( $row['field'] ) || isset( $out[ $row['key'] ] ) ) {
 				continue;
 			}
 			$out[ $row['key'] ] = $row;

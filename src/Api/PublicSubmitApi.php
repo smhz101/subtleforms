@@ -445,8 +445,8 @@ final class PublicSubmitApi {
 		$payload     = \SubtleForms\Engine\FieldValidator::prepare( $activeSchema['schema'] ?? $activeSchema, $payload );
 
 		// Fields from an add-on that is not active are not on the live form.
-		$payload     = \SubtleForms\Fields\AddonFieldTypes::dropMissingAnswers( $payload, $activeSchema['schema'] ?? $activeSchema );
-		$logicValues = \SubtleForms\Fields\AddonFieldTypes::dropMissingAnswers( $logicValues, $activeSchema['schema'] ?? $activeSchema );
+		$payload     = \SubtleForms\Fields\FieldTypeAvailability::dropMissingAnswers( $payload, $activeSchema['schema'] ?? $activeSchema );
+		$logicValues = \SubtleForms\Fields\FieldTypeAvailability::dropMissingAnswers( $logicValues, $activeSchema['schema'] ?? $activeSchema );
 
 		// Conditional logic (2.1): answers to fields the visitor could not see
 		// (hidden fields and skipped steps) are never stored or sent.

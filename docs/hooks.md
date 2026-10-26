@@ -6,10 +6,9 @@ This page lists the hooks an add-on such as SubtleForms Pro uses to add field ty
 
 | Hook | Type | Use |
 | --- | --- | --- |
-| `subtleforms/fields/register` | action `( FieldRegistry $registry )` | Register a `FieldDefinition`. Fires before the free types are added, so an add-on can also replace one. |
+| `subtleforms/fields/register` | action `( FieldRegistry $registry )` | Register a `FieldDefinition`. Fires before the free types are added, so an add-on can also replace one. The registry is the only source of truth for which field types exist: a saved form that uses a type nothing registers (for example because the add-on that provided it is not active) is kept as saved, its unknown fields are left out of the live form, and the form is not shown to visitors ("This form is not available right now.") until a plugin registers the type again. The builder names such fields in a note. Settings stored in the schema do not change this. |
 | `subtleforms/fields/validate_value` | filter `( ?string $error, string $type, mixed $value, array $field )` | Return an error message for a bad value of your type, or null. |
 | `subtleforms/fields/non_input_types` | filter `( string[] $types )` | Types that never collect an answer, so they cannot be required. |
-| `subtleforms/fields/addon_types` | filter `( string[] $types )` | Types that exist only while an add-on registers them. The default lists the add-on types that forms saved with earlier versions may contain (`signature`, `calculation` and the `payment_*` types), so those forms keep loading. When the type is not registered, the live form leaves those fields out and the builder shows a note. A saved `payment_*` field makes the whole form unavailable instead ("This form is not available right now."). |
 | `subtleforms/fields/no_answer_types` | filter `( string[] $types )` | Add-on types that show something but hold no answer. Entries, emails, webhooks, merge tags, logic rules and the "has an input field" check leave them out. Since 2.7.2. |
 | `subtleforms/public_schema` | filter `( array $schema, int $formId )` | The schema sent to the browser to render a form. |
 

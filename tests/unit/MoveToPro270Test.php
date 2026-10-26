@@ -15,7 +15,7 @@ namespace SubtleForms\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use SubtleForms\Engine\FieldValidator;
-use SubtleForms\Fields\AddonFieldTypes;
+use SubtleForms\Fields\FieldTypeAvailability;
 use SubtleForms\Fields\CoreFields;
 use SubtleForms\Fields\FieldDefinition;
 use SubtleForms\Fields\FieldRegistry;
@@ -141,31 +141,31 @@ final class MoveToPro270Test extends TestCase {
 	// ── Picture choice degrades to a plain choice ───────────────────
 
 	public function test_picture_choice_is_a_known_type_with_a_plain_fallback(): void {
-		$this->assertContains( 'picture_choice', AddonFieldTypes::knownTypes() );
-		$this->assertNotContains( 'picture_choice', AddonFieldTypes::types(), 'It is not "missing": the live form still shows it.' );
+		$this->assertContains( 'picture_choice', FieldTypeAvailability::knownTypes() );
 		$registry = new FieldRegistry();
-		$this->assertSame( 'radio', AddonFieldTypes::effectiveType( 'picture_choice', array(), $registry ) );
-		$this->assertSame( 'radio', AddonFieldTypes::effectiveType( 'picture_choice', array( 'allowMultiple' => false ), $registry ) );
-		$this->assertSame( 'multiple_choice', AddonFieldTypes::effectiveType( 'picture_choice', array( 'allowMultiple' => true ), $registry ) );
-		$this->assertSame( 'multiple_choice', AddonFieldTypes::effectiveType( 'picture_choice', array( 'config' => array( 'allowMultiple' => true ) ), $registry ) );
-		$this->assertSame( 'text', AddonFieldTypes::effectiveType( 'text', array(), $registry ) );
+		$this->assertSame( array(), FieldTypeAvailability::unregistered( array( 'fields' => array( array( 'type' => 'picture_choice', 'key' => 'p' ) ) ), $registry ), 'It is not missing: the live form still shows it as a plain choice.' );
+		$this->assertSame( 'radio', FieldTypeAvailability::effectiveType( 'picture_choice', array(), $registry ) );
+		$this->assertSame( 'radio', FieldTypeAvailability::effectiveType( 'picture_choice', array( 'allowMultiple' => false ), $registry ) );
+		$this->assertSame( 'multiple_choice', FieldTypeAvailability::effectiveType( 'picture_choice', array( 'allowMultiple' => true ), $registry ) );
+		$this->assertSame( 'multiple_choice', FieldTypeAvailability::effectiveType( 'picture_choice', array( 'config' => array( 'allowMultiple' => true ) ), $registry ) );
+		$this->assertSame( 'text', FieldTypeAvailability::effectiveType( 'text', array(), $registry ) );
 	}
 
 	public function test_an_add_on_that_registers_picture_choice_keeps_its_type(): void {
 		$registry = new FieldRegistry();
 		$registry->register( new FieldDefinition( type: 'picture_choice', label: 'Picture Choice', category: 'choices', icon: 'x', kind: 'input' ) );
-		$this->assertSame( 'picture_choice', AddonFieldTypes::effectiveType( 'picture_choice', array( 'allowMultiple' => true ), $registry ) );
+		$this->assertSame( 'picture_choice', FieldTypeAvailability::effectiveType( 'picture_choice', array( 'allowMultiple' => true ), $registry ) );
 	}
 
 	public function test_the_server_checks_picture_choice_as_a_plain_choice_even_when_an_add_on_registers_it(): void {
-		$this->assertSame( 'radio', AddonFieldTypes::validationType( 'picture_choice', array() ) );
-		$this->assertSame( 'multiple_choice', AddonFieldTypes::validationType( 'picture_choice', array( 'allowMultiple' => true ) ) );
-		$this->assertSame( 'text', AddonFieldTypes::validationType( 'text' ) );
+		$this->assertSame( 'radio', FieldTypeAvailability::validationType( 'picture_choice', array() ) );
+		$this->assertSame( 'multiple_choice', FieldTypeAvailability::validationType( 'picture_choice', array( 'allowMultiple' => true ) ) );
+		$this->assertSame( 'text', FieldTypeAvailability::validationType( 'text' ) );
 	}
 
 	public function test_the_schema_check_accepts_a_saved_picture_choice(): void {
 		$source = (string) file_get_contents( self::root() . '/src/Support/SchemaValidator.php' );
-		$this->assertStringContainsString( 'AddonFieldTypes::knownTypes()', $source );
+		$this->assertStringContainsString( 'FieldTypeAvailability::knownTypes()', $source );
 	}
 
 	public function test_a_picture_choice_is_checked_like_a_radio_group(): void {

@@ -369,10 +369,7 @@ final class FrontendAssets {
 		if ( 'conversational' === strtolower( (string) ( $schema['metadata']['type'] ?? '' ) ) ) {
 			$groups['conversational'] = true;
 		}
-		// Fields of an add-on that is not active are left off the live form,
-		// so their code is not downloaded either.
-		$absent = \SubtleForms\Fields\AddonFieldTypes::missing();
-		$walk   = static function ( $node ) use ( &$walk, &$groups, $absent ): void {
+		$walk = static function ( $node ) use ( &$walk, &$groups ): void {
 			if ( ! is_array( $node ) ) {
 				return;
 			}
@@ -391,7 +388,7 @@ final class FrontendAssets {
 			}
 			if ( $phonePicker ) {
 				$groups['geo'] = true;
-			} elseif ( isset( self::TYPE_GROUPS[ $type ] ) && ! in_array( $type, $absent, true ) ) {
+			} elseif ( isset( self::TYPE_GROUPS[ $type ] ) ) {
 				$groups[ self::TYPE_GROUPS[ $type ] ] = true;
 			}
 			foreach ( array( 'fields', 'children', 'columns' ) as $key ) {

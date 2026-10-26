@@ -76,8 +76,6 @@ final class Review37Test extends TestCase {
 	public function test_the_entry_view_hands_add_on_types_and_the_entry_to_the_format_filters(): void {
 		global $wpdb;
 		$field  = array( 'id' => 'p1', 'key' => 'item', 'type' => 'example_item', 'config' => array( 'label' => 'Item' ) );
-		$types  = static fn( $t ) => array_merge( (array) $t, array( 'example_item' ) );
-		add_filter( 'subtleforms/fields/addon_types', $types );
 		$formId = $this->publish( array( $field ) );
 		$wpdb->insert(
 			$wpdb->prefix . 'subtleforms_submissions',
@@ -103,7 +101,6 @@ final class Review37Test extends TestCase {
 		$data = rest_do_request( $request )->get_data();
 		remove_filter( 'subtleforms/format/context', $context, 10 );
 		remove_filter( 'subtleforms/format/answer', $answer, 10 );
-		remove_filter( 'subtleforms/fields/addon_types', $types );
 		$data = $data['data'] ?? $data;
 		$this->assertSame( '2 boxes', (string) ( $data['display']['item']['text'] ?? '' ) );
 	}

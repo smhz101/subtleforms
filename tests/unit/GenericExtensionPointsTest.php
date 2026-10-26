@@ -44,7 +44,7 @@ final class GenericExtensionPointsTest extends TestCase {
 	}
 
 	public function test_no_answer_types_come_from_add_ons(): void {
-		$this->assertSame( array(), \SubtleForms\Fields\AddonFieldTypes::noAnswerTypes() );
+		$this->assertSame( array(), \SubtleForms\Fields\FieldTypeAvailability::noAnswerTypes() );
 		$this->assertTrue( \SubtleForms\Support\SchemaValidator::takesAnswer( 'example_summary' ) );
 		$GLOBALS['sf_test_filters']['subtleforms/fields/no_answer_types'] = static fn( $types ) => array_merge( $types, array( 'example_summary' ) );
 		$this->assertFalse( \SubtleForms\Support\SchemaValidator::takesAnswer( 'example_summary' ) );

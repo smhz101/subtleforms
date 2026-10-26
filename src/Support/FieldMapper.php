@@ -59,7 +59,7 @@ final class FieldMapper {
 	 * @return string[]
 	 */
 	private static function noAnswerTypes(): array {
-		return class_exists( '\\SubtleForms\\Fields\\AddonFieldTypes' ) ? \SubtleForms\Fields\AddonFieldTypes::noAnswerTypes() : array();
+		return class_exists( '\\SubtleForms\\Fields\\FieldTypeAvailability' ) ? \SubtleForms\Fields\FieldTypeAvailability::noAnswerTypes() : array();
 	}
 
 	/**

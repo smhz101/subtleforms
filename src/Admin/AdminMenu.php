@@ -316,9 +316,9 @@ class AdminMenu {
 			'unreadCount'    => $this->get_unread_count(),
 			'capabilities'   => $live_caps->all(),
 			'hasProPlugin'   => self::companion_active(),
-			'missingFieldTypes' => \SubtleForms\Fields\AddonFieldTypes::missing(),
+			'knownFieldTypes' => \SubtleForms\Fields\FieldTypeAvailability::knownTypes(),
 			// What the builder needs to know about add-on field types (2.7.2).
-			'fieldTypeFlags' => (object) \SubtleForms\Fields\AddonFieldTypes::typeFlags(),
+			'fieldTypeFlags' => (object) \SubtleForms\Fields\FieldTypeAvailability::typeFlags(),
 			// Features an active add-on provides (see Support\ExtensionPoints).
 			'addonFeatures'  => \SubtleForms\Support\ExtensionPoints::provided(),
 			// The More features card on the Dashboard (see more_features()).

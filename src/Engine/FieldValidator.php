@@ -379,7 +379,7 @@ final class FieldValidator {
 		}
 		// A type with a plain fallback (picture choice) still takes an answer
 		// when its add-on is not active: it is checked as the choice it falls back to.
-		if ( in_array( $type, \SubtleForms\Fields\AddonFieldTypes::FALLBACKS, true ) ) {
+		if ( in_array( $type, \SubtleForms\Fields\FieldTypeAvailability::FALLBACKS, true ) ) {
 			return true;
 		}
 		$registry = self::registry();
@@ -482,7 +482,7 @@ final class FieldValidator {
 		// choice it falls back to, whether or not its add-on is active: the
 		// rules are the same, the add-on only changes how it looks.
 		if ( is_string( $type ) ) {
-			$type = \SubtleForms\Fields\AddonFieldTypes::validationType( $type, $field );
+			$type = \SubtleForms\Fields\FieldTypeAvailability::validationType( $type, $field );
 		}
 
 		// A field that answers with one value never takes a list (FB-23).

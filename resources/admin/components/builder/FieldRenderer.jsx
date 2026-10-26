@@ -142,8 +142,9 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
   // plain choice that visitors get (labels only) with a note.
   const pictureFallback = type === 'picture_choice' && !getCanvasPreview(type) && !addonProvides('picture_choice');
   const previewType = pictureFallback ? (field.allowMultiple === true ? 'multiple_choice' : 'radio') : type;
-  // Add-on field types no active plugin provides right now.
-  const addonMissing = (window.subtleformsAdmin?.missingFieldTypes || []).includes(type);
+  // A field type no active plugin registers right now.
+  const knownTypes = window.subtleformsAdmin?.knownFieldTypes;
+  const addonMissing = Array.isArray(knownTypes) && knownTypes.length > 0 && !!type && !knownTypes.includes(type);
 
   // ── Early return AFTER all hooks ────────────────────────────────────────────
   // Guard against null/undefined field or missing type, do NOT crash builder

@@ -172,7 +172,15 @@ final class SchemaValidator {
 	 */
 	private array $allowedFieldTypes;
 
-	private const FALLBACK_ALLOWED_FIELD_TYPES = array(
+	/**
+	 * Whether a well-formed type nothing registers is kept. A form saved while
+	 * an add-on was active may hold its fields; saving the form again, copying
+	 * it or importing it must not refuse them. True unless the caller passed
+	 * its own list of types.
+	 */
+	private bool $keepUnregistered;
+
+	public const CORE_TYPES = array(
 		'text',
 		'email',
 		'textarea',
@@ -227,6 +235,7 @@ final class SchemaValidator {
 
 	public function __construct( ?array $allowedFieldTypes = null ) {
 		$this->allowedFieldTypes = $this->resolveAllowedFieldTypes( $allowedFieldTypes );
+		$this->keepUnregistered  = ! ( is_array( $allowedFieldTypes ) && ! empty( $allowedFieldTypes ) );
 	}
 
 	private function resolveAllowedFieldTypes( ?array $allowedFieldTypes ): array {
@@ -242,9 +251,7 @@ final class SchemaValidator {
 					if ( ! empty( $types ) ) {
 						// include legacy aliases such as 'select'
 						$types[] = 'select';
-						// Add-on fields (for example Signature or Calculation)
-						// stay in a form while the add-on is inactive (2.3.9).
-						$types = array_merge( $types, \SubtleForms\Fields\AddonFieldTypes::knownTypes() );
+						$types = array_merge( $types, \SubtleForms\Fields\FieldTypeAvailability::knownTypes() );
 						return array_values( array_unique( $types ) );
 					}
 				}
@@ -253,7 +260,21 @@ final class SchemaValidator {
 			}
 		}
 
-		return array_values( array_unique( array_merge( self::FALLBACK_ALLOWED_FIELD_TYPES, \SubtleForms\Fields\AddonFieldTypes::knownTypes() ) ) );
+		return array_values( array_unique( array_merge( self::CORE_TYPES, \SubtleForms\Fields\FieldTypeAvailability::knownTypes() ) ) );
+	}
+
+	/**
+	 * Whether a field type may be saved: registered or known to this plugin, or
+	 * (unless the caller gave its own list) any type name an add-on could have
+	 * registered, so a form made with an add-on can be saved without it.
+	 *
+	 * @param string $type Field type.
+	 */
+	private function typeAllowed( string $type ): bool {
+		if ( in_array( $type, $this->allowedFieldTypes, true ) ) {
+			return true;
+		}
+		return $this->keepUnregistered && 1 === preg_match( '/^[a-z][a-z0-9_]{0,63}$/', $type );
 	}
 
 	/**
@@ -298,7 +319,7 @@ final class SchemaValidator {
 				throw new InvalidArgumentException( "Field at index {$i} must have a string 'type'." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
-			if ( ! in_array( $field['type'], $this->allowedFieldTypes, true ) ) {
+			if ( ! $this->typeAllowed( $field['type'] ) ) {
 				throw new InvalidArgumentException( "Field type '{$field['type']}' at index {$i} is not allowed." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
@@ -496,7 +517,7 @@ final class SchemaValidator {
 							fn( $v ) => $v !== null
 						)
 					);
-				} elseif ( ! in_array( $field['type'], $this->allowedFieldTypes, true ) ) {
+				} elseif ( ! $this->typeAllowed( $field['type'] ) ) {
 					$push(
 						$errors,
 						"fields[{$i}].type",
@@ -788,7 +809,7 @@ final class SchemaValidator {
 		if ( '' === $type || in_array( $type, self::LAYOUT_TYPES, true ) || substr( $type, -10 ) === '_container' ) {
 			return false;
 		}
-		return ! in_array( $type, \SubtleForms\Fields\AddonFieldTypes::noAnswerTypes(), true );
+		return ! in_array( $type, \SubtleForms\Fields\FieldTypeAvailability::noAnswerTypes(), true );
 	}
 
 	private function hasInputFieldRecursive( array $fields, ?array $inputFieldTypes = null ): bool {

@@ -13,7 +13,7 @@ import SubmissionsTable from '../../SubmissionsTable';
 import AddonFieldsNotice from '../../AddonFieldsNotice';
 import EmptyFormWelcome from '../EmptyFormWelcome';
 import PreviewWorkspace from '../PreviewWorkspace';
-import { getMissingAddonFields, getLimitedFeatures, needsMissingPayment } from '../../../utils/addonFields';
+import { getMissingAddonFields, getLimitedFeatures } from '../../../utils/addonFields';
 import ExtensionSlot from '../../ExtensionSlot';
 import './BuilderCanvasArea.scss';
 
@@ -35,11 +35,10 @@ export default function BuilderCanvasArea({
 }) {
   // Fields from an add-on that is not active (the form stays editable).
   const missingAddonFields = useMemo(() => getMissingAddonFields(draftSchema), [draftSchema]);
-  const paymentMissing = useMemo(() => needsMissingPayment(draftSchema), [draftSchema]);
   const limitedFeatures = useMemo(() => getLimitedFeatures(draftSchema), [draftSchema]);
   return (
     <>
-      <AddonFieldsNotice featuresUsed={missingAddonFields} limited={limitedFeatures} paymentForm={paymentMissing} />
+      <AddonFieldsNotice featuresUsed={missingAddonFields} limited={limitedFeatures} />
 
       {/* Notes from add-ons about the form being built (for example how the form is handled). */}
       {view === 'build' && <ExtensionSlot name='builder.canvas.notes' schema={draftSchema} />}
