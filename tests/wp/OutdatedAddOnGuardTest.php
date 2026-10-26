@@ -94,6 +94,71 @@ class OutdatedAddOnGuardTest extends TestCase {
 		$this->assertSame( '', OutdatedAddOnGuard::blocked_version() );
 	}
 
+	/** RCOMP-05: the notice can be dismissed per person, until the installed version changes. */
+	public function test_the_notice_can_be_dismissed_until_the_add_on_version_changes(): void {
+		OutdatedAddOnGuard::apply( '2.5.0' );
+		$admin = self::factory_user( 'administrator' );
+		$html  = $this->notice( $admin );
+		$this->assertStringContainsString( 'is-dismissible', $html );
+		$this->assertStringContainsString( 'data-version="2.5.0"', $html );
+		$this->assertSame( 1, preg_match( '/data-nonce="([^"]+)"/', $html, $m ) );
+
+		$result = $this->dismiss( $admin, $m[1], '2.5.0' );
+		$this->assertTrue( $result['success'] ?? false, wp_json_encode( $result ) );
+		$this->assertSame( '2.5.0', get_user_meta( $admin, AdminNotices::OUTDATED_DISMISSED_META, true ) );
+		$this->assertSame( '', $this->notice( $admin ), 'gone for this person' );
+		$other = self::factory_user( 'administrator' );
+		$this->assertNotSame( '', $this->notice( $other ), 'other people still see it' );
+
+		// Another installed version brings it back.
+		add_action( 'plugins_loaded', 'subtleforms_pro_init', 20 );
+		OutdatedAddOnGuard::apply( '2.7.0' );
+		$this->assertStringContainsString( 'SubtleForms Pro 2.7.0', $this->notice( $admin ) );
+	}
+
+	public function test_dismissing_needs_the_nonce_the_capability_and_the_blocked_version(): void {
+		OutdatedAddOnGuard::apply( '2.5.0' );
+		$admin = self::factory_user( 'administrator' );
+		$this->assertSame( 'bad_nonce', $this->dismiss( $admin, 'nope', '2.5.0' )['error'] ?? '' );
+		$nonce = wp_create_nonce( AdminNotices::OUTDATED_DISMISS_ACTION );
+		$this->assertFalse( $this->dismiss( $admin, $nonce, '9.9.9' )['success'] ?? true, 'a version that is not blocked is refused' );
+		$editor = self::factory_user( 'editor' );
+		wp_set_current_user( $editor );
+		$this->assertFalse( $this->dismiss( $editor, wp_create_nonce( AdminNotices::OUTDATED_DISMISS_ACTION ), '2.5.0' )['success'] ?? true );
+		$this->assertSame( '', (string) get_user_meta( $admin, AdminNotices::OUTDATED_DISMISSED_META, true ) );
+		$this->assertSame( '', (string) get_user_meta( $editor, AdminNotices::OUTDATED_DISMISSED_META, true ) );
+	}
+
+	/** Run the dismiss handler as AJAX and return the decoded JSON (or an error code). */
+	private function dismiss( int $userId, string $nonce, string $version ): array {
+		wp_set_current_user( $userId );
+		$_POST['nonce']   = $nonce;
+		$_POST['version'] = $version;
+		$_REQUEST['nonce'] = $nonce;
+		$ajax    = static fn() => true;
+		$handler = static fn() => static function ( $message ) {
+			throw new \RuntimeException( is_string( $message ) ? $message : 'dead' );
+		};
+		add_filter( 'wp_doing_ajax', $ajax );
+		add_filter( 'wp_die_ajax_handler', $handler );
+		ob_start();
+		$error = '';
+		try {
+			AdminNotices::dismiss_outdated_add_on_notice();
+		} catch ( \RuntimeException $e ) {
+			$error = $e->getMessage();
+		}
+		$out = (string) ob_get_clean();
+		remove_filter( 'wp_doing_ajax', $ajax );
+		remove_filter( 'wp_die_ajax_handler', $handler );
+		unset( $_POST['nonce'], $_POST['version'], $_REQUEST['nonce'] );
+		$data = json_decode( $out, true );
+		if ( is_array( $data ) ) {
+			return $data;
+		}
+		return array( 'error' => '-1' === $error || '' !== $error ? 'bad_nonce' : '', 'raw' => $out );
+	}
+
 	private static function factory_user( string $role ): int {
 		return (int) wp_insert_user(
 			array(
