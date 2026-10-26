@@ -33,6 +33,9 @@ if ( file_exists( SUBTLEFORMS_PLUGIN_DIR . 'vendor/autoload.php' ) ) {
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Contracts/ExtensionInterface.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Contracts/ActionInterface.php';
 
+// Add-on compatibility guard
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Compat/OutdatedAddOnGuard.php';
+
 // Core
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Container.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Plugin.php';
