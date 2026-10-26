@@ -68,7 +68,57 @@ window.SubtleFormsExtend.registerSettingsTab( 'example', {
 
 A `[a-z0-9-]+` name with a title adds a tab to the Add-ons group, or with `group: 'site'` to the site group after Tools. A tab without a title is not listed.
 
+`window.SubtleFormsExtend.getSettingsTab( name )` returns the definition registered under a name, or `null`. An add-on uses it to see whether another script already registered a tab before registering its own. The Settings screen lists tabs through the same registry.
+
 The tab opens at `admin.php?page=subtleforms-settings#tab=<name>`. The body looks after its own data and saving, so Settings shows no Save button or save bar for it. Tools is part of Settings now: `admin.php?page=subtleforms-tools` redirects to `#tab=tools`.
+
+## Form integration panels (JavaScript)
+
+| Function | Use |
+| --- | --- |
+| `registerFormIntegration( slug, { component, order } )` | Add a panel to a form's Integrations tab, below the built-in ones. `slug` is `[a-z0-9_-]+`. The panel keeps its settings in `metadata.integrations[ slug ]`. It is the same as `registerSlotItem( 'form.integrations', slug, { component, order } )`, so every panel is drawn in the order of `order`. |
+
+`component` receives `{ schema, integrations, onChange, isReadOnly, fieldOptions, patch, crmProvider }`: `patch( slug, values )` merges values into the panel's settings and `fieldOptions` lists the form's fields for mapping. The panel decides for itself whether to show anything and returns `null` otherwise.
+
+Screen slots for `registerSlotItem( slot, id, { component, order } )` that the admin app draws. This plugin draws nothing of its own in a slot an add-on leaves empty.
+
+| Slot | Where | The component receives |
+| --- | --- | --- |
+| `submission.panels` | Panels on the entry screen | `{ submission, meta }` |
+| `submission.actions` | Buttons on the entry screen | `{ submission }` |
+| `builder.canvas.notes` | A note above the builder canvas | `{ schema }` |
+| `form.settings.sections` | A section in a form's settings (`title`, `description`, `icon`, `appliesTo( schema )` decide whether and how it is listed) | the section's own props |
+| `form.confirmations` | Conditional confirmations in a form's settings | `{ schema, onMetadata, isReadOnly }` |
+| `form.integrations` | A form's Integrations tab (see `registerFormIntegration`) | see above |
+| `settings.extensions` | The panel of an integration listed through `subtleforms/admin/integrations`; the slot item id is the integration slug | none |
+| `dashboard.panels` | Panels on the Dashboard | `{ forms }` |
+| `reports.panels` | Panels on the Reports screen | `{ forms }` |
+| `forms.list.column` | One extra column in the forms list; the item sets `header` for the column title | `{ form }` |
+
+## Other PHP hooks add-ons use
+
+| Hook | Type | Use |
+| --- | --- | --- |
+| `subtleforms/loaded` | action `( Plugin $plugin )` | This plugin finished booting. |
+| `subtleforms/register_extensions` | action `( ExtensionManager $manager )` | Add an extension. |
+| `subtleforms/register_actions` | action `( ActionRegistry $registry )` | Register a form action (a step that runs after a submission). |
+| `subtleforms/templates` | filter `( array $templates )` | Add form templates. A template may set `addon` to true to keep its own fields as they are. |
+| `subtleforms/admin_menu` | action `( Capabilities $caps )` | Add your own admin pages. |
+| `subtleforms/admin_enqueue_scripts` | action `( string $hook )` | Enqueue add-on scripts on SubtleForms admin pages. |
+| `subtleforms/admin_data` | filter `( array $data, string $hook )` | Add keys to `window.subtleformsAdmin`. Add-ons read their own keys from there. |
+| `subtleforms/admin_branding` | filter `( array $branding )` | Change the product name, menu name and logo URL the admin app shows. |
+| `subtleforms/admin/integrations` | filter `( array $integrations )` | List an integration in Settings, keyed by slug. |
+| `subtleforms/forms/schema_before_save` | filter `( array $schema, int $formId, bool $activate )` | Change a schema before it is saved. |
+| `subtleforms/forms/schema_published` | action `( int $formId, array $schema, int $version )` | A schema version was published. |
+| `subtleforms/frontend/language` | filter `( string $lang )` | The language code the public form asks its schema in. |
+| `subtleforms/submit/confirmation` | filter `( array $confirmation, int $formId, array $payload )` | Change the confirmation shown after a submission. |
+| `subtleforms/submission/completed` | action `( int $submissionId, int $formId, array $payload, array $submission, array $schema )` | An entry was stored and its steps finished. Not fired for previews. |
+| `subtleforms/submission/trashed` | action `( int $id, array $submission )` | An entry went to the Trash. |
+| `subtleforms/submission/untrashed` | action `( int $id, string $status, array $submission )` | An entry came back from the Trash. |
+| `subtleforms/submission/deleted` | action `( int $id, array $submission )` | An entry was deleted for good. |
+| `subtleforms/email/attachments` | filter `( string[] $attachments, array $job )` | Files to attach to an email. |
+| `subtleforms/email/after_send` | action `( array $job, string[] $attachments )` | An email was sent. |
+| `subtleforms/transfer/entry_meta_keys` | filter `( string[] $keys )` | Entry meta records, by key, that travel with an entry in the submissions export and come back on import. Each must hold an array. Default: none. This plugin never copies the visitor's address or browser. Since 2.7.2. |
 
 ## Capabilities
 
