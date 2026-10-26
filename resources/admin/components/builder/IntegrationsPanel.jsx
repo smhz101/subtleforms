@@ -27,7 +27,7 @@ export default function IntegrationsPanel({ schema, onChange, isReadOnly = false
   if (slotItems.length === 0 && !legacyWebhookUrl) {
     return (
       <p className='sf-form-settings__intro'>
-        {__('No integrations are available yet. Connect one under the plugin’s Settings, then come back to attach it to this form.', 'subtleforms')}
+        {__('Send entries to other services with webhooks. Add a Webhook action under Notifications. Defaults for every webhook are under Settings > Integrations.', 'subtleforms')}
       </p>
     );
   }

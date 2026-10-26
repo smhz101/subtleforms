@@ -52,7 +52,7 @@ const GROUPS = [
         name: 'extensions',
         icon: Icon.Puzzle,
         title: __('Integrations', 'subtleforms'),
-        description: __('Webhook defaults and the integrations your add-ons bring.', 'subtleforms'),
+        description: __('Webhook defaults and other connections.', 'subtleforms'),
       },
       {
         name: 'tools',

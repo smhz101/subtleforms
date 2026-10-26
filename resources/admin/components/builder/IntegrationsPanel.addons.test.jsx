@@ -66,9 +66,14 @@ test('read-only forms do not change', () => {
   unmount();
 });
 
-test('shows the empty note when nothing is available and nothing is registered', () => {
+test('with no add-on integration the panel says what the plugin does have (RFUN-03)', () => {
   window.subtleformsAdmin = { extensions: {} };
-  const { container, unmount } = mount({ schema: { metadata: {} }, onChange: jest.fn() });
-  expect(container.textContent).toContain('No integrations are available');
+  const { container, unmount } = mount({ schema: { fields: [], metadata: {} }, onChange: jest.fn() });
+  const text = container.textContent;
+  expect(text).toBe(
+    'Send entries to other services with webhooks. Add a Webhook action under Notifications. Defaults for every webhook are under Settings > Integrations.'
+  );
+  expect(text).not.toMatch(/No integrations|email marketing|CRM|analytics|add-on|Pro/i);
   unmount();
 });
+

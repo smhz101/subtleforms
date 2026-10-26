@@ -120,7 +120,7 @@ export default function FormSettings({
       title: __('Connections', 'subtleforms'),
       items: [
         ...addonSections,
-        { id: 'integrations', title: __('Integrations', 'subtleforms'), description: __('Send entries to email marketing, a CRM, analytics or a webhook.', 'subtleforms'), icon: Icon.Webhook },
+        { id: 'integrations', title: __('Integrations', 'subtleforms'), description: __('Send entries to other services, for example with a webhook.', 'subtleforms'), icon: Icon.Webhook },
       ].filter(Boolean),
     },
     {
