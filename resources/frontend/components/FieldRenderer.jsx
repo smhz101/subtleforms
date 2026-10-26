@@ -5,7 +5,7 @@ import { consentParts } from '../../shared/consentLabel';
 import { formatUsPhone, isCompleteUsPhone } from '../../shared/phoneFormat';
 import { passwordStrength } from '../../shared/passwordStrength';
 import { columnFields } from '../utils/columnFields';
-import { getCompositeEmptyParts } from '../utils/fieldValidation';
+import { getCompositeEmptyParts, isAnswerable } from '../utils/fieldValidation';
 import { compositeParts, partValue } from '../../shared/compositeParts';
 import { rangeSliderSeed } from '../utils/defaults';
 import { debug } from '../../shared/debug';
@@ -69,7 +69,7 @@ export default function FieldRenderer({
   // width never hides required, options, placeholder or help text (bug 1).
   const config = fieldConfig(field);
   // Label visibility and help text placement, with the form's defaults (2.3.2).
-  const { fieldDefaults } = useContext(FormContext) || {};
+  const { fieldDefaults, preview: isPreview } = useContext(FormContext) || {};
   const display = fieldDisplay(field, fieldDefaults);
   const requiredMark = requiredIndicatorMark(fieldDefaults);
 
@@ -202,6 +202,12 @@ export default function FieldRenderer({
       !Array.isArray(config.columns) ||
       !config.columns.length)
   ) {
+    return null;
+  }
+
+  // A Chained Select with no dropdowns set up cannot be answered, so a
+  // visitor does not see it. The editor preview keeps it with its hint.
+  if (field.type === 'chained_select' && !isPreview && !isAnswerable('chained_select', config)) {
     return null;
   }
 

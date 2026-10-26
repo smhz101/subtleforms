@@ -20,6 +20,7 @@ import {
   DynamicInspectorPanel,
 } from './inspector/panels';
 import { isChoiceType } from './inspector/panels/OptionsPanel';
+import { chainedNotSetUpWarning } from './utils/fieldWarnings';
 import { hasSection, isLogicOnlyType } from './inspector/controlSections';
 import FieldAppearancePanel from './appearance/FieldAppearancePanel';
 import { supportsAppearance } from '../../../shared/appearance';
@@ -108,6 +109,8 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
     if (isChoiceType(field.type) && (!field.options || field.options.length === 0)) {
       warnings.push(__('Add at least one option.', 'subtleforms'));
     }
+    const chained = chainedNotSetUpWarning(field);
+    if (chained) warnings.push(chained);
     return warnings;
   }, [field]);
 

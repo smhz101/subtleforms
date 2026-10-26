@@ -16,7 +16,7 @@ import { columnFields } from './columnFields';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { getFieldType } from '../../shared/extend';
 import { hasParts, missingParts } from '../../shared/compositeParts';
-import { firstUnansweredChainedLevel } from '../../shared/chainedOptions';
+import { chainedSelectLevels, firstUnansweredChainedLevel } from '../../shared/chainedOptions';
 import { isValidInternational } from '../../shared/phoneDial';
 
 export const COMPOSITE_FIELD_TYPES = new Set(['name_group', 'address_group', 'address']);
@@ -168,6 +168,9 @@ export function isAnswerable(type, config = {}) {
       Array.isArray(config.columns) &&
       config.columns.length > 0
     );
+  }
+  if (type === 'chained_select') {
+    return chainedSelectLevels(config).length > 0;
   }
   return true;
 }

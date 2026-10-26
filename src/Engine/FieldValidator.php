@@ -188,6 +188,11 @@ final class FieldValidator {
 			// Every dependent dropdown that offers choices needs an answer,
 			// the same rule as the browser (FLD2-10).
 			if ( $type === 'chained_select' ) {
+				// Dropdowns that are not set up are not drawn, so nothing can
+				// be answered and the field is never required (RFUN-02).
+				if ( ! self::chainedIsSetUp( $fields[ $fieldKey ] ?? array() ) ) {
+					continue;
+				}
 				if ( null !== $this->chainedMissingLevel( $fields[ $fieldKey ] ?? array(), $value ) ) {
 					$errors[ $fieldKey ] = $requiredMessage;
 				}
@@ -1653,6 +1658,38 @@ final class FieldValidator {
 			return __( 'Please choose a value on the scale.', 'subtleforms' );
 		}
 		return null;
+	}
+
+	/**
+	 * Whether a chained field has any dropdown to show a visitor. Mirrors
+	 * isAnswerable() for chained_select in the browser: a field with no
+	 * choices is not drawn (RFUN-02).
+	 *
+	 * @param array $field Field.
+	 */
+	public static function chainedIsSetUp( array $field ): bool {
+		$levels = self::attr( $field, 'levels' );
+		if ( is_array( $levels ) && array() !== $levels ) {
+			foreach ( array_values( $levels ) as $depth => $level ) {
+				$options = is_array( $level ) && isset( $level['options'] ) && is_array( $level['options'] ) ? $level['options'] : array();
+				if ( array() === $options ) {
+					continue;
+				}
+				$linked = false;
+				foreach ( $options as $opt ) {
+					if ( is_array( $opt ) && isset( $opt['parent'] ) && '' !== (string) $opt['parent'] ) {
+						$linked = true;
+						break;
+					}
+				}
+				if ( 0 === $depth || ! $linked ) {
+					return true;
+				}
+			}
+			return false;
+		}
+		$options = self::attr( $field, 'options' );
+		return is_array( $options ) && array() !== $options;
 	}
 
 	/**

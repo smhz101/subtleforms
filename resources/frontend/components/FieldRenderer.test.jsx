@@ -217,6 +217,28 @@ describe('2.2.1 field fixes', () => {
     view.unmount();
   });
 
+  test('a Chained Select with no dropdowns is not drawn for visitors, but the preview keeps its hint (RFUN-02)', () => {
+    const field = { key: 'place', type: 'chained_select', label: 'Place', required: true };
+    const visitor = render(field);
+    expect(visitor.container.innerHTML).toBe('');
+    expect(visitor.container.textContent).not.toContain('field settings');
+    visitor.unmount();
+
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    act(() => {
+      root.render(
+        <FormContext.Provider value={{ preview: true }}>
+          <FieldRenderer field={field} values={{}} onChange={() => {}} errors={{}} />
+        </FormContext.Provider>
+      );
+    });
+    expect(container.textContent).toContain('Options are added in the field settings.');
+    act(() => root.unmount());
+    container.remove();
+  });
+
   test('a chained select renders a dropdown for each level', () => {
     const { container, unmount } = render({
       key: 'place',
