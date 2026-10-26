@@ -118,7 +118,7 @@ Screen slots for `registerSlotItem( slot, id, { component, order } )` that the a
 | `subtleforms/submission/deleted` | action `( int $id, array $submission )` | An entry was deleted for good. |
 | `subtleforms/email/attachments` | filter `( string[] $attachments, array $job )` | Files to attach to an email. |
 | `subtleforms/email/after_send` | action `( array $job, string[] $attachments )` | An email was sent. |
-| `subtleforms/transfer/entry_meta_keys` | filter `( string[] $keys )` | Entry meta records, by key, that travel with an entry in the submissions export and come back on import. Each must hold an array. Default: none. This plugin never copies the visitor's address or browser. Since 2.7.2. |
+| `subtleforms/transfer/entry_meta_keys` | filter `( string[] $keys, array $record )` | Entry meta records that go into the submissions export and come back on import. The default is every record (an array) that another plugin saved on the entry, so an entry keeps what an add-on stored on it even when the add-on is not active. Records this plugin writes itself (the visitor's address and browser, request state, spam checks, consents, notes) never travel, nor do records over 64 KB or keys that name a token, secret, password or API key. An add-on narrows the list to the records it wants to travel. Since 2.7.2. |
 
 ## Capabilities
 
