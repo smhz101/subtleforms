@@ -173,12 +173,10 @@ final class SchemaValidator {
 	private array $allowedFieldTypes;
 
 	/**
-	 * Whether a well-formed type nothing registers is kept. A form saved while
-	 * an add-on was active may hold its fields; saving the form again, copying
-	 * it or importing it must not refuse them. True unless the caller passed
-	 * its own list of types.
+	 * Whether a well-formed type nothing registers is kept. See
+	 * keepUnregisteredTypes().
 	 */
-	private bool $keepUnregistered;
+	private bool $keepUnregistered = false;
 
 	public const CORE_TYPES = array(
 		'text',
@@ -235,7 +233,6 @@ final class SchemaValidator {
 
 	public function __construct( ?array $allowedFieldTypes = null ) {
 		$this->allowedFieldTypes = $this->resolveAllowedFieldTypes( $allowedFieldTypes );
-		$this->keepUnregistered  = ! ( is_array( $allowedFieldTypes ) && ! empty( $allowedFieldTypes ) );
 	}
 
 	private function resolveAllowedFieldTypes( ?array $allowedFieldTypes ): array {
@@ -264,9 +261,21 @@ final class SchemaValidator {
 	}
 
 	/**
-	 * Whether a field type may be saved: registered or known to this plugin, or
-	 * (unless the caller gave its own list) any type name an add-on could have
-	 * registered, so a form made with an add-on can be saved without it.
+	 * Keep a well-formed field type that nothing registers. A form made while
+	 * an add-on was active holds that add-on's fields; saving, copying or
+	 * importing the form on a site without the add-on must not refuse them.
+	 * Used where a form is stored. Text that is new (for example from an
+	 * assistant) is still checked against the registered types.
+	 *
+	 * @return $this
+	 */
+	public function keepUnregisteredTypes(): self {
+		$this->keepUnregistered = true;
+		return $this;
+	}
+
+	/**
+	 * Whether a field type may be saved.
 	 *
 	 * @param string $type Field type.
 	 */

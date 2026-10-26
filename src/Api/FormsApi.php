@@ -735,7 +735,7 @@ final class FormsApi {
 
 		// Structured validation for activation
 		if ( $activate ) {
-			$schemaValidator  = new \SubtleForms\Support\SchemaValidator();
+			$schemaValidator  = ( new \SubtleForms\Support\SchemaValidator() )->keepUnregisteredTypes();
 			$validationErrors = ( $form['status'] ?? '' ) === 'published'
 				? $schemaValidator->validateForPublishingWithErrors( $schema )
 				: $schemaValidator->validateWithErrors( $schema );
@@ -1029,7 +1029,7 @@ final class FormsApi {
 					$schemaData['metadata']['title'] = $form['title'] ?? '';
 				}
 
-				$schemaValidator  = new \SubtleForms\Support\SchemaValidator();
+				$schemaValidator  = ( new \SubtleForms\Support\SchemaValidator() )->keepUnregisteredTypes();
 				$validationErrors = $schemaValidator->validateForPublishingWithErrors( $schemaData );
 
 				if ( ! empty( $validationErrors ) ) {

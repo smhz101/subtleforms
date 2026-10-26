@@ -183,4 +183,15 @@ final class FreeProSplitTest extends TestCase {
 		$this->assertSame( 3, \SubtleForms\Async\AsyncDispatcher::webhookRetries() );
 		unset( $GLOBALS['sf_test_options']['subtleforms_settings'] );
 	}
+
+	/** A form made with an add-on can be stored again without it; new unknown types are still refused. */
+	public function test_the_schema_check_keeps_unregistered_types_only_where_a_form_is_stored(): void {
+		$schema = array( 'schema_version' => 1, 'metadata' => array( 'title' => 'T', 'name' => 'T' ), 'fields' => array( array( 'id' => 'a', 'key' => 'a', 'type' => 'example_gauge', 'label' => 'A' ) ) );
+		$strict = ( new \SubtleForms\Support\SchemaValidator() )->validateWithErrors( $schema );
+		$this->assertNotEmpty( $strict );
+		$keeps = ( new \SubtleForms\Support\SchemaValidator() )->keepUnregisteredTypes();
+		$this->assertSame( array(), $keeps->validateWithErrors( $schema ) );
+		$schema['fields'][0]['type'] = 'Not A Type!';
+		$this->assertNotEmpty( $keeps->validateWithErrors( $schema ) );
+	}
 }

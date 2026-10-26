@@ -483,7 +483,7 @@ final class FormsRepository {
 		$schema = self::sanitizeAppearance( $schema, fn() => $this->storedCustomCss( $formId ) );
 
 		// Validate schema before saving
-		$validator = new \SubtleForms\Support\SchemaValidator();
+		$validator = ( new \SubtleForms\Support\SchemaValidator() )->keepUnregisteredTypes();
 		try {
 			$validator->validate( $schema );
 		} catch ( \InvalidArgumentException $e ) {
@@ -1033,7 +1033,7 @@ final class FormsRepository {
 		$schema = self::prepareStoredSchema( $schema, fn() => $this->storedCustomCss( $formId ) );
 
 		// Validate schema before saving
-		$validator = new \SubtleForms\Support\SchemaValidator();
+		$validator = ( new \SubtleForms\Support\SchemaValidator() )->keepUnregisteredTypes();
 		try {
 			$validator->validate( $schema );
 		} catch ( \InvalidArgumentException $e ) {
