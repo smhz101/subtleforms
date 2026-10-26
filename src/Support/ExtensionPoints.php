@@ -27,8 +27,13 @@ final class ExtensionPoints {
 	 * with an exact or range match and refuse to run outside that range.
 	 *
 	 * 2: logic, upload and add-on feature hooks of 2.7.0; FeatureGate setters.
+	 * 3: the submission store hooks (before_store, after_store,
+	 *    store_abandoned) replace price_order and finish_order; answer format,
+	 *    webhook group, request key, public route and no-answer type filters;
+	 *    the JavaScript form wrapper, option attribute and payload group
+	 *    registries. Free no longer exports `contexts` or `pricing`.
 	 */
-	public const LEVEL = 2;
+	public const LEVEL = 3;
 
 	/** Field types that an add-on registers with its own renderer, controls and checks. */
 	public const PICTURE_CHOICE = 'picture_choice';
