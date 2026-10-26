@@ -13,13 +13,40 @@ import { __ } from '@wordpress/i18n';
 import { normalizeLogic, isBasic } from '../../shared/conditions';
 
 /** Field types provided by an add-on. */
-export const ADDON_FIELD_TYPES = ['signature', 'calculation', 'payment_card'];
+export const ADDON_FIELD_TYPES = [
+  'signature',
+  'calculation',
+  'payment_card',
+  'payment_product',
+  'payment_choice',
+  'payment_amount',
+  'payment_summary',
+  'payment_coupon',
+  'payment_hidden_price',
+];
 
 const LABELS = {
   signature: () => __('Signature', 'subtleforms'),
   calculation: () => __('Calculation', 'subtleforms'),
-  payment_card: () => __('Card Payment', 'subtleforms'),
+  payment_card: () => __('Payment card', 'subtleforms'),
+  payment_product: () => __('Product', 'subtleforms'),
+  payment_choice: () => __('Priced options', 'subtleforms'),
+  payment_amount: () => __('Payment amount', 'subtleforms'),
+  payment_summary: () => __('Payment summary', 'subtleforms'),
+  payment_coupon: () => __('Coupon code', 'subtleforms'),
+  payment_hidden_price: () => __('Hidden price', 'subtleforms'),
 };
+
+/**
+ * Readable name of an add-on field type. An unknown type falls back to its key.
+ *
+ * @param {string} type Field type key.
+ * @return {string} Label.
+ */
+export function getAddonFieldLabel(type) {
+  const key = String(type);
+  return Object.prototype.hasOwnProperty.call(LABELS, key) ? LABELS[key]() : key;
+}
 
 /**
  * Every field type used in a list of fields, at any depth.
@@ -79,7 +106,7 @@ export function getMissingAddonFields(
   const types = collectTypes(schema.fields);
   return missing
     .filter((type) => types.has(type))
-    .map((type) => (LABELS[type] ? LABELS[type]() : type));
+    .map((type) => getAddonFieldLabel(type));
 }
 
 /** Walk every node of a field tree, at any depth. */

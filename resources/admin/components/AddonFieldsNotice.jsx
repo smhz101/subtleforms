@@ -29,7 +29,7 @@ export default function AddonFieldsNotice({ featuresUsed = [], limited = [], pay
             {sprintf(
               /* translators: %s: list of field types, for example "Signature, Calculation" */
               __(
-                'These field types are provided by an add-on that is not active: %s. They are kept in the form, and the live form leaves them out.',
+                'These fields need the add-on that provides them, so they are not shown: %s. They are kept in the form.',
                 'subtleforms'
               ),
               featuresUsed.join(', ')

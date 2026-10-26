@@ -1,4 +1,4 @@
-import { getMissingAddonFields, needsMissingPayment } from './addonFields';
+import { getMissingAddonFields, getAddonFieldLabel, needsMissingPayment } from './addonFields';
 
 const schema = {
   fields: [
@@ -12,6 +12,28 @@ describe('add-on field detection (2.3.9)', () => {
   test('names only the add-on fields this site cannot show', () => {
     expect(getMissingAddonFields(schema, ['signature', 'calculation', 'payment_card'])).toEqual(['Signature', 'Calculation']);
     expect(getMissingAddonFields(schema, [])).toEqual([]);
+  });
+});
+
+describe('add-on field labels (P1-02)', () => {
+  test('shows readable names, never the raw key, for every known add-on type', () => {
+    const types = ['signature', 'calculation', 'payment_card', 'payment_product', 'payment_choice', 'payment_amount', 'payment_summary', 'payment_coupon', 'payment_hidden_price'];
+    types.forEach((type) => {
+      expect(getAddonFieldLabel(type)).not.toBe(type);
+      expect(getAddonFieldLabel(type)).not.toMatch(/_/);
+    });
+    expect(getAddonFieldLabel('payment_product')).toBe('Product');
+    expect(getAddonFieldLabel('payment_card')).toBe('Payment card');
+  });
+
+  test('an unknown key falls back to the key', () => {
+    expect(getAddonFieldLabel('seating_chart')).toBe('seating_chart');
+    expect(getAddonFieldLabel('constructor')).toBe('constructor');
+  });
+
+  test('the notice list uses labels for payment fields', () => {
+    const form = { fields: [{ type: 'payment_product', key: 'p' }, { type: 'payment_card', key: 'c' }, { type: 'seating_chart', key: 's' }] };
+    expect(getMissingAddonFields(form, ['payment_product', 'payment_card', 'seating_chart'])).toEqual(['Product', 'Payment card', 'seating_chart']);
   });
 });
 
