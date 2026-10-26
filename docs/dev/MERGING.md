@@ -5,7 +5,8 @@ These rules apply to every pull request in this repository, whoever opened it.
 A pull request is merged only when all of these are true:
 
 1. Every GitHub Actions check on the pull request has passed: Tests (unit, and
-   browser and accessibility, which run side by side), CI and i18n-check. A
+   browser and accessibility, which run side by side), CI (including the
+   `ESLint` check, which must report no errors) and i18n-check. A
    cancelled or skipped run is not a pass. Re-run it. The list of required check
    names is in docs/dev/BRANCH_PROTECTION.md.
 2. GitHub shows no conflicts with the base branch. Conflicts are resolved on the

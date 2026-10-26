@@ -18,7 +18,7 @@
     "size": "node bin/check-bundle-size.js",
     "check:words": "node bin/check-built-words.js",
     "test": "wp-scripts test-unit-js",
-    "lint:js": "wp-scripts lint-js",
+    "lint:js": "wp-scripts lint-js resources",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:regression": "playwright test tests/e2e/regression-*.spec.js --reporter=html,list --timeout=90000",

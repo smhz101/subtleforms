@@ -27,6 +27,7 @@ Add exactly these:
 - PHP 8.2
 - PHP 8.3
 - JS Quality
+- ESLint
 - Build Plugin
 - WordPress Plugin Check
 - POT freshness check
@@ -38,6 +39,8 @@ either shard fails, so it is the one to require.
 
 ## Notes
 
+- `ESLint` runs `npm run lint:js` (ESLint over `resources`). It fails on any error;
+  warnings are allowed. It is a required check.
 - Every workflow runs on pull requests without a paths filter on purpose. A
   required check that is skipped by a paths filter never reports and would block
   the merge forever.

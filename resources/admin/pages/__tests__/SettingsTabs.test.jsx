@@ -7,7 +7,9 @@ import { createRoot } from '@wordpress/element';
 import { act } from 'react';
 
 jest.mock('../SettingsPage.scss', () => ({}));
-jest.mock('../../components/AdminShell', () => ({ children }) => <div>{children}</div>);
+jest.mock('../../components/AdminShell', () => function AdminShellMock({ children }) {
+  return <div>{children}</div>;
+});
 jest.mock('../../components/settings/GeneralSettings', () => () => null);
 jest.mock('../../components/settings/FrontendSettings', () => () => null);
 jest.mock('../../components/settings/EmailSettings', () => () => null);
