@@ -241,10 +241,8 @@ final class WebhooksApi {
 			'ip_address'       => '203.0.113.10',
 			'user_agent'       => 'Mozilla/5.0 (sample)',
 			'user_id'          => 0,
-			'payment_amount'   => 0.0,
-			'payment_currency' => '',
-			'payment_status'   => '',
 		);
+		$sample_entry = Webhooks::addonEntryValues( $sample_entry, null, $schema );
 
 		if ( 'selected' === ( $args['payload_mode'] ?? 'full' ) ) {
 			// The ticked data, built with the same builder a real delivery uses.

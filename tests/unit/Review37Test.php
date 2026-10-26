@@ -83,27 +83,18 @@ final class Review37Test extends TestCase {
 		$this->assertSame( '', $message['redirect'] );
 	}
 
-	public function test_money_uses_each_currency_s_decimals(): void {
-		$this->assertSame( '50 KRW', \SubtleForms\Support\AnswerFormatter::money( 50, 'KRW' ) );
-		$this->assertSame( "\u{00A5}1,200", \SubtleForms\Support\AnswerFormatter::money( 1200, 'JPY' ) );
-		$this->assertSame( '12.50 CHF', \SubtleForms\Support\AnswerFormatter::money( 12.5, 'CHF' ) );
-		$this->assertSame( '7.00', \SubtleForms\Support\AnswerFormatter::money( 7, '' ) );
-	}
-
-	public function test_entry_contexts_use_the_currency_the_entry_was_charged_in(): void {
-		$GLOBALS['sf_test_filters']['subtleforms/format/currency'] = static fn( $c, $schema ) => strtoupper( (string) ( $schema['metadata']['payment']['currency'] ?? '' ) );
-		$schema = array( 'metadata' => array( 'payment' => array( 'currency' => 'USD' ) ), 'fields' => array() );
-		$this->assertSame( 'EUR', \SubtleForms\Support\AnswerFormatter::entryCurrency( array( 'meta' => array( 'order' => array( 'currency' => 'eur' ) ) ) ) );
-		$this->assertSame( 'GBP', \SubtleForms\Support\AnswerFormatter::entryCurrency( array( 'meta' => '{"payment":{"currency":"GBP"}}' ) ) );
-		$this->assertSame( '', \SubtleForms\Support\AnswerFormatter::entryCurrency( array( 'meta' => array() ) ) );
-
-		$entry = \SubtleForms\Support\AnswerFormatter::entryContext( $schema, array( 'meta' => array( 'order' => array( 'currency' => 'KRW' ) ) ), array( 'submission_id' => 3 ) );
-		$this->assertSame( 'KRW', $entry['currency'] );
+	public function test_display_context_comes_from_add_ons_with_the_entry(): void {
+		$seen = null;
+		$GLOBALS['sf_test_filters']['subtleforms/format/context'] = static function ( $context, $schema, $submission ) use ( &$seen ) {
+			$seen = $submission;
+			return $context + array( 'example' => 'yes' );
+		};
+		$entry = \SubtleForms\Support\AnswerFormatter::entryContext( array( 'fields' => array() ), array( 'id' => 3, 'meta' => array() ) );
 		$this->assertSame( 3, $entry['submission_id'] );
-		$this->assertSame( 'USD', \SubtleForms\Support\AnswerFormatter::entryContext( $schema, array( 'meta' => array() ) )['currency'], 'An entry without an order uses the form currency.' );
-
-		$product = array( 'id' => 'p', 'key' => 'sticker', 'type' => 'payment_product', 'config' => array( 'label' => 'Sticker', 'productName' => 'Sticker', 'price' => 5000, 'allowQuantity' => true ) );
-		$this->assertSame( "Sticker \u{00D7} 2 (10,000 KRW)", \SubtleForms\Support\AnswerFormatter::text( 2, $product, $entry ) );
+		$this->assertSame( 'yes', $entry['example'] );
+		$this->assertSame( 3, $seen['id'] );
+		$this->assertArrayNotHasKey( 'currency', \SubtleForms\Support\AnswerFormatter::context( array() ) );
+		unset( $GLOBALS['sf_test_filters']['subtleforms/format/context'] );
 	}
 
 	public function test_import_identity_ignores_status_and_flags_and_reads_the_source_entry(): void {

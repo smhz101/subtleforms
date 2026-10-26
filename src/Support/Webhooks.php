@@ -23,16 +23,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Webhooks {
 
 	/**
-	 * Values a visitor's browser sends that are not answers: spam traps,
-	 * CAPTCHA tokens and the payment reference.
+	 * Values a visitor's browser sends that are not answers: spam traps and
+	 * CAPTCHA tokens. Add-ons add theirs through RequestKeys.
 	 */
-	const NOT_ANSWERS = array( 'website_url', 'form_rendered_at', 'g-recaptcha-response', 'h-captcha-response', 'cf-turnstile-response', '_payment' );
+	const NOT_ANSWERS = RequestKeys::BUILT_IN;
 
 	/**
 	 * Field types a webhook never sends, even when asked: they hold a secret
 	 * or an image of a signature.
 	 */
-	const SENSITIVE_TYPES = array( 'password', 'signature', 'payment_card' );
+	const SENSITIVE_TYPES = array( 'password', 'signature' );
 
 	/**
 	 * Keys of the "selected" payload mode (2.5.0), by group. An answer is
@@ -40,7 +40,6 @@ final class Webhooks {
 	 */
 	const FORM_KEYS       = array( 'form_id', 'form_title' );
 	const SUBMISSION_KEYS = array( 'submission_id', 'created_at', 'status', 'page_url', 'ip_address', 'user_agent', 'user_id' );
-	const PAYMENT_KEYS    = array( 'payment_amount', 'payment_currency', 'payment_status' );
 	const FIELD_PREFIX    = 'field:';
 	const LABELS_OPTION   = 'answers_with_labels';
 
@@ -110,7 +109,7 @@ final class Webhooks {
 		$payload = \SubtleForms\Api\PublicSubmitApi::storablePayload( $payload, $schema );
 		foreach ( array_keys( $payload ) as $key ) {
 			$key = (string) $key;
-			if ( '' === $key || in_array( $key, self::NOT_ANSWERS, true ) ) {
+			if ( '' === $key || RequestKeys::has( $key ) ) {
 				unset( $payload[ $key ] );
 			}
 		}
@@ -213,9 +212,7 @@ final class Webhooks {
 	 * @return array<string,mixed>
 	 */
 	public static function entryValues( $context, array $schema ): array {
-		$payment = $context->getMeta( 'payment_info', array() );
-		$payment = is_array( $payment ) ? $payment : array();
-		return array(
+		$values = array(
 			'form_id'          => (int) $context->formId,
 			'form_title'       => (string) ( $schema['metadata']['title'] ?? ( $schema['metadata']['name'] ?? '' ) ),
 			'submission_id'    => (int) $context->getMeta( 'submission_id', 0 ),
@@ -225,10 +222,60 @@ final class Webhooks {
 			'ip_address'       => (string) $context->getMeta( 'request_ip', '' ),
 			'user_agent'       => (string) $context->getMeta( 'request_user_agent', '' ),
 			'user_id'          => (int) $context->getMeta( 'request_user_id', 0 ),
-			'payment_amount'   => (float) ( $payment['amount'] ?? 0 ),
-			'payment_currency' => (string) ( $payment['currency'] ?? '' ),
-			'payment_status'   => (string) ( $payment['status'] ?? '' ),
 		);
+		return self::addonEntryValues( $values, $context, $schema );
+	}
+
+	/**
+	 * Entry values an add-on adds for its payload groups.
+	 *
+	 * @param array      $values  Values so far.
+	 * @param mixed|null $context Submission context, or null for a sample.
+	 * @param array      $schema  Form schema.
+	 * @return array
+	 */
+	public static function addonEntryValues( array $values, $context, array $schema ): array {
+		/**
+		 * Values the "selected" payload can send for an add-on's own groups
+		 * (see `subtleforms/webhooks/payload_groups`). With a null context
+		 * the values are for the sample in the builder.
+		 *
+		 * @param array      $values  Key to value.
+		 * @param mixed|null $context Submission context, or null.
+		 * @param array      $schema  Form schema.
+		 * @since 2.7.2
+		 */
+		$more = apply_filters( 'subtleforms/webhooks/entry_values', $values, $context, $schema );
+		return is_array( $more ) ? $more + $values : $values;
+	}
+
+	/**
+	 * Extra groups of the "selected" payload, from add-ons: group name to its
+	 * keys. Each key starts with the group name and an underscore; the body
+	 * sends a ticked key under the group name without that prefix, so
+	 * `example_total` is sent as `{ "example": { "total": ... } }`.
+	 *
+	 * @param array $schema Form schema.
+	 * @return array<string,string[]>
+	 */
+	public static function payloadGroups( array $schema ): array {
+		/**
+		 * Extra groups of the "selected" webhook payload.
+		 *
+		 * @param array $groups Group name to keys.
+		 * @param array $schema Form schema.
+		 * @since 2.7.2
+		 */
+		$groups = apply_filters( 'subtleforms/webhooks/payload_groups', array(), $schema );
+		$out    = array();
+		foreach ( is_array( $groups ) ? $groups : array() as $name => $keys ) {
+			$name = sanitize_key( (string) $name );
+			if ( '' === $name || in_array( $name, array( 'event', 'fields', 'answers' ), true ) || ! is_array( $keys ) ) {
+				continue;
+			}
+			$out[ $name ] = array_values( array_filter( array_map( 'strval', $keys ), static fn( $k ) => 0 === strpos( $k, $name . '_' ) ) );
+		}
+		return $out;
 	}
 
 	/**
@@ -241,7 +288,7 @@ final class Webhooks {
 	public static function sendableFields( array $schema ): array {
 		$out = array();
 		foreach ( FieldMapper::fields( $schema ) as $row ) {
-			if ( in_array( $row['type'], self::SENSITIVE_TYPES, true ) || EntryValues::isSecret( $row['field'] ) || isset( $out[ $row['key'] ] ) ) {
+			if ( in_array( $row['type'], self::SENSITIVE_TYPES, true ) || in_array( $row['type'], \SubtleForms\Fields\AddonFieldTypes::noAnswerTypes(), true ) || EntryValues::isSecret( $row['field'] ) || isset( $out[ $row['key'] ] ) ) {
 				continue;
 			}
 			$out[ $row['key'] ] = $row;
@@ -312,15 +359,16 @@ final class Webhooks {
 			}
 		}
 
-		$payment = array();
-		foreach ( self::PAYMENT_KEYS as $key ) {
-			if ( in_array( $key, $selected, true ) ) {
-				$value                                    = $entry[ $key ] ?? '';
-				$payment[ substr( $key, strlen( 'payment_' ) ) ] = 'payment_amount' === $key ? (float) $value : (string) $value;
+		foreach ( self::payloadGroups( $schema ) as $group => $groupKeys ) {
+			$picked = array();
+			foreach ( $groupKeys as $key ) {
+				if ( in_array( $key, $selected, true ) ) {
+					$picked[ substr( $key, strlen( $group ) + 1 ) ] = $entry[ $key ] ?? null;
+				}
 			}
-		}
-		if ( $payment ) {
-			$body['payment'] = $payment;
+			if ( $picked ) {
+				$body[ $group ] = $picked;
+			}
 		}
 
 		return $body;

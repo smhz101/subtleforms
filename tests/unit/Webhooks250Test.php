@@ -49,9 +49,9 @@ final class Webhooks250Test extends TestCase {
 			'ip_address'       => '203.0.113.9',
 			'user_agent'       => 'Agent/1.0',
 			'user_id'          => 3,
-			'payment_amount'   => 25.5,
-			'payment_currency' => 'USD',
-			'payment_status'   => 'paid',
+			'example_amount'   => 25.5,
+			'example_currency' => 'USD',
+			'example_status'   => 'paid',
 		);
 	}
 
@@ -105,12 +105,17 @@ final class Webhooks250Test extends TestCase {
 		$this->assertSame( array( array( 'key' => 'email', 'label' => 'Email', 'value' => 'ann@example.com' ) ), $body['answers'] );
 	}
 
-	public function test_payment_group(): void {
-		$body = Webhooks::selectedBody( $this->schema(), $this->answers(), $this->entry(), array( 'payment_amount', 'payment_currency', 'payment_status' ) );
-		$this->assertSame( array( 'amount' => 25.5, 'currency' => 'USD', 'status' => 'paid' ), $body['payment'] );
+	public function test_add_on_payload_group(): void {
+		$body = Webhooks::selectedBody( $this->schema(), $this->answers(), $this->entry(), array( 'example_amount', 'example_currency' ) );
+		$this->assertArrayNotHasKey( 'example', $body, 'No group is sent until an add-on declares it.' );
 
-		$body = Webhooks::selectedBody( $this->schema(), $this->answers(), $this->entry(), array( 'payment_currency' ) );
-		$this->assertSame( array( 'currency' => 'USD' ), $body['payment'] );
+		$GLOBALS['sf_test_filters']['subtleforms/webhooks/payload_groups'] = static fn( $groups ) => $groups + array( 'example' => array( 'example_amount', 'example_currency', 'example_status', 'other_key' ) );
+		$body = Webhooks::selectedBody( $this->schema(), $this->answers(), $this->entry(), array( 'example_amount', 'example_currency', 'example_status' ) );
+		$this->assertSame( array( 'amount' => 25.5, 'currency' => 'USD', 'status' => 'paid' ), $body['example'] );
+
+		$body = Webhooks::selectedBody( $this->schema(), $this->answers(), $this->entry(), array( 'example_currency' ) );
+		$this->assertSame( array( 'currency' => 'USD' ), $body['example'] );
+		unset( $GLOBALS['sf_test_filters']['subtleforms/webhooks/payload_groups'] );
 	}
 
 	public function test_unknown_keys_and_removed_fields_are_skipped(): void {

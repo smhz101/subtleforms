@@ -12,7 +12,6 @@
  * - A chained select shows the label chosen at each level.
  * - Dates and times follow the field's display format.
  * - Uploads read as file names, with admin download links when asked.
- * - Payment fields show option labels and product lines with prices.
  * - Field names use the admin label, and a long public label is shortened.
  *
  * Pure PHP apart from optional WordPress helpers (guarded), so the rules are
@@ -52,21 +51,6 @@ final class AnswerFormatter {
 		'datetime' => 'Y-m-d H:i',
 	);
 
-	/**
-	 * Currency symbols used in product lines; other currencies show the code.
-	 */
-	/** Currencies with no minor unit (shown without decimals). */
-	private const ZERO_DECIMAL = array( 'BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF' );
-
-	private const SYMBOLS = array(
-		'USD' => '$',
-		'EUR' => "\u{20AC}",
-		'GBP' => "\u{00A3}",
-		'CAD' => 'CA$',
-		'AUD' => 'A$',
-		'JPY' => "\u{00A5}",
-		'INR' => "\u{20B9}",
-	);
 
 	/**
 	 * The name of a field in outputs: its admin label when set, else its
@@ -112,49 +96,33 @@ final class AnswerFormatter {
 	}
 
 	/**
-	 * Display context for a form: the currency used for prices.
+	 * Display context for a form, or for one entry of it.
 	 *
-	 * @param mixed $schema Form schema.
-	 * @param array $extra  More context (submission_id, links, signature).
+	 * @param mixed      $schema     Form schema.
+	 * @param array      $extra      Context (submission_id, links, signature).
+	 * @param array|null $submission The entry, when the answers are one entry's.
 	 * @return array
 	 */
-	public static function context( $schema, array $extra = array() ): array {
+	public static function context( $schema, array $extra = array(), $submission = null ): array {
+		if ( ! function_exists( 'apply_filters' ) ) {
+			return $extra;
+		}
 		/**
-		 * The currency used for prices on this form. A payment add-on
-		 * supplies it; empty when none is active.
+		 * Filter the display context answers are formatted with. An add-on
+		 * that formats its own field types (see `subtleforms/format/answer`)
+		 * adds what it needs here.
 		 *
-		 * @param string $currency ISO code.
-		 * @param mixed  $schema   Form schema.
-		 * @since 2.8.0
+		 * @param array      $context    Context.
+		 * @param mixed      $schema     Form schema.
+		 * @param array|null $submission The entry, or null.
+		 * @since 2.7.2
 		 */
-		$currency = is_array( $schema ) ? (string) apply_filters( 'subtleforms/format/currency', '', $schema ) : '';
-		return $extra + array( 'currency' => $currency );
+		$context = apply_filters( 'subtleforms/format/context', $extra, $schema, is_array( $submission ) ? $submission : null );
+		return is_array( $context ) ? $context : $extra;
 	}
 
 	/**
-	 * The currency an entry was priced in, from its stored order (or payment).
-	 * Empty when the entry has no order.
-	 *
-	 * @param mixed $submission Submission row (meta as an array or JSON).
-	 * @return string ISO code.
-	 */
-	public static function entryCurrency( $submission ): string {
-		$meta = is_array( $submission ) ? ( $submission['meta'] ?? array() ) : array();
-		if ( is_string( $meta ) ) {
-			$decoded = json_decode( $meta, true );
-			$meta    = is_array( $decoded ) ? $decoded : array();
-		}
-		if ( ! is_array( $meta ) ) {
-			return '';
-		}
-		$code = $meta['order']['currency'] ?? ( $meta['payment']['currency'] ?? '' );
-		return is_string( $code ) ? strtoupper( trim( $code ) ) : '';
-	}
-
-	/**
-	 * Display context for one entry: prices in the currency the entry was
-	 * charged in, so a later change of the site or form currency does not
-	 * relabel older answers. Falls back to the form currency.
+	 * Display context for one entry.
 	 *
 	 * @param mixed $schema     Form schema.
 	 * @param mixed $submission Submission row.
@@ -162,11 +130,10 @@ final class AnswerFormatter {
 	 * @return array
 	 */
 	public static function entryContext( $schema, $submission, array $extra = array() ): array {
-		$currency = self::entryCurrency( $submission );
-		if ( '' !== $currency ) {
-			$extra['currency'] = $currency;
+		if ( is_array( $submission ) && isset( $submission['id'] ) && ! isset( $extra['submission_id'] ) ) {
+			$extra['submission_id'] = (int) $submission['id'];
 		}
-		return self::context( $schema, $extra );
+		return self::context( $schema, $extra, is_array( $submission ) ? $submission : null );
 	}
 
 	/**
@@ -177,7 +144,8 @@ final class AnswerFormatter {
 	 * - links (bool)         Add download links after file names.
 	 * - signature (string)   'long' (default), 'short' ("Signed") or 'raw'
 	 *                        (the image data, for renderers that draw it).
-	 * - currency (string)    Currency code for prices.
+	 *
+	 * Add-ons may add their own keys through `subtleforms/format/context`.
 	 *
 	 * @param mixed $value   Stored value.
 	 * @param array $field   Field node.
@@ -186,6 +154,23 @@ final class AnswerFormatter {
 	 */
 	public static function text( $value, array $field, array $context = array() ): string {
 		$type = (string) ( $field['type'] ?? '' );
+
+		if ( function_exists( 'apply_filters' ) && '' !== $type ) {
+			/**
+			 * Format an answer of a field type an add-on provides. Return a
+			 * string to use it, or null to let this plugin format it.
+			 *
+			 * @param string|null $text    Default null.
+			 * @param mixed       $value   Stored value.
+			 * @param array       $field   Field node.
+			 * @param array       $context Display context.
+			 * @since 2.7.2
+			 */
+			$custom = apply_filters( 'subtleforms/format/answer', null, $value, $field, $context );
+			if ( is_string( $custom ) ) {
+				return $custom;
+			}
+		}
 
 		if ( EntryValues::isSignatureImage( $value ) ) {
 			$mode = (string) ( $context['signature'] ?? 'long' );
@@ -214,9 +199,6 @@ final class AnswerFormatter {
 		if ( 'chained_select' === $type && is_scalar( $value ) && '' !== (string) $value ) {
 			$value = array( $value );
 		}
-		if ( 'payment_choice' === $type && is_scalar( $value ) && '' !== (string) $value ) {
-			$value = array_map( 'trim', explode( ',', (string) $value ) );
-		}
 
 		$items = self::items( $value, $field, $context );
 		if ( null !== $items ) {
@@ -228,9 +210,6 @@ final class AnswerFormatter {
 		}
 		if ( in_array( $type, array( 'date', 'time', 'datetime' ), true ) && is_string( $value ) ) {
 			return self::date( $value, $type, $field );
-		}
-		if ( 'payment_product' === $type ) {
-			return self::product( $value, $field, $context );
 		}
 		if ( self::isYesNo( $field ) && ! is_array( $value ) ) {
 			if ( '' === $value && 'consent' !== $type ) {
@@ -260,6 +239,23 @@ final class AnswerFormatter {
 			return null;
 		}
 
+		if ( function_exists( 'apply_filters' ) && '' !== $type ) {
+			/**
+			 * Format a list answer of a field type an add-on provides, one
+			 * string per item. Return an array to use it, or null.
+			 *
+			 * @param string[]|null $items   Default null.
+			 * @param array         $value   Stored list.
+			 * @param array         $field   Field node.
+			 * @param array         $context Display context.
+			 * @since 2.7.2
+			 */
+			$custom = apply_filters( 'subtleforms/format/items', null, $value, $field, $context );
+			if ( is_array( $custom ) ) {
+				return array_values( array_map( 'strval', $custom ) );
+			}
+		}
+
 		if ( self::isUploadList( $value ) ) {
 			$out = array();
 			foreach ( $value as $file ) {
@@ -281,9 +277,6 @@ final class AnswerFormatter {
 		foreach ( $value as $item ) {
 			if ( is_scalar( $item ) && isset( $labels[ (string) $item ] ) ) {
 				$text = $labels[ (string) $item ];
-				if ( 'payment_choice' === $type ) {
-					$text = self::withPrice( $text, self::optionPrice( $field, (string) $item ), $context );
-				}
 			} elseif ( is_scalar( $item ) && self::isYesNo( $field ) && empty( $labels ) ) {
 				$text = FieldMapper::isChecked( $item, $field ) ? __( 'Yes', 'subtleforms' ) : __( 'No', 'subtleforms' );
 			} else {
@@ -485,21 +478,6 @@ final class AnswerFormatter {
 	}
 
 	/**
-	 * The price of one option of a payment choice field.
-	 *
-	 * @param array  $field Field node.
-	 * @param string $value Option value.
-	 */
-	private static function optionPrice( array $field, string $value ): float {
-		foreach ( (array) EntryValues::attr( $field, 'options' ) as $option ) {
-			if ( is_array( $option ) && (string) ( $option['value'] ?? '' ) === $value ) {
-				return is_numeric( $option['price'] ?? null ) ? (float) $option['price'] : 0.0;
-			}
-		}
-		return 0.0;
-	}
-
-	/**
 	 * A matrix answer with its row and column names.
 	 *
 	 * One answer per row (`{ row: column }`) reads "Speed: Good; Price: OK".
@@ -657,59 +635,6 @@ final class AnswerFormatter {
 		return function_exists( 'wp_date' )
 			? (string) wp_date( $format, $date->getTimestamp(), $utc )
 			: $date->format( $format );
-	}
-
-	/**
-	 * A product answer as an order line: "Sticker × 2 ($10.00)".
-	 *
-	 * @param mixed $value   Stored quantity.
-	 * @param array $field   Field node.
-	 * @param array $context Display context.
-	 * @return string
-	 */
-	private static function product( $value, array $field, array $context ): string {
-		if ( is_array( $value ) ) {
-			return FieldMapper::toText( $value );
-		}
-		$name = (string) EntryValues::attr( $field, 'productName' );
-		if ( '' === trim( $name ) ) {
-			$name = (string) ( EntryValues::attr( $field, 'label' ) ?? '' );
-		}
-		$name  = self::shorten( '' !== trim( $name ) ? $name : (string) ( $field['key'] ?? '' ) );
-		$qty   = empty( EntryValues::attr( $field, 'allowQuantity' ) ) ? 1 : ( is_numeric( $value ) ? (int) $value : 0 );
-		$price = is_numeric( EntryValues::attr( $field, 'price' ) ) ? (float) EntryValues::attr( $field, 'price' ) : 0.0;
-		$line  = $name . " \u{00D7} " . $qty;
-		return $qty > 0 && $price > 0 ? self::withPrice( $line, $qty * $price, $context ) : $line;
-	}
-
-	/**
-	 * Text followed by its price in brackets, when it has one.
-	 *
-	 * @param string $text    Text.
-	 * @param float  $amount  Amount.
-	 * @param array  $context Display context (currency).
-	 */
-	private static function withPrice( string $text, float $amount, array $context ): string {
-		if ( $amount <= 0 ) {
-			return $text;
-		}
-		return $text . ' (' . self::money( $amount, (string) ( $context['currency'] ?? '' ) ) . ')';
-	}
-
-	/**
-	 * Money with a currency symbol or code.
-	 *
-	 * @param float  $amount   Amount.
-	 * @param string $currency ISO code.
-	 */
-	public static function money( float $amount, string $currency ): string {
-		$currency = strtoupper( $currency );
-		$decimals = '' === $currency || ! in_array( $currency, self::ZERO_DECIMAL, true ) ? 2 : 0;
-		$number   = function_exists( 'number_format_i18n' ) ? number_format_i18n( $amount, $decimals ) : number_format( $amount, $decimals );
-		if ( '' === $currency ) {
-			return $number;
-		}
-		return isset( self::SYMBOLS[ $currency ] ) ? self::SYMBOLS[ $currency ] . $number : $number . ' ' . $currency;
 	}
 
 	// ── Strings ──────────────────────────────────────────────────────────

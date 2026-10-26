@@ -122,37 +122,27 @@ class AnswerFormatterTest extends TestCase {
 		$this->assertSame( array( 'ok' => 'Yes' ), $this->answersByKey( $schema, array( 'ok' => 1 ) ) );
 	}
 
-	/** PAY-23: payment options read as labels, products as lines with prices. */
-	public function test_pay23_payment_labels_and_product_lines() {
-		$GLOBALS['sf_test_filters']['subtleforms/format/currency'] = static fn( $c, $schema ) => strtoupper( (string) ( $schema['metadata']['payment']['currency'] ?? '' ) );
-		$schema  = array(
-			'metadata' => array( 'payment' => array( 'currency' => 'usd' ) ),
-			'fields'   => array(
+	/** P1-01: an add-on formats its own field types; nothing here knows prices. */
+	public function test_add_on_formats_its_own_types() {
+		$GLOBALS['sf_test_filters']['subtleforms/format/answer'] = static fn( $text, $value, $field ) => 'example_total' === ( $field['type'] ?? '' ) ? 'Total: ' . $value : $text;
+		$GLOBALS['sf_test_filters']['subtleforms/format/items']  = static fn( $items, $value, $field ) => 'example_list' === ( $field['type'] ?? '' ) ? array_map( static fn( $v ) => strtoupper( (string) $v ), $value ) : $items;
+		$schema = array(
+			'fields' => array(
+				array( 'type' => 'example_total', 'key' => 'total', 'label' => 'Total' ),
+				array( 'type' => 'example_list', 'key' => 'tags', 'label' => 'Tags' ),
 				array(
-					'type'    => 'payment_choice',
+					'type'    => 'radio',
 					'key'     => 'tier',
 					'label'   => 'Tier',
-					'options' => array(
-						array( 'label' => 'Basic', 'value' => 'basic', 'price' => 19 ),
-						array( 'label' => 'Standard', 'value' => 'standard', 'price' => 49 ),
-					),
-				),
-				array(
-					'type'   => 'payment_product',
-					'key'    => 'sticker',
-					'config' => array(
-						'label'         => 'Sticker pack',
-						'productName'   => 'Sticker',
-						'price'         => 5,
-						'allowQuantity' => true,
-					),
+					'options' => array( array( 'label' => 'Standard', 'value' => 'standard', 'price' => 49 ) ),
 				),
 			),
 		);
 		$this->assertSame(
-			array( 'tier' => 'Standard ($49.00)', 'sticker' => "Sticker \u{00D7} 2 (\$10.00)" ),
-			$this->answersByKey( $schema, array( 'tier' => 'standard', 'sticker' => '2' ) )
+			array( 'total' => 'Total: 12', 'tags' => 'A, B', 'tier' => 'Standard' ),
+			$this->answersByKey( $schema, array( 'total' => '12', 'tags' => array( 'a', 'b' ), 'tier' => 'standard' ) )
 		);
+		unset( $GLOBALS['sf_test_filters']['subtleforms/format/answer'], $GLOBALS['sf_test_filters']['subtleforms/format/items'] );
 	}
 
 	/** FA-10: matrix answers name their rows and columns. */

@@ -64,11 +64,6 @@ final class EmailAction implements ActionInterface {
 			'submission_id' => (int) $context->getMeta( 'submission_id', 0 ),
 			'links'         => true,
 		);
-		$orderCurrency = strtoupper( (string) $context->getMeta( 'order_currency', '' ) );
-		if ( '' !== $orderCurrency ) {
-			// The currency the entry was charged in (2.4.0).
-			$displayExtra['currency'] = $orderCurrency;
-		}
 		$display     = \SubtleForms\Support\AnswerFormatter::context( $schema, $displayExtra );
 		$textPayload = $this->format_answers( $payload, $schema, false, $display );
 		$bodyPayload = $isHtml ? $this->format_answers( $payload, $schema, true, $display ) : $textPayload;

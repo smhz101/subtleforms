@@ -788,7 +788,6 @@ final class SubmissionsApi {
 		$context->setMeta( 'schema_version', isset( $submission['schema_version'] ) ? (int) $submission['schema_version'] : null );
 		$context->setMeta( 'form_schema', $schema );
 		$context->setMeta( 'resent', true );
-		$context->setMeta( 'order_currency', \SubtleForms\Support\AnswerFormatter::entryCurrency( $submission ) );
 
 		$result = $pipeline->run( $steps, $context, $schema );
 		$failures = $context->getMeta( 'action_failures', array() );
