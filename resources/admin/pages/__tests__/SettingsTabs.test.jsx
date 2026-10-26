@@ -112,10 +112,12 @@ describe('Tools and MCP tabs', () => {
     unmount();
   });
 
-  test('a component an add-on registers under "mcp" is listed and shown', () => {
+  test('a tab an add-on registers needs its own title; this plugin names none (P1-03)', () => {
     window.SubtleFormsExtend.registerSettingsTab('mcp', { component: () => <p className='addon-mcp'>MCP screen</p> });
+    expect(getGroups().flatMap((g) => g.tabs.map((t) => t.name))).not.toContain('mcp');
+    window.SubtleFormsExtend.registerSettingsTab('mcp', { title: 'Add-on tab', description: 'From the add-on.', group: 'site', component: () => <p className='addon-mcp'>MCP screen</p> });
     const { container, unmount } = render('mcp');
-    expect(container.querySelector('.sf-settings__title').textContent).toBe('MCP');
+    expect(container.querySelector('.sf-settings__title').textContent).toBe('Add-on tab');
     expect(container.querySelector('.addon-mcp').textContent).toBe('MCP screen');
     expect(container.querySelector('.sf-savebar')).toBeNull();
     unmount();
@@ -136,8 +138,8 @@ describe('Tools and MCP tabs', () => {
   });
 });
 
-// A registered MCP tab sits right after Tools, whatever title or order it asks for.
-describe('MCP sits right after Tools', () => {
+// A tab registered with group 'site' sits after Tools, whatever order it asks for.
+describe('A site tab sits right after Tools', () => {
   const navNames = (container) =>
     [...container.querySelectorAll('.sf-settings__nav-item span')].map((el) => el.textContent);
   const order = () => getGroups().flatMap((g) => g.tabs.map((t) => t.name));
@@ -152,9 +154,10 @@ describe('MCP sits right after Tools', () => {
     expect(getGroups().map((g) => g.key)).toEqual(['site']);
   });
 
-  test("the add-on's tab lands right after Tools, even with its own title or order", () => {
+  test("the add-on's site tab lands right after Tools, even with its own order", () => {
     window.SubtleFormsExtend.registerSettingsTab('mcp', {
       title: 'MCP server',
+      group: 'site',
       order: 1,
       component: () => <p className='addon-mcp'>MCP screen</p>,
     });

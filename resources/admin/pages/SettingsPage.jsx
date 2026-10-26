@@ -69,50 +69,35 @@ const GROUPS = [
   },
 ];
 
-/**
- * Tabs an add-on may register without a title of its own, with the place
- * they take: right after Tools. They are listed only when an add-on
- * registers them.
- */
-const SLOT_TABS = [
-  {
-    name: 'mcp',
-    icon: Icon.Bot,
-    title: __('MCP', 'subtleforms'),
-    description: __('Connect AI tools to your forms through the Model Context Protocol.', 'subtleforms'),
-  },
-];
-
 // A group with no tab (no add-on tab registered) is not shown.
 const withTabs = (groups) => groups.filter((g) => g.tabs.length > 0);
 
 export const ALL_TABS = GROUPS.flatMap((g) => g.tabs);
 
 const BUILT_IN = ALL_TABS.map((t) => t.name);
-const SLOT_NAMES = SLOT_TABS.map((t) => t.name);
 
 /**
  * The groups with the tabs add-ons registered (SubtleFormsExtend.registerSettingsTab).
- * A slot tab (see SLOT_TABS) goes right after Tools and may set its own title
- * and description; any other name with a title joins the Add-ons group.
+ * A tab with `group: 'site'` goes after Tools; any other tab with a title
+ * joins the Add-ons group.
  *
  * @return {Array} Groups.
  */
 export function getGroups() {
-  const added = settingsTabs().filter((t) => !BUILT_IN.includes(t.name));
-  if (!added.length) return withTabs(GROUPS);
-  const byName = Object.fromEntries(added.map((t) => [t.name, t]));
-  const slots = SLOT_TABS.filter((tab) => byName[tab.name]).map((tab) => {
-    const over = byName[tab.name];
-    return { ...tab, title: over.title || tab.title, description: over.description || tab.description };
-  });
-  const fresh = added
-    .filter((t) => !SLOT_NAMES.includes(t.name) && t.title)
+  const added = settingsTabs()
+    .filter((t) => !BUILT_IN.includes(t.name) && t.title)
     .sort((a, b) => (a.order ?? 100) - (b.order ?? 100))
-    .map((t) => ({ name: t.name, icon: Icon.Puzzle, title: t.title, description: t.description || '' }));
+    .map((t) => ({
+      name: t.name,
+      icon: t.icon && (typeof t.icon === 'function' || typeof t.icon === 'object') ? t.icon : Icon.Puzzle,
+      title: t.title,
+      description: t.description || '',
+      group: t.group === 'site' ? 'site' : 'addons',
+    }));
+  if (!added.length) return withTabs(GROUPS);
   return withTabs(GROUPS.map((g) => ({
     ...g,
-    tabs: g.key === 'site' ? [...g.tabs, ...slots] : [...g.tabs, ...fresh],
+    tabs: [...g.tabs, ...added.filter((t) => t.group === g.key).map(({ group, ...tab }) => tab)], // eslint-disable-line no-unused-vars
   })));
 }
 

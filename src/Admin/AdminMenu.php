@@ -353,7 +353,7 @@ class AdminMenu {
 			'flagBaseUrl'    => SUBTLEFORMS_PLUGIN_URL . 'build/frontend/flags/',
 			// Nonce for admin download links to uploaded files (2.1).
 			'fileNonce'      => \SubtleForms\Uploads\Uploads::nonce(),
-			// Name, logo and which credits/links to show (white label, 2.1).
+			// Name, menu name and logo (2.1).
 			'branding'       => self::branding(),
 			// Preview device widths and the active theme's styles, so "inherit
 			// from theme" and desktop/tablet/mobile match the site (2.3.5).
@@ -446,10 +446,9 @@ class AdminMenu {
 	}
 
 	/**
-	 * How the admin app presents the plugin: name, logo and which SubtleForms
-	 * credits, help links and the More features card appear.
+	 * How the admin app names the plugin: name, menu name and logo.
 	 *
-	 * @return array{name:string,menuName:string,logoUrl:string,hideCredits:bool,hideHelp:bool,hideUpgrade:bool,supportUrl:string}
+	 * @return array{name:string,menuName:string,logoUrl:string}
 	 */
 	public static function branding(): array {
 		static $cache = null;
@@ -461,23 +460,15 @@ class AdminMenu {
 			'name'        => 'SubtleForms',
 			'menuName'    => __( 'SubtleForms', 'subtleforms' ),
 			'logoUrl'     => '',
-			'hideCredits' => false,
-			'hideHelp'    => false,
-			'hideUpgrade' => false,
-			'supportUrl'  => '',
 		);
 
 		/**
-		 * Filter the admin branding (white label), for example from an add-on.
+		 * Filter how the admin app names the plugin.
 		 *
 		 * @param array $branding {
-		 *     @type string $name        Product name in the app header and copy.
-		 *     @type string $menuName    wp-admin menu label.
-		 *     @type string $logoUrl     Logo image URL; empty for the default mark.
-		 *     @type bool   $hideCredits Hide SubtleForms credits and links.
-		 *     @type bool   $hideHelp    Hide the Help menu.
-		 *     @type bool   $hideUpgrade Hide the More features card on the Dashboard.
-		 *     @type string $supportUrl  Where "Get support" links to; empty for SubtleForms (2.3.0).
+		 *     @type string $name     Product name in the app header and copy.
+		 *     @type string $menuName wp-admin menu label.
+		 *     @type string $logoUrl  Logo image URL; empty for the default mark.
 		 * }
 		 * @since 2.1.0
 		 */
@@ -490,10 +481,6 @@ class AdminMenu {
 			'name'        => $name !== '' ? $name : $defaults['name'],
 			'menuName'    => $menu !== '' ? $menu : ( $name !== '' && $name !== $defaults['name'] ? $name : $defaults['menuName'] ),
 			'logoUrl'     => esc_url_raw( (string) $b['logoUrl'] ),
-			'hideCredits' => (bool) $b['hideCredits'],
-			'hideHelp'    => (bool) $b['hideHelp'],
-			'hideUpgrade' => (bool) $b['hideUpgrade'],
-			'supportUrl'  => esc_url_raw( (string) $b['supportUrl'], array( 'http', 'https', 'mailto' ) ),
 		);
 		return $cache;
 	}
@@ -521,7 +508,7 @@ class AdminMenu {
 	/**
 	 * The More features card on the Dashboard: the one place in this plugin
 	 * that says what the separate add-on adds. Shown to people who can manage
-	 * SubtleForms until they dismiss it, and never when white label hides it
+	 * SubtleForms until they dismiss it
 	 * or the add-on is already active.
 	 *
 	 * @return array{show:bool,url:string}
@@ -529,7 +516,7 @@ class AdminMenu {
 	public static function more_features(): array {
 		$user_id   = get_current_user_id();
 		$dismissed = $user_id > 0 && (bool) get_user_meta( $user_id, self::MORE_FEATURES_META, true );
-		$show      = ! $dismissed && ! self::companion_active() && ! self::branding()['hideUpgrade'];
+		$show      = ! $dismissed && ! self::companion_active();
 		return array(
 			'show' => $show,
 			'url'  => self::MORE_FEATURES_URL,
