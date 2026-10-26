@@ -84,7 +84,8 @@ export default function FieldRenderer({
   const isHidden = hiddenFields?.has(resolvedPath);
 
   // Accessible input id
-  const inputId = `subtleforms-field-${(resolvedPath || field.key).replace(
+  // A saved node can lack a key (RCOMPAT-02); never let that stop the form.
+  const inputId = `subtleforms-field-${String(resolvedPath || field.key || field.id || '').replace(
     /[^a-zA-Z0-9\-_:.]/g,
     '-'
   )}`;
@@ -454,6 +455,12 @@ export default function FieldRenderer({
         {config.captchaWarning || __('This CAPTCHA is not set up yet.', 'subtleforms')}
       </p>
     );
+  }
+
+  // An input with no key has nowhere to keep an answer, so it is left out
+  // instead of stopping the whole form from loading (RCOMPAT-02).
+  if (!ownKey && !fieldPath) {
+    return null;
   }
 
   // A group of choices is a fieldset with a legend, so a screen reader names

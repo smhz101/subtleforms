@@ -477,6 +477,9 @@ final class FormsRepository {
 		// The type follows the structure (2.3.2), whatever the client sent.
 		list( $schema ) = \SubtleForms\Support\SchemaRepair::syncType( $schema );
 
+		// A field saved without a key gets one rather than breaking the form.
+		list( $schema ) = \SubtleForms\Support\SchemaRepair::assignMissingKeys( $schema );
+
 		// Appearance values are written into CSS custom properties on the rendered
 		// form, so they are checked here, at the point of storage, rather than
 		// escaped at output. Every save path goes through this method.
@@ -995,6 +998,7 @@ final class FormsRepository {
 	 */
 	public static function prepareStoredSchema( array $schema, ?callable $previousCss = null ): array {
 		list( $schema ) = \SubtleForms\Support\SchemaRepair::syncType( $schema );
+		list( $schema ) = \SubtleForms\Support\SchemaRepair::assignMissingKeys( $schema );
 		return self::sanitizeAppearance( $schema, $previousCss );
 	}
 

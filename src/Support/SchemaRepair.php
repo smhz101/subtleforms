@@ -188,6 +188,158 @@ final class SchemaRepair {
 	}
 
 	/**
+	 * Give every answer-bearing field that has no key one (RCOMPAT-02).
+	 *
+	 * A field without a key has nowhere to keep an answer and stopped the form
+	 * from loading. The key comes from the field's id when that is a valid,
+	 * unused key, else it is made the way the builder makes one:
+	 * `<type>_<8 characters>`. Layout nodes (headings, dividers, steps,
+	 * containers) may have no key and are left alone below the top level; the
+	 * top level always needs one.
+	 *
+	 * @param array $schema Schema with a `fields` list.
+	 * @return array{0: array, 1: int} The schema and the number of keys added.
+	 */
+	public static function assignMissingKeys( array $schema ): array {
+		if ( ! isset( $schema['fields'] ) || ! is_array( $schema['fields'] ) ) {
+			return array( $schema, 0 );
+		}
+		$used = array();
+		self::collectKeys( $schema['fields'], $used );
+		$count            = 0;
+		$schema['fields'] = self::fillKeys( $schema['fields'], true, $used, $count );
+		return array( $schema, $count );
+	}
+
+	/**
+	 * Every key in a field tree.
+	 *
+	 * @param array $list Field list.
+	 * @param array $used Keys found, by reference.
+	 */
+	private static function collectKeys( array $list, array &$used ): void {
+		foreach ( $list as $node ) {
+			if ( ! is_array( $node ) ) {
+				continue;
+			}
+			foreach ( array( $node['key'] ?? null, $node['config']['key'] ?? null ) as $key ) {
+				if ( is_string( $key ) && '' !== $key ) {
+					$used[ $key ] = true;
+				}
+			}
+			foreach ( self::childLists( $node ) as $child ) {
+				self::collectKeys( $child, $used );
+			}
+		}
+	}
+
+	/**
+	 * The lists of fields a node holds.
+	 *
+	 * @param array $node Field node.
+	 * @return array<int,array> Lists.
+	 */
+	private static function childLists( array $node ): array {
+		$lists = array();
+		foreach ( array( 'fields', 'children' ) as $name ) {
+			if ( isset( $node[ $name ] ) && is_array( $node[ $name ] ) ) {
+				$lists[] = $node[ $name ];
+			}
+		}
+		if ( isset( $node['config']['children'] ) && is_array( $node['config']['children'] ) ) {
+			$lists[] = $node['config']['children'];
+		}
+		foreach ( (array) ( $node['columns'] ?? array() ) as $column ) {
+			if ( ! is_array( $column ) ) {
+				continue;
+			}
+			if ( isset( $column['fields'] ) && is_array( $column['fields'] ) ) {
+				$lists[] = $column['fields'];
+			} elseif ( isset( $column['children'] ) && is_array( $column['children'] ) ) {
+				$lists[] = $column['children'];
+			} elseif ( isset( $column[0] ) && is_array( $column[0] ) ) {
+				$lists[] = $column;
+			}
+		}
+		return $lists;
+	}
+
+	/**
+	 * Add missing keys to a field list and everything below it.
+	 *
+	 * @param array $list     Field list.
+	 * @param bool  $topLevel Whether this is the root list.
+	 * @param array $used     Keys in use, by reference.
+	 * @param int   $count    Keys added, by reference.
+	 * @return array
+	 */
+	private static function fillKeys( array $list, bool $topLevel, array &$used, int &$count ): array {
+		foreach ( $list as $i => $node ) {
+			if ( ! is_array( $node ) ) {
+				continue;
+			}
+			$has = ( isset( $node['key'] ) && is_string( $node['key'] ) && '' !== $node['key'] );
+			if ( ! $has ) {
+				$type = (string) ( $node['type'] ?? '' );
+				$own  = $node['config']['key'] ?? null;
+				if ( is_string( $own ) && '' !== $own ) {
+					$node['key'] = $own;
+				} elseif ( '' !== $type && ( $topLevel || ! FieldMapper::isLayoutType( $type ) ) ) {
+					$node['key'] = self::newKey( $node, $type, $used );
+					++$count;
+				}
+			}
+			foreach ( array( 'fields', 'children' ) as $name ) {
+				if ( isset( $node[ $name ] ) && is_array( $node[ $name ] ) ) {
+					$node[ $name ] = self::fillKeys( $node[ $name ], false, $used, $count );
+				}
+			}
+			if ( isset( $node['config']['children'] ) && is_array( $node['config']['children'] ) ) {
+				$node['config']['children'] = self::fillKeys( $node['config']['children'], false, $used, $count );
+			}
+			if ( isset( $node['columns'] ) && is_array( $node['columns'] ) ) {
+				foreach ( $node['columns'] as $c => $column ) {
+					if ( ! is_array( $column ) ) {
+						continue;
+					}
+					if ( isset( $column['fields'] ) && is_array( $column['fields'] ) ) {
+						$node['columns'][ $c ]['fields'] = self::fillKeys( $column['fields'], false, $used, $count );
+					} elseif ( isset( $column['children'] ) && is_array( $column['children'] ) ) {
+						$node['columns'][ $c ]['children'] = self::fillKeys( $column['children'], false, $used, $count );
+					} elseif ( isset( $column[0] ) && is_array( $column[0] ) ) {
+						$node['columns'][ $c ] = self::fillKeys( $column, false, $used, $count );
+					}
+				}
+			}
+			$list[ $i ] = $node;
+		}
+		return $list;
+	}
+
+	/**
+	 * A new unique key for a node: its id when usable, else `<type>_<hex>`.
+	 *
+	 * @param array  $node Field node.
+	 * @param string $type Field type.
+	 * @param array  $used Keys in use, by reference.
+	 * @return string
+	 */
+	private static function newKey( array $node, string $type, array &$used ): string {
+		$id = isset( $node['id'] ) && is_string( $node['id'] ) ? preg_replace( '/[^a-zA-Z0-9_-]/', '_', $node['id'] ) : '';
+		if ( '' !== $id && preg_match( SchemaValidator::KEY_PATTERN, $id ) && ! isset( $used[ $id ] ) && ! RequestKeys::has( $id ) ) {
+			$used[ $id ] = true;
+			return $id;
+		}
+		$prefix = trim( (string) preg_replace( '/[^a-z0-9]+/', '_', strtolower( $type ) ), '_' );
+		$prefix = '' === $prefix ? 'field' : substr( $prefix, 0, 24 );
+		do {
+			$key = $prefix . '_' . bin2hex( random_bytes( 4 ) );
+		} while ( isset( $used[ $key ] ) );
+		$used[ $key ] = true;
+		return $key;
+	}
+
+	/**
 	 * Apply every repair, logging what changed.
 	 *
 	 * @param array $schema Schema.

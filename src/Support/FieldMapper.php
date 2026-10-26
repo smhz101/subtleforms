@@ -73,6 +73,16 @@ final class FieldMapper {
 	private const TRUTHY = array( '1', 'true', 'yes', 'on', 'checked', 'accepted', 'agree', 'agreed' );
 
 	/**
+	 * Whether a field type holds no answer (a heading, a step, a container).
+	 *
+	 * @param string $type Field type.
+	 * @return bool
+	 */
+	public static function isLayoutType( string $type ): bool {
+		return in_array( $type, self::LAYOUT_TYPES, true ) || '_container' === substr( $type, -10 ) || in_array( $type, self::noAnswerTypes(), true );
+	}
+
+	/**
 	 * Flatten a schema into its answer-bearing fields.
 	 *
 	 * Containers (steps, sections, groups, columns) are walked into but not

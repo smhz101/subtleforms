@@ -1254,7 +1254,7 @@ export default function FormRenderer({
 
               return (
                 <FieldRenderer
-                  key={fieldKey}
+                  key={fieldKey || field.id}
                   field={field}
                   fieldPath={fieldKey}
                   values={values}

@@ -16,6 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use PHPUnit\Framework\TestCase;
 use SubtleForms\Support\SchemaRepair;
+use SubtleForms\Support\SchemaValidator;
 
 /**
  * @covers \SubtleForms\Support\SchemaRepair
@@ -76,5 +77,50 @@ final class SchemaRepairTest extends TestCase {
 		$steps = array( 'fields' => array( array( 'id' => 's', 'type' => 'step', 'children' => array( $this->text( 'a' ) ) ) ) );
 		$this->assertSame( array( $steps, 0 ), SchemaRepair::moveOrphansIntoFirstStep( $steps ) );
 		$this->assertSame( $steps, SchemaRepair::repair( $steps, 9 ) );
+	}
+
+	public function test_rcompat02_keyless_input_in_a_step_gets_a_unique_valid_key(): void {
+		$schema = array(
+			'fields' => array(
+				array( 'id' => 's1', 'key' => 's1', 'type' => 'step', 'children' => array(
+					$this->text( 'name' ),
+					array( 'id' => 'f_fee_nokey', 'type' => 'text', 'label' => 'No key' ),
+					array( 'type' => 'email', 'label' => 'Anonymous' ),
+					array( 'type' => 'heading', 'label' => 'Layout only' ),
+				) ),
+			),
+		);
+		list( $fixed, $added ) = SchemaRepair::assignMissingKeys( $schema );
+		$kids = $fixed['fields'][0]['children'];
+		$this->assertSame( 2, $added );
+		$this->assertSame( 'f_fee_nokey', $kids[1]['key'] );
+		$this->assertMatchesRegularExpression( SchemaValidator::KEY_PATTERN, $kids[2]['key'] );
+		$this->assertStringStartsWith( 'email_', $kids[2]['key'] );
+		$this->assertArrayNotHasKey( 'key', $kids[3] );
+		$this->assertSame( 'name', $kids[0]['key'] );
+		$this->assertCount( 4, array_unique( array( $kids[0]['key'], $kids[1]['key'], $kids[2]['key'], 's1' ) ) );
+		$this->assertSame( array(), SchemaValidator::nestedKeyProblems( $fixed ) );
+		$this->assertSame( array( $fixed, 0 ), SchemaRepair::assignMissingKeys( $fixed ) );
+	}
+
+	public function test_rcompat02_id_that_clashes_gets_a_generated_key_and_top_level_always_gets_one(): void {
+		$schema = array(
+			'fields' => array(
+				$this->text( 'dup' ),
+				array( 'id' => 'dup', 'type' => 'text' ),
+				array( 'type' => 'html' ),
+				array( 'id' => 'a', 'type' => 'two_column_container', 'columns' => array( array( 'fields' => array( array( 'type' => 'number' ) ) ) ) ),
+			),
+		);
+		list( $fixed, $added ) = SchemaRepair::assignMissingKeys( $schema );
+		$this->assertSame( 4, $added );
+		$this->assertNotSame( 'dup', $fixed['fields'][1]['key'] );
+		$this->assertStringStartsWith( 'text_', $fixed['fields'][1]['key'] );
+		$this->assertStringStartsWith( 'html_', $fixed['fields'][2]['key'] );
+		$this->assertStringStartsWith( 'number_', $fixed['fields'][3]['columns'][0]['fields'][0]['key'] );
+		$schema['schema_version'] = 1;
+		$fixed['schema_version']  = 1;
+		$fixed['metadata']        = array( 'name' => 'T' );
+		$this->assertTrue( ( new SchemaValidator() )->validate( $fixed ) );
 	}
 }
