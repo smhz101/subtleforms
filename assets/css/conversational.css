@@ -298,80 +298,6 @@
 	background: var(--subtleforms-color-bg-subtle);
 }
 
-/* Payment Step */
-.subtleforms-payment-card {
-	background: var(--subtleforms-color-bg);
-	border: 1px solid var(--subtleforms-color-bg-subtle);
-	border-radius: 8px;
-	padding: 2.5rem;
-	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-}
-
-.subtleforms-payment-title {
-	font-size: 1.5rem;
-	font-weight: 600;
-	color: var(--subtleforms-color-text);
-	margin-bottom: 2rem;
-	text-align: center;
-}
-
-.subtleforms-payment-summary {
-	flex: 1;
-	margin-bottom: 2rem;
-}
-
-.subtleforms-payment-amount {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 1.5rem;
-	background: var(--subtleforms-color-bg-subtle);
-	border: 2px solid var(--subtleforms-color-bg-subtle);
-	border-radius: 8px;
-	margin-bottom: 1rem;
-}
-
-.subtleforms-payment-label {
-	font-size: 1.125rem;
-	font-weight: 600;
-	color: var(--subtleforms-color-text);
-}
-
-.subtleforms-payment-value {
-	font-size: 1.875rem;
-	font-weight: 700;
-	color: var(--subtleforms-color-text);
-}
-
-.subtleforms-payment-test-notice {
-	background: var(--subtleforms-color-bg-subtle);
-	border: 1px solid var(--subtleforms-color-warning);
-	color: var(--subtleforms-color-warning);
-	padding: 0.75rem 1rem;
-	border-radius: 6px;
-	font-size: 0.875rem;
-	text-align: center;
-	margin-bottom: 1rem;
-}
-
-.subtleforms-payment-gateway-placeholder {
-	background: var(--subtleforms-color-bg-subtle);
-	border: 2px dashed var(--subtleforms-color-border);
-	border-radius: 8px;
-	padding: 2rem;
-	text-align: center;
-}
-
-.subtleforms-payment-info {
-	color: var(--subtleforms-color-text-light);
-	font-size: 0.875rem;
-	line-height: 1.5;
-	margin: 0;
-}
-
 /* Responsive */
 @media (max-width: 640px) {
 	.subtleforms-conversational {
@@ -379,8 +305,7 @@
 	}
 
 	.subtleforms-question-card,
-	.subtleforms-review-card,
-	.subtleforms-payment-card {
+	.subtleforms-review-card {
 		padding: 1.5rem;
 	}
 
@@ -397,19 +322,8 @@
 		justify-content: center;
 	}
 
-	.subtleforms-review-title,
-	.subtleforms-payment-title {
+	.subtleforms-review-title {
 		font-size: 1.25rem;
-	}
-
-	.subtleforms-payment-amount {
-		flex-direction: column;
-		gap: 0.5rem;
-		text-align: center;
-	}
-
-	.subtleforms-payment-value {
-		font-size: 1.5rem;
 	}
 }
 

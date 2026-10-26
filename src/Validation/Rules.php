@@ -237,7 +237,7 @@ class Rules {
 				}
 				$max = (int) $param;
 				// Text is limited by length, numbers by value. A numeric string
-				// (such as a HubSpot Portal ID) is text.
+				// (such as an account ID) is text.
 				if ( is_string( $value ) ) {
 					if ( mb_strlen( $value ) > $max ) {
 						return array( false, $value, sprintf( 'Maximum length is %d characters', $max ) );

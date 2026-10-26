@@ -503,7 +503,7 @@ final class FieldMapper {
 	 * @param array $schema  Form schema.
 	 * @param array $payload Submitted answers.
 	 * @param bool  $skipEmpty Leave out unanswered fields.
-	 * @param array $context   Display context, such as the entry's currency (2.4.0).
+	 * @param array $context   Display context (2.4.0); add-ons add keys through `subtleforms/format/context`.
 	 * @return array<int,array{key:string,label:string,value:string}>
 	 */
 	public static function answers( array $schema, array $payload, bool $skipEmpty = true, array $context = array() ): array {

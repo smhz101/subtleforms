@@ -674,8 +674,7 @@ final class FieldSettings {
 
 		/**
 		 * The settings a field type shows in the builder, after the plugin
-		 * added its own. Add-ons add, change or replace controls here (for
-		 * example a setting for several files on upload fields).
+		 * added its own. Add-ons add, change or replace controls here.
 		 *
 		 * @param array  $controls Controls, each with type, name, label and section.
 		 * @param string $type     Field type.
