@@ -6,9 +6,9 @@ import { createRoot } from '@wordpress/element';
 import { act } from 'react';
 
 jest.mock('./DashboardPage.scss', () => ({}));
-jest.mock('../components/AdminShell', () => ({ children, title }) => (
-  <div data-title={title}>{children}</div>
-));
+jest.mock('../components/AdminShell', () => function AdminShellMock({ children, title }) {
+  return <div data-title={title}>{children}</div>;
+});
 jest.mock('../utils/api', () => ({ apiGet: jest.fn() }));
 
 import { apiGet } from '../utils/api';

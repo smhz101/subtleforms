@@ -6,7 +6,9 @@ import { createRoot } from '@wordpress/element';
 import { act } from 'react';
 
 jest.mock('../ToolsPage.scss', () => ({}));
-jest.mock('../../components/AdminShell', () => ({ children }) => <div>{children}</div>);
+jest.mock('../../components/AdminShell', () => function AdminShellMock({ children }) {
+  return <div>{children}</div>;
+});
 
 import { FileButton } from '../ToolsPage';
 
