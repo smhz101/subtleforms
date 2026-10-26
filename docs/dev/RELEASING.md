@@ -6,7 +6,7 @@ The release is one pull request, `release/<version>`, opened after every feature
 
 1. Merge every feature and fix pull request into `main`. Each one carries its changelog fragment in `docs/dev/changes/unreleased/` and none of them edits the readme, the versions or the POT.
 2. Branch from `main`: `git switch -c release/<version> origin/main`.
-3. Bump the version: `Version:` and `SUBTLEFORMS_VERSION` in `subtleforms.php`, `version` in `package.json`, `Stable tag:` in `readme.txt`. Check `Tested up to`, `Requires at least` and `Requires PHP`.
+3. Bump the version: `Version:` and `SUBTLEFORMS_VERSION` in `subtleforms.php`, `version` in `package.json`, `version` in `resources/blocks/form/block.json` (a unit test fails if it differs), `Stable tag:` in `readme.txt`. Check `Tested up to`, `Requires at least` and `Requires PHP`.
 4. Compile the changelog: `bin/compile-changes.sh <version> --apply`. Paste the printed block into `readme.txt` and `changelog.txt` under `== Changelog ==`. If a `= Unreleased =` heading from before this flow is still there, replace the heading with the version heading and keep its lines in the same block. `readme.txt` lists only the latest versions; `changelog.txt` keeps all of them. Add an upgrade notice if users must act.
 5. Merge the ledger updates: `bin/merge-ledger-updates.sh` (rows from `docs/dev/ledger-updates/*.csv` replace or extend `docs/dev/bug-ledger.csv`, then the files are removed).
 6. Regenerate the POT as the last edit, after all strings are final:

@@ -2,7 +2,7 @@
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 3,
   "name": "subtleforms/form",
-  "version": "2.7.0",
+  "version": "2.7.2",
   "title": "SubtleForms",
   "category": "widgets",
   "description": "Embed a SubtleForms form",
