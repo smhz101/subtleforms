@@ -11,6 +11,8 @@
 
 namespace SubtleForms\Admin;
 
+use SubtleForms\Compat\OutdatedAddOnGuard;
+
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /**
@@ -23,6 +25,8 @@ class AdminNotices {
 	 */
 	public static function register(): void {
 		add_action( 'admin_notices', array( self::class, 'maybe_show_permalink_notice' ) );
+		add_action( 'admin_notices', array( self::class, 'maybe_show_outdated_add_on_notice' ) );
+		add_action( 'network_admin_notices', array( self::class, 'maybe_show_outdated_add_on_notice' ) );
 	}
 
 	/**
@@ -56,6 +60,39 @@ class AdminNotices {
 				array(
 					'strong' => array(),
 					'a'      => array( 'href' => array() ),
+				)
+			)
+		);
+	}
+
+	/**
+	 * Say that an installed add-on was stopped because it is too old.
+	 *
+	 * Shown on SubtleForms screens and on the Plugins screen (where the add-on
+	 * is updated) to people who can manage plugins. See OutdatedAddOnGuard.
+	 */
+	public static function maybe_show_outdated_add_on_notice(): void {
+		$blocked = OutdatedAddOnGuard::blocked_version();
+		if ( '' === $blocked || ! current_user_can( 'activate_plugins' ) ) {
+			return;
+		}
+
+		$screen = get_current_screen();
+		if ( ! $screen ) {
+			return;
+		}
+		if ( strpos( $screen->id, 'subtleforms' ) === false && ! in_array( $screen->id, array( 'plugins', 'plugins-network' ), true ) ) {
+			return;
+		}
+
+		printf(
+			'<div class="notice notice-error"><p>%s</p></div>',
+			esc_html(
+				sprintf(
+					/* translators: 1: installed SubtleForms Pro version, 2: first compatible version */
+					__( 'SubtleForms Pro %1$s is not compatible with this version of SubtleForms. Update SubtleForms Pro to version %2$s or later.', 'subtleforms' ),
+					$blocked,
+					OutdatedAddOnGuard::minimum_version()
 				)
 			)
 		);
