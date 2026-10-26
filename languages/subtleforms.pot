@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-26T14:18:08+00:00\n"
+"POT-Creation-Date: 2026-10-26T16:39:47+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -667,7 +667,7 @@ msgstr ""
 #. translators: %d: maximum number of forms
 #: src/Api/ToolsApi.php:351
 #: src/Tools/FormMigration.php:99
-#: src/Tools/TransferPackage.php:89
+#: src/Tools/TransferPackage.php:129
 #, php-format
 msgid "Import up to %d forms at a time."
 msgstr ""
@@ -749,161 +749,161 @@ msgstr ""
 
 #. translators: %s: matrix row label
 #: src/Engine/FieldValidator.php:166
-#: resources/frontend/utils/fieldValidation.js:244
+#: resources/frontend/utils/fieldValidation.js:247
 #, php-format,js-format
 msgid "Please answer the \"%s\" row."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:490
+#: src/Engine/FieldValidator.php:495
 msgid "Please enter a single value."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:573
+#: src/Engine/FieldValidator.php:578
 msgid "The signature could not be read. Please sign again."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:655
+#: src/Engine/FieldValidator.php:660
 msgid "This field cannot be changed."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:798
+#: src/Engine/FieldValidator.php:803
 msgid "Please choose only one option."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:817
+#: src/Engine/FieldValidator.php:822
 msgid "Please choose one of the options shown."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:941
-#: resources/frontend/utils/fieldValidation.js:336
+#: src/Engine/FieldValidator.php:946
+#: resources/frontend/utils/fieldValidation.js:339
 msgid "Please enter a valid date."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:954
-#: resources/frontend/utils/fieldValidation.js:339
+#: src/Engine/FieldValidator.php:959
+#: resources/frontend/utils/fieldValidation.js:342
 msgid "Please enter a valid time."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:972
-#: resources/frontend/utils/fieldValidation.js:344
+#: src/Engine/FieldValidator.php:977
+#: resources/frontend/utils/fieldValidation.js:347
 msgid "Please enter a valid date and time."
 msgstr ""
 
 #. translators: %d: number of stars
-#: src/Engine/FieldValidator.php:1008
+#: src/Engine/FieldValidator.php:1013
 #, php-format
 msgid "Please choose a rating from 1 to %d."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1025
+#: src/Engine/FieldValidator.php:1030
 msgid "Please choose a score from 0 to 10."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1110
-#: resources/frontend/utils/fieldValidation.js:348
+#: src/Engine/FieldValidator.php:1115
+#: resources/frontend/utils/fieldValidation.js:351
 msgid "Please enter a colour as a hex value, such as #336699."
 msgstr ""
 
 #. translators: %d: maximum number of characters
-#: src/Engine/FieldValidator.php:1134
-#: resources/frontend/utils/fieldValidation.js:292
+#: src/Engine/FieldValidator.php:1139
+#: resources/frontend/utils/fieldValidation.js:295
 #, php-format,js-format
 msgid "Must be %d characters or fewer."
 msgstr ""
 
 #. translators: %d: minimum number of characters
-#: src/Engine/FieldValidator.php:1139
-#: resources/frontend/utils/fieldValidation.js:285
+#: src/Engine/FieldValidator.php:1144
+#: resources/frontend/utils/fieldValidation.js:288
 #, php-format,js-format
 msgid "Must be at least %d characters."
 msgstr ""
 
 #. translators: %s: minimum value
-#: src/Engine/FieldValidator.php:1165
-#: resources/frontend/utils/fieldValidation.js:315
+#: src/Engine/FieldValidator.php:1170
+#: resources/frontend/utils/fieldValidation.js:318
 #, php-format,js-format
 msgid "Must be at least %s."
 msgstr ""
 
 #. translators: %s: maximum value
-#: src/Engine/FieldValidator.php:1170
-#: resources/frontend/utils/fieldValidation.js:319
+#: src/Engine/FieldValidator.php:1175
+#: resources/frontend/utils/fieldValidation.js:322
 #, php-format,js-format
 msgid "Must be no more than %s."
 msgstr ""
 
 #. translators: %s: step increment
-#: src/Engine/FieldValidator.php:1181
-#: resources/frontend/utils/fieldValidation.js:328
+#: src/Engine/FieldValidator.php:1186
+#: resources/frontend/utils/fieldValidation.js:331
 #, php-format,js-format
 msgid "Must match the step of %s."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1218
-#: resources/frontend/utils/fieldValidation.js:260
+#: src/Engine/FieldValidator.php:1223
+#: resources/frontend/utils/fieldValidation.js:263
 msgid "Invalid email address."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1267
-#: resources/frontend/utils/fieldValidation.js:263
+#: src/Engine/FieldValidator.php:1272
+#: resources/frontend/utils/fieldValidation.js:266
 msgid "Invalid URL."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1283
 #: src/Engine/FieldValidator.php:1288
-#: resources/frontend/utils/fieldValidation.js:310
+#: src/Engine/FieldValidator.php:1293
+#: resources/frontend/utils/fieldValidation.js:313
 msgid "Please enter a number."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1365
-#: resources/frontend/utils/fieldValidation.js:373
+#: src/Engine/FieldValidator.php:1370
+#: resources/frontend/utils/fieldValidation.js:376
 msgid "Invalid phone number."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1380
-#: resources/frontend/utils/fieldValidation.js:376
+#: src/Engine/FieldValidator.php:1385
+#: resources/frontend/utils/fieldValidation.js:379
 msgid "Enter a 10-digit US phone number."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1412
-#: resources/frontend/utils/fieldValidation.js:493
+#: src/Engine/FieldValidator.php:1417
+#: resources/frontend/utils/fieldValidation.js:496
 msgid "The passwords do not match."
 msgstr ""
 
 #. translators: %s: earliest allowed date
-#: src/Engine/FieldValidator.php:1436
-#: resources/frontend/utils/fieldValidation.js:356
+#: src/Engine/FieldValidator.php:1441
+#: resources/frontend/utils/fieldValidation.js:359
 #, php-format,js-format
 msgid "Date must be on or after %s."
 msgstr ""
 
 #. translators: %s: latest allowed date
-#: src/Engine/FieldValidator.php:1441
-#: resources/frontend/utils/fieldValidation.js:363
+#: src/Engine/FieldValidator.php:1446
+#: resources/frontend/utils/fieldValidation.js:366
 #, php-format,js-format
 msgid "Date must be on or before %s."
 msgstr ""
 
 #. translators: %s: field label
-#: src/Engine/FieldValidator.php:1565
+#: src/Engine/FieldValidator.php:1570
 #, php-format
 msgid "%s is required."
 msgstr ""
 
 #. translators: %s: field key
-#: src/Engine/FieldValidator.php:1568
+#: src/Engine/FieldValidator.php:1573
 #, php-format
 msgid "Field \"%s\" is required."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1605
-#: resources/frontend/utils/fieldValidation.js:300
+#: src/Engine/FieldValidator.php:1610
+#: resources/frontend/utils/fieldValidation.js:303
 msgid "Please match the requested format."
 msgstr ""
 
 #. translators: %d: minimum number of selections
-#: src/Engine/FieldValidator.php:1626
-#: resources/frontend/utils/fieldValidation.js:386
+#: src/Engine/FieldValidator.php:1631
+#: resources/frontend/utils/fieldValidation.js:389
 #, php-format,js-format
 msgid "Select at least %d option."
 msgid_plural "Select at least %d options."
@@ -911,16 +911,16 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: maximum number of selections
-#: src/Engine/FieldValidator.php:1630
-#: resources/frontend/utils/fieldValidation.js:393
+#: src/Engine/FieldValidator.php:1635
+#: resources/frontend/utils/fieldValidation.js:396
 #, php-format,js-format
 msgid "Select no more than %d option."
 msgid_plural "Select no more than %d options."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Engine/FieldValidator.php:1647
-#: src/Engine/FieldValidator.php:1653
+#: src/Engine/FieldValidator.php:1652
+#: src/Engine/FieldValidator.php:1658
 msgid "Please choose a value on the scale."
 msgstr ""
 
@@ -1159,7 +1159,7 @@ msgstr ""
 
 #: src/Fields/CoreFields.php:369
 #: resources/admin/components/builder/FieldRenderer.jsx:329
-#: resources/frontend/components/FieldRenderer.jsx:776
+#: resources/frontend/components/FieldRenderer.jsx:789
 msgid "I agree"
 msgstr ""
 
@@ -1178,13 +1178,13 @@ msgstr ""
 
 #: src/Fields/CoreFields.php:403
 #: resources/admin/components/builder/FieldRenderer.jsx:344
-#: resources/frontend/components/FieldRenderer.jsx:784
+#: resources/frontend/components/FieldRenderer.jsx:797
 msgid "I agree to the Privacy Policy."
 msgstr ""
 
 #: src/Fields/CoreFields.php:405
 #: resources/admin/components/builder/FieldRenderer.jsx:346
-#: resources/frontend/components/FieldRenderer.jsx:786
+#: resources/frontend/components/FieldRenderer.jsx:799
 msgid "Privacy Policy"
 msgstr ""
 
@@ -1285,7 +1285,7 @@ msgid "Chained Select"
 msgstr ""
 
 #: src/Fields/CoreFields.php:737
-#: resources/admin/components/builder/FieldInspector.jsx:301
+#: resources/admin/components/builder/FieldInspector.jsx:304
 #: resources/admin/components/builder/inspector/controls/ChainedDisplayControl.jsx:8
 msgid "Dropdowns"
 msgstr ""
@@ -1455,7 +1455,7 @@ msgid "Disclaimer Text"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1189
-#: resources/admin/components/builder/FieldInspector.jsx:198
+#: resources/admin/components/builder/FieldInspector.jsx:201
 msgid "Style"
 msgstr ""
 
@@ -1549,7 +1549,7 @@ msgstr ""
 #: src/Fields/CoreFields.php:1412
 #: src/Fields/CoreFields.php:1419
 #: resources/admin/components/builder/ContainerRenderer.jsx:38
-#: resources/admin/components/builder/FieldInspector.jsx:47
+#: resources/admin/components/builder/FieldInspector.jsx:48
 #: resources/admin/components/builder/FieldRenderer.jsx:542
 #: resources/admin/components/OnboardingWizard.jsx:529
 #: resources/frontend/components/StepNavigation.jsx:15
@@ -2860,7 +2860,7 @@ msgstr ""
 #: src/Fields/FieldSettings.php:485
 #: resources/admin/components/builder/FieldRenderer.jsx:749
 #: resources/admin/components/builder/FormSettings.jsx:285
-#: resources/frontend/utils/fieldValidation.js:216
+#: resources/frontend/utils/fieldValidation.js:219
 msgid "This field is required."
 msgstr ""
 
@@ -3299,7 +3299,7 @@ msgid "Queued"
 msgstr ""
 
 #: src/Support/AnswerFormatter.php:181
-#: src/Support/FieldMapper.php:220
+#: src/Support/FieldMapper.php:230
 msgid "Signed"
 msgstr ""
 
@@ -3387,7 +3387,7 @@ msgstr ""
 #. translators: %d: maximum number of groups
 #. translators: %d: maximum number of entries
 #: src/Support/Repeater.php:309
-#: resources/frontend/utils/fieldValidation.js:473
+#: resources/frontend/utils/fieldValidation.js:476
 #, php-format,js-format
 msgid "Add no more than %d entry."
 msgid_plural "Add no more than %d entries."
@@ -4298,7 +4298,7 @@ msgid "Step %d"
 msgstr ""
 
 #: src/Tools/Import/SchemaBuilder.php:282
-#: src/Tools/TransferPackage.php:281
+#: src/Tools/TransferPackage.php:343
 msgid "Imported form"
 msgstr ""
 
@@ -4314,33 +4314,33 @@ msgstr ""
 msgid "The %1$s address \"%2$s\" of the email '%3$s' was not copied: SubtleForms sends email headers as typed and cannot fill them from an answer yet."
 msgstr ""
 
-#: src/Tools/TransferPackage.php:74
+#: src/Tools/TransferPackage.php:114
 msgid "This file is not a SubtleForms forms export."
 msgstr ""
 
-#: src/Tools/TransferPackage.php:81
+#: src/Tools/TransferPackage.php:121
 msgid "The export does not contain any forms."
 msgstr ""
 
-#: src/Tools/TransferPackage.php:112
+#: src/Tools/TransferPackage.php:152
 msgid "None of the forms in this file could be read."
 msgstr ""
 
-#: src/Tools/TransferPackage.php:131
+#: src/Tools/TransferPackage.php:171
 msgid "This file is not a SubtleForms submissions export."
 msgstr ""
 
-#: src/Tools/TransferPackage.php:138
+#: src/Tools/TransferPackage.php:178
 msgid "The export does not contain any submissions."
 msgstr ""
 
 #. translators: %d: maximum number of submissions
-#: src/Tools/TransferPackage.php:146
+#: src/Tools/TransferPackage.php:186
 #, php-format
 msgid "Import up to %d submissions at a time."
 msgstr ""
 
-#: src/Tools/TransferPackage.php:173
+#: src/Tools/TransferPackage.php:213
 msgid "None of the submissions in this file could be read."
 msgstr ""
 
@@ -5135,7 +5135,7 @@ msgstr ""
 
 #: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:458
 #: resources/admin/components/builder/FieldDock.jsx:23
-#: resources/admin/components/builder/FieldInspector.jsx:422
+#: resources/admin/components/builder/FieldInspector.jsx:425
 #: resources/admin/components/builder/FormSettings.jsx:128
 #: resources/admin/components/builder/FormSettings.jsx:130
 #: resources/blocks/form/edit.jsx:347
@@ -5830,13 +5830,13 @@ msgid "Move Down"
 msgstr ""
 
 #: resources/admin/components/builder/ContainerWrapper.jsx:71
-#: resources/admin/components/builder/FieldInspector.jsx:225
+#: resources/admin/components/builder/FieldInspector.jsx:228
 #: resources/admin/components/FormsList.jsx:447
 msgid "Duplicate"
 msgstr ""
 
 #: resources/admin/components/builder/ContainerWrapper.jsx:77
-#: resources/admin/components/builder/FieldInspector.jsx:234
+#: resources/admin/components/builder/FieldInspector.jsx:237
 #: resources/admin/components/builder/layout/BuilderModalsController.jsx:54
 msgid "Delete"
 msgstr ""
@@ -5973,7 +5973,7 @@ msgid "Basic"
 msgstr ""
 
 #: resources/admin/components/builder/FieldDock.jsx:22
-#: resources/admin/components/builder/FieldInspector.jsx:292
+#: resources/admin/components/builder/FieldInspector.jsx:295
 msgid "Choices"
 msgstr ""
 
@@ -6012,7 +6012,7 @@ msgstr ""
 
 #: resources/admin/components/builder/FieldDock.jsx:234
 #: resources/admin/components/builder/FieldDock.jsx:250
-#: resources/admin/components/builder/FieldInspector.jsx:132
+#: resources/admin/components/builder/FieldInspector.jsx:135
 #: resources/admin/components/builder/FormEditor.jsx:72
 msgid "Search fields"
 msgstr ""
@@ -6027,31 +6027,31 @@ msgstr ""
 msgid "Results"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:53
+#: resources/admin/components/builder/FieldInspector.jsx:54
 msgid "Moving it takes the field out of its container and puts it at the end of the chosen step."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:54
+#: resources/admin/components/builder/FieldInspector.jsx:55
 msgid "Moves the field to the end of the chosen step."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:105
+#: resources/admin/components/builder/FieldInspector.jsx:106
 msgid "This required field has no label, so visitors won’t know what to enter."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:109
+#: resources/admin/components/builder/FieldInspector.jsx:110
 msgid "Add at least one option."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:122
+#: resources/admin/components/builder/FieldInspector.jsx:125
 msgid "No field selected"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:125
+#: resources/admin/components/builder/FieldInspector.jsx:128
 msgid "Select a field on the canvas to edit its label, options, validation and logic."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:136
+#: resources/admin/components/builder/FieldInspector.jsx:139
 #: resources/admin/components/builder/FieldKeyEditor.jsx:211
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:231
 #: resources/admin/components/SpamProtectionNotice.jsx:47
@@ -6062,53 +6062,53 @@ msgstr ""
 msgid "Undo"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:139
+#: resources/admin/components/builder/FieldInspector.jsx:142
 msgid "Delete selected field"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:157
+#: resources/admin/components/builder/FieldInspector.jsx:160
 #: resources/admin/utils/saveErrors.js:13
 msgid "Logic"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:178
+#: resources/admin/components/builder/FieldInspector.jsx:181
 #: resources/admin/components/builder/LogicEditor.jsx:267
 msgid "Field"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:185
+#: resources/admin/components/builder/FieldInspector.jsx:188
 msgid "Validation"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:242
+#: resources/admin/components/builder/FieldInspector.jsx:245
 msgid "Close settings"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:272
+#: resources/admin/components/builder/FieldInspector.jsx:275
 #: resources/admin/components/builder/FormSettings.jsx:98
 #: resources/admin/pages/SettingsPage.jsx:30
 msgid "General"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:348
+#: resources/admin/components/builder/FieldInspector.jsx:351
 msgid "Skip this step unless its rules match. Fields in a skipped step are not checked or saved."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:350
+#: resources/admin/components/builder/FieldInspector.jsx:353
 msgid "Show or hide this repeater based on answers to other fields. A hidden repeater, including every row inside it, is not checked or saved."
 msgstr ""
 
 #. translators: %s: field label
-#: resources/admin/components/builder/FieldInspector.jsx:355
+#: resources/admin/components/builder/FieldInspector.jsx:358
 #, js-format
 msgid "Show or hide “%s” based on answers to other fields. Hidden fields are not checked or saved."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:366
+#: resources/admin/components/builder/FieldInspector.jsx:369
 msgid "This step is always shown."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:400
+#: resources/admin/components/builder/FieldInspector.jsx:403
 #: resources/admin/pages/SettingsPage.jsx:36
 msgid "Display"
 msgstr ""
@@ -6576,7 +6576,7 @@ msgid "Integrations"
 msgstr ""
 
 #: resources/admin/components/builder/FormSettings.jsx:123
-msgid "Send entries to email marketing, a CRM, analytics or a webhook."
+msgid "Send entries to other services, for example with a webhook."
 msgstr ""
 
 #: resources/admin/components/builder/FormSettings.jsx:130
@@ -7059,7 +7059,7 @@ msgid "Visitors can leave this empty."
 msgstr ""
 
 #: resources/admin/components/builder/IntegrationsPanel.jsx:30
-msgid "No integrations are available yet. Connect one under the plugin’s Settings, then come back to attach it to this form."
+msgid "Send entries to other services with webhooks. Add a Webhook action under Notifications. Defaults for every webhook are under Settings > Integrations."
 msgstr ""
 
 #: resources/admin/components/builder/IntegrationsPanel.jsx:70
@@ -7573,6 +7573,10 @@ msgstr ""
 
 #: resources/admin/components/builder/StepNavigator.jsx:169
 msgid "Add Step"
+msgstr ""
+
+#: resources/admin/components/builder/utils/fieldWarnings.js:16
+msgid "The dropdowns are not set up yet. Visitors will not see this field until you add them."
 msgstr ""
 
 #. translators: %s: field label
@@ -9155,7 +9159,7 @@ msgid "5 retries (up to 10 hours)"
 msgstr ""
 
 #: resources/admin/components/settings/extensions/WebhooksPanel.jsx:49
-msgid "Send each entry as JSON to any URL. Add a webhook to a form under Form settings > Actions; the settings below apply to every webhook action."
+msgid "Send each entry as JSON to any URL. Add a webhook to a form under Form settings > Notifications; the settings below apply to every webhook action."
 msgstr ""
 
 #: resources/admin/components/settings/extensions/WebhooksPanel.jsx:59
@@ -10449,7 +10453,7 @@ msgid "Spam protection, CAPTCHA, data retention and debugging."
 msgstr ""
 
 #: resources/admin/pages/SettingsPage.jsx:55
-msgid "Webhook defaults and the integrations your add-ons bring."
+msgid "Webhook defaults and other connections."
 msgstr ""
 
 #: resources/admin/pages/SettingsPage.jsx:60
@@ -10973,7 +10977,7 @@ msgstr ""
 #. translators: %s: plugin name
 #: resources/admin/pages/ToolsPage.jsx:320
 #, js-format
-msgid "JSON import and export move entries between %s sites. Passwords are left out. Notes, IP address, browser, uploaded files, logs and unpublished draft changes are not in the file. Status, read and starred state, and order and payment details are kept. Importing the same file again skips entries that are already there. A file from another form still imports and says which form it came from. A form with more than 2,000 submissions is not exported in part. Export CSV makes a spreadsheet file."
+msgid "JSON import and export move entries between %s sites. Passwords are left out. Notes, IP address, browser, uploaded files, logs and unpublished draft changes are not in the file. Status, read and starred state, and all other saved entry data, including data added by other plugins, are kept. Importing the same file again skips entries that are already there. A file from another form still imports and says which form it came from. A form with more than 2,000 submissions is not exported in part. Export CSV makes a spreadsheet file."
 msgstr ""
 
 #: resources/admin/pages/ToolsPage.jsx:330
@@ -11644,48 +11648,48 @@ msgstr ""
 msgid "Question"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:454
+#: resources/frontend/components/FieldRenderer.jsx:461
 msgid "This CAPTCHA is not set up yet."
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:658
+#: resources/frontend/components/FieldRenderer.jsx:671
 msgid "Strong password"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:660
+#: resources/frontend/components/FieldRenderer.jsx:673
 msgid "Fair password"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:661
+#: resources/frontend/components/FieldRenderer.jsx:674
 msgid "Weak password"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:671
-#: resources/frontend/components/FieldRenderer.jsx:672
+#: resources/frontend/components/FieldRenderer.jsx:684
+#: resources/frontend/components/FieldRenderer.jsx:685
 msgid "Confirm password"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:1009
+#: resources/frontend/components/FieldRenderer.jsx:1022
 msgid "Select Country"
 msgstr ""
 
 #. translators: 1: chosen rating, 2: highest rating
 #. translators: 1: groups added, 2: maximum groups
-#: resources/frontend/components/FieldRenderer.jsx:1069
+#: resources/frontend/components/FieldRenderer.jsx:1082
 #: resources/frontend/components/fields/RepeaterField.jsx:223
 #, js-format
 msgid "%1$d of %2$d"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:1160
+#: resources/frontend/components/FieldRenderer.jsx:1173
 msgid "Not at all likely"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:1161
+#: resources/frontend/components/FieldRenderer.jsx:1174
 msgid "Extremely likely"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:1356
+#: resources/frontend/components/FieldRenderer.jsx:1369
 msgid "Colour hex value"
 msgstr ""
 
@@ -11876,12 +11880,12 @@ msgstr ""
 msgid "%s (current)"
 msgstr ""
 
-#: resources/frontend/utils/fieldValidation.js:421
-#: resources/frontend/utils/fieldValidation.js:427
+#: resources/frontend/utils/fieldValidation.js:424
+#: resources/frontend/utils/fieldValidation.js:430
 msgid "Please enter your first and last name."
 msgstr ""
 
-#: resources/frontend/utils/fieldValidation.js:422
+#: resources/frontend/utils/fieldValidation.js:425
 msgid "Please enter your full address."
 msgstr ""
 
