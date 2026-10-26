@@ -58,7 +58,7 @@ final class SchemaBuilder {
 		$incoming = trim( $incoming );
 		if ( '' !== $incoming
 			&& preg_match( '/^[a-zA-Z][a-zA-Z0-9_-]{0,63}$/', $incoming )
-			&& ! in_array( $incoming, SchemaValidator::RESERVED_KEYS, true )
+			&& ! \SubtleForms\Support\RequestKeys::has( (string) $incoming )
 			&& ! isset( $this->used[ $incoming ] ) ) {
 			$this->used[ $incoming ] = true;
 			return $incoming;
@@ -69,7 +69,7 @@ final class SchemaBuilder {
 			$base = '' !== $id ? 'field_' . $id : 'field';
 		}
 		$base = substr( $base, 0, 40 );
-		if ( in_array( $base, SchemaValidator::RESERVED_KEYS, true ) ) {
+		if ( \SubtleForms\Support\RequestKeys::has( (string) $base ) ) {
 			$base = 'field_' . $base;
 		}
 		$key = $base;

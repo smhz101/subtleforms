@@ -313,11 +313,12 @@ class AdminMenu {
 			'nonce'          => wp_create_nonce( 'subtleforms_admin' ),
 			'restNonce'      => wp_create_nonce( 'wp_rest' ),
 			'version'        => SUBTLEFORMS_VERSION,
-			'currency'       => 'USD',
 			'unreadCount'    => $this->get_unread_count(),
 			'capabilities'   => $live_caps->all(),
 			'hasProPlugin'   => self::companion_active(),
 			'missingFieldTypes' => \SubtleForms\Fields\AddonFieldTypes::missing(),
+			// What the builder needs to know about add-on field types (2.7.2).
+			'fieldTypeFlags' => (object) \SubtleForms\Fields\AddonFieldTypes::typeFlags(),
 			// Features an active add-on provides (see Support\ExtensionPoints).
 			'addonFeatures'  => \SubtleForms\Support\ExtensionPoints::provided(),
 			// The More features card on the Dashboard (see more_features()).
@@ -348,8 +349,6 @@ class AdminMenu {
 				'error'         => __( 'An error occurred. Please try again.', 'subtleforms' ),
 				'success'       => __( 'Action completed successfully.', 'subtleforms' ),
 			),
-			// WooCommerce status for the checkout settings (2.1). Null when inactive.
-			'woocommerce'    => self::woocommerceData(),
 			// Country flag files, for the builder canvas and the previews (2.7.2).
 			'flagBaseUrl'    => SUBTLEFORMS_PLUGIN_URL . 'build/frontend/flags/',
 			// Nonce for admin download links to uploaded files (2.1).
@@ -534,27 +533,6 @@ class AdminMenu {
 		return array(
 			'show' => $show,
 			'url'  => self::MORE_FEATURES_URL,
-		);
-	}
-
-	/**
-	 * WooCommerce details for the admin app, or null when it is not active.
-	 *
-	 * @return array{active:bool,version:string,currency:string,symbol:string,checkoutUrl:string,cartUrl:string,couponsUrl:string}|null
-	 */
-	public static function woocommerceData(): ?array {
-		if ( ! class_exists( 'WooCommerce' ) || ! function_exists( 'get_woocommerce_currency' ) ) {
-			return null;
-		}
-		$currency = get_woocommerce_currency();
-		return array(
-			'active'      => true,
-			'version'     => defined( 'WC_VERSION' ) ? (string) WC_VERSION : '',
-			'currency'    => $currency,
-			'symbol'      => html_entity_decode( (string) get_woocommerce_currency_symbol( $currency ), ENT_QUOTES, 'UTF-8' ),
-			'checkoutUrl' => function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : '',
-			'cartUrl'     => function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : '',
-			'couponsUrl'  => admin_url( 'edit.php?post_type=shop_coupon' ),
 		);
 	}
 

@@ -211,7 +211,6 @@ final class SaveAction implements ActionInterface {
 					$sanitized[ $key ] = esc_url_raw( sanitize_text_field( (string) $value ) );
 					break;
 				case 'number':
-				case 'payment_amount':
 					$sanitized[ $key ] = is_numeric( $value ) ? $value : 0;
 					break;
 				default:

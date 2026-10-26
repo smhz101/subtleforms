@@ -81,9 +81,6 @@ final class FieldValidator {
 		'consent',
 		'hidden',
 		'signature',
-		'payment_amount',
-		'payment_product',
-		'payment_coupon',
 	);
 
 	/**
@@ -105,11 +102,6 @@ final class FieldValidator {
 		'dropdown',
 		'country',
 	);
-
-	/**
-	 * Payment fields that show the order but take no answer (PAY2-04).
-	 */
-	private const DISPLAY_ONLY_TYPES = array( 'payment_summary', 'payment_hidden_price' );
 
 	/**
 	 * Calling codes whose national numbers keep their leading 0 (Italy, San
@@ -257,8 +249,6 @@ final class FieldValidator {
 	 * Put submitted answers in the shape the form stores, before they are
 	 * checked: the same steps the browser takes.
 	 *
-	 * - Display-only payment fields (Order Summary, Fixed Fee) take no answer;
-	 *   a posted value for them is dropped (PAY2-04).
 	 * - A Hidden field's value is worked out here, so {date}, {user_email}
 	 *   and {user_name} are filled in without JavaScript (FLD2-16). A value
 	 *   that reads the page address ({get:param}) keeps what the browser sent.
@@ -282,10 +272,6 @@ final class FieldValidator {
 		$fields = is_array( $schema ) && isset( $schema['fields'] ) && is_array( $schema['fields'] ) ? $schema['fields'] : array();
 		foreach ( self::answerFields( $fields ) as $key => $field ) {
 			$type = (string) ( $field['type'] ?? '' );
-			if ( in_array( $type, self::DISPLAY_ONLY_TYPES, true ) ) {
-				unset( $payload[ $key ] );
-				continue;
-			}
 			if ( 'hidden' === $type ) {
 				$raw = self::attr( $field, 'defaultValue' );
 				if ( null === $raw || '' === $raw ) {
@@ -575,14 +561,6 @@ final class FieldValidator {
 			case 'phone':
 			case 'tel':
 				return $this->validatePhone( $value, $field );
-			case 'payment_amount':
-				return $this->validatePaymentAmount( $value, $field );
-			case 'payment_coupon':
-				return $this->validatePaymentCoupon( $value, $field );
-			case 'payment_product':
-				return $this->validatePaymentQuantity( $value, $field );
-			case 'payment_choice':
-				return $this->validateChoices( $value, $field, 'checkbox' === (string) ( $this->attr( $field, 'displayAs' ) ?? 'radio' ) );
 			case 'name_group':
 			case 'address_group':
 				// Grouped fields submit as arrays/objects - no specific validation needed
@@ -610,8 +588,7 @@ final class FieldValidator {
 	 */
 	private function addonError( $type, $value, array $field ) {
 		/**
-		 * Validate a value for a field type an add-on registered (for
-		 * example the WooCommerce Product field). Return an error
+		 * Validate a value for a field type an add-on registered. Return an error
 		 * message, or null when the value is fine. Unknown types are
 		 * otherwise not checked.
 		 *
@@ -1811,108 +1788,5 @@ final class FieldValidator {
 		}
 
 		return false;
-	}
-
-	/**
-	 * A Custom Amount lies between the field's minimum and maximum (PAY-05).
-	 * Same messages as the browser.
-	 *
-	 * @param mixed $value
-	 * @param array $field
-	 * @return string|null
-	 */
-	private function validatePaymentAmount( $value, $field ) {
-		if ( $this->isEmpty( $value ) ) {
-			return null;
-		}
-
-		if ( ! is_numeric( $value ) ) {
-			return __( 'Payment amount must be a valid number.', 'subtleforms' );
-		}
-
-		$amount = floatval( $value );
-		$field  = is_array( $field ) ? $field : array();
-
-		if ( $amount < 0 ) {
-			return __( 'Payment amount must be positive.', 'subtleforms' );
-		}
-
-		$min = $this->attr( $field, 'min' );
-		if ( is_numeric( $min ) && $amount < (float) $min ) {
-			/* translators: %s: smallest amount */
-			return sprintf( __( 'Payment amount must be at least %s.', 'subtleforms' ), number_format( (float) $min, 2, '.', '' ) );
-		}
-
-		$max = $this->attr( $field, 'max' );
-		if ( is_numeric( $max ) && (float) $max > 0 && $amount > (float) $max ) {
-			/* translators: %s: largest amount */
-			return sprintf( __( 'Payment amount cannot exceed %s.', 'subtleforms' ), number_format( (float) $max, 2, '.', '' ) );
-		}
-
-		return null;
-	}
-
-	/**
-	 * A Product quantity is a whole number within the field's minimum and
-	 * maximum (PAY-06). The order is never priced with a quantity other than
-	 * the one stored.
-	 *
-	 * @param mixed $value Value.
-	 * @param array $field Field.
-	 * @return string|null
-	 */
-	private function validatePaymentQuantity( $value, array $field ) {
-		if ( $this->isEmpty( $value ) || empty( $this->attr( $field, 'allowQuantity' ) ) ) {
-			return null;
-		}
-		$qty = self::wholeNumber( $value );
-		if ( null === $qty || $qty < 0 ) {
-			return __( 'Please enter a whole number for the quantity.', 'subtleforms' );
-		}
-		$min = max( 0, (int) ( $this->attr( $field, 'minQuantity' ) ?? 0 ) );
-		$max = (int) ( $this->attr( $field, 'maxQuantity' ) ?? 0 );
-		if ( $qty < $min ) {
-			/* translators: %d: smallest quantity */
-			return sprintf( __( 'The quantity must be at least %d.', 'subtleforms' ), $min );
-		}
-		if ( $max > 0 && $qty > $max ) {
-			/* translators: %d: largest quantity */
-			return sprintf( __( 'The quantity can be at most %d.', 'subtleforms' ), $max );
-		}
-		return null;
-	}
-
-	/**
-	 * Validate payment coupon field.
-	 *
-	 * @param mixed $value
-	 * @param array $field
-	 * @return string|null
-	 */
-	private function validatePaymentCoupon( $value, $field ) {
-		if ( $this->isEmpty( $value ) ) {
-			return null;
-		}
-
-		if ( ! is_string( $value ) ) {
-			return __( 'Enter the coupon code as text.', 'subtleforms' );
-		}
-
-		$maxLength = $this->attr( is_array( $field ) ? $field : array(), 'maxLength' );
-		$maxLength = is_numeric( $maxLength ) ? intval( $maxLength ) : 50;
-		$value     = trim( $value );
-
-		if ( strlen( $value ) > $maxLength ) {
-			/* translators: %d: maximum number of characters */
-			return sprintf( __( 'Coupon code cannot be longer than %d characters.', 'subtleforms' ), $maxLength );
-		}
-
-		// Letters, numbers, hyphens and underscores. Spaces are allowed: the
-		// code is read without them, as the summary's coupon box does (PAY-13).
-		if ( ! preg_match( '/^[a-zA-Z0-9\-_ ]+$/', $value ) ) {
-			return __( 'Coupon codes use only letters, numbers, hyphens and underscores.', 'subtleforms' );
-		}
-
-		return null;
 	}
 }

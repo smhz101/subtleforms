@@ -2,8 +2,8 @@
 /**
  * Field types that add-ons provide.
  *
- * Signature, Calculation and Card Payment fields are registered by an
- * add-on. A form keeps such fields when the add-on is not active, so nothing is
+ * Some field types (for example Signature and Calculation) are registered by
+ * an add-on. A form keeps such fields when the add-on is not active, so nothing is
  * lost, but the live form leaves them out until the add-on is back.
  *
  * @package SubtleForms\Fields
@@ -52,6 +52,61 @@ final class AddonFieldTypes {
 		 * @param string[] $types Field types.
 		 */
 		return array_values( array_filter( (array) apply_filters( 'subtleforms/fields/addon_types', self::TYPES ), 'is_string' ) );
+	}
+
+	/**
+	 * Add-on field types that hold no answer (they show something, such as a
+	 * summary, but the visitor answers nothing). Entries, emails, webhooks
+	 * and the "has an input field" check leave them out.
+	 *
+	 * @return string[]
+	 */
+	public static function noAnswerTypes(): array {
+		if ( ! function_exists( 'apply_filters' ) ) {
+			return array();
+		}
+		/**
+		 * Add-on field types that hold no answer.
+		 *
+		 * @param string[] $types Field types.
+		 * @since 2.7.2
+		 */
+		return array_values( array_filter( (array) apply_filters( 'subtleforms/fields/no_answer_types', array() ), 'is_string' ) );
+	}
+
+	/**
+	 * What the builder needs to know about field types an add-on registered,
+	 * from the `meta` of their definitions: `noMessages` (no required or
+	 * error messages), `logicOnly` (shown or hidden by logic but takes no
+	 * answer), `notInRepeater` (cannot go inside a Repeater), plus
+	 * `noAnswer` for the types in noAnswerTypes().
+	 *
+	 * @param FieldRegistry|null $registry Registry (null: the plugin's own).
+	 * @return array<string,array<string,bool>> Type to flags.
+	 */
+	public static function typeFlags( ?FieldRegistry $registry = null ): array {
+		if ( null === $registry ) {
+			try {
+				$registry = \SubtleForms\Plugin::instance()->container()->get( FieldRegistry::class );
+			} catch ( \Throwable $e ) {
+				$registry = null;
+			}
+		}
+		$out = array();
+		if ( $registry instanceof FieldRegistry ) {
+			foreach ( $registry->all() as $type => $definition ) {
+				$meta = is_array( $definition->meta ?? null ) ? $definition->meta : array();
+				foreach ( array( 'noMessages', 'logicOnly', 'notInRepeater' ) as $flag ) {
+					if ( ! empty( $meta[ $flag ] ) ) {
+						$out[ (string) $type ][ $flag ] = true;
+					}
+				}
+			}
+		}
+		foreach ( self::noAnswerTypes() as $type ) {
+			$out[ $type ]['noAnswer'] = true;
+		}
+		return $out;
 	}
 
 	/**

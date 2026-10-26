@@ -377,8 +377,7 @@ final class FormsRepository {
 	public static function beforeSave( array $schema, int $formId, bool $activate ): array {
 		/**
 		 * Filter a form schema before it is saved (draft or published). Add-ons
-		 * use this to store data they need at render time, such as a snapshot
-		 * of WooCommerce products for the WooCommerce Product field.
+		 * use this to store data they need at render time.
 		 *
 		 * @param array $schema   Schema about to be saved.
 		 * @param int   $formId   Form ID.

@@ -74,11 +74,10 @@ final class FormPlaceholder {
 		'turnstile'          => 90,
 		'name_group'         => 72,
 		'address_group'      => 304,
-		'payment_summary'    => 120,
 	);
 
 	/** Types that draw nothing. */
-	private const HIDDEN = array( 'hidden', 'payment_hidden_price', 'action_hook', 'form_step', 'save_resume' );
+	private const HIDDEN = array( 'hidden', 'action_hook', 'form_step', 'save_resume' );
 
 	/** Types listing their options one per line. */
 	private const CHOICES = array( 'radio', 'checkbox', 'multiple_choice', 'post_selection' );

@@ -51,8 +51,16 @@ final class FieldMapper {
 		'turnstile',
 		'action_hook',
 		'save_resume',
-		'payment_summary',
 	);
+
+	/**
+	 * Add-on types that hold no answer.
+	 *
+	 * @return string[]
+	 */
+	private static function noAnswerTypes(): array {
+		return class_exists( '\\SubtleForms\\Fields\\AddonFieldTypes' ) ? \SubtleForms\Fields\AddonFieldTypes::noAnswerTypes() : array();
+	}
 
 	/**
 	 * Composite name field types (value: { first_name, last_name, ... }).
@@ -123,7 +131,7 @@ final class FieldMapper {
 				continue;
 			}
 
-			$isLayout = in_array( $type, self::LAYOUT_TYPES, true ) || '_container' === substr( $type, -10 );
+			$isLayout = in_array( $type, self::LAYOUT_TYPES, true ) || '_container' === substr( $type, -10 ) || in_array( $type, self::noAnswerTypes(), true );
 			if ( '' !== $key && '' !== $type && ! $isLayout ) {
 				$out[] = array(
 					'key'          => $key,

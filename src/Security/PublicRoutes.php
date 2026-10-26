@@ -23,7 +23,7 @@ final class PublicRoutes {
 	/**
 	 * Routes a visitor calls while filling in and sending a form.
 	 */
-	const PATTERN = '#^/subtleforms/v1/(submit|uploads|payments/(coupon|quote|intent)|forms/\d+/(schema|view))/?$#';
+	const PATTERN = '#^/subtleforms/v1/(submit|uploads|forms/\d+/(schema|view))/?$#';
 
 	/**
 	 * Register hooks.
@@ -56,7 +56,25 @@ final class PublicRoutes {
 	 * @param string $route REST route, for example /subtleforms/v1/submit.
 	 */
 	public static function isPublicRoute( string $route ): bool {
-		return 1 === preg_match( self::PATTERN, $route );
+		if ( 1 === preg_match( self::PATTERN, $route ) ) {
+			return true;
+		}
+		/**
+		 * More REST routes visitors call while filling in a form, for
+		 * example an add-on's own public routes. Exact routes such as
+		 * `/subtleforms/v1/example`.
+		 *
+		 * @param string[] $routes Routes.
+		 * @since 2.7.2
+		 */
+		$extra = function_exists( 'apply_filters' ) ? (array) apply_filters( 'subtleforms/rest/public_routes', array() ) : array();
+		$route = rtrim( $route, '/' );
+		foreach ( $extra as $candidate ) {
+			if ( is_string( $candidate ) && '' !== $candidate && rtrim( $candidate, '/' ) === $route ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

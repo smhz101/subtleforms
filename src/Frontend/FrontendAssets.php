@@ -137,7 +137,6 @@ final class FrontendAssets {
 				'successMessage' => $settings ? $settings->get( 'success_message' ) : __( 'Thank you! Your submission has been received.', 'subtleforms' ),
 				'errorMessage'   => $settings ? $settings->get( 'error_message' ) : __( 'An error occurred. Please try again.', 'subtleforms' ),
 				'redirectUrl'    => $settings ? $settings->get( 'redirect_after_submit' ) : '',
-				'currency'       => $settings ? strtoupper( (string) ( $settings->get( 'ext_payments_currency' ) ?: 'USD' ) ) : 'USD',
 				'locale'         => str_replace( '_', '-', get_locale() ),
 				/**
 				 * Language of the page the form is on, sent with every request
@@ -166,8 +165,8 @@ final class FrontendAssets {
 		}
 
 		/**
-		 * Fires after the public form assets are enqueued, so add-ons (such as
-		 * a payment gateway) can load their own scripts alongside.
+		 * Fires after the public form assets are enqueued, so add-ons can load
+		 * their own scripts alongside.
 		 *
 		 * @param Settings|null $settings Plugin settings.
 		 * @since 2.1.0
