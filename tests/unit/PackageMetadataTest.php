@@ -23,4 +23,19 @@ final class PackageMetadataTest extends TestCase {
 		$this->assertIsArray( $block );
 		$this->assertSame( $plugin[1], $block['version'] ?? null, 'resources/blocks/form/block.json version equals the plugin Version.' );
 	}
+
+	/** PKG-05: the GPL text is in the repository root. */
+	public function test_license_file_holds_the_gpl_text(): void {
+		$file = self::root() . '/license.txt';
+		$this->assertFileExists( $file );
+		$text = (string) file_get_contents( $file );
+		$this->assertStringContainsString( 'GNU GENERAL PUBLIC LICENSE', $text );
+		$this->assertStringContainsString( 'Version 2, June 1991', $text );
+	}
+
+	/** PKG-05: the licence file is not excluded from the WordPress.org release. */
+	public function test_license_and_notices_are_not_in_distignore(): void {
+		$ignore = (string) file_get_contents( self::root() . '/.distignore' );
+		$this->assertDoesNotMatchRegularExpression( '/^\s*(license\.txt|THIRD-PARTY-NOTICES\.txt)\s*$/m', $ignore );
+	}
 }
