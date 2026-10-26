@@ -436,8 +436,8 @@ final class PublicSubmitApi {
 		$payload = self::applyComputedValues( $payload, $activeSchema['schema'] ?? $activeSchema );
 
 		// Answers in the shape the form stores: Hidden field values worked
-		// out on the server, display-only payment fields dropped, websites,
-		// email lists and phone numbers tidied (FLD2-16, PAY2-04, FB-15).
+		// out on the server, websites, email lists and phone numbers tidied
+		// (FLD2-16, FB-15).
 		// Conditional logic reads the same answers before they are tidied,
 		// as the browser does, so a rule for "example.com" still matches a
 		// website stored as https://example.com (review of PR #28).
@@ -449,7 +449,7 @@ final class PublicSubmitApi {
 		$logicValues = \SubtleForms\Fields\AddonFieldTypes::dropMissingAnswers( $logicValues, $activeSchema['schema'] ?? $activeSchema );
 
 		// Conditional logic (2.1): answers to fields the visitor could not see
-		// (hidden fields and skipped steps) are never stored, priced or sent.
+		// (hidden fields and skipped steps) are never stored or sent.
 		$schemaForLogic = $activeSchema['schema'] ?? $activeSchema;
 		if ( is_array( $schemaForLogic ) ) {
 			$conditions  = new \SubtleForms\Engine\ConditionalLogic();
@@ -464,19 +464,21 @@ final class PublicSubmitApi {
 			return ApiResponse::validation_error( $payload->get_error_message(), is_array( $uploadErrors ) ? ( $uploadErrors['errors'] ?? array() ) : array() );
 		}
 
-		// Payments (2.1): price the order on the server, check the coupon and
-		// confirm the payment with the gateway before anything is stored.
-		$schemaForPricing = $activeSchema['schema'] ?? $activeSchema;
-		$order            = $this->priceOrder( $formId, $schemaForPricing, $payload, $request, $logicValues );
-		if ( $order instanceof WP_REST_Response ) {
-			return $order;
+		// Last word before the entry is stored: an add-on may refuse the
+		// submission, or hand back what it keeps for this entry (its "hold",
+		// which this plugin does not read beyond the generic keys below).
+		$hold = $this->beforeStore( $formId, $activeSchema['schema'] ?? $activeSchema, $payload, $request, $logicValues );
+		if ( $hold instanceof WP_REST_Response ) {
+			return $hold;
 		}
-		unset( $payload['_coupon'], $payload['_payment'] );
-		// An order that was priced but not stored is handed back as
-		// abandoned, so the add-on that priced it can release what it holds.
-		$voidPayment = function () use ( $order ) {
-			if ( ! empty( $order['payment'] ) ) {
-				$this->finishOrder( 0, array(), $order, 'abandoned' );
+		// Request values an add-on listed are read by now and never stored.
+		$payload = \SubtleForms\Support\RequestKeys::stripAddonKeys( $payload );
+		// An entry that is not stored after all is handed back, so the add-on
+		// that made the hold can release it.
+		$abandon = function ( int $submissionId = 0 ) use ( &$hold, $formId ) {
+			if ( ! empty( $hold ) ) {
+				$this->storeAbandoned( $hold, $formId, $submissionId );
+				$hold = array();
 			}
 		};
 
@@ -487,7 +489,7 @@ final class PublicSubmitApi {
 		if ( is_string( $timeTokenToClaim ) && '' !== $timeTokenToClaim ) {
 			$tokenInfo = SpamProtection::token_info( $timeTokenToClaim, $formId );
 			if ( ! SpamProtection::claim_token( $timeTokenToClaim, $tokenInfo['time'] ?? null ) ) {
-				$voidPayment();
+				$abandon();
 				SpamStats::blocked( $formId, 'time_token_reused' );
 				return ApiResponse::success(
 					array(
@@ -516,8 +518,8 @@ final class PublicSubmitApi {
 		} catch ( \RuntimeException $e ) {
 			Logger::error( 'Failed to create submission record: %s', $e->getMessage() );
 			SpamProtection::release_token( $claimedToken );
-			// The entry was not saved: release an authorised payment.
-			$voidPayment();
+			// The entry was not saved: release an add-on's hold.
+			$abandon();
 			return ApiResponse::server_error( __( 'Failed to create submission record', 'subtleforms' ) );
 		}
 
@@ -535,30 +537,18 @@ final class PublicSubmitApi {
 		// Answers as typed, for conditions on actions and steps.
 		$context->setMeta( 'logic_payload', $logicValues );
 		$context->setMeta( 'schema_version', is_int( $formVersion ) ? $formVersion : null );
-		$context->setMeta( 'order_currency', (string) ( $order['quote']['currency'] ?? '' ) );
+		$context->setMeta( 'preview', ! empty( $isPreview ) );
 
-		// What a webhook can send about the visit and the payment (2.5.0).
+		// What a webhook can send about the visit (2.5.0).
 		$referer = function_exists( 'wp_get_raw_referer' ) ? wp_get_raw_referer() : '';
 		$context->setMeta( 'request_ip', (string) $ip );
 		$context->setMeta( 'request_user_agent', isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '' );
 		$context->setMeta( 'request_page_url', is_string( $referer ) ? esc_url_raw( $referer ) : '' );
 		$context->setMeta( 'request_user_id', get_current_user_id() );
-		$context->setMeta( 'entry_status', ! empty( $order['payment'] ) ? 'payment_pending' : 'completed' );
-		$context->setMeta(
-			'payment_info',
-			array(
-				'amount'   => (float) ( $order['quote']['total'] ?? 0 ),
-				'currency' => (string) ( $order['quote']['currency'] ?? '' ),
-				'status'   => (string) ( $order['payment']['status'] ?? ( ! empty( $order['quote'] ) ? 'free' : '' ) ),
-			)
-		);
-
-		$isPaymentForm   = ! empty( $order['payment'] );
-		$paymentMetadata = $order['payment'] ?? null;
-		if ( $isPaymentForm ) {
-			$context->setMeta( 'payment_intent', $paymentMetadata );
-			$context->setMeta( 'is_payment_form', true );
-		}
+		$context->setMeta( 'entry_status', 'completed' );
+		// Details the add-on that made the hold wants its own actions and
+		// webhook values to read.
+		self::applyContextMeta( $context, $hold['context_meta'] ?? null );
 
 		// Compile and run pipeline
 		if ( ! empty( $activeSchema['schema'] ) && is_array( $activeSchema['schema'] ) ) {
@@ -583,15 +573,14 @@ final class PublicSubmitApi {
 				}
 			} catch ( \InvalidArgumentException $e ) {
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
-				$voidPayment();
+				$abandon();
 				Logger::error( 'Schema compilation failed for form %d: %s', $formId, $e->getMessage() );
 				return ApiResponse::bad_request( __( 'This form could not be processed. Please contact the site owner.', 'subtleforms' ) );
 			}
 
-			// An order that still has to be settled is settled after the entry
-			// is saved. Emails, webhooks and integrations wait for that result,
-			// so nobody gets a receipt for a payment that then fails (PAY-04).
-			$deferActions = $isPaymentForm && 'authorized' === ( $paymentMetadata['status'] ?? '' );
+			// A hold that is settled after the entry is saved can ask for the
+			// emails, webhooks and integrations to wait for that result.
+			$deferActions = ! empty( $hold['defer_actions'] );
 			$laterSteps   = array();
 			if ( $deferActions ) {
 				$laterSteps = array_values(
@@ -615,7 +604,7 @@ final class PublicSubmitApi {
 			try {
 				$result = $this->pipeline->run( $steps, $context, $activeSchema['schema'] );
 			} catch ( \RuntimeException $e ) {
-				$voidPayment();
+				$abandon();
 				$validationErrors = $context->getMeta( 'validation_errors' );
 				if ( is_array( $validationErrors ) && ! empty( $validationErrors ) ) {
 					// Rejected answers are never stored (FB-09, FF-13, FA-24).
@@ -630,13 +619,13 @@ final class PublicSubmitApi {
 				return ApiResponse::server_error( __( 'Your submission could not be completed. Please try again later.', 'subtleforms' ) );
 			} catch ( \Throwable $e ) {
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
-				$voidPayment();
+				$abandon();
 				Logger::error( 'Unexpected error in submission %d: %s', $submissionId, $e->getMessage() );
 				return ApiResponse::server_error( __( 'An unexpected error occurred', 'subtleforms' ) );
 			}
 
 			if ( ! $result->ok ) {
-				$voidPayment();
+				$abandon();
 				$validationErrors = $context->getMeta( 'validation_errors' );
 				if ( is_array( $validationErrors ) && ! empty( $validationErrors ) ) {
 					// Rejected answers are never stored (FB-09, FF-13, FA-24).
@@ -655,53 +644,39 @@ final class PublicSubmitApi {
 		$finalSubmission = $this->submissionsRepo->find( $submissionId );
 		if ( $finalSubmission && $finalSubmission['status'] === 'saved' ) {
 			// Record consent timestamps (GDPR audit) into submission meta. Done
-			// for both payment and non-payment forms so consent is always stamped.
+			// for every entry so consent is always stamped.
 			$this->recordConsents( $submissionId, $finalSubmission, $payload, $activeSchema['schema'] ?? $activeSchema );
 
-			if ( ! $isPaymentForm ) {
-				$this->submissionsRepo->update( $submissionId, array( 'status' => ! empty( $isPreview ) ? 'preview' : 'completed' ) );
-				if ( empty( $isPreview ) && ! empty( $order['quote']['coupon'] ) ) {
-					// A coupon that made the order free still counts as used.
-					$this->finishOrder( $submissionId, $finalSubmission, $order, 'free' );
-				}
+			$doneStatus = ! empty( $isPreview ) ? 'preview' : 'completed';
+			if ( empty( $hold ) ) {
+				$this->submissionsRepo->update( $submissionId, array( 'status' => $doneStatus ) );
 			} else {
-				// The entry is safely stored: the add-on settles the order and
-				// reports the outcome through the context (`order_result`:
-				// error, status, payment).
-				$this->finishOrder( $submissionId, $finalSubmission, $order, 'saved', $context );
-				$result = $context->getMeta( 'order_result', array() );
-				$result = is_array( $result ) ? $result : array();
-				if ( ! empty( $result['error'] ) ) {
-					return ApiResponse::error( 'subtleforms_payment_failed', (string) $result['error'], 402 );
+				// The entry is safely stored: the add-on that made the hold
+				// finishes its part and reports back (see afterStore()).
+				$result = $this->afterStore( $submissionId, $finalSubmission, $hold, $context );
+				$status = is_string( $result['status'] ?? null ) && '' !== $result['status'] ? sanitize_key( $result['status'] ) : $doneStatus;
+				$this->submissionsRepo->update( $submissionId, array( 'status' => $status ) );
+				if ( ( $result['response'] ?? null ) instanceof WP_REST_Response ) {
+					return $result['response'];
 				}
-				$captured = is_array( $result['payment'] ?? null ) ? $result['payment'] : $paymentMetadata;
-				if ( $laterSteps ) {
-					// The payment went through: now send the emails and run the
-					// integrations that waited for it.
-					$captureStatus = (string) ( $captured['status'] ?? '' );
-					$context->setMeta( 'entry_status', in_array( $captureStatus, array( 'paid', 'succeeded' ), true ) ? 'completed' : 'payment_pending' );
-					$info           = $context->getMeta( 'payment_info', array() );
-					$info['status'] = '' !== $captureStatus ? $captureStatus : ( $info['status'] ?? '' );
-					$context->setMeta( 'payment_info', $info );
+				if ( $laterSteps && ! empty( $result['run_deferred'] ) ) {
+					self::applyContextMeta( $context, $result['context_meta'] ?? null );
 					try {
 						$this->pipeline->run( $laterSteps, $context, $activeSchema['schema'] );
 					} catch ( \Throwable $e ) {
-						Logger::error( 'Actions after payment failed for submission %d: %s', $submissionId, $e->getMessage() );
+						Logger::error( 'Deferred actions failed for submission %d: %s', $submissionId, $e->getMessage() );
 					}
 				}
-				$order['payment'] = $captured;
-				$status           = in_array( $order['payment']['status'] ?? '', array( 'paid', 'succeeded' ), true ) ? 'completed' : 'payment_pending';
-				$this->finishOrder( $submissionId, $finalSubmission, $order, $status );
 			}
 			} elseif ( ! $finalSubmission || $finalSubmission['status'] === 'processing' ) {
 				Logger::error( 'Submission %d did not reach saved status', $submissionId );
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
-				$voidPayment();
+				$abandon();
 				return ApiResponse::server_error( __( 'Failed to save submission data', 'subtleforms' ) );
-			} elseif ( $isPaymentForm ) {
-				// Stored with another status (for example spam): the payment
-				// is never captured, so release the hold now.
-				$voidPayment();
+			} elseif ( ! empty( $hold ) ) {
+				// Stored with another status (for example spam): the hold is
+				// never settled, so it is released now.
+				$abandon( (int) $submissionId );
 			}
 
 			// Keep the entry's uploaded files (they were pending until now).
@@ -717,7 +692,7 @@ final class PublicSubmitApi {
 
 			/**
 			 * A submission was stored and its pipeline finished. Integrations
-			 * (email marketing, CRM, PDF, WooCommerce) hook here.
+			 * from add-ons hook here.
 			 *
 			 * @param int   $submissionId Submission ID.
 			 * @param int   $formId       Form ID.
@@ -735,12 +710,12 @@ final class PublicSubmitApi {
 
 			/**
 			 * Filter the JSON returned to the browser after a successful submit.
-			 * Add `redirect` to send the visitor somewhere (e.g. a checkout).
+			 * Add `redirect` to send the visitor to another page.
 			 *
 			 * @param array $response     { success, submission_id }.
 			 * @param int   $submissionId Submission ID.
 			 * @param int   $formId       Form ID.
-			 * @param array $order        Priced order (quote, coupon, payment) or empty.
+			 * @param array $hold         What an add-on returned from `subtleforms/submit/before_store`, or empty.
 			 */
 			$response = apply_filters(
 				'subtleforms/submit/response',
@@ -753,7 +728,7 @@ final class PublicSubmitApi {
 				),
 				$submissionId,
 				$formId,
-				is_array( $order ) ? $order : array()
+				is_array( $hold ) ? $hold : array()
 			);
 
 			return ApiResponse::success( $response );
@@ -828,75 +803,128 @@ final class PublicSubmitApi {
 	 * @return int Number of matching submissions.
 	 */
 	/**
-	 * Price the order for a form that takes payment.
+	 * Ask add-ons for their last word before the entry is stored.
 	 *
-	 * This plugin prices nothing itself. A payment add-on answers the
-	 * filter the filter; without one every form is free and no order is made.
+	 * This plugin keeps nothing here itself. Without an add-on the result is an
+	 * empty array and the entry is stored and completed as usual.
 	 *
 	 * @param int             $formId      Form ID.
 	 * @param mixed           $schema      Active schema.
-	 * @param array           $payload     Sanitized payload with calculations applied.
+	 * @param array           $payload     Sanitized payload with computed values applied.
 	 * @param WP_REST_Request $request     Incoming request.
 	 * @param array|null      $logicValues Answers as typed, for conditional logic.
-	 * @return array{quote:?array,coupon:?array,payment:?array}|WP_REST_Response
+	 * @return array|WP_REST_Response The hold (empty when no add-on made one), or a response that refuses the submission.
 	 */
-	private function priceOrder( int $formId, $schema, array $payload, WP_REST_Request $request, ?array $logicValues = null ) {
-		$none = array(
-			'quote'   => null,
-			'coupon'  => null,
-			'payment' => null,
-		);
-
+	private function beforeStore( int $formId, $schema, array $payload, WP_REST_Request $request, ?array $logicValues = null ) {
 		/**
-		 * Price this submission's order, check its coupon and confirm payment.
+		 * Filter what an add-on keeps for this submission before it is stored.
 		 *
-		 * Return the order array ({ quote, coupon, payment, customer }), or a
-		 * WP_REST_Response to refuse the submission. An order with a `payment`
-		 * is settled and released through `subtleforms/submit/finish_order`.
+		 * Return a WP_REST_Response to refuse the submission (nothing is
+		 * stored), or an array (the "hold"). The hold is passed back on
+		 * `subtleforms/submit/after_store` and `subtleforms/submit/store_abandoned`
+		 * and to `subtleforms/submit/response`. This plugin reads only these keys:
 		 *
-		 * @param array|WP_REST_Response $order       Empty order.
+		 * - `defer_actions` (bool): run only the Save step until the add-on has
+		 *   finished on `after_store` and asks for the rest (`run_deferred`).
+		 * - `context_meta` (array): values put on the SubmissionContext before
+		 *   the actions run, for the add-on's own actions and webhook values.
+		 *
+		 * @param array|WP_REST_Response $hold        Empty array.
 		 * @param int                    $formId      Form ID.
 		 * @param mixed                  $schema      Active schema.
 		 * @param array                  $payload     Sanitized payload.
 		 * @param WP_REST_Request        $request     Incoming request.
 		 * @param array|null             $logicValues Answers as typed.
-		 * @since 2.8.0
+		 * @since 2.7.2
 		 */
-		$order = apply_filters( 'subtleforms/submit/price_order', $none, $formId, $schema, $payload, $request, $logicValues );
-
-		return ( $order instanceof WP_REST_Response || is_array( $order ) ) ? $order : $none;
+		$hold = apply_filters( 'subtleforms/submit/before_store', array(), $formId, $schema, $payload, $request, $logicValues );
+		if ( ! $hold instanceof WP_REST_Response && has_filter( 'subtleforms/submit/price_order' ) ) {
+			// Deprecated name of the same filter, kept for add-ons that still use it.
+			$hold = apply_filters_deprecated( 'subtleforms/submit/price_order', array( is_array( $hold ) ? $hold : array(), $formId, $schema, $payload, $request, $logicValues ), '2.7.2', 'subtleforms/submit/before_store' );
+		}
+		if ( $hold instanceof WP_REST_Response ) {
+			return $hold;
+		}
+		return is_array( $hold ) ? array_filter( $hold, static fn( $v ) => null !== $v ) : array();
 	}
 
 	/**
-	 * Hand the finished order to the payment add-on, which stores it on the
-	 * submission and counts the coupon.
+	 * Let the add-on that made a hold finish its part now that the entry is
+	 * stored, and read back what it reports.
 	 *
-	 * @param int    $submissionId Submission ID.
-	 * @param array  $submission   Stored submission.
-	 * @param array  $order        Result of priceOrder().
-	 * @param string $status       Final submission status.
+	 * @param int               $submissionId Submission ID.
+	 * @param array             $submission   Stored submission.
+	 * @param array             $hold         Result of beforeStore().
+	 * @param SubmissionContext $context      Submission context.
+	 * @return array{status?:string,response?:WP_REST_Response,run_deferred?:bool,context_meta?:array}
 	 */
-	private function finishOrder( int $submissionId, array $submission, array $order, string $status, ?SubmissionContext $context = null ): void {
+	private function afterStore( int $submissionId, array $submission, array $hold, SubmissionContext $context ): array {
+		$context->setMeta( 'store_result', array() );
 		/**
-		 * Fires at each step of a priced order after the entry is stored, and
-		 * when an order is dropped.
+		 * Fires after an entry with a hold is stored, before its deferred
+		 * actions run. Report back with
+		 * `$context->setMeta( 'store_result', array( ... ) )`:
 		 *
-		 * Status `saved`: the entry is stored and the order has a `payment`
-		 * to settle. The add-on settles it and reports back with
-		 * `$context->setMeta( 'order_result', array( 'error' => string,
-		 * 'status' => string, 'payment' => array ) )`; an error answers the
-		 * visitor with HTTP 402. Status `abandoned` (submission ID 0): the
-		 * order will not be stored, release what it holds. Any other status is
-		 * the final status of the entry (completed, payment_pending, free).
+		 * - `status` (string): the entry status to store (default `completed`).
+		 * - `response` (WP_REST_Response): answer the visitor with this instead.
+		 * - `run_deferred` (bool): run the actions that waited (`defer_actions`).
+		 * - `context_meta` (array): values for those actions' context.
 		 *
-		 * @param int                    $submissionId Submission ID.
-		 * @param array                  $submission   Stored submission.
-		 * @param array                  $order        Order from `subtleforms/submit/price_order`.
-		 * @param string                 $status       Step or final status.
-		 * @param SubmissionContext|null $context      Submission context, for `saved`.
-		 * @since 2.8.0
+		 * @param int               $submissionId Submission ID.
+		 * @param array             $submission   Stored submission.
+		 * @param array             $hold         The hold from `subtleforms/submit/before_store`.
+		 * @param SubmissionContext $context      Submission context.
+		 * @since 2.7.2
 		 */
-		do_action( 'subtleforms/submit/finish_order', $submissionId, $submission, $order, $status, $context );
+		do_action( 'subtleforms/submit/after_store', $submissionId, $submission, $hold, $context );
+		if ( has_action( 'subtleforms/submit/finish_order' ) ) {
+			// Deprecated name, kept for add-ons that still use it.
+			do_action_deprecated( 'subtleforms/submit/finish_order', array( $submissionId, $submission, $hold, 'saved', $context ), '2.7.2', 'subtleforms/submit/after_store' );
+		}
+		$result = $context->getMeta( 'store_result', array() );
+		return is_array( $result ) ? $result : array();
+	}
+
+	/**
+	 * Hand a hold back when its entry is not stored, or is stored with a
+	 * status that is not finished (for example spam).
+	 *
+	 * @param array $hold         Result of beforeStore().
+	 * @param int   $formId       Form ID.
+	 * @param int   $submissionId Entry ID, or 0 when nothing was stored.
+	 */
+	private function storeAbandoned( array $hold, int $formId, int $submissionId = 0 ): void {
+		/**
+		 * Fires when an entry an add-on made a hold for is not stored after
+		 * all (or is stored as spam). Release what the hold keeps.
+		 *
+		 * @param array $hold         The hold from `subtleforms/submit/before_store`.
+		 * @param int   $formId       Form ID.
+		 * @param int   $submissionId Entry ID, or 0 when nothing was stored.
+		 * @since 2.7.2
+		 */
+		do_action( 'subtleforms/submit/store_abandoned', $hold, $formId, $submissionId );
+		if ( has_action( 'subtleforms/submit/finish_order' ) ) {
+			// Deprecated name, kept for add-ons that still use it.
+			do_action_deprecated( 'subtleforms/submit/finish_order', array( 0, array(), $hold, 'abandoned', null ), '2.7.2', 'subtleforms/submit/store_abandoned' );
+		}
+	}
+
+	/**
+	 * Put an add-on's values on the submission context.
+	 *
+	 * @param SubmissionContext $context Context.
+	 * @param mixed             $meta    Key to value.
+	 */
+	private static function applyContextMeta( SubmissionContext $context, $meta ): void {
+		if ( ! is_array( $meta ) ) {
+			return;
+		}
+		foreach ( $meta as $key => $value ) {
+			if ( is_string( $key ) && '' !== $key ) {
+				$context->setMeta( $key, $value );
+			}
+		}
 	}
 
 	/**
@@ -923,7 +951,7 @@ final class PublicSubmitApi {
 		/**
 		 * Filter the submitted values to add computed field values.
 		 *
-		 * Runs before conditional logic, validation, pricing and storage. A
+		 * Runs before conditional logic, validation and storage. A
 		 * value that cannot be computed should be PublicSubmitApi::COMPUTE_ERROR.
 		 *
 		 * @since 2.3.9

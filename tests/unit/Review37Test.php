@@ -26,6 +26,8 @@ final class Review37Test extends TestCase {
 				'meta'    => array( 'fields' => array( 'email' => 'Enter a valid email address.' ) ),
 			),
 		);
+		// An add-on's own request value is listed through RequestKeys.
+		$GLOBALS['sf_test_filters']['subtleforms/submission/request_keys'] = static fn( $keys ) => array_merge( $keys, array( '_example' ) );
 		$outcome = ClassicResult::outcome(
 			422,
 			$body,
@@ -34,9 +36,10 @@ final class Review37Test extends TestCase {
 				'email'                => 'not-an-email',
 				'g-recaptcha-response' => 'token',
 				'website_url'          => '',
-				'_payment'             => 'pi_123',
+				'_example'             => 'ref_123',
 			)
 		);
+		unset( $GLOBALS['sf_test_filters']['subtleforms/submission/request_keys'] );
 		$this->assertFalse( $outcome['ok'] );
 		$this->assertSame( '', $outcome['redirect'] );
 		$this->assertSame( $body, $outcome['body'] );
