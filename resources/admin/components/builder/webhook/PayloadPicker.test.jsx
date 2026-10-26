@@ -26,7 +26,7 @@ function Host({ initial }) {
     <PayloadPicker
       settings={settings}
       fields={fields}
-      hasPayment={false}
+      addonGroups={[]}
       formId={5}
       formTitle='Contact'
       siteUrl='https://example.com'
@@ -127,8 +127,8 @@ describe('PayloadPicker', () => {
   });
 
   test('current selection reads every stored mode', () => {
-    expect(currentSelection({ payload_mode: 'selected', payload_selection: ['form_id', 'field:gone'] }, fields, false)).toEqual(['form_id']);
-    expect(currentSelection({ payload_mode: 'custom', custom_payload: '{"a":1}' }, fields, false)).toEqual([]);
-    expect(currentSelection({}, fields, false)).toContain('field:name');
+    expect(currentSelection({ payload_mode: 'selected', payload_selection: ['form_id', 'field:gone'] }, fields, [])).toEqual(['form_id']);
+    expect(currentSelection({ payload_mode: 'custom', custom_payload: '{"a":1}' }, fields, [])).toEqual([]);
+    expect(currentSelection({}, fields, [])).toContain('field:name');
   });
 });

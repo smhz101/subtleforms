@@ -317,19 +317,6 @@
 		}
 	}
 
-	&[data-form-type="payment"] {
-		background-color: var(--sf-green-50);
-		border-color: var(--sf-green-500);
-
-		.sf-form-type-banner__title {
-			color: var(--sf-green-900);
-		}
-
-		.sf-form-type-banner__description {
-			color: var(--sf-emerald-900);
-		}
-	}
-
 }
 
 .sf-form-settings .sf-form-type-banner__title {
@@ -619,22 +606,6 @@
 		margin: 0;
 		font-size: 12px;
 		color: var(--sf-text-muted);
-	}
-}
-
-// ── Checkout (2.1) ───────────────────────────────────────────────────────────
-.sf-checkout-panel {
-	&__billing {
-		padding-top: var(--sf-space-4);
-		border-top: 1px solid var(--sf-border-subtle);
-
-		.sf-form-settings__hint { margin: 0 0 var(--sf-space-3); }
-	}
-
-	&__grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
-		gap: var(--sf-space-4);
 	}
 }
 

@@ -11,6 +11,7 @@
  */
 
 import Icon from '../ui/Icon';
+import { getFieldIconOverride } from '../../shared/extend';
 
 // ── Field type icons ──────────────────────────────────────────────────────────
 
@@ -64,16 +65,6 @@ export const FIELD_ICON_MAP = {
   column_layout: Icon.Columns2,
   repeat_container: Icon.Layers,
 
-  // Payment
-  payment_amount: Icon.CircleDollarSign,
-  payment_card: Icon.CreditCard,
-  payment_product: Icon.ShoppingCart,
-  woo_product: Icon.Package, // Add-on: WooCommerce Product
-  payment_choice: Icon.ListChecks || Icon.Tag,
-  payment_currency: Icon.Coins,
-  payment_coupon: Icon.Tag,
-  payment_summary: Icon.Receipt,
-  payment_hidden_price: Icon.Lock,
 
   // Advanced
   rating: Icon.Star,
@@ -146,7 +137,7 @@ export const UI_ICON_MAP = {
  * @returns {React.ComponentType}
  */
 export const getFieldIcon = (fieldType) =>
-  FIELD_ICON_MAP[fieldType] ?? Icon.Circle;
+  FIELD_ICON_MAP[fieldType] ?? getFieldIconOverride(fieldType) ?? Icon.Circle;
 
 /**
  * Resolve a UI element key to its Icon component.

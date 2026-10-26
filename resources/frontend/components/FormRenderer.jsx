@@ -18,8 +18,8 @@ import { structuralType } from '../../shared/formType';
 import { formFieldDefaults, formHasRequiredFields, requiredIndicatorMark } from '../../shared/fieldDisplay';
 import { debug } from '../../shared/debug';
 import { fieldConfig } from '../../shared/fieldConfig';
-import { computeQuote, isPricedForm, formatMoney, isPricedType } from '../../shared/pricing';
-import { FormContext, PaymentContext } from './fields/contexts';
+import { FormContext } from './fields/contexts';
+import { getFormWrappers } from '../../shared/extend';
 import { lazyField, loadFieldsFor, fieldsReadyFor } from './fields/lazyFields';
 import { readInlineFormData } from '../utils/inlineData';
 import {
@@ -545,83 +545,35 @@ export default function FormRenderer({
     }
   }, [currentStepIndex, values, prevVisibleStep]);
 
-  // ── Payments (2.1) ──────────────────────────────────────────────────────
-  // One live order for the whole form. Priced fields feed it, the summary and
-  // coupon box read it, and the card field hands its total to the gateway.
-  const isPriced = useMemo(() => isPricedForm(allFields), [allFields]);
-  const currency =
-    schema?.metadata?.payment?.currency || window.subtleformsFrontend?.currency || 'USD';
-  const [coupon, setCoupon] = useState(null);
-  const [couponBusy, setCouponBusy] = useState(false);
-  const [couponError, setCouponError] = useState('');
-  const cardRef = useRef(null);
-  const quote = useMemo(
-    () =>
-      isPriced
-        ? computeQuote(allFields, values, { coupon, schema, hidden: hiddenFields, currency })
-        : null,
-    [isPriced, allFields, values, coupon, schema, hiddenFields, currency]
-  );
-  // Another checkout (e.g. WooCommerce, set by an add-on) takes the payment
-  // after the form is sent, so the Card field is not used.
-  const externalCheckout =
-    !!schema?.metadata?.payment?.processor && schema.metadata.payment.processor !== 'subtleforms';
-  const hasCardField = useMemo(
-    () => !externalCheckout && allFields.some((f) => f.type === 'payment_card'),
-    [allFields, externalCheckout]
-  );
-
-  const applyCoupon = useCallback(
-    async (code) => {
-      setCouponBusy(true);
-      setCouponError('');
-      try {
-        const res = await restFetch('/payments/coupon', {
-          method: 'POST',
-          body: { form_id: formId, code, data: flattenToPathMap(values) },
-        });
-        const json = await res.json().catch(() => ({}));
-        const found = json?.data?.coupon;
-        if (res.ok && found) {
-          setCoupon(found);
-        } else {
-          setCouponError(
-            json?.error?.message || json?.message || __('This coupon code is not valid.', 'subtleforms')
-          );
-        }
-      } catch (e) {
-        setCouponError(__('The code could not be checked. Please try again.', 'subtleforms'));
-      } finally {
-        setCouponBusy(false);
-      }
-    },
-    [formId, values]
-  );
-
-  const paymentContext = useMemo(
-    () =>
-      isPriced
-        ? {
-            formId,
-            preview,
-            currency,
-            quote,
-            coupon,
-            couponBusy,
-            couponError,
-            applyCoupon,
-            removeCoupon: () => {
-              setCoupon(null);
-              setCouponError('');
-            },
-            hasCouponField: allFields.some((f) => f.type === 'payment_coupon'),
-            external: externalCheckout,
-            registerCard: (handle) => {
-              cardRef.current = handle;
-            },
-          }
-        : null,
-    [isPriced, formId, preview, currency, quote, coupon, couponBusy, couponError, applyCoupon, allFields, externalCheckout]
+  // ── Form wrappers (add-ons) ─────────────────────────────────────────────
+  // An add-on may wrap the form (see registerFormWrapper): it reads the
+  // answers, checks or adds to them before they are sent and may name the
+  // submit button. Without one the form is exactly the plain form.
+  const formWrappers = useMemo(() => getFormWrappers(), []);
+  const beforeSubmitRef = useRef(new Set());
+  const [wrapperSubmitLabel, setWrapperSubmitLabel] = useState(null);
+  const [submitCount, setSubmitCount] = useState(0);
+  const onBeforeSubmit = useCallback((fn) => {
+    if (typeof fn !== 'function') return () => {};
+    beforeSubmitRef.current.add(fn);
+    return () => beforeSubmitRef.current.delete(fn);
+  }, []);
+  const setSubmitLabel = useCallback((label) => {
+    setWrapperSubmitLabel(typeof label === 'string' && label.trim() ? label : null);
+  }, []);
+  const wrapperForm = useMemo(
+    () => ({
+      formId,
+      preview,
+      schema,
+      fields: allFields,
+      values,
+      hidden: hiddenFields,
+      submitCount,
+      onBeforeSubmit,
+      setSubmitLabel,
+    }),
+    [formId, preview, schema, allFields, values, hiddenFields, submitCount, onBeforeSubmit, setSubmitLabel]
   );
 
   // Form details for fields that talk to the server (uploads).
@@ -832,43 +784,18 @@ export default function FormRenderer({
           );
         }
 
-        if (isPriced) {
-          // Fields hidden by conditional logic are not part of the order.
-          allFields.forEach((f) => {
-            const k = (f.config ?? f).key || f.key;
-            if (k && hiddenFields.has(k) && isPricedType(f.type)) {
-              delete submissionPayload[k];
-            }
-          });
-          if (coupon) {
-            submissionPayload._coupon = coupon.code;
+        // Add-ons that wrap the form may check or add to the answers.
+        for (const fn of Array.from(beforeSubmitRef.current)) {
+          let outcome = null;
+          try {
+            outcome = await fn({ payload: submissionPayload, formId, restUrl, nonce: restNonce() });
+          } catch (hookErr) {
+            outcome = { stop: true, message: hookErr?.message || __('Submission failed.', 'subtleforms') };
           }
-          if (quote && quote.total > 0 && hasCardField) {
-            if (!cardRef.current?.confirm) {
-              setSubmitError(__('Online payment is not available right now.', 'subtleforms'));
-              setSubmitting(false);
-              return;
-            }
-            try {
-              const paid = await cardRef.current.confirm({
-                formId,
-                data: submissionPayload,
-                restUrl,
-                nonce: restNonce(),
-              });
-              submissionPayload._payment = paid?.reference || '';
-            } catch (payErr) {
-              if (payErr?.inline) {
-                // A decline or incomplete card: the Card field shows the
-                // reason next to the card, and every other answer stays.
-                setSubmitError(null);
-                cardRef.current?.focus?.();
-              } else {
-                setSubmitError(payErr?.message || __('Your payment could not be completed.', 'subtleforms'));
-              }
-              setSubmitting(false);
-              return;
-            }
+          if (outcome && outcome.stop) {
+            setSubmitError(outcome.message || null);
+            setSubmitting(false);
+            return;
           }
         }
 
@@ -903,7 +830,7 @@ export default function FormRenderer({
         const result = await response.json();
 
         if (response.ok && result?.data?.success && result.data.redirect && !preview) {
-          // An add-on (e.g. WooCommerce checkout) takes the visitor onward.
+          // An add-on takes the visitor to another page.
           if (customOnSubmit) customOnSubmit(result.data);
           window.location.assign(result.data.redirect);
           return;
@@ -960,7 +887,7 @@ export default function FormRenderer({
             allowAnother: !!conf.allowAnother,
           });
           setSubmitSuccess(true);
-          setCoupon(null);
+          setSubmitCount((n) => n + 1);
           setValues({ ...defaultValues });
           setCurrentStepIndex(0);
 
@@ -1005,11 +932,6 @@ export default function FormRenderer({
       fieldsToRender,
       defaultValues,
       schema,
-      isPriced,
-      allFields,
-      coupon,
-      quote,
-      hasCardField,
       spamToken,
       spamTokens,
     ]
@@ -1253,7 +1175,9 @@ export default function FormRenderer({
       )}
 
       <FormContext.Provider value={formContext}>
-      <PaymentContext.Provider value={paymentContext}>
+      {formWrappers.reduceRight((inner, Wrapper, index) => (
+        <Wrapper key={index} form={wrapperForm}>{inner}</Wrapper>
+      ), (
       <form
         role='form'
         aria-label={schema.metadata?.title || __('Form', 'subtleforms')}
@@ -1364,20 +1288,13 @@ export default function FormRenderer({
               {submitting
                 ? __('Submitting…', 'subtleforms')
                 : schema?.metadata?.submitText?.trim() ||
-                  (hasCardField && quote?.total > 0
-                    ? sprintf(
-                        /* translators: %s: order total */
-                        __('Pay %s', 'subtleforms'),
-                        formatMoney(quote.total, currency)
-                      )
-                    : externalCheckout && quote?.items?.length
-                    ? __('Continue to checkout', 'subtleforms')
-                    : __('Submit', 'subtleforms'))}
+                  wrapperSubmitLabel ||
+                  __('Submit', 'subtleforms')}
             </button>
           )}
         </div>
       </form>
-      </PaymentContext.Provider>
+      ))}
       </FormContext.Provider>
     </div>
   );

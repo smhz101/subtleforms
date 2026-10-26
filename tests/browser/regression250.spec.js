@@ -2,7 +2,7 @@
  * Browser checks for fixes that shipped before 2.5.0 without a test:
  * Section Heading followed by Custom HTML (FA-20), the builder header at
  * common widths (UX2-01), conversational choice questions (UX2-03), the
- * coupon row on a narrow screen (UX2-04), the focus ring on the status
+ * focus ring on the status
  * tabs (UX2-20), the builder loading state (UX2-07) and the Tools file
  * buttons from the keyboard (FF2-16).
  */
@@ -136,36 +136,6 @@ for (const layout of ['inline', 'buttons', 'columns-2']) {
     expect(boxes[2].y).toBeGreaterThan(boxes[1].y);
   });
 }
-
-test('the coupon field wraps on a narrow screen (UX2-04)', async ({ page }) => {
-  const form = await publishForm(client, {
-    title: 'UX2-04 coupon row',
-    fields: [{ id: 'k1', key: 'name', type: 'text', label: 'Name' }],
-  });
-  created.push(form);
-  await page.setViewportSize({ width: 360, height: 800 });
-  await page.goto(form.url);
-  await waitForForm(page);
-
-  // The coupon row is part of the payment summary. Draw the same markup in
-  // the form so the rule that the bundle ships is what is measured.
-  await page.evaluate(() => {
-    const host = document.querySelector('.subtleforms-form-container');
-    const row = document.createElement('div');
-    row.className = 'subtleforms-coupon__row';
-    row.innerHTML = '<input class="subtleforms-coupon__input" type="text" aria-label="Coupon code"><button type="button" class="subtleforms-coupon__apply">Apply</button>';
-    host.appendChild(row);
-  });
-  const input = await page.locator('.subtleforms-coupon__input').boundingBox();
-  const apply = await page.locator('.subtleforms-coupon__apply').boundingBox();
-  const container = await page.locator('.subtleforms-form-container').boundingBox();
-  // Stacked: the button is under the input and nothing leaves the form.
-  expect(apply.y).toBeGreaterThan(input.y + input.height - 1);
-  expect(input.x + input.width).toBeLessThanOrEqual(container.x + container.width + 1);
-  expect(apply.x + apply.width).toBeLessThanOrEqual(container.x + container.width + 1);
-  const scrolls = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
-  expect(scrolls).toBe(false);
-});
 
 for (const width of [1280, 390]) {
   test(`the focus ring on the Forms status tabs is not clipped at ${width}px (UX2-20)`, async ({ page }) => {

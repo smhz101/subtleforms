@@ -5,7 +5,7 @@
  * The ID is the key the field's answers are stored under. A form rebuilt
  * from another tool, or an import that has to match existing data, can give
  * a field the ID it had before. Changing it updates every place the form
- * uses it (merge tags, formulas, logic, integrations, payment settings).
+ * uses it (merge tags, formulas, logic, integrations, add-on settings).
  * Entries already sent keep their answers under the old ID.
  */
 import { useEffect, useMemo, useRef, useState } from '@wordpress/element';

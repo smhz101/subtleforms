@@ -1,6 +1,5 @@
 import { createSpamTokenSource } from '../utils/spamToken';
 import { useState, useEffect, useCallback, useMemo, useRef } from '@wordpress/element';
-import { currencySymbol as symbolFor, currencyDecimals } from '../../shared/currencies';
 import { __, sprintf } from '@wordpress/i18n';
 import FieldRenderer from './FieldRenderer';
 import { getIn, setIn, flattenToPathMap } from '../utils/valuePaths';
@@ -30,7 +29,7 @@ import ConfirmationText from './ConfirmationText';
  * ConversationalFormRenderer - Renders form one question at a time
  *
  * Displays fields sequentially with smooth transitions and per-field validation
- * Supports payment flow: Questions → Review → Payment → Submit
+ * Flow: Questions → Review → Submit
  */
 export default function ConversationalFormRenderer({
   schema,
@@ -42,7 +41,7 @@ export default function ConversationalFormRenderer({
   const spamTokens = useMemo(() => createSpamTokenSource(formId), [formId]);
   const primeSpamToken = useCallback(() => spamTokens.prime(spamToken), [spamTokens, spamToken]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [currentStep, setCurrentStep] = useState('questions'); // 'questions', 'review', 'payment'
+  const [currentStep, setCurrentStep] = useState('questions'); // 'questions', 'review'
   const [values, setValues] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -62,14 +61,6 @@ export default function ConversationalFormRenderer({
     () => collectLeafInputPaths(schema?.fields || []),
     [schema]
   );
-
-  // Check if payment is enabled
-  const paymentEnabled =
-    schema?.metadata?.payment?.enabled === true &&
-    (schema?.metadata?.type === 'payment' ||
-      schema?.metadata?.type === 'conversational');
-
-  const paymentSettings = schema?.metadata?.payment || {};
 
   // The questions: the same list the builder shows (2.3.2). A Group or
   // Repeater is one question with its fields inside it.
@@ -182,14 +173,6 @@ export default function ConversationalFormRenderer({
         setCurrentStep('review');
       }
     } else if (currentStep === 'review') {
-      // Move to payment or submit
-      if (paymentEnabled) {
-        setCurrentStep('payment');
-      } else {
-        submitRef.current();
-      }
-    } else if (currentStep === 'payment') {
-      // Submit from payment step
       submitRef.current();
     }
   }, [
@@ -197,7 +180,6 @@ export default function ConversationalFormRenderer({
     validateCurrentField,
     currentIndex,
     totalFields,
-    paymentEnabled,
   ]);
 
   // Handle previous
@@ -206,9 +188,6 @@ export default function ConversationalFormRenderer({
       // Go back to last question
       setCurrentStep('questions');
       setCurrentIndex(totalFields - 1);
-    } else if (currentStep === 'payment') {
-      // Go back to review
-      setCurrentStep('review');
     } else if (currentIndex > 0) {
       setCurrentIndex((prev) => prev - 1);
     }
@@ -228,7 +207,7 @@ export default function ConversationalFormRenderer({
           handleNext();
         } else if (currentStep === 'questions') {
           handleNext();
-        } else if (currentStep === 'review' || currentStep === 'payment') {
+        } else if (currentStep === 'review') {
           handleNext();
         }
       }
@@ -458,22 +437,6 @@ export default function ConversationalFormRenderer({
   const currentValue = getIn(values, fieldKey, '') || '';
   const currentError = validationErrors[fieldKey];
 
-  // Calculate total payment amount
-  const calculateTotal = () => {
-    if (paymentSettings.amountType === 'fixed') {
-      return parseFloat(paymentSettings.fixedAmount || 0);
-    } else if (paymentSettings.amountType === 'field') {
-      const amountField = paymentSettings.amountField;
-      return parseFloat(values[amountField] || 0);
-    }
-    return 0;
-  };
-
-  const totalAmount = calculateTotal();
-  // A form without its own currency follows the site currency (PAY2-02).
-  const currency = paymentSettings.currency || window.subtleformsFrontend?.currency || 'USD';
-  const currencySymbol = symbolFor(currency);
-
   // Render Review Step
   if (currentStep === 'review') {
     return (
@@ -542,9 +505,7 @@ export default function ConversationalFormRenderer({
               className='subtleforms-button subtleforms-button-next'
               onClick={handleNext}
               disabled={submitting}>
-              {paymentEnabled
-                ? __('Continue to Payment', 'subtleforms')
-                : __('Submit', 'subtleforms')}{' '}
+              {__('Submit', 'subtleforms')}{' '}
               →
             </button>
           </div>
@@ -553,86 +514,6 @@ export default function ConversationalFormRenderer({
     );
   }
 
-  // Render Payment Step
-  if (currentStep === 'payment') {
-    return (
-      <div className={formClassNames} style={appearanceStyle}>
-        {/* Progress indicator */}
-        <div className='subtleforms-progress'>
-          <div className='subtleforms-progress-bar'>
-            <div
-              className='subtleforms-progress-fill'
-              style={{ width: '95%' }}
-            />
-          </div>
-          <div className='subtleforms-progress-text'>
-            {__('Payment', 'subtleforms')}
-          </div>
-        </div>
-
-        <div className='subtleforms-payment-card'>
-          <h2 className='subtleforms-payment-title'>
-            {__('Complete Payment', 'subtleforms')}
-          </h2>
-
-          {submitError && (
-            <div className='subtleforms-error'>{submitError}</div>
-          )}
-
-          <div className='subtleforms-payment-summary'>
-            <div className='subtleforms-payment-amount'>
-              <span className='subtleforms-payment-label'>
-                {__('Amount Due:', 'subtleforms')}
-              </span>
-              <span className='subtleforms-payment-value'>
-                {currencySymbol}
-                {totalAmount.toFixed(currencyDecimals(currency))}
-              </span>
-            </div>
-
-            {paymentSettings.mode === 'test' && (
-              <div className='subtleforms-payment-test-notice'>
-                {__(
-                  '⚠️ Test Mode: No actual payment will be processed',
-                  'subtleforms'
-                )}
-              </div>
-            )}
-
-            <div className='subtleforms-payment-gateway-placeholder'>
-              <p className='subtleforms-payment-info'>
-                {__(
-                  'Payment gateway integration will appear here. For now, click Submit to complete the form.',
-                  'subtleforms'
-                )}
-              </p>
-            </div>
-          </div>
-
-          <div className='subtleforms-conversational-nav'>
-            <button
-              type='button'
-              className='subtleforms-button subtleforms-button-prev'
-              onClick={handlePrevious}
-              disabled={submitting}>
-              ← {__('Back to Review', 'subtleforms')}
-            </button>
-
-            <button
-              type='button'
-              className='subtleforms-button subtleforms-button-submit'
-              onClick={handleSubmit}
-              disabled={submitting}>
-              {submitting
-                ? __('Processing...', 'subtleforms')
-                : __('Complete Submission', 'subtleforms')}{' '}
-              →
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   // Render Questions Step (default)
   return (

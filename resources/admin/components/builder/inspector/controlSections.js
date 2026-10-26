@@ -4,6 +4,8 @@
  * Kept free of components so the builder and its tests share one answer.
  */
 
+import { typeHasFlag } from '../../../utils/fieldTypeFlags';
+
 /**
  * Controls whose content belongs under General when the definition does not
  * name a section: what a block says (label, title, help text, notice text).
@@ -62,7 +64,8 @@ export function hasSection( def, section ) {
 
 /**
  * Types that take no answer but can still be shown or hidden by logic: steps,
- * content blocks, the Repeater and the Fixed Fee (PAY-02).
+ * content blocks and the Repeater. An add-on type says the same with
+ * `meta.logicOnly` (see isLogicOnlyType()).
  */
 export const LOGIC_ONLY_TYPES = [
 	'step',
@@ -70,5 +73,9 @@ export const LOGIC_ONLY_TYPES = [
 	'section_break',
 	'disclaimer',
 	'repeat_container',
-	'payment_hidden_price',
 ];
+
+/** Whether a type takes no answer but can be shown or hidden by logic. */
+export function isLogicOnlyType( type ) {
+	return LOGIC_ONLY_TYPES.includes( type ) || typeHasFlag( type, 'logicOnly' );
+}

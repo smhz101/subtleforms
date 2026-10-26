@@ -3,6 +3,7 @@
  * every tag with single or double braces; the builder inserts single braces.
  */
 import { __ } from '@wordpress/i18n';
+import { typeHasFlag } from '../../utils/fieldTypeFlags';
 
 export const GLOBAL_MERGE_TAGS = [
   { tag: '{all_fields}', label: __('All fields', 'subtleforms'), help: __('Every answer with its label. Passwords are never included.', 'subtleforms') },
@@ -14,7 +15,7 @@ export const GLOBAL_MERGE_TAGS = [
 ];
 
 /** Field types that hold no answer, or must never be emailed. */
-const SKIP = ['password', 'html', 'section_break', 'disclaimer', 'step', 'action_hook', 'payment_summary', 'payment_card'];
+const SKIP = ['password', 'html', 'section_break', 'disclaimer', 'step', 'action_hook'];
 
 /**
  * One {field:key} tag per answer-bearing field.
@@ -24,7 +25,7 @@ const SKIP = ['password', 'html', 'section_break', 'disclaimer', 'step', 'action
  */
 export function fieldMergeTags(fields = []) {
   return (fields || [])
-    .filter((f) => f && f.key && !SKIP.includes(f.type))
+    .filter((f) => f && f.key && !SKIP.includes(f.type) && !typeHasFlag(f.type, 'noAnswer'))
     .map((f) => ({ tag: `{field:${f.key}}`, label: f.label || f.key }));
 }
 

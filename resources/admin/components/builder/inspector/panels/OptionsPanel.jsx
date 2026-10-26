@@ -33,8 +33,14 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import Icon from '../../../../ui/Icon';
+import { getChoiceType } from '../../../../../shared/extend';
 
-export const CHOICE_TYPES = ['radio', 'multiple_choice', 'dropdown', 'select', 'picture_choice', 'payment_choice'];
+const BUILT_IN_CHOICE_TYPES = ['radio', 'multiple_choice', 'dropdown', 'select', 'picture_choice'];
+
+/** Whether a field type uses the options editor (built in, or an add-on's registerChoiceType). */
+export function isChoiceType(type) {
+  return BUILT_IN_CHOICE_TYPES.includes(type) || !!getChoiceType(type);
+}
 
 const slugify = (text) =>
   String(text || '')
@@ -51,7 +57,7 @@ function OptionRow({
   isDefault,
   multiple,
   showValues,
-  withPrice,
+  extraInputs = [],
   disabled,
   onChange,
   onRemove,
@@ -144,28 +150,31 @@ function OptionRow({
         )}
       </div>
 
-      {withPrice && (
-        <span className='sf-options__price'>
+      {extraInputs.map((attr) => (
+        <span key={attr.key} className='sf-options__attribute'>
           <input
-            type='number'
-            min='0'
-            step='0.01'
-            inputMode='decimal'
-            className='sf-options__input sf-options__input--price'
-            value={option.price ?? ''}
-            placeholder='0.00'
+            type={attr.inputType === 'number' ? 'number' : 'text'}
+            min={attr.min}
+            step={attr.step}
+            inputMode={attr.inputType === 'number' ? 'decimal' : undefined}
+            className='sf-options__input sf-options__input--attribute'
+            value={option[attr.key] ?? ''}
+            placeholder={attr.placeholder || ''}
             aria-label={sprintf(
-              /* translators: %d: option number */
-              __('Option %d price', 'subtleforms'),
-              index + 1
+              /* translators: 1: option number, 2: name of the setting */
+              __('Option %1$d %2$s', 'subtleforms'),
+              index + 1,
+              attr.label || attr.key
             )}
             disabled={disabled}
-            onChange={(e) =>
-              onChange({ ...option, price: e.target.value === '' ? '' : Number(e.target.value) })
-            }
+            onChange={(e) => {
+              const raw = e.target.value;
+              const value = attr.inputType === 'number' ? (raw === '' ? '' : Number(raw)) : raw;
+              onChange({ ...option, [attr.key]: value });
+            }}
           />
         </span>
-      )}
+      ))}
 
       <Button
         className='sf-options__remove'
@@ -200,14 +209,15 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
     return list.map((opt, i) => ({ ...opt, _sid: ids[i] }));
   }, [field?.options]);
 
-  if (!field || !CHOICE_TYPES.includes(field.type)) {
+  if (!field || !isChoiceType(field.type)) {
     return null;
   }
 
-  const withPrice = field.type === 'payment_choice';
+  const addonChoice = getChoiceType(field.type);
+  const attributes = addonChoice?.attributes || [];
   const multiple =
-    field.type === 'payment_choice'
-      ? field.displayAs === 'checkbox'
+    addonChoice
+      ? (typeof addonChoice.multiple === 'function' ? !!addonChoice.multiple(field) : false)
       : field.type === 'multiple_choice'
       ? field.allowMultiple !== false
       : field.type === 'picture_choice'
@@ -243,9 +253,9 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
       options
         .map((o) => {
           const base = o.value && o.value !== slugify(o.label) ? `${o.label}|${o.value}` : o.label;
-          if (!withPrice) return base;
+          if (!attributes.length) return base;
           const custom = o.value && o.value !== slugify(o.label) ? o.value : '';
-          return `${o.label}|${custom}|${o.price ?? ''}`;
+          return [o.label, custom, ...attributes.map((a) => o[a.key] ?? '')].join('|');
         })
         .join('\n')
     );
@@ -258,14 +268,18 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
       .map((line) => line.trim())
       .filter(Boolean)
       .map((line) => {
-        const [label, value, price] = line.split('|').map((p) => p.trim());
+        const [label, value, ...extra] = line.split('|').map((p) => p.trim());
         const existing = options.find((o) => o.label === label);
         const next = {
           ...(existing || {}),
           label,
           value: value || existing?.value || slugify(label),
         };
-        if (withPrice && price !== undefined && price !== '') next.price = Number(price) || 0;
+        attributes.forEach((attr, i) => {
+          const raw = extra[i];
+          if (raw === undefined || raw === '') return;
+          next[attr.key] = attr.inputType === 'number' ? Number(raw) || 0 : raw;
+        });
         return next;
       });
     if (next.length) commit(next);
@@ -297,9 +311,7 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
             __nextHasNoMarginBottom
             label={__('One option per line', 'subtleforms')}
             help={
-              withPrice
-                ? __('Use Label|value|price, for example Large||12.50.', 'subtleforms')
-                : __('Use Label|value to set a stored value.', 'subtleforms')
+              addonChoice?.bulkHelp || __('Use Label|value to set a stored value.', 'subtleforms')
             }
             rows={8}
             value={bulkText}
@@ -332,7 +344,7 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
                   isDefault={defaults.includes(option.value)}
                   multiple={multiple}
                   showValues={showValues}
-                  withPrice={withPrice}
+                  extraInputs={attributes}
                   disabled={isReadOnly}
                   onMove={move}
                   onChange={(next) => {
@@ -368,7 +380,7 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
               {
                 label,
                 value: `option_${nanoid(6)}`,
-                ...(withPrice ? { price: 0 } : {}),
+                ...Object.fromEntries(attributes.filter((a) => a.defaultValue !== undefined).map((a) => [a.key, a.defaultValue])),
               },
             ]);
           }}>

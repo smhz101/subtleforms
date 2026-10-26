@@ -23,16 +23,15 @@ import {
 import { createNodeId, createFieldKey } from './utils/idGenerator';
 import ActionsPanel from './ActionsPanel';
 import { ConfirmationPanel, AvailabilityPanel } from './FormBehaviorPanels';
-import ExtensionSlot from '../ExtensionSlot';
-import FormCurrencyControl from './FormCurrencyControl';
+import { getSlotItems } from '../../../shared/extend';
 import IntegrationsPanel from './IntegrationsPanel';
 import SpamProtectionPanel from './SpamProtectionPanel';
-import { isPricedForm, isPricedType } from '../../../shared/pricing';
 import Icon from '../../ui/Icon';
 import './FormSettings.scss';
 
 /**
- * FormSettings - Configure form-wide settings including payment options
+ * FormSettings - Configure form-wide settings. Add-ons add sections of their
+ * own through the `form.settings.sections` slot.
  */
 export default function FormSettings({ 
   schema, 
@@ -45,22 +44,10 @@ export default function FormSettings({
   const metadata = schema?.metadata || {};
   // The structure decides between Standard and Multi-step (2.3.2).
   const formType = structuralType(schema || {}) || 'regular';
-  const isPaymentForm = formType === 'payment';
   const isConversationalForm = formType === 'conversational';
   // Both spellings reach this component: stored schemas may hold either, and
   // normalisation happens on save rather than on every read.
   const isMultiStep = formType === 'multi-step' || formType === 'multistep';
-  const supportsPayment = isPaymentForm || isConversationalForm;
-
-  // Payment settings. No currency default: a form follows the site currency
-  // until the admin picks one (PAY2-02).
-  const paymentSettings = metadata.payment || {
-    enabled: isPaymentForm ? true : false, // Payment forms have payment enabled by default
-    mode: 'test',
-    amountType: 'fixed',
-    fixedAmount: '',
-    amountField: '',
-  };
 
   const handleMetadataChange = (key, value) => {
     if (isReadOnly) return;
@@ -72,39 +59,6 @@ export default function FormSettings({
       },
     };
     onChange(updated);
-  };
-
-  const handlePaymentSettingChange = (key, value) => {
-    if (isReadOnly) return;
-    const updated = {
-      ...schema,
-      metadata: {
-        ...metadata,
-        payment: {
-          ...paymentSettings,
-          [key]: value,
-        },
-      },
-    };
-    onChange(updated);
-  };
-
-  // Checkout settings (2.1) merge into whatever payment settings exist,
-  // without the legacy defaults above (they would pin the currency).
-  const handleCheckoutChange = (key, value) => {
-    if (isReadOnly) return;
-    onChange({
-      ...schema,
-      metadata: {
-        ...metadata,
-        payment: (() => {
-          const next = { ...(metadata.payment || {}), [key]: value };
-          // An empty currency means the site currency: leave it unset.
-          if (key === 'currency' && !value) delete next.currency;
-          return next;
-        })(),
-      },
-    });
   };
 
   const flatFields = (() => {
@@ -120,40 +74,18 @@ export default function FormSettings({
     walk(schema?.fields);
     return out;
   })();
-  const pricedFields = flatFields.filter((f) => isPricedType(f.type));
-  const takesMoney = isPricedForm(flatFields) || supportsPayment;
 
-  // Get all numeric/text fields for amount selection
-  const amountFieldOptions = () => {
-    if (!schema?.fields) return [];
-
-    const flatten = (fields) => {
-      let result = [];
-      fields.forEach((field) => {
-        // Only include numeric and text fields
-        if (field.type === 'number' || field.type === 'text') {
-          const key = field.config?.key || field.key;
-          const label = field.config?.label || key;
-          result.push({ label, value: key });
-        }
-        if (field.children && Array.isArray(field.children)) {
-          result = result.concat(flatten(field.children));
-        }
-        if (field.columns && Array.isArray(field.columns)) {
-          field.columns.forEach((col) => {
-            if (Array.isArray(col)) {
-              result = result.concat(flatten(col));
-            }
-          });
-        }
-      });
-      return result;
-    };
-
-    return flatten(schema.fields);
-  };
-
-  const fieldOptions = amountFieldOptions();
+  // Sections from add-ons (form.settings.sections). Each decides with
+  // `appliesTo(schema)` whether this form needs it.
+  const addonSections = getSlotItems('form.settings.sections')
+    .filter((item) => item.title && (typeof item.appliesTo !== 'function' || item.appliesTo(schema)))
+    .map((item) => ({
+      id: `addon-${item.id}`,
+      title: item.title,
+      description: item.description || '',
+      icon: item.icon || Icon.Puzzle,
+      component: item.component,
+    }));
 
   const restrictions = metadata.restrictions || {};
   const availabilityOn = [restrictions.requireLogin, restrictions.openAt, restrictions.closeAt, restrictions.entryLimit].filter(Boolean).length;
@@ -187,12 +119,7 @@ export default function FormSettings({
       key: 'connections',
       title: __('Connections', 'subtleforms'),
       items: [
-        (supportsPayment || takesMoney) && {
-          id: 'payments',
-          title: __('Payments', 'subtleforms'),
-          description: __('How this form charges, and where the visitor checks out.', 'subtleforms'),
-          icon: Icon.CreditCard,
-        },
+        ...addonSections,
         { id: 'integrations', title: __('Integrations', 'subtleforms'), description: __('Send entries to email marketing, a CRM, analytics or a webhook.', 'subtleforms'), icon: Icon.Webhook },
       ].filter(Boolean),
     },
@@ -253,19 +180,17 @@ export default function FormSettings({
 
             {current.id === 'general' && (
               <div className='sf-form-settings__card'>
-                {formType !== 'regular' && formType !== 'standard' && (
+                {(isMultiStep || formType === 'sectioned' || isConversationalForm) && (
                   <div className='sf-form-type-banner' data-form-type={formType}>
                     <h3 className='sf-form-type-banner__title'>
                       {isMultiStep && formTypeLabel('multi-step')}
                       {formType === 'sectioned' && formTypeLabel('sectioned')}
                       {formType === 'conversational' && formTypeLabel('conversational')}
-                      {formType === 'payment' && __('Payment Form', 'subtleforms')}
                     </h3>
                     <p className='sf-form-type-banner__description'>
                       {isMultiStep && __('Fields are organized into steps. Users navigate through one step at a time with progress tracking.', 'subtleforms')}
                       {formType === 'sectioned' && __('Fields are grouped into collapsible sections. All sections are visible on a single page.', 'subtleforms')}
                       {formType === 'conversational' && __('Questions are presented one at a time. After completing all questions, users review answers before submitting.', 'subtleforms')}
-                      {formType === 'payment' && __('This form collects payment information. Configure payment settings in Payments.', 'subtleforms')}
                     </p>
                   </div>
                 )}
@@ -398,98 +323,20 @@ export default function FormSettings({
               </div>
             )}
 
-            {current.id === 'payments' && (
-              <div className='sf-form-settings__stack'>
-                {supportsPayment && (
-                  <div className='sf-form-settings__card'>
-                    {isConversationalForm && (
-                      <div className='sf-info-box sf-info-box--blue'>
-                        <p className='sf-info-box__text'>
-                          <strong>{__('Conversational Payment:', 'subtleforms')}</strong>{' '}
-                          {__('When enabled, users will answer questions, review their answers, and then complete payment before submission.', 'subtleforms')}
-                        </p>
-                      </div>
-                    )}
-                    {isPaymentForm && (
-                      <div className='sf-info-box sf-info-box--blue'>
-                        <p className='sf-info-box__text'>
-                          <strong>{__('Note:', 'subtleforms')}</strong>{' '}
-                          {__('Payment gateway integration will be added in a future update. These settings prepare your form for payment processing.', 'subtleforms')}
-                        </p>
-                      </div>
-                    )}
-                    <ToggleControl
-                      label={__('Enable Payments', 'subtleforms')}
-                      checked={paymentSettings.enabled}
-                      onChange={(value) => handlePaymentSettingChange('enabled', value)}
-                      help={__('Require payment for form submission', 'subtleforms')}
-                      disabled={isReadOnly}
-                    />
-                    {paymentSettings.enabled && (
-                      <>
-                        <RadioControl
-                          label={__('Payment Mode', 'subtleforms')}
-                          selected={paymentSettings.mode}
-                          options={[
-                            { label: __('Test Mode', 'subtleforms'), value: 'test' },
-                            { label: __('Live Mode', 'subtleforms'), value: 'live' },
-                          ]}
-                          onChange={(value) => handlePaymentSettingChange('mode', value)}
-                          help={__('Test mode will not process real payments', 'subtleforms')}
-                        />
-                        <RadioControl
-                          label={__('Amount Type', 'subtleforms')}
-                          selected={paymentSettings.amountType}
-                          options={[
-                            { label: __('Fixed Amount', 'subtleforms'), value: 'fixed' },
-                            { label: __('From Field', 'subtleforms'), value: 'field' },
-                          ]}
-                          onChange={(value) => handlePaymentSettingChange('amountType', value)}
-                          help={__('Set a fixed amount or use a field value', 'subtleforms')}
-                        />
-                        {paymentSettings.amountType === 'fixed' && (
-                          <TextControl
-                            label={__('Fixed Amount', 'subtleforms')}
-                            type='number'
-                            step='0.01'
-                            min='0'
-                            value={paymentSettings.fixedAmount}
-                            onChange={(value) => handlePaymentSettingChange('fixedAmount', value)}
-                            help={__('The amount to charge (e.g., 29.99)', 'subtleforms')}
-                          />
-                        )}
-                        {paymentSettings.amountType === 'field' && (
-                          <SelectControl
-                            label={__('Amount Field', 'subtleforms')}
-                            value={paymentSettings.amountField}
-                            options={[
-                              { label: __('Select a field...', 'subtleforms'), value: '' },
-                              ...fieldOptions,
-                            ]}
-                            onChange={(value) => handlePaymentSettingChange('amountField', value)}
-                            help={__('Field that contains the payment amount', 'subtleforms')}
-                          />
-                        )}
-                      </>
-                    )}
-                  </div>
-                )}
-                {takesMoney && (metadata.payment?.processor || 'subtleforms') !== 'woocommerce' && (
-                  <div className='sf-form-settings__card'>
-                    <FormCurrencyControl schema={schema} onPayment={handleCheckoutChange} isReadOnly={isReadOnly} />
-                  </div>
-                )}
-                {takesMoney && (
-                  <ExtensionSlot
-                    name='form.settings.checkout'
+            {current.component && (() => {
+              const Section = current.component;
+              return (
+                <div className='sf-form-settings__stack'>
+                  <Section
                     schema={schema}
-                    fields={pricedFields}
-                    onPayment={handleCheckoutChange}
+                    onChange={onChange}
+                    onMetadata={handleMetadataChange}
                     isReadOnly={isReadOnly}
+                    fields={flatFields}
                   />
-                )}
-              </div>
-            )}
+                </div>
+              );
+            })()}
 
             {current.id === 'integrations' && (
               <div className='sf-form-settings__card sf-form-settings__card--stack'>

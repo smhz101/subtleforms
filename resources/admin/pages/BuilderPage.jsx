@@ -50,7 +50,6 @@ import { getFormTypeBadgeConfig } from '../utils/formMeta';
 import { countSchemaFields, fieldDeletedMessage } from '../utils/fieldDeleteNotice';
 import { Skeleton } from '../ui/loading/Skeleton';
 import './BuilderPage.scss';
-import { applyPaymentDefaults } from '../utils/paymentDefaults';
 import { confirmDialog } from '../utils/confirmDialog';
 import {
   structuralType,
@@ -398,9 +397,7 @@ function FormBuilderInner({
 
       dispatch({
         type: BUILDER_ACTIONS.EDIT_SCHEMA,
-        // A form that just got its first priced field picks up the site's
-        // default checkout (e.g. WooCommerce), when an add-on provides one.
-        payload: { schema: applyPaymentDefaults(draftSchema, typedSchema) },
+        payload: { schema: typedSchema },
       });
 
       const before = structuralType(draftSchema || {});
@@ -733,7 +730,7 @@ function FormBuilderInner({
 
   // Always show the builder canvas, even blank forms should open the editor
   // so users can immediately add fields. The welcome screen was blocking builder
-  // access for regular and payment form types with empty fields arrays.
+  // access for every form type with an empty fields array.
   const showWelcomeScreen = false;
 
   if (isSmallScreen && !openSmallAnyway) {

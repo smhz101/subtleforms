@@ -11,7 +11,7 @@ import { rangeSliderSeed } from '../utils/defaults';
 import { debug } from '../../shared/debug';
 import { cloneElement, useContext, useEffect } from '@wordpress/element';
 import ChoiceSelect from './fields/ChoiceSelect';
-import { FormContext, usePayment } from './fields/contexts';
+import { FormContext } from './fields/contexts';
 import { lazyField } from './fields/lazyFields';
 import { getFieldType, getFieldOverride } from '../../shared/extend';
 import { effectiveFieldType } from '../../shared/fieldFallback';
@@ -201,12 +201,6 @@ export default function FieldRenderer({
       !Array.isArray(config.columns) ||
       !config.columns.length)
   ) {
-    return null;
-  }
-
-  if (field.type === 'payment_hidden_price') {
-    // A Fixed Fee has nothing to answer: it appears only as a line in the
-    // order summary, never as a label or help text on the form (PAY-18).
     return null;
   }
 
@@ -1483,11 +1477,11 @@ export function hasVisibleText(html) {
 }
 
 /**
- * Renders an add-on field with the form's order context.
+ * Renders an add-on field with the form's details (which form, preview).
  */
 function AddonField({ component: Component, ...props }) {
-  const payment = usePayment();
-  return <Component {...props} payment={payment} formId={payment?.formId} preview={!!payment?.preview} />;
+  const form = useContext(FormContext);
+  return <Component {...props} formId={form?.formId} preview={!!form?.preview} />;
 }
 
 function getInputType(fieldType) {

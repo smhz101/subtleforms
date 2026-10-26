@@ -1,12 +1,11 @@
 /**
  * Turn a failed save response into a sentence that names the setting at
- * fault (2.3.1, QA-03): "Payment settings: add an amount" instead of
+ * fault (2.3.1, QA-03): "Confirmation settings: ..." instead of
  * "Failed to autosave".
  */
 import { __, sprintf } from '@wordpress/i18n';
 
 const AREAS = [
-  [/^schema\.metadata\.payment/, () => __('Payment settings', 'subtleforms')],
   [/^schema\.metadata\.(confirmation|confirmations)/, () => __('Confirmation settings', 'subtleforms')],
   [/^schema\.metadata/, () => __('Form settings', 'subtleforms')],
   [/^schema\.actions/, () => __('Notifications & actions', 'subtleforms')],

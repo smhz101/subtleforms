@@ -8,6 +8,8 @@
  * the body here follow it.
  */
 import { __ } from '@wordpress/i18n';
+import { payloadGroups } from '../../../../shared/extend';
+import { typeHasFlag } from '../../../utils/fieldTypeFlags';
 
 // ─── Headers ────────────────────────────────────────────────────────────────
 
@@ -165,11 +167,11 @@ export function parseHeadersJson(text) {
 const LAYOUT_TYPES = [
   'html', 'heading', 'divider', 'section', 'section_break', 'step', 'form_step', 'page_break',
   'spacer', 'paragraph', 'columns', 'group', 'row', 'disclaimer', 'recaptcha', 'hcaptcha',
-  'turnstile', 'action_hook', 'save_resume', 'payment_summary',
+  'turnstile', 'action_hook', 'save_resume',
 ];
 
 /** Types a webhook never sends (Webhooks::SENSITIVE_TYPES). */
-export const SENSITIVE_TYPES = ['password', 'signature', 'payment_card'];
+export const SENSITIVE_TYPES = ['password', 'signature'];
 
 const REPEATER = 'repeat_container';
 
@@ -185,7 +187,7 @@ const flat = (node) => (node && typeof node.config === 'object' && node.config ?
 /**
  * The fields a webhook can send, in form order: the answer-bearing fields of
  * the schema as the server lists them. A repeater is one field; the fields
- * inside it are not listed. Password, signature and card fields are left out
+ * inside it are not listed. Password and signature fields are left out
  * because they are never sent.
  *
  * @param {Array} nodes Schema fields.
@@ -206,7 +208,7 @@ export function collectPayloadFields(nodes, out = []) {
       }
       return;
     }
-    const isLayout = LAYOUT_TYPES.includes(type) || type.endsWith('_container');
+    const isLayout = LAYOUT_TYPES.includes(type) || type.endsWith('_container') || typeHasFlag(type, 'noAnswer');
     if (key && type && !isLayout && !SENSITIVE_TYPES.includes(type) && !out.some((f) => f.key === key)) {
       out.push({ key, label: node.adminLabel || node.label || key, type });
     }
@@ -223,26 +225,23 @@ export function collectPayloadFields(nodes, out = []) {
 }
 
 /**
- * Whether the form takes a payment.
+ * The extra data groups add-ons registered (registerPayloadGroup) that apply
+ * to this form.
  *
  * @param {Array} nodes Schema fields.
- * @return {boolean} True when a payment field exists.
+ * @return {Array<{id: string, title: string, keys: Array}>} Groups.
  */
-export function formHasPayment(nodes) {
-  let found = false;
-  const walk = (list) => {
-    if (!Array.isArray(list) || found) return;
-    list.forEach((raw) => {
-      if (!raw || typeof raw !== 'object' || found) return;
-      if (String(raw.type || '').startsWith('payment_')) found = true;
-      walk(raw.fields);
-      walk(raw.children);
-      if (Array.isArray(raw.columns)) raw.columns.forEach((c) => walk(Array.isArray(c) ? c : c?.fields || c?.children));
-    });
-  };
-  walk(nodes);
-  return found;
+export function applicableGroups(nodes) {
+  return payloadGroups().filter((g) => {
+    try {
+      return typeof g.appliesTo !== 'function' || !!g.appliesTo(Array.isArray(nodes) ? nodes : []);
+    } catch (e) {
+      return false;
+    }
+  });
 }
+
+const groupKeys = (groups) => (Array.isArray(groups) ? groups : []).flatMap((g) => g.keys.map((k) => k.key));
 
 // ─── What can be ticked ─────────────────────────────────────────────────────
 
@@ -251,10 +250,14 @@ export const LABELS_OPTION = 'answers_with_labels';
 
 export const FORM_KEYS = ['form_id', 'form_title'];
 export const SUBMISSION_KEYS = ['submission_id', 'created_at', 'status', 'page_url', 'ip_address', 'user_agent', 'user_id'];
-export const PAYMENT_KEYS = ['payment_amount', 'payment_currency', 'payment_status'];
 
-/** The groups of the checkbox picker, without the answers. */
-export function keyGroups() {
+/**
+ * The groups of the checkbox picker, without the answers.
+ *
+ * @param {Array} groups Add-on groups (applicableGroups()).
+ * @return {Array} Groups.
+ */
+export function keyGroups(groups = []) {
   return [
     {
       id: 'form',
@@ -277,31 +280,27 @@ export function keyGroups() {
         { key: 'user_id', label: __('User ID', 'subtleforms') },
       ],
     },
-    {
-      id: 'payment',
-      title: __('Payment', 'subtleforms'),
-      items: [
-        { key: 'payment_amount', label: __('Amount', 'subtleforms') },
-        { key: 'payment_currency', label: __('Currency', 'subtleforms') },
-        { key: 'payment_status', label: __('Payment status', 'subtleforms') },
-      ],
-    },
+    ...(Array.isArray(groups) ? groups : []).map((g) => ({
+      id: g.id,
+      title: g.title || g.id,
+      items: g.keys.map((k) => ({ key: k.key, label: k.label || k.key })),
+    })),
   ];
 }
 
 /**
- * Keys that make sense for this form: the answers it has and, only when it
- * takes a payment, the payment group.
+ * Keys that make sense for this form: the answers it has and the add-on
+ * groups that apply to it.
  *
- * @param {Array}   fields     collectPayloadFields() result.
- * @param {boolean} hasPayment Whether the form takes a payment.
+ * @param {Array} fields collectPayloadFields() result.
+ * @param {Array} groups Add-on groups (applicableGroups()).
  * @return {string[]} Every key that can be ticked.
  */
-export function knownKeys(fields, hasPayment) {
+export function knownKeys(fields, groups = []) {
   return [
     ...FORM_KEYS,
     ...SUBMISSION_KEYS,
-    ...(hasPayment ? PAYMENT_KEYS : []),
+    ...groupKeys(groups),
     ...fields.map((f) => FIELD_PREFIX + f.key),
     LABELS_OPTION,
   ];
@@ -333,12 +332,12 @@ export function fullSelection(fields) {
  *
  * @param {string[]} selection Saved keys.
  * @param {Array}    fields    collectPayloadFields() result.
- * @param {boolean}  hasPayment Whether the form takes a payment.
+ * @param {Array}    groups    Add-on groups (default: every registered group).
  * @return {string[]} Keys.
  */
-export function cleanSelection(selection, fields, hasPayment = true) {
+export function cleanSelection(selection, fields, groups = payloadGroups()) {
   const set = new Set(Array.isArray(selection) ? selection.map(String) : []);
-  return knownKeys(fields, hasPayment).filter((k) => set.has(k));
+  return knownKeys(fields, groups).filter((k) => set.has(k));
 }
 
 // ─── Example body ───────────────────────────────────────────────────────────
@@ -392,11 +391,16 @@ export function sampleValue(field) {
 /**
  * Example entry details shown in the preview.
  *
- * @param {Object} info { formId, formTitle, siteUrl }.
+ * @param {Object} info   { formId, formTitle, siteUrl }.
+ * @param {Array}  groups Add-on groups (default: every registered group).
  * @return {Object} Values for every entry key.
  */
-export function sampleEntry({ formId = 0, formTitle = '', siteUrl = 'https://example.com' } = {}) {
+export function sampleEntry({ formId = 0, formTitle = '', siteUrl = 'https://example.com' } = {}, groups = payloadGroups()) {
+  const extra = Object.fromEntries(
+    (Array.isArray(groups) ? groups : []).flatMap((g) => g.keys.map((k) => [k.key, k.sample ?? '']))
+  );
   return {
+    ...extra,
     form_id: Number(formId) || 0,
     form_title: formTitle || __('Untitled form', 'subtleforms'),
     submission_id: 1024,
@@ -406,9 +410,6 @@ export function sampleEntry({ formId = 0, formTitle = '', siteUrl = 'https://exa
     ip_address: '203.0.113.10',
     user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
     user_id: 0,
-    payment_amount: 49.99,
-    payment_currency: 'USD',
-    payment_status: 'paid',
   };
 }
 
@@ -434,11 +435,7 @@ export function buildPreview(selection, fields, entry) {
       body.answers = chosen.map((f) => ({ key: f.key, label: f.label, value: sampleValue(f) }));
     }
   }
-  const payment = {};
-  PAYMENT_KEYS.forEach((key) => {
-    if (picked.has(key)) payment[key.replace(/^payment_/, '')] = entry[key];
-  });
-  if (Object.keys(payment).length) body.payment = payment;
+  addGroups(picked, (key) => entry[key], body);
   return body;
 }
 
@@ -464,6 +461,24 @@ const entryTag = (key) => ENTRY_TAGS[key] || `{{entry:${key}}}`;
 const fieldTag = (field) => (SCALAR_TYPES.includes(field.type) ? `{{field:${field.key}}}` : `{{raw:${field.key}}}`);
 
 /**
+ * Add the ticked keys of every registered add-on group to a body, under the
+ * group name without the `${group}_` prefix, as the server does.
+ *
+ * @param {Set}      picked Ticked keys.
+ * @param {Function} value  (key) => value.
+ * @param {Object}   body   Body to add to.
+ */
+function addGroups(picked, value, body) {
+  payloadGroups().forEach((g) => {
+    const part = {};
+    g.keys.forEach(({ key }) => {
+      if (picked.has(key)) part[key.slice(g.id.length + 1)] = value(key);
+    });
+    if (Object.keys(part).length) body[g.id] = part;
+  });
+}
+
+/**
  * The checkbox selection as a JSON template with merge tags. Saving it as a
  * custom body sends the same data.
  *
@@ -484,11 +499,7 @@ export function selectionToTemplate(selection, fields) {
       out.answers = chosen.map((f) => ({ key: f.key, label: f.label, value: fieldTag(f) }));
     }
   }
-  const payment = {};
-  PAYMENT_KEYS.forEach((key) => {
-    if (picked.has(key)) payment[key.replace(/^payment_/, '')] = entryTag(key);
-  });
-  if (Object.keys(payment).length) out.payment = payment;
+  addGroups(picked, entryTag, out);
   return JSON.stringify(out, null, 2);
 }
 
@@ -498,10 +509,10 @@ export function selectionToTemplate(selection, fields) {
  *
  * @param {string} text    Template text.
  * @param {Array}  fields  collectPayloadFields() result.
- * @param {boolean} hasPayment Whether the form takes a payment.
+ * @param {Array}  groups  Add-on groups that apply (default: every registered group).
  * @return {{kind: 'selection', selection: string[]}|{kind: 'custom', reason: string}} Result.
  */
-export function templateToSelection(text, fields, hasPayment = true) {
+export function templateToSelection(text, fields, groups = payloadGroups()) {
   const custom = (reason) => ({ kind: 'custom', reason });
   let doc;
   try {
@@ -540,18 +551,20 @@ export function templateToSelection(text, fields, hasPayment = true) {
         return custom(__('The labelled answers list does not match the fields.', 'subtleforms'));
       }
       selection.push(LABELS_OPTION);
-    } else if (name === 'payment') {
-      if (!hasPayment || !value || typeof value !== 'object' || Array.isArray(value)) return custom(__('The payment details were changed.', 'subtleforms'));
+    } else if ((Array.isArray(groups) ? groups : []).some((g) => g.id === name)) {
+      const group = groups.find((g) => g.id === name);
+      const keys = group.keys.map((k) => k.key);
+      if (!value || typeof value !== 'object' || Array.isArray(value)) return custom(__('A group of values was changed.', 'subtleforms'));
       for (const [sub, tag] of Object.entries(value)) {
-        const key = `payment_${sub}`;
-        if (!PAYMENT_KEYS.includes(key) || tag !== entryTag(key)) return custom(__('The payment details were changed.', 'subtleforms'));
+        const key = `${name}_${sub}`;
+        if (!keys.includes(key) || tag !== entryTag(key)) return custom(__('A group of values was changed.', 'subtleforms'));
         selection.push(key);
       }
     } else {
       return custom(__('The body has an entry that the checkboxes cannot show.', 'subtleforms'));
     }
   }
-  return { kind: 'selection', selection: cleanSelection(selection, fields, hasPayment) };
+  return { kind: 'selection', selection: cleanSelection(selection, fields, groups) };
 }
 
 // ─── Example of a custom body ───────────────────────────────────────────────

@@ -36,8 +36,6 @@ export function createInitialSchema({
       ? 'sectioned'
       : formType === 'conversational'
       ? 'conversational'
-      : formType === 'payment'
-      ? 'payment'
       : 'regular';
 
   const base = {

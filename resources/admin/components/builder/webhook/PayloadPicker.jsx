@@ -30,11 +30,11 @@ export function payloadMode(settings) {
 }
 
 /** The ticks that apply to the stored settings, for any mode. */
-export function currentSelection(settings, fields, hasPayment) {
+export function currentSelection(settings, fields, addonGroups) {
   const mode = payloadMode(settings);
-  if (mode === 'selected') return cleanSelection(settings.payload_selection, fields, hasPayment);
+  if (mode === 'selected') return cleanSelection(settings.payload_selection, fields, addonGroups);
   if (mode === 'full') return fullSelection(fields);
-  const converted = templateToSelection(settings.custom_payload || '', fields, hasPayment);
+  const converted = templateToSelection(settings.custom_payload || '', fields, addonGroups);
   return converted.kind === 'selection' ? converted.selection : [];
 }
 
@@ -47,23 +47,23 @@ function Group({ title, children }) {
   );
 }
 
-export default function PayloadPicker({ settings, fields, hasPayment, formId, formTitle, siteUrl, disabled, patch }) {
+export default function PayloadPicker({ settings, fields, addonGroups, formId, formTitle, siteUrl, disabled, patch }) {
   const mode = payloadMode(settings);
   const [view, setView] = useState(mode === 'custom' ? 'json' : 'checkboxes');
   const [jsonText, setJsonText] = useState(() => (mode === 'custom' ? settings.custom_payload || '' : ''));
   const [jsonError, setJsonError] = useState('');
 
-  const entry = useMemo(() => sampleEntry({ formId, formTitle, siteUrl }), [formId, formTitle, siteUrl]);
-  const selection = currentSelection(settings, fields, hasPayment);
+  const entry = useMemo(() => sampleEntry({ formId, formTitle, siteUrl }, addonGroups), [formId, formTitle, siteUrl, addonGroups]);
+  const selection = currentSelection(settings, fields, addonGroups);
   const picked = new Set(selection);
 
-  const setSelection = (next) => patch({ payload_mode: 'selected', payload_selection: cleanSelection(next, fields, hasPayment) });
+  const setSelection = (next) => patch({ payload_mode: 'selected', payload_selection: cleanSelection(next, fields, addonGroups) });
   const toggle = (key, on) => setSelection(on ? [...selection, key] : selection.filter((k) => k !== key));
   const answerKeys = fields.map((f) => FIELD_PREFIX + f.key);
   const allAnswersOn = answerKeys.length > 0 && answerKeys.every((k) => picked.has(k));
 
   // What the JSON view says about itself.
-  const asSelection = view === 'json' ? templateToSelection(jsonText, fields, hasPayment) : null;
+  const asSelection = view === 'json' ? templateToSelection(jsonText, fields, addonGroups) : null;
   const isCustom = view === 'json' && asSelection && asSelection.kind === 'custom';
 
   const openJson = () => {
@@ -112,7 +112,7 @@ export default function PayloadPicker({ settings, fields, hasPayment, formId, fo
     preview = buildPreview(selection, fields, entry);
   }
 
-  const groups = keyGroups().filter((g) => g.id !== 'payment' || hasPayment);
+  const groups = keyGroups(addonGroups);
 
   return (
     <div className='sf-webhook-data'>

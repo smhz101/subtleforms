@@ -2,8 +2,8 @@ import { describeSaveError } from './saveErrors';
 
 describe('describeSaveError (QA-03)', () => {
   it('names the setting at fault', () => {
-    const body = { error: { message: 'Validation failed', meta: { fields: { 'schema.metadata.payment': 'Choose an amount.' } } } };
-    expect(describeSaveError(body, 422)).toBe('Payment settings: Choose an amount.');
+    const body = { error: { message: 'Validation failed', meta: { fields: { 'schema.metadata.confirmation': 'Add a message.' } } } };
+    expect(describeSaveError(body, 422)).toBe('Confirmation settings: Add a message.');
     expect(describeSaveError({ error: { meta: { fields: { 'schema.actions.0.settings.to': 'Bad address' } } } })).toBe('Notifications & actions: Bad address');
   });
   it('names the field setting that is too long', () => {

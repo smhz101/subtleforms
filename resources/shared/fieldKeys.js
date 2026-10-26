@@ -5,7 +5,7 @@
  * A field's ID is the key its answers are stored under. It appears in merge
  * tags ({email}, {{email}}, {field:email}, {name.first}), calculation
  * formulas ({quantity} * {price}), conditional logic rules, integration
- * field maps and payment settings. Renaming a field updates all of them in
+ * field maps and add-on settings. Renaming a field updates all of them in
  * the same change, so nothing points at the old ID afterwards.
  *
  * The server applies the same rules (SubtleForms\Support\SchemaValidator).
@@ -16,7 +16,7 @@ export const FIELD_KEY_MAX = 64;
 
 /**
  * Names a field ID cannot take: values the browser sends with every entry
- * (spam checks, CAPTCHA tokens, the payment reference), request parameters,
+ * (spam checks, CAPTCHA tokens), request parameters,
  * and the global merge tags, which would hide the field's answer.
  */
 export const RESERVED_FIELD_KEYS = [
@@ -213,9 +213,8 @@ const REFERENCE_PROPS = new Set([
 
 /**
  * Properties that hold a field ID only inside a given part of the schema:
- * the email marketing and CRM identity fields (metadata.integrations), and
- * the billing details an add-on WooCommerce checkout takes from the
- * form (metadata.payment.billing).
+ * identity fields in add-on integration settings (metadata.integrations) and
+ * billing details in add-on settings (metadata.payment.billing).
  */
 const CONTEXT_PROPS = {
   integrations: new Set(['email', 'first_name', 'last_name', 'phone', 'company']),
@@ -255,7 +254,7 @@ export function renameKeyInText(text, oldKey, newKey) {
 /**
  * Rename a field's ID everywhere in a form schema: the field itself, logic
  * rules, merge tags and formulas in any text, integration field maps and
- * payment settings. Entries are not touched; their answers stay under the
+ * add-on settings. Entries are not touched; their answers stay under the
  * old ID.
  *
  * Only the selected field is renamed. A field inside a Repeater lives in

@@ -41,7 +41,7 @@ export default function BuilderCanvasArea({
     <>
       <AddonFieldsNotice featuresUsed={missingAddonFields} limited={limitedFeatures} paymentForm={paymentMissing} />
 
-      {/* Notes from add-ons about the form being built (for example how a payment form takes money). */}
+      {/* Notes from add-ons about the form being built (for example how the form is handled). */}
       {view === 'build' && <ExtensionSlot name='builder.canvas.notes' schema={draftSchema} />}
 
       {saveError && (

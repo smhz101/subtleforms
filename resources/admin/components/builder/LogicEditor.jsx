@@ -15,6 +15,7 @@
 import { Button, SelectControl, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import Icon from '../../ui/Icon';
+import { typeHasFlag } from '../../utils/fieldTypeFlags';
 import { nodeLogics, normalizeLogic, isBasic, VALUELESS_OPERATORS } from '../../../shared/conditions';
 import { getLogicEditor } from '../../../shared/extend';
 import { logicOperatorsFor, logicValueChoices } from '../../../shared/logicFields';
@@ -60,7 +61,7 @@ export function countRules(logic) {
 
 const LAYOUT_TYPES = [
   'step', 'section', 'section_break', 'html', 'form_step', 'page_break', 'hidden_price',
-  'payment_summary', 'payment_card', 'captcha', 'recaptcha', 'honeypot', 'action_hook',
+  'captcha', 'recaptcha', 'honeypot', 'action_hook',
 ];
 
 /**
@@ -72,7 +73,7 @@ export function collectLogicFields(nodes, out = []) {
     if (!n || typeof n !== 'object') return;
     const cfg = n.config && typeof n.config === 'object' ? { ...n, ...n.config } : n;
     const type = n.type || '';
-    if (cfg.key && !LAYOUT_TYPES.includes(type) && !type.includes('container')) {
+    if (cfg.key && !LAYOUT_TYPES.includes(type) && !typeHasFlag(type, 'noAnswer') && !type.includes('container')) {
       out.push({ key: cfg.key, label: cfg.label || cfg.key, type, options: cfg.options, onValue: cfg.onValue, offValue: cfg.offValue });
     }
     collectLogicFields(n.children, out);

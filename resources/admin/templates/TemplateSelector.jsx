@@ -6,7 +6,7 @@ import { useTemplates } from '../data';
 import clsx from 'clsx';
 import Icon from '../ui/Icon';
 import { formTypeLabel } from '../utils/formTypeChoices';
-import { TEMPLATE_CATEGORIES } from './index';
+import { templateCategories } from './index';
 
 export default function TemplateSelector({
   onSelectTemplate,
@@ -47,12 +47,7 @@ export default function TemplateSelector({
     onSelectTemplate(template);
   };
 
-  const getFormTypeLabel = (type) => {
-    if (type === 'payment') {
-      return __('Payment', 'subtleforms');
-    }
-    return formTypeLabel(type);
-  };
+  const getFormTypeLabel = (type) => formTypeLabel(type);
 
   return (
     <div className='sf-template-selector'>
@@ -70,7 +65,7 @@ export default function TemplateSelector({
       <div className='sf-template-selector__content'>
         {/* Left: Categories */}
         <div className='sf-template-selector__categories'>
-          {TEMPLATE_CATEGORIES.map((category) => (
+          {templateCategories(templates).map((category) => (
             <button
               key={category.id}
               type='button'

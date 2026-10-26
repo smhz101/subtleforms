@@ -383,13 +383,13 @@ describe('2.3.2: label visibility, help text placement and container labels', ()
   });
 });
 
-describe('PAY-18: Fixed Fee is not drawn on the form', () => {
-  it('prints no label and no help text', () => {
+describe('P1-01: an add-on type with nothing to answer is not drawn', () => {
+  it('prints no label and no help text when isAnswerable says no', () => {
+    registerFieldType('example_fee', { component: () => <p>fee</p>, input: false, isAnswerable: () => false });
     const { container, unmount } = render({
-      type: 'payment_hidden_price',
+      type: 'example_fee',
       key: 'fee',
       label: 'Processing fee',
-      amount: 2,
       description: 'Optional description for debugging',
     });
     expect(container.innerHTML).toBe('');

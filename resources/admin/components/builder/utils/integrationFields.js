@@ -8,6 +8,7 @@
 
 import { adminLabel } from '../../../../shared/fieldDisplay';
 import { __, sprintf } from '@wordpress/i18n';
+import { typeHasFlag } from '../../../utils/fieldTypeFlags';
 
 const LAYOUT_TYPES = new Set([
   'html',
@@ -29,13 +30,12 @@ const LAYOUT_TYPES = new Set([
   'turnstile',
   'action_hook',
   'save_resume',
-  'payment_summary',
 ]);
 
 const NAME_TYPES = new Set(['name_group', 'name']);
 const CONSENT_TYPES = new Set(['consent', 'checkbox', 'toggle']);
 
-const isLayout = (type) => LAYOUT_TYPES.has(type) || /_container$/.test(type || '');
+const isLayout = (type) => LAYOUT_TYPES.has(type) || /_container$/.test(type || '') || typeHasFlag(type, 'noAnswer');
 
 /**
  * Flatten a field tree into answer-bearing fields.

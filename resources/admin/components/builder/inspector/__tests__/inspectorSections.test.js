@@ -2,7 +2,7 @@
  * Inspector panels for layout blocks (FA-02) and the Fixed Fee Logic tab
  * (PAY-02).
  */
-import { resolveControls, controlSection, hasSection, LOGIC_ONLY_TYPES } from '../controlSections';
+import { resolveControls, controlSection, hasSection, LOGIC_ONLY_TYPES, isLogicOnlyType } from '../controlSections';
 
 const notice = {
   meta: { category: 'layout' },
@@ -38,8 +38,15 @@ describe('FA-02: layout block settings land in a drawn panel', () => {
   });
 });
 
-describe('PAY-02: Fixed Fee has a Logic tab', () => {
-  it('lists the Fixed Fee with the other logic-only types', () => {
-    expect(LOGIC_ONLY_TYPES).toContain('payment_hidden_price');
+describe('Logic-only add-on types (PAY-02, P1-01)', () => {
+  afterEach(() => {
+    delete window.subtleformsAdmin;
+  });
+  it('a type is logic-only when the server says its definition is', () => {
+    expect(LOGIC_ONLY_TYPES).not.toContain('payment_hidden_price');
+    expect(isLogicOnlyType('example_fee')).toBe(false);
+    window.subtleformsAdmin = { fieldTypeFlags: { example_fee: { logicOnly: true } } };
+    expect(isLogicOnlyType('example_fee')).toBe(true);
+    expect(isLogicOnlyType('html')).toBe(true);
   });
 });

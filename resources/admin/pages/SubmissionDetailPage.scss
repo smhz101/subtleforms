@@ -556,50 +556,11 @@ $pipe-status-colors: (
 }
 
 
-// ── Order (2.1) ────────────────────────────────────────────────────────────
-.sf-order-panel {
-	&__items {
-		margin: 0 0 8px;
-		padding: 0;
-		list-style: none;
-
-		li {
-			display: flex;
-			justify-content: space-between;
-			gap: 12px;
-			padding: 4px 0;
-			font-size: var(--sf-text-sm);
-		}
-	}
-
-	&__muted { color: var(--sf-text-muted); }
-
-	&__totals {
-		display: grid;
-		grid-template-columns: 1fr auto;
-		gap: 4px 12px;
-		margin: 0;
-		padding-top: 8px;
-		border-top: 1px dashed var(--sf-border);
-		font-size: var(--sf-text-sm);
-
-		dt, dd { margin: 0; }
-		dd { text-align: end; font-variant-numeric: tabular-nums; }
-		.is-total {
-			margin-top: 4px;
-			padding-top: 8px;
-			border-top: 1px solid var(--sf-border);
-			font-weight: var(--sf-weight-semibold);
-			color: var(--sf-text);
-		}
-	}
-
-	&__ref {
-		margin: 12px 0 0;
-		font-size: 12px;
-
-		a { display: inline-flex; align-items: center; gap: 4px; }
-	}
+// ── Recorded payment (display of saved data) ───────────────────────────────
+.sf-recorded-panel__note {
+	margin: 8px 0 0;
+	font-size: 12px;
+	color: var(--sf-text-muted);
 }
 
 // ── 2.3.0: notes, multi-line and rich answers ──────────────────────────────
