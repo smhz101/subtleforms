@@ -51,7 +51,7 @@ class OutdatedAddOnGuardTest extends TestCase {
 		$this->assertSame( '2.5.0', OutdatedAddOnGuard::blocked_version() );
 
 		$html = $this->notice( self::factory_user( 'administrator' ) );
-		$this->assertStringContainsString( 'SubtleForms Pro 2.5.0 is not compatible with this version of SubtleForms. Update SubtleForms Pro to version 2.7.0 or later.', $html );
+		$this->assertStringContainsString( 'SubtleForms Pro 2.5.0 is not compatible with this version of SubtleForms. Update SubtleForms Pro to version 2.8.0 or later.', $html );
 		$this->assertDoesNotMatchRegularExpression( '/licen[sc]e|upgrade|buy|purchase|price/i', $html );
 	}
 
@@ -71,7 +71,7 @@ class OutdatedAddOnGuardTest extends TestCase {
 	}
 
 	public function test_every_released_old_build_is_blocked(): void {
-		foreach ( array( '2.4.0', '2.4.1', '2.4.2', '2.5.0', '2.6.0', '2.6.9' ) as $version ) {
+		foreach ( array( '2.4.0', '2.4.1', '2.4.2', '2.5.0', '2.6.0', '2.6.9', '2.7.0', '2.7.1' ) as $version ) {
 			remove_action( 'plugins_loaded', 'subtleforms_pro_init', 20 );
 			add_action( 'plugins_loaded', 'subtleforms_pro_init', 20 );
 			OutdatedAddOnGuard::apply( $version );
@@ -80,7 +80,7 @@ class OutdatedAddOnGuardTest extends TestCase {
 	}
 
 	public function test_a_compatible_add_on_is_left_alone(): void {
-		foreach ( array( '2.7.0', '2.7.1', '2.10.0', '3.0.0' ) as $version ) {
+		foreach ( array( '2.8.0', '2.8.1', '2.10.0', '3.0.0' ) as $version ) {
 			OutdatedAddOnGuard::apply( $version );
 			$this->assertSame( 20, has_action( 'plugins_loaded', 'subtleforms_pro_init' ), $version );
 			$this->assertSame( '', OutdatedAddOnGuard::blocked_version(), $version );

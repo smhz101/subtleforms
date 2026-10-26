@@ -4,10 +4,12 @@
  * starting.
  *
  * Add-on builds before 2.7.0 depend on a PHP interface that this plugin no
- * longer ships, so starting them ends the request with a fatal error. This
- * guard removes only the add-on's start-up callback for the current request.
- * It does not deactivate anything, change any option or look at any account
- * data. Once the add-on is updated to the minimum version it starts normally.
+ * longer ships, so starting them ends the request with a fatal error. Build
+ * 2.7.0 needs extension level 2 and imports pricing modules that this plugin
+ * no longer ships, so it cannot work either. This guard removes only the
+ * add-on's start-up callback for the current request. It does not deactivate
+ * anything, change any option or look at any account data. Once the add-on is
+ * updated to the minimum version it starts normally.
  *
  * @package SubtleForms\Compat
  */
@@ -26,7 +28,7 @@ class OutdatedAddOnGuard {
 	/**
 	 * First SubtleForms Pro version that works with this plugin.
 	 */
-	public const MIN_PRO_VERSION = '2.7.0';
+	public const MIN_PRO_VERSION = '2.8.0';
 
 	/**
 	 * Function every older Pro build hooks to start itself.
