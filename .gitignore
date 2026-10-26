@@ -89,3 +89,4 @@ pnpm-lock.yaml
 .webpack/
 .DS_Store
 storybook-static/
+THIRD-PARTY-NOTICES.txt
