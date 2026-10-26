@@ -317,7 +317,7 @@ function Transfer( { forms, busy, setBusy, tell } ) {
             <h2 className='sf-panel__title'>{ __( 'Submissions', 'subtleforms' ) }</h2>
             <p className='sf-panel__subtitle'>{ sprintf(
               /* translators: %s: plugin name */
-              __( 'JSON import and export move entries between %s sites. Passwords are left out. Notes, IP address, browser, uploaded files, logs and unpublished draft changes are not in the file. Status, read and starred state, and order and payment details are kept. Importing the same file again skips entries that are already there. A file from another form still imports and says which form it came from. A form with more than 2,000 submissions is not exported in part. Export CSV makes a spreadsheet file.', 'subtleforms' ),
+              __( 'JSON import and export move entries between %s sites. Passwords are left out. Notes, IP address, browser, uploaded files, logs and unpublished draft changes are not in the file. Status, read and starred state, and all other saved entry data, including data added by other plugins, are kept. Importing the same file again skips entries that are already there. A file from another form still imports and says which form it came from. A form with more than 2,000 submissions is not exported in part. Export CSV makes a spreadsheet file.', 'subtleforms' ),
               getBranding().name
             ) }</p>
           </div>
