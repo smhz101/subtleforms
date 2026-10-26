@@ -333,6 +333,8 @@ export function formIntegrations() {
  *   fields         Every field of the form, flattened.
  *   values         Current answers.
  *   hidden         Set of keys hidden by conditional logic.
+ *   hiddenNodes    Set of the schema's own field objects that logic hides, in
+ *                  a skipped step or container too, fields without a key included.
  *   submitCount    Raised after each successful submit (reset your state).
  *   onBeforeSubmit(fn)  Register `async ({ payload, formId, restUrl, nonce }) => result`.
  *                  It may change `payload`. Return { stop: true, message } to

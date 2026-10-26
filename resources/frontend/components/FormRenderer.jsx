@@ -7,7 +7,7 @@ import { collectLeafInputPaths, collectContainerKeys } from '../utils/schemaLeav
 import { columnFields, flattenSchemaFields } from '../utils/columnFields';
 import { collectDefaultValues } from '../utils/defaults';
 import { computeValues } from '../../shared/extend';
-import { computeLogicState, pickConfirmation } from '../../shared/conditions';
+import { computeLogicState, hiddenNodes, pickConfirmation } from '../../shared/conditions';
 import {
   validateFields,
 } from '../utils/fieldValidation';
@@ -561,6 +561,12 @@ export default function FormRenderer({
   const setSubmitLabel = useCallback((label) => {
     setWrapperSubmitLabel(typeof label === 'string' && label.trim() ? label : null);
   }, []);
+  // The nodes logic hides, including fields without a key and everything in
+  // a skipped step. Worked out only when an add-on wraps the form.
+  const wrapperHiddenNodes = useMemo(
+    () => (formWrappers.length ? hiddenNodes(schema || {}, values).nodes : new Set()),
+    [formWrappers, schema, values]
+  );
   const wrapperForm = useMemo(
     () => ({
       formId,
@@ -569,11 +575,12 @@ export default function FormRenderer({
       fields: allFields,
       values,
       hidden: hiddenFields,
+      hiddenNodes: wrapperHiddenNodes,
       submitCount,
       onBeforeSubmit,
       setSubmitLabel,
     }),
-    [formId, preview, schema, allFields, values, hiddenFields, submitCount, onBeforeSubmit, setSubmitLabel]
+    [formId, preview, schema, allFields, values, hiddenFields, wrapperHiddenNodes, submitCount, onBeforeSubmit, setSubmitLabel]
   );
 
   // Form details for fields that talk to the server (uploads).
