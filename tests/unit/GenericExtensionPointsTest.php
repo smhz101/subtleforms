@@ -60,4 +60,21 @@ final class GenericExtensionPointsTest extends TestCase {
 		$submit = (string) file_get_contents( $root . '/src/Api/PublicSubmitApi.php' );
 		$this->assertStringNotContainsString( 'payment', strtolower( preg_replace( '/subtleforms\/submit\/(price|finish)_order/', '', $submit ) ) );
 	}
+
+	/** RCOMP-01: Free holds no catalogue of an add-on's field types and no payment panel. */
+	public function test_free_names_no_add_on_field_types_or_payment_panel(): void {
+		$root = dirname( __DIR__, 2 );
+		foreach ( array( 'src/Fields/FieldTypeAvailability.php', 'src/Engine/FormRestrictions.php', 'resources/admin/utils/addonFields.js', 'resources/admin/components/AddonFieldsNotice.jsx' ) as $file ) {
+			$source = strtolower( (string) file_get_contents( $root . '/' . $file ) );
+			$this->assertStringNotContainsString( 'payment_', $source, $file );
+			$this->assertStringNotContainsString( 'coupon', $source, $file );
+		}
+		$transfer = strtolower( (string) file_get_contents( $root . '/src/Tools/TransferPackage.php' ) . (string) file_get_contents( $root . '/src/Tools/TransferService.php' ) );
+		$this->assertStringNotContainsString( 'paymentmeta', $transfer );
+		$this->assertStringNotContainsString( 'payment_meta', $transfer );
+		$detail = (string) file_get_contents( $root . '/resources/admin/pages/SubmissionDetailPage.jsx' );
+		$this->assertStringNotContainsString( 'Recorded payment', $detail );
+		$this->assertStringNotContainsString( 'meta.payment', $detail );
+		$this->assertFileDoesNotExist( $root . '/src/Fields/AddonFieldTypes.php' );
+	}
 }

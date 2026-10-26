@@ -556,13 +556,6 @@ $pipe-status-colors: (
 }
 
 
-// ── Recorded payment (display of saved data) ───────────────────────────────
-.sf-recorded-panel__note {
-	margin: 8px 0 0;
-	font-size: 12px;
-	color: var(--sf-text-muted);
-}
-
 // ── 2.3.0: notes, multi-line and rich answers ──────────────────────────────
 .sf-answers__text--multiline {
 	white-space: pre-wrap;

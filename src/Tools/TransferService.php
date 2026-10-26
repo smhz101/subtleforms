@@ -329,8 +329,8 @@ final class TransferService {
 						'created_at' => (string) ( $row['created_at'] ?? '' ),
 						'payload'    => TransferPackage::withoutSecrets( $payload, $keys ),
 					),
-					// The order and payment record go with the entry (PAY2-01).
-					TransferPackage::paymentMeta( $meta )
+					// Records an add-on asked to carry with the entry.
+					TransferPackage::entryMeta( $meta )
 				);
 			}
 			$offset += 200;

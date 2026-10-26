@@ -23,8 +23,8 @@ final class TransferPackage {
 	public const MAX_FORMS       = 100;
 	public const MAX_SUBMISSIONS = 2000;
 
-	/** Entry meta that travels with a submission: the order and its payment. */
-	public const PAYMENT_META = array( 'order', 'payment' );
+	/** Entry meta keys this plugin writes itself and never takes from a file. */
+	private const RESERVED_META = array( 'import', 'notes', 'consents' );
 
 	/**
 	 * A forms package.
@@ -164,7 +164,7 @@ final class TransferPackage {
 				'starred'    => empty( $row['starred'] ) ? 0 : 1,
 				'created_at' => self::timestamp( (string) ( $row['created_at'] ?? '' ) ),
 				'payload'    => $row['payload'],
-				'meta'       => self::paymentMeta( $row ),
+				'meta'       => self::entryMeta( $row ),
 			);
 		}
 		if ( ! $clean ) {
@@ -180,16 +180,42 @@ final class TransferPackage {
 	}
 
 	/**
-	 * The order and payment record of an exported entry, cleaned for storage
-	 * (PAY2-01): order lines, coupon and totals, and the payment status,
-	 * gateway, transaction ID, amount, currency and mode.
+	 * Entry meta keys an add-on asks to travel with an exported entry. This
+	 * plugin has none of its own: the export carries the answers, the status
+	 * and the dates. Entry meta also holds the visitor's address and browser,
+	 * which an export must not copy unless an add-on names a record it owns.
+	 *
+	 * @return string[]
+	 */
+	public static function entryMetaKeys(): array {
+		/**
+		 * Entry meta records that go into an export and come back on import.
+		 *
+		 * @since 2.7.2
+		 *
+		 * @param string[] $keys Meta keys. Each holds an array. Default: none.
+		 */
+		$keys = apply_filters( 'subtleforms/transfer/entry_meta_keys', array() );
+		$out  = array();
+		foreach ( (array) $keys as $key ) {
+			if ( is_string( $key ) && '' !== $key && sanitize_key( $key ) === $key && ! in_array( $key, self::RESERVED_META, true ) ) {
+				$out[ $key ] = $key;
+			}
+		}
+		return array_values( $out );
+	}
+
+	/**
+	 * The records an add-on named in subtleforms/transfer/entry_meta_keys, taken
+	 * from an exported row (or a stored entry's meta) and cleaned for storage:
+	 * text is sanitised, numbers and booleans kept, nesting limited.
 	 *
 	 * @param array $row Exported row (or a stored entry's meta).
-	 * @return array{order?: array, payment?: array}
+	 * @return array<string, array>
 	 */
-	public static function paymentMeta( array $row ): array {
+	public static function entryMeta( array $row ): array {
 		$out = array();
-		foreach ( self::PAYMENT_META as $key ) {
+		foreach ( self::entryMetaKeys() as $key ) {
 			if ( isset( $row[ $key ] ) && is_array( $row[ $key ] ) && $row[ $key ] ) {
 				$out[ $key ] = self::cleanRecord( $row[ $key ], 0 );
 			}

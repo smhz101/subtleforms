@@ -18,7 +18,6 @@ import AdminShell from '../components/AdminShell';
 import { apiClient } from '../data';
 import Icon from '../ui/Icon';
 import ExtensionSlot from '../components/ExtensionSlot';
-import { getSlotItems } from '../../shared/extend';
 import './SubmissionDetailPage.scss';
 
 // ─── Pipeline timeline helpers ──────────────────────────────────────────────
@@ -30,23 +29,6 @@ const ACTION_META = {
   email_marketing: { iconName: 'Mail',     label: 'Email Marketing' },
   crm:     { iconName: 'Users',    label: 'CRM' },
   pdf:     { iconName: 'FileText', label: 'Entry PDF' },
-};
-
-/**
- * A saved amount with its currency code, for entries that recorded one.
- * Display only: nothing is worked out here.
- */
-const recordedAmount = ( amount, currency ) => {
-  const value = Number( amount );
-  if ( ! Number.isFinite( value ) ) return '';
-  const code = String( currency || '' ).toUpperCase();
-  try {
-    return code
-      ? new Intl.NumberFormat( undefined, { style: 'currency', currency: code } ).format( value )
-      : new Intl.NumberFormat( undefined, { minimumFractionDigits: 2 } ).format( value );
-  } catch ( e ) {
-    return `${ value } ${ code }`.trim();
-  }
 };
 
 const getActionMeta = ( actionType ) =>
@@ -1072,36 +1054,8 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
             </div>
           </section>
 
-          {/* Panels from add-ons (submission.panels slot). Without one, a
-              payment an entry recorded is shown as it was saved. */}
-          { getSlotItems( 'submission.panels' ).length > 0 ? (
-            <ExtensionSlot name='submission.panels' submission={ submission } meta={ meta } />
-          ) : meta.payment && typeof meta.payment === 'object' && (
-            <section className='sf-panel sf-recorded-panel'>
-              <header className='sf-panel__header'>
-                <h2 className='sf-panel__title'>{ __( 'Recorded payment', 'subtleforms' ) }</h2>
-              </header>
-              <div className='sf-panel__body'>
-                <dl className='sf-kv'>
-                  <dt>{ __( 'Status', 'subtleforms' ) }</dt>
-                  <dd>{ String( meta.payment.status || '' ) || __( 'Not recorded', 'subtleforms' ) }</dd>
-                  { meta.payment.amount !== undefined && (
-                    <>
-                      <dt>{ __( 'Amount', 'subtleforms' ) }</dt>
-                      <dd>{ recordedAmount( meta.payment.amount, meta.payment.currency || meta.order?.currency ) }</dd>
-                    </>
-                  ) }
-                  { meta.payment.transaction_id && (
-                    <>
-                      <dt>{ __( 'Reference', 'subtleforms' ) }</dt>
-                      <dd><code>{ String( meta.payment.transaction_id ) }</code></dd>
-                    </>
-                  ) }
-                </dl>
-                <p className='sf-recorded-panel__note'>{ __( 'Saved with the entry. It is shown as it was recorded.', 'subtleforms' ) }</p>
-              </div>
-            </section>
-          ) }
+          {/* Panels from add-ons (submission.panels slot). */}
+          <ExtensionSlot name='submission.panels' submission={ submission } meta={ meta } />
           <section className='sf-panel'>
             <header className='sf-panel__header'>
               <h2 className='sf-panel__title'>{ __( 'Details', 'subtleforms' ) }</h2>
