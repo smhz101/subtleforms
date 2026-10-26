@@ -1,6 +1,6 @@
 # Hooks for add-ons
 
-This page lists the hooks an add-on such as SubtleForms Pro uses to add field types, prices and computed values. Everything the free plugin ships works without any of them.
+This page lists the hooks an add-on such as SubtleForms Pro uses to add field types, computed values and its own steps around a submission. Everything the free plugin ships works without any of them, and none of them carries a feature of its own.
 
 ## Field types (PHP)
 
@@ -9,19 +9,32 @@ This page lists the hooks an add-on such as SubtleForms Pro uses to add field ty
 | `subtleforms/fields/register` | action `( FieldRegistry $registry )` | Register a `FieldDefinition`. Fires before the free types are added, so an add-on can also replace one. |
 | `subtleforms/fields/validate_value` | filter `( ?string $error, string $type, mixed $value, array $field )` | Return an error message for a bad value of your type, or null. |
 | `subtleforms/fields/non_input_types` | filter `( string[] $types )` | Types that never collect an answer, so they cannot be required. |
-| `subtleforms/fields/addon_types` | filter `( string[] $types )` | Types that exist only while an add-on registers them. Default: `signature`, `calculation`, `payment_card`, `payment_product`, `payment_choice`, `payment_amount`, `payment_summary`, `payment_coupon`, `payment_hidden_price`. When the type is not registered, the live form leaves those fields out and the builder shows a note. A payment type makes the whole form unavailable instead. |
+| `subtleforms/fields/addon_types` | filter `( string[] $types )` | Types that exist only while an add-on registers them. The default lists the add-on types that forms saved with earlier versions may contain (`signature`, `calculation` and the `payment_*` types), so those forms keep loading. When the type is not registered, the live form leaves those fields out and the builder shows a note. A saved `payment_*` field makes the whole form unavailable instead ("This form is not available right now."). |
+| `subtleforms/fields/no_answer_types` | filter `( string[] $types )` | Add-on types that show something but hold no answer. Entries, emails, webhooks, merge tags, logic rules and the "has an input field" check leave them out. Since 2.7.2. |
 | `subtleforms/public_schema` | filter `( array $schema, int $formId )` | The schema sent to the browser to render a form. |
 
-## Computed values and prices (PHP)
+Field definitions an add-on registers may set these `meta` keys, which the builder reads (sent as `subtleformsAdmin.fieldTypeFlags`): `noMessages` (no required or error messages), `logicOnly` (shown or hidden by logic, takes no answer), `notInRepeater` (cannot go inside a Repeater), `logicHelp` (the intro of the Logic tab). Name a library section with `registerFieldCategory` (JavaScript).
+
+## Computed values (PHP)
 
 | Hook | Type | Use |
 | --- | --- | --- |
-| `subtleforms/submission/computed_values` | filter `( array $payload, array $schema )` | Work out computed fields (Pro Calculation) from the submitted values. Runs before conditional logic, validation, pricing and storage, and before payment quotes. Use `PublicSubmitApi::COMPUTE_ERROR` for a value that cannot be worked out; it is never stored. |
-| `subtleforms/payments/is_priced` | filter `( bool $priced, array $schema )` | Return true when your field type makes the form take money. |
-| `subtleforms/payments/line_items` | filter `( array $items, array $schema, array $payload )` | Add order lines for your field type. Each line: `key`, `label`, `qty`, `unit`, `amount`. |
-| `subtleforms/payments/card_minimum` | filter `( float $min, string $currency )` | The smallest card charge for a currency. Defaults to Stripe's published figure; raise it when the account settles in another currency. |
-| `subtleforms/payments/quote` | filter `( array $quote, array $schema, array $payload )` | The final order. Set `formula_error` to true when a charged amount cannot be worked out; the submission is then refused and nothing is charged. |
-| `subtleforms/payment/verify` | filter `( array\|WP_Error\|null $result, array $quote, array $payload, int $formId, array $schema )` | Gateways confirm the payment here. |
+| `subtleforms/submission/computed_values` | filter `( array $payload, array $schema )` | Work out computed fields (Pro Calculation) from the submitted values, or drop values your display-only types never take. Runs before conditional logic, validation and storage. Use `PublicSubmitApi::COMPUTE_ERROR` for a value that cannot be worked out; it is never stored. |
+
+## Answers on screen, in emails and exports (PHP)
+
+| Hook | Type | Use |
+| --- | --- | --- |
+| `subtleforms/format/answer` | filter `( ?string $text, mixed $value, array $field, array $context )` | Format an answer of your field type. Return a string, or null to let the plugin format it. Since 2.7.2. |
+| `subtleforms/format/items` | filter `( ?array $items, array $value, array $field, array $context )` | Format a list answer of your field type, one string per item. Since 2.7.2. |
+| `subtleforms/format/context` | filter `( array $context, mixed $schema, ?array $submission )` | Add what your formatter needs to the display context. `$context['submission_id']` is set when the answers are one entry's. Since 2.7.2. |
+
+## Webhook data (PHP)
+
+| Hook | Type | Use |
+| --- | --- | --- |
+| `subtleforms/webhooks/payload_groups` | filter `( array $groups, array $schema )` | Extra groups of the "selected" payload: group name to keys. Each key starts with the group name and an underscore and is sent under the group without that prefix. Since 2.7.2. |
+| `subtleforms/webhooks/entry_values` | filter `( array $values, ?SubmissionContext $context, array $schema )` | Values for those keys (also the `{{entry:key}}` tags). A null context means the sample in the builder. Since 2.7.2. |
 
 ## Field types (JavaScript)
 
@@ -29,8 +42,12 @@ Add-on scripts call these on `window.SubtleFormsExtend`. Load your script after 
 
 | Function | Use |
 | --- | --- |
-| `registerFieldType( type, { component, input, isAnswerable } )` | The live form renderer for your type. `isAnswerable( config )` returns false when a field has nothing to show. |
-| `registerPricedType( type, fn, { isPriced } )` | Order lines for the live summary: `fn( config, value, { currency } )` returns `[ { label, qty, unit } ]`, or `{ error: true }`. `isPriced( config )` says whether a field charges money (default: always). |
+| `registerFieldType( type, { component, input, isAnswerable, validate } )` | The live form renderer for your type. `isAnswerable( config )` returns false when a field has nothing to show. `validate( value, config )` returns an error message for a non-empty answer, or null. |
+| `registerFormWrapper( id, Component )` | Wrap every public form. `Component` gets `{ form, children }` and renders `children`. `form`: `formId`, `preview`, `schema`, `fields`, `values`, `hidden`, `submitCount`, `onBeforeSubmit( fn )` (fn gets `{ payload, formId, restUrl, nonce }`, may change `payload`, and returns `{ stop: true, message }` to stop the submit; returns an unregister function) and `setSubmitLabel( label )`. Since 2.7.2. |
+| `registerChoiceType( type, { multiple( field ), attributes, bulkHelp } )` | Give your type the builder's options editor, with extra inputs on each option (`attributes`: `{ key, label, inputType, placeholder, step, min, defaultValue }`). Since 2.7.2. |
+| `registerFieldIcon( type, Component )` | The builder icon of your type. Since 2.7.2. |
+| `registerFieldCategory( key, label )` | The name of a field library section your types use. Since 2.7.2. |
+| `registerPayloadGroup( id, { title, keys: [ { key, label, sample } ], appliesTo( fields ) } )` | An extra group in the Webhook action's "selected" data (see the PHP filters above). Since 2.7.2. |
 | `registerValueComputer( fn )` | `fn( fields, values )` returns the values with computed fields filled in, or the same object when nothing changed. Runs whenever an answer changes. |
 | `registerCanvasPreview( type, Component )` | The builder canvas preview. |
 | `registerInspectorControl( type, Component )` | A builder settings control for a PHP `inspectorControls` type (for example `formula`). |
@@ -40,23 +57,23 @@ Add-on scripts call these on `window.SubtleFormsExtend`. Load your script after 
 The Settings screen lists its own tabs, ending with Tools. Add-ons register a tab on `window.SubtleFormsExtend` from a script that loads after the `subtleforms-admin` script on SubtleForms admin pages:
 
 ```js
-window.SubtleFormsExtend.registerSettingsTab( 'mcp', {
-	component: McpSettings, // takes no props
-	title: 'MCP', // optional, overrides the Free title
-	description: '...', // optional, overrides the Free description
+window.SubtleFormsExtend.registerSettingsTab( 'example', {
+	component: ExampleSettings, // takes no props
+	title: 'Example', // required
+	description: '...', // optional
+	group: 'site', // optional: after Tools instead of the Add-ons group
+	order: 10, // optional, default last
+	icon: ExampleIcon, // optional component, default a puzzle piece
 } );
 ```
 
-| Name | Result |
-| --- | --- |
-| `mcp` | Adds the MCP tab right after Tools, with the default title MCP. Without a registration there is no MCP tab. |
-| any other `[a-z0-9-]+` name | Adds a tab to the Add-ons group. `title` is required; `description` and `order` (a number, default last) are optional. |
+A `[a-z0-9-]+` name with a title adds a tab to the Add-ons group, or with `group: 'site'` to the site group after Tools. A tab without a title is not listed.
 
 The tab opens at `admin.php?page=subtleforms-settings#tab=<name>`. The body looks after its own data and saving, so Settings shows no Save button or save bar for it. Tools is part of Settings now: `admin.php?page=subtleforms-tools` redirects to `#tab=tools`.
 
 ## Capabilities
 
-`subtleforms/capabilities` filters the capability map. This plugin never switches its own code off through the map and does not check add-on keys: an extension, field type, action or template an add-on registers is used. Keys such as `fields.advanced`, `actions.payment`, `extensions.*` and `branding.white_label` belong to the add-on that adds them, and only that add-on reads them. The one exception is `extensions.pdf`: when an add-on sets it, the entry screen shows its PDF link.
+`subtleforms/capabilities` filters the capability map. This plugin never switches its own code off through the map and does not check add-on keys: an extension, field type, action or template an add-on registers is used. Keys an add-on adds belong to that add-on, and only that add-on reads them.
 
 ## Moved to Pro in 2.7.0
 
@@ -75,7 +92,7 @@ Picture choice, several files per upload field, advanced conditional logic and f
 | --- | --- | --- |
 | `subtleforms/fields/register` | action `( FieldRegistry $registry )` | Register `picture_choice` with a `FieldDefinition`. Existing hook. |
 | `subtleforms/fields/validate_value` | filter | Validate the type. Existing hook. |
-| `subtleforms/uploads/max_files` | filter `( int $max, array $field )` | Files accepted for one upload field. Default 1. Pro returns the field's own limit. |
+| `subtleforms/uploads/max_files` | filter `( int $max, array $field )` | How many files the control drawn for an upload field sends (1 to 20). The plugin's own upload field sends one; an add-on that draws the field with its own control (`registerFieldOverride`) returns how many that control sends. |
 | `subtleforms/fields/inspector_controls` | filter `( array $controls, string $type )` | Change the settings controls of a field type. Since 2.7.2 this plugin ships no `multiple` control on file uploads; an add-on adds its own toggle and `maxFiles` number here. |
 
 Without Pro, a saved `picture_choice` is shown, checked and stored as a radio group, or as a multiple choice when `allowMultiple` is true. A saved multi-file upload accepts one file, and a request that posts more is refused with "You can attach up to 1 file". Nothing in the saved form JSON is changed.
@@ -113,7 +130,7 @@ Counts already stored in the `subtleforms_stats` and `subtleforms_funnel` tables
 | `registerFormMountHook( fn )` | `fn( { container, formId, config } )` runs when a form mounts on a page (view beacon, funnel tracker). |
 | `registerFieldType`, `registerInspectorControl`, `registerCanvasPreview` | Existing. |
 
-Slots: `reports.panels` and `dashboard.panels` (props: `forms`), `forms.list.column` (`{ component( form ), header, order }`), `settings.extensions` (id is the extension slug), `form.integrations` (props: `schema`, `integrations`, `patch`, `isReadOnly`) and `form.confirmations` (props: `schema`, `onMetadata`, `isReadOnly`).
+Slots: `reports.panels` and `dashboard.panels` (props: `forms`), `forms.list.column` (`{ component( form ), header, order }`), `settings.extensions` (id is the extension slug), `form.integrations` (props: `schema`, `integrations`, `patch`, `isReadOnly`, `fieldOptions`), `form.confirmations` (props: `schema`, `onMetadata`, `isReadOnly`), `form.settings.sections` (`{ component, title, description, icon, order, appliesTo( schema ) }`; props: `schema`, `onChange`, `onMetadata`, `isReadOnly`, `fields`), `builder.canvas.notes` (props: `schema`), `submission.panels` (props: `submission`, `meta`) and `submission.actions` (props: `submission`).
 
 The front end dispatches the `subtleforms:submitted` event on `document` with `detail.formId` after a successful send. Field wrappers carry `data-sf-key` and steps carry `data-sf-step`, which Pro reads for the funnel.
 
@@ -127,18 +144,24 @@ The front end dispatches the `subtleforms:submitted` event on `document` with `d
 
 Since 2.7.2 the gate only reads the capability map. It has no other setter, and an extra constructor argument is ignored. A `Capabilities` map rebuilds itself when callbacks are added to `subtleforms/capabilities` after it was built, so services that hold the gate see an add-on's keys. An add-on decides for itself which of its features are available.
 
-## Orders (PHP, 2.8.0)
+## Submission store hooks (PHP, 2.7.2)
 
-Payments are part of SubtleForms Pro. The free submit route keeps two hooks where the order is priced and finished, and does nothing else with money.
+The submit route lets an add-on take part around storing the entry. The plugin reads only the generic keys named here and does nothing else with the add-on's data.
 
 | Hook | Type | Use |
 | --- | --- | --- |
-| `subtleforms/submit/price_order` | filter `( array\|WP_REST_Response $order, int $formId, mixed $schema, array $payload, WP_REST_Request $request, ?array $logicValues )` | Price the order, check the coupon and confirm payment. The start value is an empty order (`quote`, `coupon`, `payment`, `customer` all empty). Return the order array, or a `WP_REST_Response` to refuse the submission. Anything else is ignored. |
-| `subtleforms/submit/finish_order` | action `( int $submissionId, array $submission, array $order, string $status, ?SubmissionContext $context )` | Fires at each step of a priced order. Status `saved`: the entry is stored and the order has a `payment`; settle it and report with `$context->setMeta( 'order_result', array( 'error' => string ) )` (the visitor gets HTTP 402) or `array( 'payment' => array )`. Status `abandoned` (ID 0): the order will not be stored, release what it holds. Any other status is the final status of the entry; store the order on it and count the coupon. |
+| `subtleforms/submit/before_store` | filter `( array\|WP_REST_Response $hold, int $formId, mixed $schema, array $payload, WP_REST_Request $request, ?array $logicValues )` | The last word before the entry is stored. Return a `WP_REST_Response` to refuse the submission, or an array (the "hold") that is handed back on the hooks below. The plugin reads `defer_actions` (bool: run only the Save step until `after_store` asks for the rest) and `context_meta` (array: values put on the SubmissionContext before the actions run). |
+| `subtleforms/submit/after_store` | action `( int $submissionId, array $submission, array $hold, SubmissionContext $context )` | The entry with a hold is stored. Report with `$context->setMeta( 'store_result', array( ... ) )`: `status` (the entry status to store, default `completed`), `response` (a `WP_REST_Response` to answer the visitor with), `run_deferred` (run the actions that waited) and `context_meta` (values for those actions). |
+| `subtleforms/submit/store_abandoned` | action `( array $hold, int $formId, int $submissionId )` | The entry with a hold is not stored after all (ID 0), or is stored as spam. Release what the hold keeps. |
+| `subtleforms/submit/response` | filter `( array $response, int $submissionId, int $formId, array $hold )` | The JSON the browser gets after a successful submit. Add `redirect` to send the visitor to another page. |
+| `subtleforms/submission/request_keys` | filter `( string[] $keys )` | Keys in a submission's `data` that are request values for your add-on, not answers. They are never stored, emailed or sent, and no field can use them as its ID. |
+| `subtleforms/rest/public_routes` | filter `( string[] $routes )` | Exact REST routes visitors call while filling in a form (a request with a stale nonce is let through as a visitor). |
 
-The free plugin has no other payment hook. Gateways are the add-on's business: how it confirms, captures or voids money is not part of this plugin.
+Deprecated since 2.7.2: `subtleforms/submit/price_order` (fired after `before_store` with the same arguments) and `subtleforms/submit/finish_order` (fired after `after_store` with status `saved` and after `store_abandoned` with status `abandoned`). They carry the same generic hold and nothing else; use the new names.
 
-A form with a payment field and no add-on that registers it is not shown to visitors ("This form is not available right now.") and does not accept entries.
+Entry statuses `payment_pending` and `payment_failed` stay valid stored values, so entries saved with them keep their labels and filters. The entry screen shows a payment an entry recorded (`meta.payment`) as it was saved when no add-on panel is registered in `submission.panels`.
+
+A form with a saved `payment_*` field and no add-on that registers it is not shown to visitors ("This form is not available right now.") and does not accept entries.
 
 ## Spam time token (PHP)
 
