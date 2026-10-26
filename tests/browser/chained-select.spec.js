@@ -80,7 +80,7 @@ test('a Chained Select that is not set up is hidden from visitors and does not b
     await loginPage(page);
     await openBuilder(page, bare.id);
     await page.locator('.sf-field-chrome').nth(1).click();
-    const warning = page.getByText('The dropdowns are not set up yet. Visitors will not see this field until you add them.');
+    const warning = page.getByText('The dropdowns are not set up yet. Visitors will not see this field until you add them.').first();
     await expect(warning).toBeVisible();
     if (process.env.SF_SHOT_DIR) await page.screenshot({ path: `${process.env.SF_SHOT_DIR}/chained-warning.png` });
 
