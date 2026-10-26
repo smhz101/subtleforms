@@ -85,6 +85,30 @@ class IntegrationFollowups280Test extends TestCase {
 		$this->assertSame( 200, $this->submit( $plain, array( 'name' => 'Ada' ) )['status'] );
 	}
 
+	public function test_a_saved_form_with_payment_settings_on_is_not_available_without_an_addon() {
+		// Saved by an earlier version: type `payment`, a fixed amount and no payment field.
+		$repo   = new \SubtleForms\Repositories\FormsRepository();
+		$schema = array(
+			'schema_version' => 1,
+			'metadata'       => array( 'type' => 'payment', 'name' => 'Old', 'title' => 'Old', 'payment' => array( 'enabled' => true, 'amountType' => 'fixed', 'fixedAmount' => '15' ) ),
+			'fields'         => array( array( 'id' => 'e', 'key' => 'email', 'type' => 'email', 'label' => 'Email' ) ),
+		);
+		$form   = $repo->create( array( 'title' => 'Old', 'status' => 'published', 'schema' => $schema ) );
+		$repo->saveSchemaVersion( $form, $schema, true );
+		$this->formIds[] = $form;
+
+		$result = $this->submit( $form, array( 'email' => 'ada@example.test' ) );
+		$this->assertSame( 403, $result['status'], wp_json_encode( $result['data'] ) );
+		$this->assertSame( 'This form is not available right now.', $result['data']['error']['message'] ?? '' );
+
+		// Payment settings that are off do not block the form.
+		$schema['metadata']['payment']['enabled'] = false;
+		$off = $repo->create( array( 'title' => 'Off', 'status' => 'published', 'schema' => $schema ) );
+		$repo->saveSchemaVersion( $off, $schema, true );
+		$this->formIds[] = $off;
+		$this->assertSame( 200, $this->submit( $off, array( 'email' => 'ada@example.test' ) )['status'] );
+	}
+
 	public function test_no_payments_code_is_hinted_for_fields_nobody_registers() {
 		$schema = array( 'fields' => array(
 			array( 'type' => 'date', 'key' => 'd' ),

@@ -70,4 +70,11 @@ describe('needsMissingPayment', () => {
     expect(needsMissingPayment({ fields: [{ type: 'signature' }] }, ['signature', 'payment_amount'])).toBe(false);
     expect(needsMissingPayment(null, ['payment_amount'])).toBe(false);
   });
+
+  test('is true for saved payment settings that are on while the card field is missing', () => {
+    const saved = { metadata: { type: 'payment', payment: { enabled: true, fixedAmount: '15' } }, fields: [{ type: 'email' }] };
+    expect(needsMissingPayment(saved, ['payment_card', 'payment_product'])).toBe(true);
+    expect(needsMissingPayment(saved, ['signature'])).toBe(false);
+    expect(needsMissingPayment({ ...saved, metadata: { payment: { enabled: false } } }, ['payment_card'])).toBe(false);
+  });
 });

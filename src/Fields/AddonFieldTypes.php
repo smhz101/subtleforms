@@ -210,9 +210,11 @@ final class AddonFieldTypes {
 	}
 
 	/**
-	 * Whether a schema has a payment field and nothing registers it. Without
-	 * the add-on such a form cannot take its payment, so it is not shown
-	 * and does not accept entries.
+	 * Whether a schema takes a payment that nothing handles: it has a payment
+	 * field nobody registers, or it was saved by an earlier version with
+	 * payment settings turned on (`metadata.payment.enabled`) and nothing
+	 * registers the Card Payment field. Without the add-on such a form cannot
+	 * take its payment, so it is not shown and does not accept entries.
 	 *
 	 * @param mixed $schema Form schema (the `schema` part of a version row).
 	 */
@@ -220,14 +222,16 @@ final class AddonFieldTypes {
 		if ( ! is_array( $schema ) ) {
 			return false;
 		}
-		$missing = array_filter(
-			self::missing(),
-			static function ( $type ) {
-				return 0 === strpos( (string) $type, 'payment_' );
-			}
-		);
+		$isPayment = static function ( $type ) {
+			return 0 === strpos( (string) $type, 'payment_' );
+		};
+		$missing   = array_filter( self::missing(), $isPayment );
 		if ( ! $missing ) {
 			return false;
+		}
+		$saved = $schema['metadata']['payment'] ?? null;
+		if ( is_array( $saved ) && ! empty( $saved['enabled'] ) && in_array( 'payment_card', $missing, true ) ) {
+			return true;
 		}
 		foreach ( \SubtleForms\Support\SchemaFields::flat( $schema ) as $field ) {
 			if ( in_array( (string) ( $field['type'] ?? '' ), $missing, true ) ) {

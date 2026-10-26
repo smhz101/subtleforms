@@ -43,8 +43,9 @@ function collectTypes(fields, out = new Set()) {
 }
 
 /**
- * Whether a schema has a payment field that no active plugin provides. Such a
- * form is not shown to visitors.
+ * Whether a schema has a payment field that no active plugin provides, or
+ * payment settings saved on by an earlier version while nothing provides the
+ * Card Payment field. Such a form is not shown to visitors.
  *
  * @param {Object}   schema  Form schema.
  * @param {string[]} missing Missing types (default: from the server).
@@ -55,6 +56,9 @@ export function needsMissingPayment(
   missing = window.subtleformsAdmin?.missingFieldTypes || []
 ) {
   if (!schema || !Array.isArray(missing)) return false;
+  // Saved by an earlier version with payment settings on: the Card Payment
+  // field's add-on takes that payment.
+  if (schema.metadata?.payment?.enabled && missing.includes('payment_card')) return true;
   const types = collectTypes(schema.fields);
   return missing.some((type) => String(type).startsWith('payment_') && types.has(type));
 }
