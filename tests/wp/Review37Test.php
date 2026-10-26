@@ -68,27 +68,44 @@ final class Review37Test extends TestCase {
 		remove_all_filters( 'allowed_redirect_hosts' );
 	}
 
-	public function test_the_entry_view_prices_answers_in_the_entry_s_own_currency(): void {
+	/**
+	 * P1-01: the entry view formats an add-on field type through the generic
+	 * format filters, with the entry in the display context. Prices are the
+	 * add-on's (SubtleForms Pro), not this plugin's.
+	 */
+	public function test_the_entry_view_hands_add_on_types_and_the_entry_to_the_format_filters(): void {
 		global $wpdb;
-		$product = array( 'id' => 'p1', 'key' => 'sticker', 'type' => 'payment_product', 'config' => array( 'label' => 'Sticker', 'productName' => 'Sticker', 'price' => 5000, 'allowQuantity' => true ) );
-		$formId  = $this->publish( array( $product ) );
+		$field  = array( 'id' => 'p1', 'key' => 'item', 'type' => 'example_item', 'config' => array( 'label' => 'Item' ) );
+		$types  = static fn( $t ) => array_merge( (array) $t, array( 'example_item' ) );
+		add_filter( 'subtleforms/fields/addon_types', $types );
+		$formId = $this->publish( array( $field ) );
 		$wpdb->insert(
 			$wpdb->prefix . 'subtleforms_submissions',
 			array(
 				'form_id'    => $formId,
-				'payload'    => wp_json_encode( array( 'sticker' => 2 ) ),
-				'meta'       => wp_json_encode( array( 'order' => array( 'currency' => 'KRW', 'total' => 10000 ) ) ),
+				'payload'    => wp_json_encode( array( 'item' => 2 ) ),
+				'meta'       => wp_json_encode( array( 'example' => array( 'unit' => 'boxes' ) ) ),
 				'status'     => 'completed',
 				'created_at' => current_time( 'mysql', true ),
 			)
 		);
-		$id = (int) $wpdb->insert_id;
+		$id      = (int) $wpdb->insert_id;
+		$context = static function ( $context, $schema, $submission ) {
+			$meta = is_array( $submission['meta'] ?? null ) ? $submission['meta'] : json_decode( (string) ( $submission['meta'] ?? '' ), true );
+			return $context + array( 'unit' => (string) ( $meta['example']['unit'] ?? '' ) );
+		};
+		$answer  = static fn( $text, $value, $field, $ctx ) => 'example_item' === ( $field['type'] ?? '' ) ? $value . ' ' . ( $ctx['unit'] ?? '' ) : $text;
+		add_filter( 'subtleforms/format/context', $context, 10, 3 );
+		add_filter( 'subtleforms/format/answer', $answer, 10, 4 );
 		wp_set_current_user( 1 );
 		$request = new \WP_REST_Request( 'GET', '/subtleforms/v1/submissions/' . $id );
 		$request->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
 		$data = rest_do_request( $request )->get_data();
+		remove_filter( 'subtleforms/format/context', $context, 10 );
+		remove_filter( 'subtleforms/format/answer', $answer, 10 );
+		remove_filter( 'subtleforms/fields/addon_types', $types );
 		$data = $data['data'] ?? $data;
-		$this->assertStringContainsString( '10,000 KRW', (string) ( $data['display']['sticker']['text'] ?? '' ) );
+		$this->assertSame( '2 boxes', (string) ( $data['display']['item']['text'] ?? '' ) );
 	}
 
 	public function test_reimporting_after_a_status_change_skips_the_entries_and_twins_stay_apart(): void {

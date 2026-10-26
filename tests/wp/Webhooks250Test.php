@@ -64,11 +64,19 @@ final class Webhooks250Test extends TestCase {
 	}
 
 	public function test_selected_mode_sends_only_the_ticked_data_with_the_request_details(): void {
+		// An add-on's own data group (P1-01: this plugin has no payment group).
+		$groups = static fn( $g ) => $g + array( 'example' => array( 'example_amount', 'example_currency', 'example_status' ) );
+		$values = static function ( $v, $context ) {
+			$info = $context ? (array) $context->getMeta( 'example_info', array() ) : array();
+			return $v + array( 'example_amount' => (float) ( $info['amount'] ?? 0 ), 'example_currency' => (string) ( $info['currency'] ?? '' ), 'example_status' => (string) ( $info['status'] ?? '' ) );
+		};
+		add_filter( 'subtleforms/webhooks/payload_groups', $groups );
+		add_filter( 'subtleforms/webhooks/entry_values', $values, 10, 2 );
 		$job = $this->run_action(
 			array(
 				'url'               => 'https://93.184.216.34/receive',
 				'payload_mode'      => 'selected',
-				'payload_selection' => array( 'form_id', 'submission_id', 'ip_address', 'user_agent', 'page_url', 'user_id', 'status', 'field:name', 'field:pass', 'payment_amount', 'payment_currency', 'payment_status' ),
+				'payload_selection' => array( 'form_id', 'submission_id', 'ip_address', 'user_agent', 'page_url', 'user_id', 'status', 'field:name', 'field:pass', 'example_amount', 'example_currency', 'example_status' ),
 			),
 			array( 'name' => 'Ann', 'email' => 'ann@example.com', 'pass' => 'hunter2', 'g-recaptcha-response' => 'tok', 'website_url' => '' ),
 			array(
@@ -77,9 +85,11 @@ final class Webhooks250Test extends TestCase {
 				'request_page_url'   => 'https://example.com/contact/',
 				'request_user_id'    => 5,
 				'entry_status'       => 'completed',
-				'payment_info'       => array( 'amount' => 12.5, 'currency' => 'EUR', 'status' => 'paid' ),
+				'example_info'       => array( 'amount' => 12.5, 'currency' => 'EUR', 'status' => 'paid' ),
 			)
 		);
+		remove_filter( 'subtleforms/webhooks/payload_groups', $groups );
+		remove_filter( 'subtleforms/webhooks/entry_values', $values, 10 );
 		$body = json_decode( (string) $job['body'], true );
 		$this->assertSame( 'submission.created', $body['event'] );
 		$this->assertSame( 7, $body['form_id'] );
@@ -89,7 +99,7 @@ final class Webhooks250Test extends TestCase {
 		$this->assertSame( 'https://example.com/contact/', $body['page_url'] );
 		$this->assertSame( 5, $body['user_id'] );
 		$this->assertSame( 'completed', $body['status'] );
-		$this->assertSame( array( 'amount' => 12.5, 'currency' => 'EUR', 'status' => 'paid' ), $body['payment'] );
+		$this->assertSame( array( 'amount' => 12.5, 'currency' => 'EUR', 'status' => 'paid' ), $body['example'] );
 		$this->assertSame( array( 'name' => 'Ann' ), $body['fields'] );
 		$this->assertArrayNotHasKey( 'form_title', $body );
 		$this->assertArrayNotHasKey( 'answers', $body );
