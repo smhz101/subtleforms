@@ -735,7 +735,7 @@ final class FormsApi {
 
 		// Structured validation for activation
 		if ( $activate ) {
-			$schemaValidator  = new \SubtleForms\Support\SchemaValidator();
+			$schemaValidator  = ( new \SubtleForms\Support\SchemaValidator() )->keepUnregisteredTypes();
 			$validationErrors = ( $form['status'] ?? '' ) === 'published'
 				? $schemaValidator->validateForPublishingWithErrors( $schema )
 				: $schemaValidator->validateWithErrors( $schema );
@@ -1029,7 +1029,7 @@ final class FormsApi {
 					$schemaData['metadata']['title'] = $form['title'] ?? '';
 				}
 
-				$schemaValidator  = new \SubtleForms\Support\SchemaValidator();
+				$schemaValidator  = ( new \SubtleForms\Support\SchemaValidator() )->keepUnregisteredTypes();
 				$validationErrors = $schemaValidator->validateForPublishingWithErrors( $schemaData );
 
 				if ( ! empty( $validationErrors ) ) {
@@ -1256,8 +1256,9 @@ final class FormsApi {
 	 * Build a public-safe schema for unauthenticated rendering.
 	 *
 	 * The renderer only needs the field list and a small set of metadata
-	 * keys (type, appearance, title, description, theme toggles, payment
-	 * display settings). It never needs `actions` (which contain webhook
+	 * keys (type, appearance, title, description, theme toggles); add-ons
+	 * add what their own fields need through `subtleforms/public_schema`.
+	 * It never needs `actions` (which contain webhook
 	 * URLs, email recipients and other integration config) or internal
 	 * metadata such as `integrations`. Stripping these halves the payload
 	 * and prevents leaking unpublished/integration config to the public.
@@ -1275,7 +1276,6 @@ final class FormsApi {
 			$allowed_meta = array(
 				'type',
 				'appearance',
-				'payment',
 				'title',
 				'description',
 				'name',
@@ -1301,19 +1301,6 @@ final class FormsApi {
 				}
 			}
 
-			// Payment display settings the renderer needs (amount, currency,
-			// mode). Never expose gateway secrets (secretKey, publishableKey,
-			// apiKey, provider credentials, etc.) to the public.
-			if ( isset( $public['metadata']['payment'] ) && is_array( $public['metadata']['payment'] ) ) {
-				$payment = $public['metadata']['payment'];
-				$clean   = array();
-				foreach ( array( 'enabled', 'amountType', 'fixedAmount', 'amountField', 'currency', 'mode', 'processor' ) as $pk ) {
-					if ( array_key_exists( $pk, $payment ) ) {
-						$clean[ $pk ] = $payment[ $pk ];
-					}
-				}
-				$public['metadata']['payment'] = $clean;
-			}
 		}
 
 		return $public;

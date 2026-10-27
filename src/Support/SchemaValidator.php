@@ -54,7 +54,7 @@ final class SchemaValidator {
 	 * Keys the browser sends with every entry beside the answers. A field
 	 * with one of these keys would lose its answer (2.4.1).
 	 */
-	const RESERVED_KEYS = array( 'website_url', 'form_rendered_at', 'g-recaptcha-response', 'h-captcha-response', 'cf-turnstile-response', '_payment' );
+	const RESERVED_KEYS = RequestKeys::BUILT_IN;
 
 	/**
 	 * Keys of fields inside steps, columns and containers that repeat a key
@@ -95,7 +95,7 @@ final class SchemaValidator {
 			if ( ! preg_match( self::KEY_PATTERN, $key ) ) {
 				/* translators: %s: field key */
 				$problems[] = array( 'key' => $key, 'message' => sprintf( __( 'The field ID %s can only use letters, numbers, _ and -, up to 64 characters.', 'subtleforms' ), $key ) );
-			} elseif ( in_array( $key, self::RESERVED_KEYS, true ) ) {
+			} elseif ( RequestKeys::has( (string) $key ) ) {
 				/* translators: %s: field key */
 				$problems[] = array( 'key' => $key, 'message' => sprintf( __( 'SubtleForms uses %s itself. Give the field another ID.', 'subtleforms' ), $key ) );
 			}
@@ -125,7 +125,7 @@ final class SchemaValidator {
 				} elseif ( ! preg_match( self::KEY_PATTERN, $key ) ) {
 					/* translators: %s: field key */
 					$problems[] = array( 'key' => $key, 'message' => sprintf( __( 'The field ID %s can only use letters, numbers, _ and -, up to 64 characters.', 'subtleforms' ), $key ) );
-				} elseif ( in_array( $key, self::RESERVED_KEYS, true ) ) {
+				} elseif ( RequestKeys::has( (string) $key ) ) {
 					/* translators: %s: field key */
 					$problems[] = array( 'key' => $key, 'message' => sprintf( __( 'SubtleForms uses %s itself. Give the field another ID.', 'subtleforms' ), $key ) );
 				}
@@ -172,7 +172,13 @@ final class SchemaValidator {
 	 */
 	private array $allowedFieldTypes;
 
-	private const FALLBACK_ALLOWED_FIELD_TYPES = array(
+	/**
+	 * Whether a well-formed type nothing registers is kept. See
+	 * keepUnregisteredTypes().
+	 */
+	private bool $keepUnregistered = false;
+
+	public const CORE_TYPES = array(
 		'text',
 		'email',
 		'textarea',
@@ -203,13 +209,6 @@ final class SchemaValidator {
 		'dynamic_field',
 		'post_selection',
 		'html',
-		'payment_product',
-		'payment_choice',
-		'payment_amount',
-		'payment_summary',
-		'payment_card',
-		'payment_coupon',
-		'payment_hidden_price',
 		'hidden',
 		'address',
 		'section_break',
@@ -249,9 +248,7 @@ final class SchemaValidator {
 					if ( ! empty( $types ) ) {
 						// include legacy aliases such as 'select'
 						$types[] = 'select';
-						// Add-on fields (Signature, Calculation, Card Payment)
-						// stay in a form while the add-on is inactive (2.3.9).
-						$types = array_merge( $types, \SubtleForms\Fields\AddonFieldTypes::knownTypes() );
+						$types = array_merge( $types, \SubtleForms\Fields\FieldTypeAvailability::knownTypes() );
 						return array_values( array_unique( $types ) );
 					}
 				}
@@ -260,7 +257,33 @@ final class SchemaValidator {
 			}
 		}
 
-		return array_values( array_unique( array_merge( self::FALLBACK_ALLOWED_FIELD_TYPES, \SubtleForms\Fields\AddonFieldTypes::knownTypes() ) ) );
+		return array_values( array_unique( array_merge( self::CORE_TYPES, \SubtleForms\Fields\FieldTypeAvailability::knownTypes() ) ) );
+	}
+
+	/**
+	 * Keep a well-formed field type that nothing registers. A form made while
+	 * an add-on was active holds that add-on's fields; saving, copying or
+	 * importing the form on a site without the add-on must not refuse them.
+	 * Used where a form is stored. Text that is new (for example from an
+	 * assistant) is still checked against the registered types.
+	 *
+	 * @return $this
+	 */
+	public function keepUnregisteredTypes(): self {
+		$this->keepUnregistered = true;
+		return $this;
+	}
+
+	/**
+	 * Whether a field type may be saved.
+	 *
+	 * @param string $type Field type.
+	 */
+	private function typeAllowed( string $type ): bool {
+		if ( in_array( $type, $this->allowedFieldTypes, true ) ) {
+			return true;
+		}
+		return $this->keepUnregistered && 1 === preg_match( '/^[a-z][a-z0-9_]{0,63}$/', $type );
 	}
 
 	/**
@@ -305,7 +328,7 @@ final class SchemaValidator {
 				throw new InvalidArgumentException( "Field at index {$i} must have a string 'type'." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
-			if ( ! in_array( $field['type'], $this->allowedFieldTypes, true ) ) {
+			if ( ! $this->typeAllowed( $field['type'] ) ) {
 				throw new InvalidArgumentException( "Field type '{$field['type']}' at index {$i} is not allowed." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
@@ -317,7 +340,7 @@ final class SchemaValidator {
 				throw new InvalidArgumentException( "Field key '{$field['key']}' at index {$i} contains invalid characters." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
-			if ( in_array( $field['key'], self::RESERVED_KEYS, true ) ) {
+			if ( RequestKeys::has( (string) $field['key'] ) ) {
 				throw new InvalidArgumentException( "Field key '{$field['key']}' at index {$i} is reserved." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
@@ -503,7 +526,7 @@ final class SchemaValidator {
 							fn( $v ) => $v !== null
 						)
 					);
-				} elseif ( ! in_array( $field['type'], $this->allowedFieldTypes, true ) ) {
+				} elseif ( ! $this->typeAllowed( $field['type'] ) ) {
 					$push(
 						$errors,
 						"fields[{$i}].type",
@@ -521,7 +544,7 @@ final class SchemaValidator {
 				if ( empty( $field['key'] ) || ! is_string( $field['key'] ) ) {
 					$push( $errors, "fields[{$i}].key", "Field at index {$i} must have a string 'key'.", array( 'index' => $i ) );
 				} else {
-					if ( in_array( $field['key'], self::RESERVED_KEYS, true ) ) {
+					if ( RequestKeys::has( (string) $field['key'] ) ) {
 						$push(
 							$errors,
 							"fields[{$i}].key",
@@ -780,7 +803,7 @@ final class SchemaValidator {
 	/**
 	 * Field types that hold no answer.
 	 */
-	private const LAYOUT_TYPES = array( 'html', 'section_break', 'disclaimer', 'step', 'form_step', 'repeat_field', 'recaptcha', 'hcaptcha', 'turnstile', 'captcha', 'action_hook', 'save_resume', 'payment_summary', 'payment_card', 'payment_hidden_price', 'hidden' );
+	private const LAYOUT_TYPES = array( 'html', 'section_break', 'disclaimer', 'step', 'form_step', 'repeat_field', 'recaptcha', 'hcaptcha', 'turnstile', 'captcha', 'action_hook', 'save_resume', 'hidden' );
 
 	/**
 	 * Whether a field type takes an answer from the visitor.
@@ -792,7 +815,10 @@ final class SchemaValidator {
 	 * @return bool
 	 */
 	public static function takesAnswer( string $type ): bool {
-		return $type !== '' && ! in_array( $type, self::LAYOUT_TYPES, true ) && substr( $type, -10 ) !== '_container';
+		if ( '' === $type || in_array( $type, self::LAYOUT_TYPES, true ) || substr( $type, -10 ) === '_container' ) {
+			return false;
+		}
+		return ! in_array( $type, \SubtleForms\Fields\FieldTypeAvailability::noAnswerTypes(), true );
 	}
 
 	private function hasInputFieldRecursive( array $fields, ?array $inputFieldTypes = null ): bool {

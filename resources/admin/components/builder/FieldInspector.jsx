@@ -19,8 +19,9 @@ import {
   ValidationPanel,
   DynamicInspectorPanel,
 } from './inspector/panels';
-import { CHOICE_TYPES } from './inspector/panels/OptionsPanel';
-import { hasSection, LOGIC_ONLY_TYPES } from './inspector/controlSections';
+import { isChoiceType } from './inspector/panels/OptionsPanel';
+import { chainedNotSetUpWarning } from './utils/fieldWarnings';
+import { hasSection, isLogicOnlyType } from './inspector/controlSections';
 import FieldAppearancePanel from './appearance/FieldAppearancePanel';
 import { supportsAppearance } from '../../../shared/appearance';
 import { getIcon } from './utils/iconMap';
@@ -28,7 +29,7 @@ import { stepOptions, getStepIdOf } from './schema/commands/steps';
 
 /**
  * "Step" setting for fields of a multi-step form (2.3.1): moving a field to
- * another step keeps its key, settings, logic and payment links, puts it at
+ * another step keeps its key, settings, logic and other links, puts it at
  * the end of that step and switches the canvas there.
  */
 function StepSetting({ tree, nodeId, onMoveToStep, isReadOnly }) {
@@ -105,9 +106,11 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
         __('This required field has no label, so visitors won’t know what to enter.', 'subtleforms')
       );
     }
-    if (CHOICE_TYPES.includes(field.type) && (!field.options || field.options.length === 0)) {
+    if (isChoiceType(field.type) && (!field.options || field.options.length === 0)) {
       warnings.push(__('Add at least one option.', 'subtleforms'));
     }
+    const chained = chainedNotSetUpWarning(field);
+    if (chained) warnings.push(chained);
     return warnings;
   }, [field]);
 
@@ -191,7 +194,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
           },
           logicTab,
         ]
-      : LOGIC_ONLY_TYPES.includes(field.type) && showLogicOnlyTab
+      : isLogicOnlyType(field.type) && showLogicOnlyTab
       ? [logicTab]
       : []),
     ...(supportsAppearance(field.type)
@@ -288,7 +291,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
                   onUpdate={handleUpdate}
                   isReadOnly={isReadOnly}
                 />
-                {CHOICE_TYPES.includes(field.type) && (
+                {isChoiceType(field.type) && (
                   <PanelBody title={__('Choices', 'subtleforms')} initialOpen>
                     <OptionsPanel
                       field={field}
@@ -348,8 +351,8 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
                     ? __('Skip this step unless its rules match. Fields in a skipped step are not checked or saved.', 'subtleforms')
                     : isRepeater
                     ? __('Show or hide this repeater based on answers to other fields. A hidden repeater, including every row inside it, is not checked or saved.', 'subtleforms')
-                    : field.type === 'payment_hidden_price'
-                    ? __('Add this fee only when its rules match. A hidden fee is not charged and not listed in the order.', 'subtleforms')
+                    : typeof definition?.meta?.logicHelp === 'string' && definition.meta.logicHelp
+                    ? definition.meta.logicHelp
                     : sprintf(
                         /* translators: %s: field label */
                         __('Show or hide “%s” based on answers to other fields. Hidden fields are not checked or saved.', 'subtleforms'),

@@ -36,8 +36,6 @@ export function BuilderProvider({
 	fieldDefinitions = {},
 	formType = 'regular',
 	fieldDefaults = null,
-	// The form's own currency, '' for the site currency (2.4.0).
-	currency = '',
 	onInsert,
 	onDelete,
 	onUpdate,
@@ -107,11 +105,10 @@ export function BuilderProvider({
 			isReadOnly,
 			// Form-level label visibility and help text placement (2.3.2).
 			fieldDefaults,
-			currency,
 			// Entries the form has, for the field ID editor's note (2.4.1).
 			entryCount,
 		}),
-		[fieldDefinitions, formType, isReadOnly, fieldDefaults, currency, entryCount]
+		[fieldDefinitions, formType, isReadOnly, fieldDefaults, entryCount]
 	);
 
 	return (

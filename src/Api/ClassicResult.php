@@ -31,10 +31,10 @@ final class ClassicResult {
 	const TTL = 600;
 
 	/**
-	 * Answers that are never kept or sent back: spam traps, CAPTCHA tokens
-	 * and the payment reference.
+	 * Answers that are never kept or sent back: spam traps and CAPTCHA
+	 * tokens. Add-ons add their request values through RequestKeys.
 	 */
-	const SKIP_VALUES = array( 'website_url', 'form_rendered_at', 'g-recaptcha-response', 'h-captcha-response', 'cf-turnstile-response', '_payment' );
+	const SKIP_VALUES = \SubtleForms\Support\RequestKeys::BUILT_IN;
 
 	/**
 	 * Outcomes already read in this request, by token.
@@ -62,7 +62,7 @@ final class ClassicResult {
 		if ( $ok ) {
 			$confirmation = is_array( $data['confirmation'] ?? null ) ? $data['confirmation'] : array();
 			if ( ! empty( $data['redirect'] ) && is_string( $data['redirect'] ) ) {
-				// An add-on (such as a WooCommerce checkout) takes the visitor onward.
+				// An add-on takes the visitor to another page.
 				$redirect = $data['redirect'];
 			} elseif ( 'redirect' === ( $confirmation['type'] ?? '' ) && ! empty( $confirmation['redirectUrl'] ) ) {
 				// The form's own confirmation, set by an administrator.
@@ -75,7 +75,7 @@ final class ClassicResult {
 			'form_id'    => $formId,
 			'ok'         => $ok,
 			'body'       => $body,
-			'values'     => array_diff_key( $values, array_flip( self::SKIP_VALUES ) ),
+			'values'     => array_diff_key( $values, array_flip( \SubtleForms\Support\RequestKeys::all() ) ),
 			'redirect'   => $redirect,
 			'configured' => $configured,
 		);

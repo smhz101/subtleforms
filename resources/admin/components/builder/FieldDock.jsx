@@ -1,4 +1,5 @@
 import { useDraggable } from '@dnd-kit/core';
+import { getFieldCategoryLabel } from '../../../shared/extend';
 import { LIBRARY_PREFIX } from './dnd/BuilderDnd';
 import {
   useState,
@@ -22,14 +23,13 @@ const CATEGORY_LABELS = {
   advanced: __('Advanced', 'subtleforms'),
   media: __('Uploads', 'subtleforms'),
   layout: __('Layout', 'subtleforms'),
-  payment: __('Payments', 'subtleforms'),
   system: __('Spam protection', 'subtleforms'),
   special: __('Special', 'subtleforms'),
   structure: __('Structure', 'subtleforms'),
 };
 
 export const categoryLabel = (key) =>
-  CATEGORY_LABELS[key] || key.charAt(0).toUpperCase() + key.slice(1);
+  CATEGORY_LABELS[key] || getFieldCategoryLabel(key) || key.charAt(0).toUpperCase() + key.slice(1);
 
 function HighlightMatch({ text, query }) {
   if (!query) return text;

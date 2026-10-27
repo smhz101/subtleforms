@@ -30,7 +30,7 @@ final class Skeleton {
 	private const MAX_FIELDS = 24;
 
 	/** Types that draw no label and no box of their own. */
-	private const HIDDEN = array( 'hidden', 'payment_hidden_price', 'action_hook', 'form_step', 'save_resume', 'html', 'section_break', 'disclaimer' );
+	private const HIDDEN = array( 'hidden', 'action_hook', 'form_step', 'save_resume', 'html', 'section_break', 'disclaimer' );
 
 	/** Types listing their options one per line. */
 	private const CHOICES = array( 'radio', 'checkbox', 'multiple_choice', 'post_selection' );

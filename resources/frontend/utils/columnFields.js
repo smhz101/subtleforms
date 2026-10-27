@@ -2,8 +2,8 @@
  * Fields stored in one layout column.
  *
  * A column is a list of fields, or an object with `fields` or `children`.
- * Pricing on the server reads all three. The form has to use the same list,
- * or a product in an object column is charged without being shown.
+ * The server reads all three. The form has to use the same list, or a
+ * field in an object column is sent without being shown.
  *
  * @param {*} column One entry of a column container's `columns` array.
  * @return {Array}

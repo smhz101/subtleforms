@@ -103,7 +103,7 @@ final class EntryStorageTest extends TestCase {
 		$this->assertSame( 'yes', $p['tog'] );
 		$this->assertSame( '4', (string) $p['sca'] );
 		$this->assertSame( 'a', $p['pic'] );
-		if ( \SubtleForms\Fields\AddonFieldTypes::missing() ) {
+		if ( ! \SubtleForms\Plugin::instance()->container()->get( \SubtleForms\Fields\FieldRegistry::class )->has( 'signature' ) ) {
 			// Without SubtleForms Pro, Signature and Calculation are not on the
 			// live form, so posted values for them are not stored (2.3.9).
 			$this->assertArrayNotHasKey( 'sig', $p );

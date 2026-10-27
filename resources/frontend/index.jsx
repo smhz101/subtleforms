@@ -11,13 +11,6 @@ import { containerGroups, loadGroups, loadFieldsFor } from './components/fields/
 import { readInlineFormData } from './utils/inlineData';
 import { restFetch } from './utils/restFetch';
 import { runFormMountHooks } from '../shared/extend';
-import * as contexts from './components/fields/contexts';
-import * as pricing from '../shared/pricing';
-
-// Shared with add-on payment fields: the order context and the price maths.
-if (typeof window !== 'undefined') {
-  window.SubtleFormsExtend = Object.assign(window.SubtleFormsExtend || {}, { contexts, pricing });
-}
 
 /**
  * Resolve the public schema (and spam token) before the first paint so the

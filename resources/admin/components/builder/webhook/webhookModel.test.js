@@ -6,7 +6,7 @@ import {
   parseHeadersJson,
   rowProblems,
   collectPayloadFields,
-  formHasPayment,
+  applicableGroups,
   defaultSelection,
   fullSelection,
   cleanSelection,
@@ -18,6 +18,18 @@ import {
   buildFullPreview,
   LABELS_OPTION,
 } from './webhookModel';
+import { registerPayloadGroup } from '../../../../shared/extend';
+
+// An add-on's extra data group (P1-01: this plugin has none of its own).
+registerPayloadGroup('example', {
+  title: 'Example',
+  keys: [
+    { key: 'example_amount', label: 'Amount', sample: 49.99 },
+    { key: 'example_currency', label: 'Currency', sample: 'USD' },
+    { key: 'example_status', label: 'Status', sample: 'paid' },
+  ],
+  appliesTo: (nodes) => JSON.stringify(nodes).includes('example_product'),
+});
 
 const schemaFields = [
   { type: 'text', key: 'name', label: 'Name' },
@@ -95,9 +107,9 @@ describe('payload fields', () => {
     expect(fields.find((f) => f.key === 'offices').children.map((c) => c.key)).toEqual(['office_city']);
   });
 
-  test('finds payment fields', () => {
-    expect(formHasPayment(schemaFields)).toBe(false);
-    expect(formHasPayment([{ type: 'section', fields: [{ type: 'payment_product', key: 'p' }] }])).toBe(true);
+  test('lists the add-on groups that apply to the form', () => {
+    expect(applicableGroups(schemaFields)).toEqual([]);
+    expect(applicableGroups([{ type: 'section', fields: [{ type: 'example_product', key: 'p' }] }]).map((g) => g.id)).toEqual(['example']);
   });
 });
 
@@ -106,11 +118,11 @@ describe('payload selection', () => {
   const entry = sampleEntry({ formId: 9, formTitle: 'Contact', siteUrl: 'https://example.com/' });
 
   test('the preview has only what is ticked, in the server order', () => {
-    const body = buildPreview(['field:email', 'form_id', 'ip_address', 'payment_currency'], fields, entry);
-    expect(Object.keys(body)).toEqual(['event', 'form_id', 'ip_address', 'fields', 'payment']);
+    const body = buildPreview(['field:email', 'form_id', 'ip_address', 'example_currency'], fields, entry);
+    expect(Object.keys(body)).toEqual(['event', 'form_id', 'ip_address', 'fields', 'example']);
     expect(body.form_id).toBe(9);
     expect(body.fields).toEqual({ email: 'name@example.com' });
-    expect(body.payment).toEqual({ currency: 'USD' });
+    expect(body.example).toEqual({ currency: 'USD' });
   });
 
   test('labels are added only with the option, for ticked fields only', () => {
@@ -120,25 +132,24 @@ describe('payload selection', () => {
   });
 
   test('unknown or removed keys are dropped', () => {
-    expect(cleanSelection(['form_id', 'field:gone', 'nonsense', 'field:name'], fields, false)).toEqual(['form_id', 'field:name']);
+    expect(cleanSelection(['form_id', 'field:gone', 'nonsense', 'field:name'], fields, [])).toEqual(['form_id', 'field:name']);
   });
 
   test('selection to JSON and back gives the same ticks', () => {
     const selection = cleanSelection(
-      ['form_id', 'form_title', 'submission_id', 'ip_address', 'field:name', 'field:topics', 'field:offices', LABELS_OPTION, 'payment_amount', 'payment_status'],
-      fields,
-      true
+      ['form_id', 'form_title', 'submission_id', 'ip_address', 'field:name', 'field:topics', 'field:offices', LABELS_OPTION, 'example_amount', 'example_status'],
+      fields
     );
     const text = selectionToTemplate(selection, fields);
     expect(JSON.parse(text).fields.name).toBe('{{field:name}}');
     expect(JSON.parse(text).fields.topics).toBe('{{raw:topics}}');
     expect(JSON.parse(text).ip_address).toBe('{{entry:ip_address}}');
-    expect(templateToSelection(text, fields, true)).toEqual({ kind: 'selection', selection });
+    expect(templateToSelection(text, fields)).toEqual({ kind: 'selection', selection });
   });
 
   test('every default selection survives the round trip', () => {
     [defaultSelection(fields), fullSelection(fields), []].forEach((selection) => {
-      const out = templateToSelection(selectionToTemplate(selection, fields), fields, true);
+      const out = templateToSelection(selectionToTemplate(selection, fields), fields);
       expect(out.kind).toBe('selection');
       expect(out.selection).toEqual(selection);
     });
@@ -162,7 +173,7 @@ describe('payload selection', () => {
       '{"form_id":"{{entry:form_id}}"}',
     ];
     cases.forEach((text) => {
-      const out = templateToSelection(text, fields, true);
+      const out = templateToSelection(text, fields);
       expect(out.kind).toBe('custom');
       expect(out.reason).toBeTruthy();
     });

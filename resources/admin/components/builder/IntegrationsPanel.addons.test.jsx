@@ -7,9 +7,7 @@ import { act } from 'react';
 import IntegrationsPanel from './IntegrationsPanel';
 import { registerFormIntegration } from '../../../shared/extend';
 
-jest.mock('../settings/extensions/ConnectionTest', () => () => null);
 jest.mock('../settings/extensions/extensions.scss', () => ({}));
-jest.mock('@wordpress/api-fetch', () => jest.fn(() => Promise.resolve({})));
 
 global.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -44,7 +42,8 @@ test('draws a registered panel with the form schema and a patch helper', () => {
   expect(seen.schema).toBe(schema);
   expect(seen.onChange).toBe(onChange);
   expect(Array.isArray(seen.fieldOptions)).toBe(true);
-  expect(seen.crmProvider).toBe('hubspot');
+  // P1-03: no provider-specific value is handed to add-on panels.
+  expect(seen.crmProvider).toBeUndefined();
 
   act(() => seen.patch('demo', { enabled: true }));
   expect(onChange).toHaveBeenCalledWith({ ...schema, metadata: { integrations: { demo: { enabled: true } } } });
@@ -67,9 +66,14 @@ test('read-only forms do not change', () => {
   unmount();
 });
 
-test('shows the empty note when nothing is available and nothing is registered', () => {
+test('with no add-on integration the panel says what the plugin does have (RFUN-03)', () => {
   window.subtleformsAdmin = { extensions: {} };
-  const { container, unmount } = mount({ schema: { metadata: {} }, onChange: jest.fn() });
-  expect(container.textContent).toContain('No integrations are available');
+  const { container, unmount } = mount({ schema: { fields: [], metadata: {} }, onChange: jest.fn() });
+  const text = container.textContent;
+  expect(text).toBe(
+    'Send entries to other services with webhooks. Add a Webhook action under Notifications. Defaults for every webhook are under Settings > Integrations.'
+  );
+  expect(text).not.toMatch(/No integrations|email marketing|CRM|analytics|add-on|Pro/i);
   unmount();
 });
+

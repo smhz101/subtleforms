@@ -3,7 +3,6 @@ import { useState } from '@wordpress/element';
 import { MergeTagsModal } from './merge-tags/MergeTagsHelp';
 import { __ } from '@wordpress/i18n';
 import Icon from '../ui/Icon';
-import { getBranding } from '../utils/branding';
 import './HelpMenu.scss';
 
 export default function HelpMenu({
@@ -59,17 +58,15 @@ export default function HelpMenu({
             }}>
             {__('Email merge tags', 'subtleforms')}
           </MenuItem>
-          {/* White label hides SubtleForms documentation links (2.3.0). */}
-          {!getBranding().hideCredits && (
-            <MenuItem
-              icon={<Icon.Book size={16} />}
-              onClick={() => {
-                onClose();
-                window.open('https://subtleforms.com/docs', '_blank');
-              }}>
-              {__('View Documentation', 'subtleforms')}
-            </MenuItem>
-          )}
+          <MenuItem
+            className='sf-help__docs'
+            icon={<Icon.Book size={16} />}
+            onClick={() => {
+              onClose();
+              window.open('https://subtleforms.com/docs', '_blank');
+            }}>
+            {__('View Documentation', 'subtleforms')}
+          </MenuItem>
         </MenuGroup>
       )}
     />

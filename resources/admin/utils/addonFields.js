@@ -1,82 +1,16 @@
 /**
  * Add-on field detection.
  *
- * Signature, Calculation and Card Payment fields come from an add-on. A form
- * keeps them when the add-on is not active; the live form leaves them out.
- * This module finds them in a schema so the builder can say so. It never
- * changes or locks anything in the builder.
+ * An add-on can register field types. A form keeps its fields when the add-on
+ * is not active; the live form does not show them. This module finds them in a
+ * schema (a type nothing registers on this site) so the builder can say so. It
+ * never changes or locks anything in the builder.
  *
  * @package SubtleForms
  */
 
 import { __ } from '@wordpress/i18n';
 import { normalizeLogic, isBasic } from '../../shared/conditions';
-
-/** Field types provided by an add-on. */
-export const ADDON_FIELD_TYPES = ['signature', 'calculation', 'payment_card'];
-
-const LABELS = {
-  signature: () => __('Signature', 'subtleforms'),
-  calculation: () => __('Calculation', 'subtleforms'),
-  payment_card: () => __('Card Payment', 'subtleforms'),
-};
-
-/**
- * Every field type used in a list of fields, at any depth.
- *
- * @param {Array} fields Field nodes.
- * @param {Set}   out    Collected types.
- * @return {Set} Types.
- */
-function collectTypes(fields, out = new Set()) {
-  (Array.isArray(fields) ? fields : []).forEach((field) => {
-    if (!field || typeof field !== 'object') return;
-    if (field.type) out.add(field.type);
-    collectTypes(field.children || field.fields, out);
-    if (Array.isArray(field.columns)) {
-      field.columns.forEach((column) => {
-        collectTypes(Array.isArray(column) ? column : column?.fields || column?.children, out);
-      });
-    }
-  });
-  return out;
-}
-
-/**
- * Whether a schema has a payment field that no active plugin provides. Such a
- * form is not shown to visitors.
- *
- * @param {Object}   schema  Form schema.
- * @param {string[]} missing Missing types (default: from the server).
- * @return {boolean} True when it does.
- */
-export function needsMissingPayment(
-  schema,
-  missing = window.subtleformsAdmin?.missingFieldTypes || []
-) {
-  if (!schema || !Array.isArray(missing)) return false;
-  const types = collectTypes(schema.fields);
-  return missing.some((type) => String(type).startsWith('payment_') && types.has(type));
-}
-
-/**
- * Labels of add-on fields in a schema that no active plugin provides on
- * this site right now.
- *
- * @param {Object}   schema  Form schema.
- * @param {string[]} missing Missing types (default: from the server).
- * @return {string[]} Labels.
- */
-export function getMissingAddonFields(
-  schema,
-  missing = window.subtleformsAdmin?.missingFieldTypes || []
-) {
-  if (!schema || !Array.isArray(missing) || missing.length === 0) return [];
-  const types = collectTypes(schema.fields);
-  return missing
-    .filter((type) => types.has(type))
-    .map((type) => (LABELS[type] ? LABELS[type]() : type));
-}
 
 /** Walk every node of a field tree, at any depth. */
 function eachNode(fields, visit) {
@@ -90,6 +24,49 @@ function eachNode(fields, visit) {
       });
     }
   });
+}
+
+/**
+ * Field types this site understands: the registered ones, from the server.
+ * An empty list means the server did not say, so nothing is reported.
+ */
+function knownTypes() {
+  const list = window.subtleformsAdmin?.knownFieldTypes;
+  return Array.isArray(list) ? list : [];
+}
+
+/**
+ * The name the form's author gave a field, or its type key when it has none.
+ *
+ * @param {Object} node Field node.
+ * @return {string} Label.
+ */
+export function getFieldDisplayName(node) {
+  const config = node && typeof node.config === 'object' && node.config ? node.config : {};
+  const label = [node?.label, config.label, node?.title].find(
+    (value) => typeof value === 'string' && value.trim() !== ''
+  );
+  return label ? label.trim() : String(node?.type || '');
+}
+
+/**
+ * Names of the fields in a schema whose type no active plugin registers on
+ * this site right now. The names are the ones the form's author gave the
+ * fields; a field without a name shows its type key.
+ *
+ * @param {Object}   schema Form schema.
+ * @param {string[]} known  Known field types (default: from the server).
+ * @return {string[]} Names, without repeats.
+ */
+export function getMissingAddonFields(schema, known = knownTypes()) {
+  if (!schema || !Array.isArray(known) || known.length === 0) return [];
+  const names = [];
+  eachNode(schema.fields, (node) => {
+    if (typeof node.type !== 'string' || node.type === '' || known.includes(node.type)) return;
+    const name = getFieldDisplayName(node);
+    if (!names.includes(name)) names.push(name);
+  });
+  return names;
 }
 
 /**

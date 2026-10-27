@@ -22,8 +22,7 @@ class FormTemplates {
 
 	/**
 	 * Raw card inputs, matched by stable id or key. Labels are not used: a
-	 * "Gift card message" or a "Scorecard" is not a card number, and the
-	 * gateway-managed Card Payment field (payment_card) is always kept.
+	 * "Gift card message" or a "Scorecard" is not a card number.
 	 */
 	const CARD_INPUT_ID = '/^(?:(?:credit|debit)[\s_-]*)?(?:card[\s_-]*(?:number|num|no|cvv2?|cvc|csc|expiry|expiration|exp[\s_-]*date)|cc[\s_-]*(?:number|num|cvv2?|cvc)|cvv2?|cvc|csc|expiry|expiration|exp[\s_-]*date)(?:[\s_-]|$)/i';
 
@@ -606,8 +605,8 @@ class FormTemplates {
 	}
 
 	/**
-	 * Drop example.com webhooks, notify the site owner, and keep payment
-	 * templates away from card numbers. Runs after other plugins add templates.
+	 * Drop example.com webhooks, notify the site owner, and keep templates
+	 * away from raw card number inputs. Runs after other plugins add templates.
 	 *
 	 * @param string $id       Template id.
 	 * @param array  $template Template definition.
@@ -617,7 +616,7 @@ class FormTemplates {
 		$schema = ( isset( $template['schema'] ) && is_array( $template['schema'] ) ) ? $template['schema'] : array();
 
 		// Templates an add-on marks as its own (`addon`, or `is_pro` from
-		// older add-ons) keep their fields, such as the Card Payment field;
+		// older add-ons) keep all their fields;
 		// only their actions are checked here.
 		if ( ! empty( $template['addon'] ) || ! empty( $template['is_pro'] ) ) {
 			if ( isset( $schema['actions'] ) || isset( $schema['fields'] ) ) {
@@ -666,9 +665,6 @@ class FormTemplates {
 	 * @param array<string, mixed> $field Field definition.
 	 */
 	public static function is_card_field( array $field ): bool {
-		if ( 'payment_card' === ( $field['type'] ?? '' ) ) {
-			return false;
-		}
 		$config = isset( $field['config'] ) && is_array( $field['config'] ) ? $field['config'] : array();
 		foreach ( array( $field['id'] ?? '', $field['key'] ?? '', $config['key'] ?? '' ) as $identifier ) {
 			if ( is_string( $identifier ) && 1 === preg_match( self::CARD_INPUT_ID, strtolower( trim( $identifier ) ) ) ) {

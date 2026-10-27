@@ -60,6 +60,9 @@ register_deactivation_hook(
 add_action(
 	'plugins_loaded',
 	function () {
+		// An add-on built for an earlier SubtleForms must not start (see the class).
+		SubtleForms\Compat\OutdatedAddOnGuard::apply();
+
 		// Check for DB schema updates (only runs dbDelta when db_version changes).
 		SubtleForms\Activator::maybe_upgrade();
 

@@ -8,11 +8,13 @@
  *   parent? Containers (Repeater, Group, Columns) accept fields into their
  *   drop zone; nothing moves into itself; steps only live at root level;
  *   fixed groups (Name, Address) keep their parts; a Repeater cannot hold
- *   another Repeater, payment fields, uploads or CAPTCHAs.
+ *   another Repeater, uploads, CAPTCHAs or an add-on type that says so.
  * - resolveDrop(): turns "active dropped over target" into one command.
  * - moveTargets(): every place a field can move to in its step, for the
  *   keyboard menu.
  */
+
+import { typeHasFlag } from '../../../utils/fieldTypeFlags';
 
 const ROOT_NODE_ID = 'root';
 
@@ -28,13 +30,6 @@ export const REPEATER_BLOCKED_TYPES = new Set([
   'hcaptcha',
   'turnstile',
   'save_resume',
-  'payment_amount',
-  'payment_summary',
-  'payment_coupon',
-  'payment_hidden_price',
-  'payment_product',
-  'payment_choice',
-  'payment_card',
 ]);
 
 const COLUMN_SUFFIX = '_column_container';
@@ -116,7 +111,7 @@ export function canDropInto(tree, { nodeId = null, fieldType = null, parentId })
   }
   if (insideRepeater(tree, parent.id)) {
     for (const type of types) {
-      if (REPEATER_BLOCKED_TYPES.has(type)) return false;
+      if (REPEATER_BLOCKED_TYPES.has(type) || typeHasFlag(type, 'notInRepeater')) return false;
     }
   }
   return true;

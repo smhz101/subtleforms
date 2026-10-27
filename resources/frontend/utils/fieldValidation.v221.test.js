@@ -24,3 +24,16 @@ describe('fieldValidation 2.2.1', () => {
     expect(errors).toEqual({});
   });
 });
+
+describe('Chained Select with no dropdowns (RFUN-02)', () => {
+  test('is not answerable and never required until it has choices', () => {
+    expect(isAnswerable('chained_select', {})).toBe(false);
+    expect(isAnswerable('chained_select', { levels: [{ label: 'A', options: [] }] })).toBe(false);
+    expect(isAnswerable('chained_select', { options: [{ label: 'A', value: 'a' }] })).toBe(true);
+    const unset = { key: 'p', type: 'chained_select', required: true };
+    expect(validateFields([unset], {}, new Set())).toEqual({});
+    const set = { ...unset, levels: [{ label: 'A', options: [{ label: 'x', value: 'x' }] }] };
+    expect(Object.keys(validateFields([set], {}, new Set()))).toEqual(['p']);
+  });
+});
+

@@ -33,7 +33,7 @@ function randomSecret() {
 /**
  * Webhooks Extension Settings Panel
  *
- * Webhooks themselves are form actions (Form settings > Actions). This panel
+ * Webhooks themselves are form actions (Form settings > Notifications). This panel
  * holds the defaults every webhook action uses and a tool to test an endpoint.
  */
 export default function WebhooksPanel({ settings, updateSetting, fieldErrors = {} }) {
@@ -47,7 +47,7 @@ export default function WebhooksPanel({ settings, updateSetting, fieldErrors = {
         <h2 className='sf-ext-panel__title'>{__('Webhooks', 'subtleforms')}</h2>
         <p className='sf-ext-panel__description'>
           {__(
-            'Send each entry as JSON to any URL. Add a webhook to a form under Form settings > Actions; the settings below apply to every webhook action.',
+            'Send each entry as JSON to any URL. Add a webhook to a form under Form settings > Notifications; the settings below apply to every webhook action.',
             'subtleforms'
           )}
         </p>

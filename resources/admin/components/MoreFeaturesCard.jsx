@@ -10,8 +10,8 @@ import './MoreFeaturesCard.scss';
  * link to its page. Information only: nothing in this plugin depends on it.
  *
  * The server decides whether it shows (subtleformsAdmin.moreFeatures.show):
- * not after this user dismissed it, not while the add-on is active and not
- * when white label hides it. Dismissing it is remembered for the user.
+ * not after this user dismissed it and not while the add-on is active.
+ * Dismissing it is remembered for the user.
  *
  * @param {Object} props
  * @param {Object} props.data Card data (tests); read from the page when omitted.

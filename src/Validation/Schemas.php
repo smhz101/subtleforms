@@ -351,7 +351,8 @@ class Schemas {
 				'tags'         => 'optional|array',
 				'uses_pro'     => 'optional|bool',
 				'pro_features' => 'optional|array',
-				'payment'      => 'optional|object|map:PaymentConfig',
+				// Settings an add-on stores for the form, kept as saved.
+				'payment'      => 'optional|object',
 				// Undeclared keys are dropped from the validated output, so anything
 				// the builder writes to metadata has to be listed here or it never
 				// reaches the database. canvasWidth and integrations were written by
@@ -431,23 +432,6 @@ class Schemas {
 				'customCss' => 'optional|string|max:20000',
 			),
 
-			// PaymentConfig (Phase A2-P3: at_least_one for flexible pricing)
-			// Open (2.3.1): add-ons store more here (the checkout `processor`,
-			// `billing` mapping), and forms priced by Product or Priced option
-			// fields have no fixed amount or amount field. Requiring one made
-			// every autosave of such a form fail (QA-03, form 11).
-			'PaymentConfig' => array(
-				'__passthrough' => true,
-				'enabled'     => 'optional|bool|default:false',
-				// A three-letter code. No default: a form without a currency
-				// follows the site currency (PAY2-02). The payment add-on
-				// decides which codes it can charge.
-				'currency'    => 'optional|string|max:10',
-				'amountType'  => 'optional|in:fixed,field,calculated|default:fixed',
-				'fixedAmount' => 'optional|number|min:0',
-				'amountField' => 'optional|string|max:100',
-				'mode'        => 'optional|in:test,live|default:test',
-			),
 		);
 	}
 

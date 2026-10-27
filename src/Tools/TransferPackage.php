@@ -23,8 +23,48 @@ final class TransferPackage {
 	public const MAX_FORMS       = 100;
 	public const MAX_SUBMISSIONS = 2000;
 
-	/** Entry meta that travels with a submission: the order and its payment. */
-	public const PAYMENT_META = array( 'order', 'payment' );
+	/**
+	 * Entry meta this plugin writes itself: the visitor's address and browser,
+	 * request and pipeline state, spam checks, consent times, private notes and
+	 * the import reference. An export never copies these, and an import never
+	 * takes them from a file.
+	 */
+	private const OWN_META = array(
+		'action_failures',
+		'conditional_state',
+		'consents',
+		'current_step_id',
+		'current_step_settings',
+		'disabled_fields',
+		'entry_status',
+		'form_schema',
+		'hidden_fields',
+		'hidden_steps',
+		'import',
+		'logic_payload',
+		'notes',
+		'pipeline_status',
+		'preview',
+		'request_ip',
+		'request_page_url',
+		'request_user_agent',
+		'request_user_id',
+		'required_fields',
+		'resent',
+		'schema_version',
+		'spam_reason',
+		'spam_token',
+		'step_output_data',
+		'store_result',
+		'submission_id',
+		'validation_errors',
+	);
+
+	/** The keys of an exported row that are not entry meta. */
+	private const ROW_FIELDS = array( 'entry_id', 'status', 'is_read', 'starred', 'created_at', 'payload', 'meta' );
+
+	/** Largest record (as JSON, in bytes) that travels with an entry. */
+	private const MAX_META_RECORD = 65536;
 
 	/**
 	 * A forms package.
@@ -164,7 +204,7 @@ final class TransferPackage {
 				'starred'    => empty( $row['starred'] ) ? 0 : 1,
 				'created_at' => self::timestamp( (string) ( $row['created_at'] ?? '' ) ),
 				'payload'    => $row['payload'],
-				'meta'       => self::paymentMeta( $row ),
+				'meta'       => self::entryMeta( $row ),
 			);
 		}
 		if ( ! $clean ) {
@@ -180,18 +220,66 @@ final class TransferPackage {
 	}
 
 	/**
-	 * The order and payment record of an exported entry, cleaned for storage
-	 * (PAY2-01): order lines, coupon and totals, and the payment status,
-	 * gateway, transaction ID, amount, currency and mode.
+	 * The entry meta records that travel with an entry: every record (an
+	 * array) another plugin saved on the entry, so an entry keeps what an
+	 * add-on stored on it even when that add-on is not active. The records
+	 * this plugin writes itself (see OWN_META) never travel.
 	 *
-	 * @param array $row Exported row (or a stored entry's meta).
-	 * @return array{order?: array, payment?: array}
+	 * @param array $record Stored entry meta, or an exported row.
+	 * @return string[] Meta keys.
 	 */
-	public static function paymentMeta( array $row ): array {
+	public static function entryMetaKeys( array $record ): array {
+		$keys = array();
+		foreach ( $record as $key => $value ) {
+			if ( ! is_string( $key ) || ! is_array( $value ) || ! $value ) {
+				continue;
+			}
+			if ( sanitize_key( $key ) !== $key || in_array( $key, self::OWN_META, true ) || in_array( $key, self::ROW_FIELDS, true ) ) {
+				continue;
+			}
+			$json = wp_json_encode( $value );
+			if ( false === $json || strlen( $json ) > self::MAX_META_RECORD ) {
+				continue;
+			}
+			$keys[] = $key;
+		}
+		/**
+		 * Entry meta records that go into an export and come back on import.
+		 * The default is every record another plugin saved on the entry. An
+		 * add-on narrows the list to the records it wants to travel.
+		 *
+		 * @since 2.7.2
+		 *
+		 * @param string[] $keys   Meta keys.
+		 * @param array    $record Stored entry meta, or an exported row.
+		 */
+		$keys = apply_filters( 'subtleforms/transfer/entry_meta_keys', $keys, $record );
+		$out  = array();
+		foreach ( (array) $keys as $key ) {
+			if ( is_string( $key ) && '' !== $key && sanitize_key( $key ) === $key && ! in_array( $key, self::OWN_META, true ) && ! in_array( $key, self::ROW_FIELDS, true ) ) {
+				$out[ $key ] = $key;
+			}
+		}
+		return array_values( $out );
+	}
+
+	/**
+	 * The records that travel with an entry, cleaned for storage: text is
+	 * sanitised, numbers and booleans kept, nesting limited, and anything that
+	 * looks like a secret (a key naming a token, secret, password or API key)
+	 * left out.
+	 *
+	 * @param array $record Stored entry meta, or an exported row.
+	 * @return array<string, array>
+	 */
+	public static function entryMeta( array $record ): array {
 		$out = array();
-		foreach ( self::PAYMENT_META as $key ) {
-			if ( isset( $row[ $key ] ) && is_array( $row[ $key ] ) && $row[ $key ] ) {
-				$out[ $key ] = self::cleanRecord( $row[ $key ], 0 );
+		foreach ( self::entryMetaKeys( $record ) as $key ) {
+			if ( isset( $record[ $key ] ) && is_array( $record[ $key ] ) && $record[ $key ] ) {
+				$clean = self::cleanRecord( $record[ $key ], 0 );
+				if ( $clean ) {
+					$out[ $key ] = $clean;
+				}
 			}
 		}
 		return $out;
@@ -209,7 +297,7 @@ final class TransferPackage {
 		$out = array();
 		foreach ( $record as $key => $value ) {
 			$key = is_int( $key ) ? $key : sanitize_key( (string) $key );
-			if ( '' === $key ) {
+			if ( '' === $key || ( is_string( $key ) && preg_match( '/secret|token|passw|api_?key|authorization|credential/i', $key ) ) ) {
 				continue;
 			}
 			if ( is_array( $value ) ) {

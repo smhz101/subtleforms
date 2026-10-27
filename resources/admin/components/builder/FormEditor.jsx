@@ -217,7 +217,7 @@ export default function FormEditor({
 
   // Change a field's ID and every reference to it (2.4.1). The whole schema
   // goes through renameFieldKey(), so form settings outside the field tree
-  // (emails, webhooks, confirmations, integrations, payments) follow too, and
+  // (emails, webhooks, confirmations, integrations, add-on settings) follow too, and
   // the change lands in the builder's undo history like any other edit.
   const handleRenameKey = useCallback(
     (nodeId, newKey) => {
@@ -346,7 +346,6 @@ export default function FormEditor({
       fieldDefinitions={definitionMap}
       formType={formType}
       fieldDefaults={fieldDefaults}
-      currency={schema?.metadata?.payment?.currency || ''}
       onInsert={handleInsert}
       onDelete={handleDelete}
       onUpdate={handleUpdate}

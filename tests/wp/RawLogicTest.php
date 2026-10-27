@@ -68,16 +68,16 @@ final class RawLogicTest extends TestCase {
 			)
 		);
 
-		// Pricing is done by a payment add-on; it is handed the answers as typed.
+		// An add-on's before_store filter is handed the answers as typed.
 		$typed = null;
-		$spy   = static function ( $order, $formId, $schema, $payload, $request, $logicValues ) use ( &$typed ) {
+		$spy   = static function ( $hold, $formId, $schema, $payload, $request, $logicValues ) use ( &$typed ) {
 			$typed = $logicValues;
-			return $order;
+			return $hold;
 		};
-		add_filter( 'subtleforms/submit/price_order', $spy, 10, 6 );
+		add_filter( 'subtleforms/submit/before_store', $spy, 10, 6 );
 
 		$res = $this->submit( $id, array( 'site' => 'example.com', 'company' => 'Acme' ) );
-		remove_filter( 'subtleforms/submit/price_order', $spy, 10 );
+		remove_filter( 'subtleforms/submit/before_store', $spy, 10 );
 		$this->assertSame( 200, $res['status'], wp_json_encode( $res['data'] ) );
 
 		$stored = $this->storedPayload( $id );
@@ -87,7 +87,7 @@ final class RawLogicTest extends TestCase {
 		$this->assertSame( 'Acme', $stored['company'] ?? null );
 
 		$row = $this->storedRow( $id );
-		// The order pricing sees the website as typed.
+		// The add-on sees the website as typed.
 		$this->assertSame( 'example.com', $typed['site'] ?? null );
 		// The answers as typed are not stored in the entry meta.
 		$this->assertStringNotContainsString( 'logic_payload', $row );

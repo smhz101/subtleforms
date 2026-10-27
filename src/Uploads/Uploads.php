@@ -138,8 +138,8 @@ final class Uploads {
 			return self::error( 'subtleforms_upload_field', __( 'This form does not accept uploads here.', 'subtleforms' ), 404 );
 		}
 
-		// A form that is closed to entries (login, schedule, entry limit or a
-		// payment nobody can take) takes no files either.
+		// A form that is closed to entries (login, schedule, entry limit, or
+		// a field whose add-on is not active) takes no files either.
 		$blocked = self::blockedReason( $formId );
 		if ( null !== $blocked ) {
 			return self::error( 'subtleforms_upload_closed', $blocked, 403 );
@@ -338,16 +338,17 @@ final class Uploads {
 	}
 
 	/**
-	 * Most files one field accepts: one, unless an add-on allows more. A form
-	 * saved with several files allowed keeps its settings; this plugin simply
-	 * accepts the first file.
+	 * How many files one field accepts. This plugin's upload field takes one
+	 * file. An add-on that draws the field with a control of its own (see
+	 * registerFieldOverride in the JavaScript API) says how many files that
+	 * control sends, so the files are matched to the field.
 	 *
 	 * @param array $field Field node.
 	 */
 	public static function maxFiles( array $field ): int {
 		/**
-		 * Most files one upload field accepts (1 to 20). An add-on that
-		 * provides several files per field returns the field's own limit.
+		 * How many files the control drawn for this upload field sends
+		 * (1 to 20). The upload field of this plugin sends one.
 		 *
 		 * @param int   $max   Default 1.
 		 * @param array $field Field node, as saved in the form.

@@ -12,7 +12,7 @@
 namespace SubtleForms\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use SubtleForms\Fields\AddonFieldTypes;
+use SubtleForms\Fields\FieldTypeAvailability;
 use SubtleForms\Fields\CoreFields;
 use SubtleForms\Fields\FieldRegistry;
 use SubtleForms\Fields\FieldsV2;
@@ -94,14 +94,15 @@ final class FreeProSplitTest extends TestCase {
 				),
 			),
 		);
-		$out = AddonFieldTypes::strip( $nodes, array( 'signature', 'calculation' ) );
+		$out = FieldTypeAvailability::strip( $nodes, array( 'signature', 'calculation' ) );
 		$this->assertCount( 2, $out );
 		$this->assertSame( 'text', $out[0]['type'] );
 		$this->assertSame( array( 'email' ), array_column( $out[1]['children'], 'type' ) );
-		$missing = AddonFieldTypes::missing( self::registry() );
-		foreach ( array( 'signature', 'calculation', 'payment_card', 'payment_product', 'payment_choice', 'payment_amount', 'payment_summary', 'payment_coupon', 'payment_hidden_price' ) as $type ) {
-			$this->assertContains( $type, $missing );
-		}
+		// What is left out is decided by the registry alone: no list of add-on types.
+		$schema  = array( 'fields' => array_merge( $nodes, array( array( 'type' => 'example_gauge', 'key' => 'g' ) ) ) );
+		$missing = FieldTypeAvailability::unregistered( $schema, self::registry() );
+		$this->assertEqualsCanonicalizing( array( 'signature', 'calculation', 'example_gauge' ), $missing );
+		$this->assertSame( array(), FieldTypeAvailability::unregistered( array( 'fields' => array( array( 'type' => 'text', 'key' => 'a' ), array( 'type' => 'picture_choice', 'key' => 'b' ) ) ), self::registry() ) );
 	}
 
 	/** The moved payment fields are left out of a saved form's live schema, at any depth, and their answers are dropped. */
@@ -112,13 +113,12 @@ final class FreeProSplitTest extends TestCase {
 			array( 'type' => 'payment_amount', 'key' => 'amt', 'required' => true ),
 			array( 'type' => 'step', 'children' => array( array( 'type' => 'payment_coupon', 'key' => 'cp' ), array( 'type' => 'payment_hidden_price', 'key' => 'fee' ), array( 'type' => 'payment_summary', 'key' => 'sum' ) ) ),
 		);
-		$out = AddonFieldTypes::strip( $nodes, $types );
+		$out = FieldTypeAvailability::strip( $nodes, $types );
 		$this->assertCount( 2, $out );
 		$this->assertSame( array(), $out[1]['children'] );
 		// Never a validation type of its own: nothing here can reject a submission.
 		foreach ( $types as $type ) {
-			$this->assertSame( $type, AddonFieldTypes::validationType( $type ) );
-			$this->assertContains( $type, AddonFieldTypes::types() );
+			$this->assertSame( $type, FieldTypeAvailability::validationType( $type ) );
 		}
 	}
 
@@ -182,5 +182,16 @@ final class FreeProSplitTest extends TestCase {
 		$GLOBALS['sf_test_options']['subtleforms_settings'] = array();
 		$this->assertSame( 3, \SubtleForms\Async\AsyncDispatcher::webhookRetries() );
 		unset( $GLOBALS['sf_test_options']['subtleforms_settings'] );
+	}
+
+	/** A form made with an add-on can be stored again without it; new unknown types are still refused. */
+	public function test_the_schema_check_keeps_unregistered_types_only_where_a_form_is_stored(): void {
+		$schema = array( 'schema_version' => 1, 'metadata' => array( 'title' => 'T', 'name' => 'T' ), 'fields' => array( array( 'id' => 'a', 'key' => 'a', 'type' => 'example_gauge', 'label' => 'A' ) ) );
+		$strict = ( new \SubtleForms\Support\SchemaValidator() )->validateWithErrors( $schema );
+		$this->assertNotEmpty( $strict );
+		$keeps = ( new \SubtleForms\Support\SchemaValidator() )->keepUnregisteredTypes();
+		$this->assertSame( array(), $keeps->validateWithErrors( $schema ) );
+		$schema['fields'][0]['type'] = 'Not A Type!';
+		$this->assertNotEmpty( $keeps->validateWithErrors( $schema ) );
 	}
 }

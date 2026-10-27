@@ -10,7 +10,6 @@ const SKIP = [
   'g-recaptcha-response',
   'h-captcha-response',
   'cf-turnstile-response',
-  '_payment',
 ];
 
 /**

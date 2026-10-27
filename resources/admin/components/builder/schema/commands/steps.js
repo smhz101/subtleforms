@@ -269,7 +269,7 @@ export function moveNodeToStep(tree, { nodeId, stepId }) {
 }
 
 /**
- * Options for the inspector's Step select: "Step 2: Payment".
+ * Options for the inspector's Step select: "Step 2: Contact details".
  */
 export function stepOptions(tree) {
   return getStepIds(tree).map((id, index) => {

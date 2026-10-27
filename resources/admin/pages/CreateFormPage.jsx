@@ -12,7 +12,7 @@ import AdminShell from '../components/AdminShell';
 import { withOwnMetadata } from '../utils/schemaCopy';
 import { createInitialSchema } from '../utils/initialSchema';
 import { schemaFromTemplate } from '../utils/templateSchema';
-import { TEMPLATE_CATEGORIES } from '../templates';
+import { templateCategories } from '../templates';
 import './CreateFormPage.scss';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -30,7 +30,6 @@ function generateDefaultTitle() {
 
 // The tag on a template card: the form type name, except for Standard.
 function templateTypeTag(type) {
-  if (type === 'payment') return __('Payment', 'subtleforms');
   if (['multi-step', 'multistep', 'sectioned', 'conversational'].includes(type)) return formTypeLabel(type);
   return '';
 }
@@ -231,7 +230,7 @@ export default function CreateFormPage() {
     }
   }, [chosen, title, description, structure, createFormMutation, navigate, showError]);
 
-  const categories = TEMPLATE_CATEGORIES.filter((c) => c.id === 'all' || counts[c.id]);
+  const categories = templateCategories(templates).filter((c) => c.id === 'all' || counts[c.id]);
 
   return (
     <AdminShell

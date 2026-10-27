@@ -559,6 +559,58 @@ export function computeLogicState(schema, values, opts = {}) {
 }
 
 /**
+ * The nodes of a schema that conditional logic hides for these answers: a
+ * field hidden by its own rules, and everything inside a hidden container or
+ * a skipped step. A node without a key is judged by its own show and hide
+ * rules, so it is found too, which a list of hidden keys cannot do. Add-ons
+ * that need to know what is on screen (for example to leave a field out of a
+ * total) read this through the form wrapper's `hiddenNodes`.
+ *
+ * @param {Object} schema { fields, logic }.
+ * @param {Object} values Answers keyed by field key.
+ * @param {Object} opts   { today }.
+ * @return {{keys: Set<string>, nodes: Set<Object>}} Hidden keys and hidden nodes (the schema's own objects).
+ */
+export function hiddenNodes(schema, values = {}, opts = {}) {
+  const keys = new Set();
+  const nodes = new Set();
+  const fields = Array.isArray(schema?.fields) ? schema.fields : [];
+  if (!fields.length) return { keys, nodes };
+  const state = computeLogicState(schema, values, opts);
+  const hidden = new Set([...state.hidden_fields, ...state.hidden_steps]);
+  const visible = visibleValues(schema, values, opts);
+
+  const walk = (list, parentHidden) => {
+    (Array.isArray(list) ? list : []).forEach((node) => {
+      if (!isPlainObject(node)) return;
+      const c = { ...node, ...(isPlainObject(node.config) ? node.config : {}) };
+      const key = c.key || (node.type === 'step' ? node.id : '') || '';
+      let isHidden = parentHidden;
+      if (key) {
+        isHidden = isHidden || hidden.has(key);
+      } else {
+        nodeLogics(node).forEach((l) => {
+          const passes = logicPasses(l, visible, opts);
+          if ((l.action === 'show' && !passes) || (l.action === 'hide' && passes)) isHidden = true;
+        });
+      }
+      if (isHidden) {
+        nodes.add(node);
+        if (key) keys.add(key);
+      }
+      walk(node.children, isHidden);
+      walk(node.fields, isHidden);
+      (Array.isArray(node.columns) ? node.columns : []).forEach((col) => {
+        if (Array.isArray(col)) walk(col, isHidden);
+        else if (isPlainObject(col)) walk(col.fields || col.children, isHidden);
+      });
+    });
+  };
+  walk(fields, false);
+  return { keys, nodes };
+}
+
+/**
  * Answers with hidden fields removed: what the server stores.
  */
 export function visibleValues(schema, values, opts = {}) {

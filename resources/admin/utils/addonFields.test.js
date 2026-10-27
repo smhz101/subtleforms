@@ -1,17 +1,40 @@
-import { getMissingAddonFields, needsMissingPayment } from './addonFields';
+import { getMissingAddonFields, getFieldDisplayName } from './addonFields';
 
-const schema = {
-  fields: [
-    { type: 'text', key: 'name' },
-    { type: 'step', children: [{ type: 'signature', key: 'sig' }] },
-    { type: 'two_column_container', columns: [{ fields: [{ type: 'calculation', key: 'total' }] }] },
-  ],
-};
+const known = ['text', 'email', 'step', 'two_column_container'];
 
-describe('add-on field detection (2.3.9)', () => {
-  test('names only the add-on fields this site cannot show', () => {
-    expect(getMissingAddonFields(schema, ['signature', 'calculation', 'payment_card'])).toEqual(['Signature', 'Calculation']);
+describe('fields no active plugin registers', () => {
+  const schema = {
+    fields: [
+      { type: 'text', key: 'name', label: 'Name' },
+      { type: 'step', children: [{ type: 'add_on_one', key: 'one', label: 'Your signature' }] },
+      { type: 'two_column_container', columns: [{ fields: [{ type: 'add_on_two', key: 'two', config: { label: 'Total' } }] }] },
+    ],
+  };
+
+  test('names the fields as the form author wrote them', () => {
+    expect(getMissingAddonFields(schema, known)).toEqual(['Your signature', 'Total']);
+  });
+
+  test('falls back to the type key when a field has no name', () => {
+    expect(getMissingAddonFields({ fields: [{ type: 'seating_chart', key: 's' }] }, known)).toEqual(['seating_chart']);
+    expect(getFieldDisplayName({ type: 'seating_chart', label: '  ' })).toBe('seating_chart');
+  });
+
+  test('says nothing when every type is registered, or when the server gave no list', () => {
+    expect(getMissingAddonFields(schema, [...known, 'add_on_one', 'add_on_two'])).toEqual([]);
     expect(getMissingAddonFields(schema, [])).toEqual([]);
+    expect(getMissingAddonFields(null, known)).toEqual([]);
+  });
+
+  test('ignores payment settings: only registered field types decide', () => {
+    const toggleOnly = { metadata: { type: 'conversational', payment: { enabled: true } }, fields: [{ type: 'email', key: 'e' }] };
+    expect(getMissingAddonFields(toggleOnly, known)).toEqual([]);
+  });
+
+  test('reads the known types from the page data by default', () => {
+    window.subtleformsAdmin = { knownFieldTypes: known };
+    expect(getMissingAddonFields(schema)).toEqual(['Your signature', 'Total']);
+    delete window.subtleformsAdmin;
   });
 });
 
@@ -55,19 +78,5 @@ describe('settings a form uses that an inactive add-on provides', () => {
     const schema = { fields: [{ type: 'picture_choice', key: 'p' }, { type: 'image_upload', key: 'u', multiple: true }] };
     expect(getLimitedFeatures(schema, ['picture_choice', 'multi_file_uploads'])).toEqual([]);
     expect(getLimitedFeatures(schema, ['picture_choice'])).toHaveLength(1);
-  });
-});
-
-describe('needsMissingPayment', () => {
-  const schema = { fields: [{ type: 'text' }, { type: 'two_column_container', columns: [[{ type: 'payment_amount' }]] }] };
-
-  test('is true when a payment field is missing', () => {
-    expect(needsMissingPayment(schema, ['signature', 'payment_amount'])).toBe(true);
-  });
-
-  test('is false when the payment type is registered or the form has none', () => {
-    expect(needsMissingPayment(schema, ['signature'])).toBe(false);
-    expect(needsMissingPayment({ fields: [{ type: 'signature' }] }, ['signature', 'payment_amount'])).toBe(false);
-    expect(needsMissingPayment(null, ['payment_amount'])).toBe(false);
   });
 });

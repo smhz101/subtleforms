@@ -16,7 +16,7 @@ import { columnFields } from './columnFields';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { getFieldType } from '../../shared/extend';
 import { hasParts, missingParts } from '../../shared/compositeParts';
-import { firstUnansweredChainedLevel } from '../../shared/chainedOptions';
+import { chainedSelectLevels, firstUnansweredChainedLevel } from '../../shared/chainedOptions';
 import { isValidInternational } from '../../shared/phoneDial';
 
 export const COMPOSITE_FIELD_TYPES = new Set(['name_group', 'address_group', 'address']);
@@ -169,6 +169,9 @@ export function isAnswerable(type, config = {}) {
       config.columns.length > 0
     );
   }
+  if (type === 'chained_select') {
+    return chainedSelectLevels(config).length > 0;
+  }
   return true;
 }
 
@@ -263,6 +266,17 @@ function rawValidateField(field, value, defaults = {}) {
     return __('Invalid URL.', 'subtleforms');
   }
 
+  // A type from an add-on may check its own answers (registerFieldType `validate`).
+  const addonDef = getFieldType(type);
+  if (addonDef && typeof addonDef.validate === 'function') {
+    try {
+      const addonError = addonDef.validate(value, config);
+      if (typeof addonError === 'string' && addonError) return addonError;
+    } catch (e) {
+      // A broken add-on must not stop the form.
+    }
+  }
+
   const num = (v) => (v === undefined || v === null || v === '' ? null : Number(v));
 
   if (typeof value === 'string' && ['text', 'textarea', 'password'].includes(type)) {
@@ -336,56 +350,6 @@ function rawValidateField(field, value, defaults = {}) {
   if (type === 'color_picker' && !/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(value).trim())) {
     return __('Please enter a colour as a hex value, such as #336699.', 'subtleforms');
   }
-  if (type === 'payment_amount') {
-    const amount = Number(value);
-    if (Number.isNaN(amount)) return __('Payment amount must be a valid number.', 'subtleforms');
-    if (amount < 0) return __('Payment amount must be positive.', 'subtleforms');
-    const min = num(config.min);
-    const max = num(config.max);
-    if (min !== null && Number.isFinite(min) && amount < min) {
-      return sprintf(
-        /* translators: %s: smallest amount */
-        __('Payment amount must be at least %s.', 'subtleforms'),
-        min.toFixed(2)
-      );
-    }
-    if (max !== null && Number.isFinite(max) && max > 0 && amount > max) {
-      return sprintf(
-        /* translators: %s: largest amount */
-        __('Payment amount cannot exceed %s.', 'subtleforms'),
-        max.toFixed(2)
-      );
-    }
-  }
-
-  // A Product quantity is a whole number within the field's limits, as
-  // FieldValidator::validatePaymentQuantity checks on the server (PAY-06).
-  // Checked here so a card is never authorised for an order the server
-  // will refuse.
-  if (type === 'payment_product' && config.allowQuantity) {
-    const text = typeof value === 'number' ? String(value) : String(value).trim();
-    const qty = Number(text);
-    if (!/^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/.test(text) || !Number.isInteger(qty) || qty < 0) {
-      return __('Please enter a whole number for the quantity.', 'subtleforms');
-    }
-    const minQty = Math.max(0, parseInt(config.minQuantity, 10) || 0);
-    const maxQty = parseInt(config.maxQuantity, 10) || 0;
-    if (qty < minQty) {
-      return sprintf(
-        /* translators: %d: smallest quantity */
-        __('The quantity must be at least %d.', 'subtleforms'),
-        minQty
-      );
-    }
-    if (maxQty > 0 && qty > maxQty) {
-      return sprintf(
-        /* translators: %d: largest quantity */
-        __('The quantity can be at most %d.', 'subtleforms'),
-        maxQty
-      );
-    }
-  }
-
   if (type === 'date' && isIsoDate(value)) {
     const minDate = config.minDate;
     const maxDate = config.maxDate;

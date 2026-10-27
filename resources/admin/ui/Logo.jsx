@@ -21,7 +21,7 @@ export default function Logo({
 }) {
   const branding = getBranding();
 
-  // White label: the agency's logo and name replace the mark and wordmark.
+  // A name or logo from the `subtleforms/admin_branding` filter replaces the mark and wordmark.
   if (branding.logoUrl || branding.name !== 'SubtleForms') {
     const custom = branding.logoUrl ? (
       <img

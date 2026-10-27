@@ -5,6 +5,9 @@ This file keeps the full release history. readme.txt lists only the latest versi
 == Changelog ==
 
 = 2.7.2 - 2026-10-24 =
+* Change: SubtleForms Pro builds older than 2.8.0 are not started by this version, to avoid errors. Update SubtleForms Pro to 2.8.0 or later.
+* Change: Payment, pricing and coupon features are provided only by the add-on. This plugin no longer includes the order engine, and an entry's order is shown by the add-on.
+* Change: A form that has a field no active plugin provides shows "This form is not available right now." and keeps its saved fields. Forms with only a leftover payments setting and no payment field keep working.
 * New: On an empty site, SubtleForms offers to import forms from Contact Form 7, Gravity Forms, Fluent Forms and other detected form plugins.
 * Change: Forms load without a loading flash, file uploads use a drop zone with a select button, repeater groups are labelled Entry N, and form settings let you choose the required-field mark and turn the validation summary on or off. Forms that have required fields show a short legend for the mark. Forms no longer paint a background by default, and inherit-from-theme keeps SubtleForms chrome for calendars and similar fields while using theme colours.
 * Fix: The Preview tab uses one scrollbar for the canvas and styling controls.

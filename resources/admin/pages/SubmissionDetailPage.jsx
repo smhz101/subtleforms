@@ -1,5 +1,6 @@
 import { submissionStatus } from '../utils/submissionStatus';
 import { displayItems, displayLabel, displayRow, displayText } from '../utils/entryDisplay';
+import { nextReviewStatus } from '../utils/entryStatus';
 import { adminLabel } from '../../shared/fieldDisplay';
 import { structuralType } from '../../shared/formType';
 import { useState, useEffect, useRef } from '@wordpress/element';
@@ -16,7 +17,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import AdminShell from '../components/AdminShell';
 import { apiClient } from '../data';
 import Icon from '../ui/Icon';
-import { formatMoney } from '../../shared/pricing';
+import ExtensionSlot from '../components/ExtensionSlot';
 import './SubmissionDetailPage.scss';
 
 // ─── Pipeline timeline helpers ──────────────────────────────────────────────
@@ -28,13 +29,6 @@ const ACTION_META = {
   email_marketing: { iconName: 'Mail',     label: 'Email Marketing' },
   crm:     { iconName: 'Users',    label: 'CRM' },
   pdf:     { iconName: 'FileText', label: 'Entry PDF' },
-};
-
-/** Entry PDF (from an add-on). Cookie-authenticated REST link with a nonce. */
-const pdfUrl = ( id ) => {
-  const base = ( window.subtleformsAdmin?.restUrl || '/wp-json/subtleforms/v1' ).replace( /\/$/, '' );
-  const nonce = window.wpApiSettings?.nonce || window.subtleformsAdmin?.restNonce || '';
-  return `${ base }/entries/${ id }/pdf?_wpnonce=${ encodeURIComponent( nonce ) }`;
 };
 
 const getActionMeta = ( actionType ) =>
@@ -629,7 +623,6 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
     regular:        __( 'Standard',       'subtleforms' ),
     conversational: __( 'Conversational', 'subtleforms' ),
     'multi-step':   __( 'Multi-step',     'subtleforms' ),
-    payment:        __( 'Payment',        'subtleforms' ),
   };
   const formTypeLabel = formTypeLabels[ formType ] || __( 'Standard', 'subtleforms' );
 
@@ -679,8 +672,6 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
   const relDate = formatRelDate( submission.created_at );
 
   const isUnread = parseInt( submission.is_read, 10 ) === 0;
-  // An add-on that serves entry PDFs adds this key to the capability map.
-  const canPdf = !! window.subtleformsAdmin?.capabilities?.[ 'extensions.pdf' ];
   const isFlagged = submission.status === 'flagged';
   const isStarred = parseInt( submission.starred, 10 ) === 1;
   const notes = Array.isArray( meta.notes ) ? meta.notes : [];
@@ -759,16 +750,8 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
         />
       </div>
       <div className='sf-sub-toolbar__group' role='group' aria-label={ __( 'Submission actions', 'subtleforms' ) }>
-        { canPdf && (
-          <Button
-            size='compact'
-            icon={ <Icon.FileText size={ 16 } /> }
-            href={ pdfUrl( submission.id ) }
-            target='_blank'
-            rel='noopener noreferrer'>
-            { __( 'PDF', 'subtleforms' ) }
-          </Button>
-        ) }
+        {/* Buttons from add-ons (submission.actions slot). */}
+        <ExtensionSlot name='submission.actions' submission={ submission } />
         <Button
           size='compact'
           icon={ isUnread ? <Icon.Eye size={ 16 } /> : <Icon.EyeOff size={ 16 } /> }
@@ -1071,91 +1054,8 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
             </div>
           </section>
 
-          { meta.order && (
-            <section className='sf-panel sf-order-panel'>
-              <header className='sf-panel__header'>
-                <h2 className='sf-panel__title'>{ __( 'Order', 'subtleforms' ) }</h2>
-                { ( () => {
-                  const st = meta.payment?.status || 'pending';
-                  const map = {
-                    paid: [ 'sf-pill--success', __( 'Paid', 'subtleforms' ) ],
-                    succeeded: [ 'sf-pill--success', __( 'Paid', 'subtleforms' ) ],
-                    free: [ 'sf-pill--success', __( 'Free', 'subtleforms' ) ],
-                    authorized: [ 'sf-pill--info', __( 'Authorised', 'subtleforms' ) ],
-                    failed: [ 'sf-pill--danger', __( 'Failed', 'subtleforms' ) ],
-                    refunded: [ 'sf-pill--outline', __( 'Refunded', 'subtleforms' ) ],
-                    cancelled: [ 'sf-pill--danger', __( 'Cancelled', 'subtleforms' ) ],
-                    pending: [ 'sf-pill--warning', __( 'Payment pending', 'subtleforms' ) ],
-                  };
-                  const [ cls, label ] = map[ st ] || map.pending;
-                  return <span className={ `sf-pill sf-pill--dot ${ cls }` }>{ label }</span>;
-                } )() }
-              </header>
-              <div className='sf-panel__body'>
-                <ul className='sf-order-panel__items'>
-                  { ( meta.order.items || [] ).map( ( item, i ) => (
-                    <li key={ i }>
-                      <span>
-                        { item.label }
-                        { item.qty > 1 && <span className='sf-order-panel__muted'> × { item.qty }</span> }
-                      </span>
-                      <span>{ formatMoney( item.amount, meta.order.currency ) }</span>
-                    </li>
-                  ) ) }
-                </ul>
-                <dl className='sf-order-panel__totals'>
-                  { meta.order.discount > 0 && (
-                    <>
-                      <dt>{ sprintf( __( 'Coupon %s', 'subtleforms' ), meta.order.coupon || '' ) }</dt>
-                      <dd>−{ formatMoney( meta.order.discount, meta.order.currency ) }</dd>
-                    </>
-                  ) }
-                  { meta.order.tax > 0 && (
-                    <>
-                      <dt>{ sprintf( __( 'Tax (%s%%)', 'subtleforms' ), meta.order.tax_rate ) }</dt>
-                      <dd>{ formatMoney( meta.order.tax, meta.order.currency ) }</dd>
-                    </>
-                  ) }
-                  <dt className='is-total'>{ __( 'Total', 'subtleforms' ) }</dt>
-                  <dd className='is-total'>{ formatMoney( meta.order.total, meta.order.currency ) }</dd>
-                  { Number( meta.payment?.refunded ) > 0 && (
-                    <>
-                      <dt>{ __( 'Refunded', 'subtleforms' ) }</dt>
-                      <dd>−{ formatMoney( Number( meta.payment.refunded ), meta.order.currency ) }</dd>
-                    </>
-                  ) }
-                </dl>
-                { meta.woocommerce?.order_id && (
-                  <p className='sf-order-panel__ref sf-order-panel__woo'>
-                    <a href={ meta.woocommerce.edit_url } target='_blank' rel='noopener noreferrer'>
-                      { sprintf(
-                        /* translators: 1: order number, 2: order status */
-                        __( 'WooCommerce order #%1$s (%2$s)', 'subtleforms' ),
-                        meta.woocommerce.number || meta.woocommerce.order_id,
-                        meta.woocommerce.status_label || meta.woocommerce.status || ''
-                      ) }
-                      <Icon.ExternalLink size={ 12 } aria-hidden='true' />
-                    </a>
-                  </p>
-                ) }
-                { meta.payment?.transaction_id && ! meta.woocommerce?.order_id && (
-                  <p className='sf-order-panel__ref'>
-                    { meta.payment.gateway === 'stripe' ? (
-                      <a
-                        href={ `https://dashboard.stripe.com/${ meta.payment.mode === 'live' ? '' : 'test/' }payments/${ meta.payment.transaction_id }` }
-                        target='_blank'
-                        rel='noopener noreferrer'>
-                        { __( 'View in Stripe', 'subtleforms' ) }
-                        <Icon.ExternalLink size={ 12 } aria-hidden='true' />
-                      </a>
-                    ) : (
-                      <code>{ meta.payment.transaction_id }</code>
-                    ) }
-                  </p>
-                ) }
-              </div>
-            </section>
-          ) }
+          {/* Panels from add-ons (submission.panels slot). */}
+          <ExtensionSlot name='submission.panels' submission={ submission } meta={ meta } />
           <section className='sf-panel'>
             <header className='sf-panel__header'>
               <h2 className='sf-panel__title'>{ __( 'Details', 'subtleforms' ) }</h2>

@@ -4,16 +4,17 @@
  */
 
 import { ToggleControl } from '@wordpress/components';
+import { typeHasFlag } from '../../../../utils/fieldTypeFlags';
 import { __ } from '@wordpress/i18n';
 import DynamicInspectorPanel from '../DynamicInspectorPanel';
 import './ValidationPanel.scss';
 
-const NO_REQUIRED = new Set(['calculation', 'hidden', 'payment_summary', 'payment_hidden_price', 'html']);
+const NO_REQUIRED = new Set(['calculation', 'hidden', 'html']);
 
 export default function ValidationPanel({ field, onUpdate, isReadOnly }) {
   return (
     <div className='sf-validation-panel'>
-      {!NO_REQUIRED.has(field.type) && (
+      {!NO_REQUIRED.has(field.type) && !typeHasFlag(field.type, 'noMessages') && (
         <div className='sf-validation-panel__required'>
           <ToggleControl
             __nextHasNoMarginBottom

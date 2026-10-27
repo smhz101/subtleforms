@@ -30,13 +30,6 @@ const FORM_GOALS = [
     fields: ['name', 'email', 'rating', 'feedback'],
   },
   {
-    id: 'payment',
-    label: __('Payment Form', 'subtleforms'),
-    icon: Icon.CreditCard,
-    description: __('Accept payments online', 'subtleforms'),
-    fields: ['name', 'email', 'amount', 'payment'],
-  },
-  {
     id: 'conversational',
     label: __('Conversational', 'subtleforms'),
     icon: Icon.MessageCircle,
@@ -131,25 +124,6 @@ const FIELD_DEFINITIONS = {
       placeholder: __('Your feedback...', 'subtleforms'),
       required: false,
       rows: 4,
-    },
-  },
-  amount: {
-    key: 'amount',
-    type: 'number',
-    config: {
-      label: __('Amount', 'subtleforms'),
-      placeholder: __('0.00', 'subtleforms'),
-      required: true,
-      min: 0,
-      step: 0.01,
-    },
-  },
-  payment: {
-    key: 'payment',
-    type: 'payment_gateway',
-    config: {
-      label: __('Payment Details', 'subtleforms'),
-      required: true,
     },
   },
 };
@@ -286,7 +260,7 @@ export default function OnboardingWizard({ onComplete, onDismiss, createError = 
                   <Icon.CheckCircle />
                   <span>
                     {__(
-                      'Accept payments and create conversational forms',
+                      'Create multi-step and conversational forms',
                       'subtleforms'
                     )}
                   </span>

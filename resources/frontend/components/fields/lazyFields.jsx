@@ -3,7 +3,7 @@
  *
  * The main front-end bundle holds the form and the everyday fields. The date
  * picker, the phone and country pickers (with the country list), uploads,
- * payments, repeaters, chained selects, the rich text editor and the
+ * repeaters, chained selects, the rich text editor and the
  * conversational layout each live in their own file and are fetched only for
  * a form that has them.
  *

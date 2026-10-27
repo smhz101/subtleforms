@@ -54,6 +54,7 @@ function copyFilesToTemp() {
       // Core plugin files
       'subtleforms.php',
       'license.txt',
+      'THIRD-PARTY-NOTICES.txt',
       'readme.txt',
       'changelog.txt',
       'uninstall.php',

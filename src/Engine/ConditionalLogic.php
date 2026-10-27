@@ -494,6 +494,12 @@ final class ConditionalLogic {
 				}
 			}
 
+			// Dropdowns that are not set up are not drawn for visitors, so the
+			// field counts as not shown: not required, not stored (RFUN-02).
+			if ( ( $node['type'] ?? '' ) === 'chained_select' && ! FieldValidator::chainedIsSetUp( $node ) ) {
+				$hidden = true;
+			}
+
 			if ( $hidden ) {
 				if ( ( $node['type'] ?? '' ) === 'step' ) {
 					self::addTo( $state['hiddenSteps'], $key );

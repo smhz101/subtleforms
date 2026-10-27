@@ -51,8 +51,16 @@ final class FieldMapper {
 		'turnstile',
 		'action_hook',
 		'save_resume',
-		'payment_summary',
 	);
+
+	/**
+	 * Add-on types that hold no answer.
+	 *
+	 * @return string[]
+	 */
+	private static function noAnswerTypes(): array {
+		return class_exists( '\\SubtleForms\\Fields\\FieldTypeAvailability' ) ? \SubtleForms\Fields\FieldTypeAvailability::noAnswerTypes() : array();
+	}
 
 	/**
 	 * Composite name field types (value: { first_name, last_name, ... }).
@@ -63,6 +71,16 @@ final class FieldMapper {
 	 * Values that count as "checked" for a consent or checkbox field.
 	 */
 	private const TRUTHY = array( '1', 'true', 'yes', 'on', 'checked', 'accepted', 'agree', 'agreed' );
+
+	/**
+	 * Whether a field type holds no answer (a heading, a step, a container).
+	 *
+	 * @param string $type Field type.
+	 * @return bool
+	 */
+	public static function isLayoutType( string $type ): bool {
+		return in_array( $type, self::LAYOUT_TYPES, true ) || '_container' === substr( $type, -10 ) || in_array( $type, self::noAnswerTypes(), true );
+	}
 
 	/**
 	 * Flatten a schema into its answer-bearing fields.
@@ -123,7 +141,7 @@ final class FieldMapper {
 				continue;
 			}
 
-			$isLayout = in_array( $type, self::LAYOUT_TYPES, true ) || '_container' === substr( $type, -10 );
+			$isLayout = in_array( $type, self::LAYOUT_TYPES, true ) || '_container' === substr( $type, -10 ) || in_array( $type, self::noAnswerTypes(), true );
 			if ( '' !== $key && '' !== $type && ! $isLayout ) {
 				$out[] = array(
 					'key'          => $key,
@@ -495,7 +513,7 @@ final class FieldMapper {
 	 * @param array $schema  Form schema.
 	 * @param array $payload Submitted answers.
 	 * @param bool  $skipEmpty Leave out unanswered fields.
-	 * @param array $context   Display context, such as the entry's currency (2.4.0).
+	 * @param array $context   Display context (2.4.0); add-ons add keys through `subtleforms/format/context`.
 	 * @return array<int,array{key:string,label:string,value:string}>
 	 */
 	public static function answers( array $schema, array $payload, bool $skipEmpty = true, array $context = array() ): array {

@@ -18,7 +18,6 @@ import ChoiceSelect from '../../../frontend/components/fields/ChoiceSelect';
 import CountrySelect from '../../../frontend/components/fields/CountrySelect';
 import DateTimeField from '../../../frontend/components/fields/DateTimeField';
 import { ConfigContext } from './context/ConfigContext';
-import { currencySymbol } from '../../../shared/currencies';
 import './FieldRenderer.scss';
 
 const noop = () => {};
@@ -29,8 +28,7 @@ const NON_INPUT_TYPES = new Set([
   'one_column_container', 'two_column_container', 'three_column_container',
   'four_column_container', 'five_column_container', 'six_column_container',
   'repeat_container', 'group_container', 'step', 'action_hook', 'disclaimer',
-  'payment_summary', 'payment_hidden_price', 'calculation', 'payment_card',
-  'recaptcha', 'hcaptcha', 'turnstile',
+  'calculation', 'recaptcha', 'hcaptcha', 'turnstile',
 ]);
 
 // All field types recognized by this renderer, unknown types get legacy fallback
@@ -41,7 +39,6 @@ const KNOWN_TYPES = new Set([
   'country', 'chained_select', 'password', 'rating', 'range_slider',
   'color_picker', 'signature', 'image_upload', 'file_upload',
   'name_group', 'address_group',
-  'payment_amount', 'payment_coupon', 'payment_product', 'payment_choice',
   'post_create', 'quiz_score',
   'rich_text', 'net_promoter_score', 'checkbox_grid',
   'toggle', 'scale', 'picture_choice', 'calculation',
@@ -141,13 +138,13 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
   // canvas shows them as the live form does (2.3.2).
   const builderConfig = useContext(ConfigContext);
   const display = fieldDisplay(field, builderConfig?.fieldDefaults || {});
-  const formCurrency = builderConfig?.currency || '';
   // Picture choice is an add-on field. Without the add-on the canvas shows the
   // plain choice that visitors get (labels only) with a note.
   const pictureFallback = type === 'picture_choice' && !getCanvasPreview(type) && !addonProvides('picture_choice');
   const previewType = pictureFallback ? (field.allowMultiple === true ? 'multiple_choice' : 'radio') : type;
-  // Add-on field types no active plugin provides right now.
-  const addonMissing = (window.subtleformsAdmin?.missingFieldTypes || []).includes(type);
+  // A field type no active plugin registers right now.
+  const knownTypes = window.subtleformsAdmin?.knownFieldTypes;
+  const addonMissing = Array.isArray(knownTypes) && knownTypes.length > 0 && !!type && !knownTypes.includes(type);
 
   // ── Early return AFTER all hooks ────────────────────────────────────────────
   // Guard against null/undefined field or missing type, do NOT crash builder
@@ -155,7 +152,10 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
     return null;
   }
 
-  const showRequired = required && !NON_INPUT_TYPES.has(type);
+  // A type from an add-on whose definition says it shows no messages takes
+  // no answer either, so it never shows the required mark.
+  const definition = builderConfig?.fieldDefinitions?.[type];
+  const showRequired = required && !NON_INPUT_TYPES.has(type) && !definition?.meta?.noMessages;
   const requiredMark = requiredIndicatorMark(builderConfig?.fieldDefaults || {});
   const FieldIcon = getFieldIcon(type);
 
@@ -486,24 +486,6 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
 
       {/* Legacy address field detected, deprecated and ignored */}
 
-      {/* Payment fields */}
-      {type === 'payment_amount' && (
-        <div className='sf-field-renderer__rating-wrapper'>
-          {field.showCurrencySymbol !== false && (
-            <span className='sf-field-renderer__rating-text'>
-              {/* The form charges in the site or form currency, never a per-field one (PAY-09). */}
-              {currencySymbol(formCurrency || window.subtleformsAdmin?.currency || 'USD')}
-            </span>
-          )}
-          <input
-            type='number'
-            placeholder={placeholder || '0.00'}
-            className={inputClass}
-            readOnly
-          />
-        </div>
-      )}
-
       {pictureFallback && (
         <p className='sf-field-renderer__placeholder-note'>
           {__('This field type is provided by an add-on that is not active. Visitors see these choices without images.', 'subtleforms')}
@@ -522,31 +504,6 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         const AddonPreview = getCanvasPreview(type);
         return AddonPreview ? <AddonPreview field={field} /> : null;
       })()}
-
-      {type === 'payment_coupon' && (
-        <div className='sf-field-renderer__subscribe-wrapper'>
-          <input
-            type='text'
-            placeholder={placeholder || __('Enter coupon code', 'subtleforms')}
-            className={`${inputClass} sf-field-renderer__subscribe-input`}
-            readOnly
-            aria-label={canvasControlName(field)} tabIndex='-1'
-          />
-          <button
-            type='button'
-            className='sf-field-renderer__subscribe-button'
-            disabled>
-            <span className='sf-field-renderer__button-icon'><Icon.Check size={12} /></span>
-            {field.buttonText || __('Apply', 'subtleforms')}
-          </button>
-        </div>
-      )}
-
-      {type === 'payment_hidden_price' && (
-        <div className='sf-field-renderer__hidden-field'>
-          {__('Hidden pricing field (not visible to users)', 'subtleforms')}
-        </div>
-      )}
 
       {type === 'action_hook' && (
         <div className='sf-action-hook-preview'>

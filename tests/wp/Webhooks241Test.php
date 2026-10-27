@@ -57,10 +57,14 @@ final class Webhooks241Test extends TestCase {
 	}
 
 	public function test_full_body_is_the_documented_shape_without_spam_or_captcha_values(): void {
+		// An add-on's own request value (RequestKeys) is never sent either.
+		$keys = static fn( $k ) => array_merge( $k, array( '_example' ) );
+		add_filter( 'subtleforms/submission/request_keys', $keys );
 		$this->handle(
 			array( 'url' => 'https://93.184.216.34/receive', 'payload_mode' => 'full' ),
-			array( 'name' => 'Ann', 'form_rendered_at' => 'v1.token', 'website_url' => '', 'g-recaptcha-response' => 'tok', '_payment' => 'pi_1' )
+			array( 'name' => 'Ann', 'form_rendered_at' => 'v1.token', 'website_url' => '', 'g-recaptcha-response' => 'tok', '_example' => 'ref_1' )
 		);
+		remove_filter( 'subtleforms/submission/request_keys', $keys );
 		$this->assertCount( 1, $this->jobs );
 		$body = json_decode( (string) $this->jobs[0]['body'], true );
 		$this->assertSame( 'submission.created', $body['event'] );

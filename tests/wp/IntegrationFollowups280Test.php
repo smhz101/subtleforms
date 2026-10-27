@@ -43,28 +43,28 @@ class IntegrationFollowups280Test extends TestCase {
 
 	public function test_the_moved_payment_fields_are_not_registered_by_free() {
 		$registry = \SubtleForms\Plugin::instance()->container()->get( \SubtleForms\Fields\FieldRegistry::class );
+		$schema   = array( 'fields' => array() );
 		foreach ( array( 'payment_amount', 'payment_summary', 'payment_coupon', 'payment_hidden_price' ) as $type ) {
 			$this->assertFalse( $registry->has( $type ), $type );
-			$this->assertContains( $type, \SubtleForms\Fields\AddonFieldTypes::missing( $registry ) );
+			$schema['fields'][] = array( 'type' => $type, 'key' => $type );
 		}
+		$this->assertCount( 4, \SubtleForms\Fields\FieldTypeAvailability::unregistered( $schema, $registry ) );
 	}
 
-	public function test_a_saved_form_with_payment_fields_is_not_available_without_pro() {
+	public function test_a_saved_form_with_a_field_nobody_registers_is_not_available() {
 		$form = $this->publish(
 			array(
 				array( 'id' => 'n', 'key' => 'name', 'type' => 'text', 'label' => 'Name' ),
 				array( 'id' => 'a', 'key' => 'amount', 'type' => 'payment_amount', 'label' => 'Amount', 'required' => true, 'min' => 5 ),
 				array( 'id' => 'c', 'key' => 'coupon', 'type' => 'payment_coupon', 'label' => 'Coupon', 'required' => true ),
-				array( 'id' => 'f', 'key' => 'fee', 'type' => 'payment_hidden_price', 'label' => 'Fee', 'amount' => 2 ),
-				array( 'id' => 's', 'key' => 'summary', 'type' => 'payment_summary', 'label' => 'Summary' ),
 			)
 		);
-		// The live form leaves the four fields out.
+		// The live form leaves the fields out.
 		$public = rest_do_request( new \WP_REST_Request( 'GET', '/subtleforms/v1/forms/' . $form . '/schema' ) )->get_data();
 		$types  = array_column( $public['data']['schema']['fields'] ?? array(), 'type' );
 		$this->assertSame( array( 'text' ), $types );
 
-		// Nothing is stored: a form that cannot take its payment is not a free form.
+		// Nothing is stored and the visitor gets the neutral message.
 		foreach ( array( array( 'name' => 'Ada', 'amount' => 1, 'coupon' => 'FREE' ), array( 'name' => 'Grace' ) ) as $answers ) {
 			$result = $this->submit( $form, $answers );
 			$this->assertSame( 403, $result['status'], wp_json_encode( $result['data'] ) );
@@ -73,24 +73,81 @@ class IntegrationFollowups280Test extends TestCase {
 		global $wpdb;
 		$this->assertSame( 0, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}subtleforms_submissions WHERE form_id = %d", $form ) ) );
 
-		// Visitors see the generic message, with no mention of Pro or payments.
 		$html = \SubtleForms\Plugin::instance()->container()->get( \SubtleForms\Frontend\Shortcode::class )->render( array( 'id' => $form ) );
 		$this->assertStringContainsString( 'This form is not available right now.', $html );
 		$this->assertStringNotContainsString( 'Pro', $html );
 		$this->assertStringNotContainsString( 'ayment', $html );
 		$this->assertStringNotContainsString( 'subtleforms-form-container', $html );
 
-		// A form without payment fields is not affected.
+		// A form whose fields are all registered is not affected.
 		$plain = $this->publish( array( array( 'id' => 'n', 'key' => 'name', 'type' => 'text', 'label' => 'Name' ) ) );
 		$this->assertSame( 200, $this->submit( $plain, array( 'name' => 'Ada' ) )['status'] );
 	}
 
-	public function test_no_payments_code_is_hinted_for_fields_nobody_registers() {
+	/** RCOMP-02: saved payment settings with no such field never close a form. */
+	public function test_a_form_with_only_the_old_payments_toggle_keeps_working() {
+		$repo = new \SubtleForms\Repositories\FormsRepository();
+		foreach ( array( 'conversational', 'payment' ) as $type ) {
+			$schema = array(
+				'schema_version' => 1,
+				'metadata'       => array( 'type' => $type, 'name' => 'Old', 'title' => 'Old', 'payment' => array( 'enabled' => true, 'amountType' => 'fixed', 'fixedAmount' => '15' ) ),
+				'fields'         => array( array( 'id' => 'e', 'key' => 'email', 'type' => 'email', 'label' => 'Email' ) ),
+			);
+			$form   = $repo->create( array( 'title' => 'Old', 'status' => 'published', 'schema' => $schema ) );
+			$repo->saveSchemaVersion( $form, $schema, true );
+			$this->formIds[] = $form;
+
+			$result = $this->submit( $form, array( 'email' => 'ada@example.test' ) );
+			$this->assertSame( 200, $result['status'], $type . ' ' . wp_json_encode( $result['data'] ) );
+			$this->assertSame( 'ada@example.test', $this->storedPayload( $form )['email'] );
+			$html = \SubtleForms\Plugin::instance()->container()->get( \SubtleForms\Frontend\Shortcode::class )->render( array( 'id' => $form ) );
+			$this->assertStringNotContainsString( 'This form is not available right now.', $html );
+		}
+	}
+
+	/** Signature and Calculation fields saved before 2.3.9 are left out; the form stays open. */
+	public function test_a_form_with_older_add_on_fields_stays_open_without_them() {
+		$form = $this->publish(
+			array(
+				array( 'id' => 'n', 'key' => 'name', 'type' => 'text', 'label' => 'Name' ),
+				array( 'id' => 's', 'key' => 'sig', 'type' => 'signature', 'label' => 'Sign' ),
+				array( 'id' => 'k', 'key' => 'total', 'type' => 'calculation', 'label' => 'Total' ),
+			)
+		);
+		$this->assertSame( 200, $this->submit( $form, array( 'name' => 'Ada', 'sig' => 'x', 'total' => 5 ) )['status'] );
+		$stored = $this->storedPayload( $form );
+		$this->assertSame( 'Ada', $stored['name'] );
+		$this->assertArrayNotHasKey( 'sig', $stored );
+	}
+
+	/** RCOMP-02: the form opens as soon as an add-on registers the type through the public action. */
+	public function test_a_form_opens_when_an_add_on_registers_its_field_type() {
+		$type = 'example_gauge';
+		$form = $this->publish(
+			array(
+				array( 'id' => 'n', 'key' => 'name', 'type' => 'text', 'label' => 'Name' ),
+				array( 'id' => 'g', 'key' => 'gauge', 'type' => $type, 'label' => 'Gauge' ),
+			)
+		);
+		$closed = $this->submit( $form, array( 'name' => 'Ada', 'gauge' => '3' ) );
+		$this->assertSame( 403, $closed['status'], wp_json_encode( $closed['data'] ) );
+
+		$registry = \SubtleForms\Plugin::instance()->container()->get( \SubtleForms\Fields\FieldRegistry::class );
+		$this->assertFalse( $registry->has( $type ) );
+		// What an add-on does inside its subtleforms/fields/register callback.
+		$registry->register( new \SubtleForms\Fields\FieldDefinition( $type, 'Gauge', 'basic', 'dashicons-admin-generic', 'input' ) );
+
+		$this->assertSame( array(), \SubtleForms\Fields\FieldTypeAvailability::unregistered( array( 'fields' => array( array( 'type' => $type, 'key' => 'gauge' ) ) ), $registry ) );
+		$open = $this->submit( $form, array( 'name' => 'Ada', 'gauge' => '3' ) );
+		$this->assertSame( 200, $open['status'], wp_json_encode( $open['data'] ) );
+		$this->assertSame( 'Ada', $this->storedPayload( $form )['name'] );
+	}
+
+	public function test_no_field_code_is_hinted_for_fields_nobody_registers() {
 		$schema = array( 'fields' => array(
 			array( 'type' => 'date', 'key' => 'd' ),
-			array( 'type' => 'payment_product', 'key' => 'p' ),
-			array( 'type' => 'payment_summary', 'key' => 's' ),
-			array( 'type' => 'payment_amount', 'key' => 'a' ),
+			array( 'type' => 'example_one', 'key' => 'p' ),
+			array( 'type' => 'example_two', 'key' => 's' ),
 		) );
 		$this->assertSame( array( 'date' ), \SubtleForms\Frontend\FrontendAssets::fieldGroups( $schema ) );
 	}

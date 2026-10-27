@@ -5,13 +5,13 @@ import { consentParts } from '../../shared/consentLabel';
 import { formatUsPhone, isCompleteUsPhone } from '../../shared/phoneFormat';
 import { passwordStrength } from '../../shared/passwordStrength';
 import { columnFields } from '../utils/columnFields';
-import { getCompositeEmptyParts } from '../utils/fieldValidation';
+import { getCompositeEmptyParts, isAnswerable } from '../utils/fieldValidation';
 import { compositeParts, partValue } from '../../shared/compositeParts';
 import { rangeSliderSeed } from '../utils/defaults';
 import { debug } from '../../shared/debug';
 import { cloneElement, useContext, useEffect } from '@wordpress/element';
 import ChoiceSelect from './fields/ChoiceSelect';
-import { FormContext, usePayment } from './fields/contexts';
+import { FormContext } from './fields/contexts';
 import { lazyField } from './fields/lazyFields';
 import { getFieldType, getFieldOverride } from '../../shared/extend';
 import { effectiveFieldType } from '../../shared/fieldFallback';
@@ -69,7 +69,7 @@ export default function FieldRenderer({
   // width never hides required, options, placeholder or help text (bug 1).
   const config = fieldConfig(field);
   // Label visibility and help text placement, with the form's defaults (2.3.2).
-  const { fieldDefaults } = useContext(FormContext) || {};
+  const { fieldDefaults, preview: isPreview } = useContext(FormContext) || {};
   const display = fieldDisplay(field, fieldDefaults);
   const requiredMark = requiredIndicatorMark(fieldDefaults);
 
@@ -84,7 +84,8 @@ export default function FieldRenderer({
   const isHidden = hiddenFields?.has(resolvedPath);
 
   // Accessible input id
-  const inputId = `subtleforms-field-${(resolvedPath || field.key).replace(
+  // A saved node can lack a key (RCOMPAT-02); never let that stop the form.
+  const inputId = `subtleforms-field-${String(resolvedPath || field.key || field.id || '').replace(
     /[^a-zA-Z0-9\-_:.]/g,
     '-'
   )}`;
@@ -204,9 +205,9 @@ export default function FieldRenderer({
     return null;
   }
 
-  if (field.type === 'payment_hidden_price') {
-    // A Fixed Fee has nothing to answer: it appears only as a line in the
-    // order summary, never as a label or help text on the form (PAY-18).
+  // A Chained Select with no dropdowns set up cannot be answered, so a
+  // visitor does not see it. The editor preview keeps it with its hint.
+  if (field.type === 'chained_select' && !isPreview && !isAnswerable('chained_select', config)) {
     return null;
   }
 
@@ -460,6 +461,12 @@ export default function FieldRenderer({
         {config.captchaWarning || __('This CAPTCHA is not set up yet.', 'subtleforms')}
       </p>
     );
+  }
+
+  // An input with no key has nowhere to keep an answer, so it is left out
+  // instead of stopping the whole form from loading (RCOMPAT-02).
+  if (!ownKey && !fieldPath) {
+    return null;
   }
 
   // A group of choices is a fieldset with a legend, so a screen reader names
@@ -1483,11 +1490,11 @@ export function hasVisibleText(html) {
 }
 
 /**
- * Renders an add-on field with the form's order context.
+ * Renders an add-on field with the form's details (which form, preview).
  */
 function AddonField({ component: Component, ...props }) {
-  const payment = usePayment();
-  return <Component {...props} payment={payment} formId={payment?.formId} preview={!!payment?.preview} />;
+  const form = useContext(FormContext);
+  return <Component {...props} formId={form?.formId} preview={!!form?.preview} />;
 }
 
 function getInputType(fieldType) {

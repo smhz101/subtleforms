@@ -11,25 +11,17 @@ import { Notice } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import './AddonFieldsNotice.scss';
 
-export default function AddonFieldsNotice({ featuresUsed = [], limited = [], paymentForm = false }) {
-  if (!featuresUsed.length && !limited.length && !paymentForm) return null;
+export default function AddonFieldsNotice({ featuresUsed = [], limited = [] }) {
+  if (!featuresUsed.length && !limited.length) return null;
   return (
     <div className='sf-addon-fields-notice'>
       <Notice status='info' isDismissible={false} className='sf-addon-fields-notice__notice'>
-        {paymentForm && (
-          <p className='sf-addon-fields-notice__message'>
-            {__(
-              'This form has a payment field, which is provided by an add-on that is not active. Visitors see "This form is not available right now." and no entries are accepted.',
-              'subtleforms'
-            )}
-          </p>
-        )}
         {featuresUsed.length > 0 && (
           <p className='sf-addon-fields-notice__message'>
             {sprintf(
-              /* translators: %s: list of field types, for example "Signature, Calculation" */
+              /* translators: %s: list of field names as written in the form, for example "Your signature, Total" */
               __(
-                'These field types are provided by an add-on that is not active: %s. They are kept in the form, and the live form leaves them out.',
+                'This form contains fields that need an add-on that is not active: %s. The fields are kept in the form.',
                 'subtleforms'
               ),
               featuresUsed.join(', ')

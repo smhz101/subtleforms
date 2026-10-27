@@ -100,13 +100,13 @@ test('form-scoped errors name the setting and clear when leaving the form (QA-03
     return route.fulfill({
       status: 422,
       contentType: 'application/json',
-      body: JSON.stringify({ error: { code: 'validation_error', message: 'Validation failed', meta: { fields: { 'schema.metadata.payment': 'Choose a currency.' } } } }),
+      body: JSON.stringify({ error: { code: 'validation_error', message: 'Validation failed', meta: { fields: { 'schema.metadata.confirmation': 'Add a message.' } } } }),
     });
   });
   await page.locator('.sf-field-chrome').first().click();
   await page.getByLabel('Label', { exact: true }).fill('Full name');
   await saveDraft(page);
-  await expect(saveStatus(page)).toHaveAttribute('title', /Payment settings: Choose a currency\./, { timeout: 20000 });
+  await expect(saveStatus(page)).toHaveAttribute('title', /Confirmation settings: Add a message\./, { timeout: 20000 });
 
   // Publishing fails the same way and shows a snackbar for this form.
   await page.locator('.sf-builder-header-bar__publish-button').click();
@@ -115,15 +115,15 @@ test('form-scoped errors name the setting and clear when leaving the form (QA-03
   await page.unroute(`**/forms/${form.id}/schema*`);
 
   // The publish failure left a notice for this form.
-  await expect(page.locator('.components-snackbar', { hasText: 'Payment settings' }).first()).toBeVisible({ timeout: 20000 });
+  await expect(page.locator('.components-snackbar', { hasText: 'Confirmation settings' }).first()).toBeVisible({ timeout: 20000 });
 
   // Leaving the form clears its notices.
   await page.getByRole('button', { name: 'Back to forms' }).click();
   const discard = page.getByRole('button', { name: 'Discard Changes' });
   if (await discard.isVisible().catch(() => false)) await discard.click();
   await page.waitForSelector('.sf-data-table__table', { timeout: 30000 });
-  await expect(page.locator('.components-snackbar, .components-notice', { hasText: /Payment settings|subject line/ })).toHaveCount(0);
-  await expect(page.locator('#a11y-speak-polite')).not.toContainText(/Payment settings|subject line/);
+  await expect(page.locator('.components-snackbar, .components-notice', { hasText: /Confirmation settings|subject line/ })).toHaveCount(0);
+  await expect(page.locator('#a11y-speak-polite')).not.toContainText(/Confirmation settings|subject line/);
 });
 
 test('the form 11 shape saves: payment form with checkout settings and a disabled blank email (QA-03)', async ({ page }) => {

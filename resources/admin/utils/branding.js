@@ -1,35 +1,29 @@
 /**
- * Admin branding (white label, 2.1).
+ * How the admin app names the plugin (2.1): name, menu name and logo.
  *
  * Comes from `subtleformsAdmin.branding`, built by AdminMenu::branding() and
- * filtered by `subtleforms/admin_branding` (for example by an add-on).
+ * filtered by `subtleforms/admin_branding`.
  */
 const DEFAULTS = {
   name: 'SubtleForms',
   menuName: 'SubtleForms',
   logoUrl: '',
-  hideCredits: false,
-  hideHelp: false,
-  // Hides the More features card on the Dashboard.
-  hideUpgrade: false,
-  // Custom "Get support" link (white label, 2.3.0).
-  supportUrl: '',
 };
 
 const SUPPORT_URL = 'https://subtleforms.com/support';
 
-/** Where "Get support" links go: the white-label support URL, or SubtleForms. */
+/** Where "Get support" links go. */
 export function supportUrl() {
-  return getBranding().supportUrl || SUPPORT_URL;
+  return SUPPORT_URL;
 }
 
 export function getBranding() {
   const b = window.subtleformsAdmin?.branding;
-  return b && typeof b === 'object' ? { ...DEFAULTS, ...b } : { ...DEFAULTS };
-}
-
-/** Whether the plugin is shown under a custom name. */
-export function isWhiteLabelled() {
-  const b = getBranding();
-  return b.name !== DEFAULTS.name || !!b.logoUrl || b.hideCredits;
+  const out = { ...DEFAULTS };
+  if (b && typeof b === 'object') {
+    ['name', 'menuName', 'logoUrl'].forEach((key) => {
+      if (typeof b[key] === 'string') out[key] = b[key];
+    });
+  }
+  return out;
 }

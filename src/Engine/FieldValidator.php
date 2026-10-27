@@ -81,9 +81,6 @@ final class FieldValidator {
 		'consent',
 		'hidden',
 		'signature',
-		'payment_amount',
-		'payment_product',
-		'payment_coupon',
 	);
 
 	/**
@@ -105,11 +102,6 @@ final class FieldValidator {
 		'dropdown',
 		'country',
 	);
-
-	/**
-	 * Payment fields that show the order but take no answer (PAY2-04).
-	 */
-	private const DISPLAY_ONLY_TYPES = array( 'payment_summary', 'payment_hidden_price' );
 
 	/**
 	 * Calling codes whose national numbers keep their leading 0 (Italy, San
@@ -196,6 +188,11 @@ final class FieldValidator {
 			// Every dependent dropdown that offers choices needs an answer,
 			// the same rule as the browser (FLD2-10).
 			if ( $type === 'chained_select' ) {
+				// Dropdowns that are not set up are not drawn, so nothing can
+				// be answered and the field is never required (RFUN-02).
+				if ( ! self::chainedIsSetUp( $fields[ $fieldKey ] ?? array() ) ) {
+					continue;
+				}
 				if ( null !== $this->chainedMissingLevel( $fields[ $fieldKey ] ?? array(), $value ) ) {
 					$errors[ $fieldKey ] = $requiredMessage;
 				}
@@ -257,8 +254,6 @@ final class FieldValidator {
 	 * Put submitted answers in the shape the form stores, before they are
 	 * checked: the same steps the browser takes.
 	 *
-	 * - Display-only payment fields (Order Summary, Fixed Fee) take no answer;
-	 *   a posted value for them is dropped (PAY2-04).
 	 * - A Hidden field's value is worked out here, so {date}, {user_email}
 	 *   and {user_name} are filled in without JavaScript (FLD2-16). A value
 	 *   that reads the page address ({get:param}) keeps what the browser sent.
@@ -282,10 +277,6 @@ final class FieldValidator {
 		$fields = is_array( $schema ) && isset( $schema['fields'] ) && is_array( $schema['fields'] ) ? $schema['fields'] : array();
 		foreach ( self::answerFields( $fields ) as $key => $field ) {
 			$type = (string) ( $field['type'] ?? '' );
-			if ( in_array( $type, self::DISPLAY_ONLY_TYPES, true ) ) {
-				unset( $payload[ $key ] );
-				continue;
-			}
 			if ( 'hidden' === $type ) {
 				$raw = self::attr( $field, 'defaultValue' );
 				if ( null === $raw || '' === $raw ) {
@@ -393,7 +384,7 @@ final class FieldValidator {
 		}
 		// A type with a plain fallback (picture choice) still takes an answer
 		// when its add-on is not active: it is checked as the choice it falls back to.
-		if ( in_array( $type, \SubtleForms\Fields\AddonFieldTypes::FALLBACKS, true ) ) {
+		if ( in_array( $type, \SubtleForms\Fields\FieldTypeAvailability::FALLBACKS, true ) ) {
 			return true;
 		}
 		$registry = self::registry();
@@ -496,7 +487,7 @@ final class FieldValidator {
 		// choice it falls back to, whether or not its add-on is active: the
 		// rules are the same, the add-on only changes how it looks.
 		if ( is_string( $type ) ) {
-			$type = \SubtleForms\Fields\AddonFieldTypes::validationType( $type, $field );
+			$type = \SubtleForms\Fields\FieldTypeAvailability::validationType( $type, $field );
 		}
 
 		// A field that answers with one value never takes a list (FB-23).
@@ -575,14 +566,6 @@ final class FieldValidator {
 			case 'phone':
 			case 'tel':
 				return $this->validatePhone( $value, $field );
-			case 'payment_amount':
-				return $this->validatePaymentAmount( $value, $field );
-			case 'payment_coupon':
-				return $this->validatePaymentCoupon( $value, $field );
-			case 'payment_product':
-				return $this->validatePaymentQuantity( $value, $field );
-			case 'payment_choice':
-				return $this->validateChoices( $value, $field, 'checkbox' === (string) ( $this->attr( $field, 'displayAs' ) ?? 'radio' ) );
 			case 'name_group':
 			case 'address_group':
 				// Grouped fields submit as arrays/objects - no specific validation needed
@@ -610,8 +593,7 @@ final class FieldValidator {
 	 */
 	private function addonError( $type, $value, array $field ) {
 		/**
-		 * Validate a value for a field type an add-on registered (for
-		 * example the WooCommerce Product field). Return an error
+		 * Validate a value for a field type an add-on registered. Return an error
 		 * message, or null when the value is fine. Unknown types are
 		 * otherwise not checked.
 		 *
@@ -1679,6 +1661,38 @@ final class FieldValidator {
 	}
 
 	/**
+	 * Whether a chained field has any dropdown to show a visitor. Mirrors
+	 * isAnswerable() for chained_select in the browser: a field with no
+	 * choices is not drawn (RFUN-02).
+	 *
+	 * @param array $field Field.
+	 */
+	public static function chainedIsSetUp( array $field ): bool {
+		$levels = self::attr( $field, 'levels' );
+		if ( is_array( $levels ) && array() !== $levels ) {
+			foreach ( array_values( $levels ) as $depth => $level ) {
+				$options = is_array( $level ) && isset( $level['options'] ) && is_array( $level['options'] ) ? $level['options'] : array();
+				if ( array() === $options ) {
+					continue;
+				}
+				$linked = false;
+				foreach ( $options as $opt ) {
+					if ( is_array( $opt ) && isset( $opt['parent'] ) && '' !== (string) $opt['parent'] ) {
+						$linked = true;
+						break;
+					}
+				}
+				if ( 0 === $depth || ! $linked ) {
+					return true;
+				}
+			}
+			return false;
+		}
+		$options = self::attr( $field, 'options' );
+		return is_array( $options ) && array() !== $options;
+	}
+
+	/**
 	 * The first level of a chained field that offers choices for the answers
 	 * so far but has no valid answer. Mirrors firstUnansweredChainedLevel()
 	 * in resources/shared/chainedOptions.js.
@@ -1811,108 +1825,5 @@ final class FieldValidator {
 		}
 
 		return false;
-	}
-
-	/**
-	 * A Custom Amount lies between the field's minimum and maximum (PAY-05).
-	 * Same messages as the browser.
-	 *
-	 * @param mixed $value
-	 * @param array $field
-	 * @return string|null
-	 */
-	private function validatePaymentAmount( $value, $field ) {
-		if ( $this->isEmpty( $value ) ) {
-			return null;
-		}
-
-		if ( ! is_numeric( $value ) ) {
-			return __( 'Payment amount must be a valid number.', 'subtleforms' );
-		}
-
-		$amount = floatval( $value );
-		$field  = is_array( $field ) ? $field : array();
-
-		if ( $amount < 0 ) {
-			return __( 'Payment amount must be positive.', 'subtleforms' );
-		}
-
-		$min = $this->attr( $field, 'min' );
-		if ( is_numeric( $min ) && $amount < (float) $min ) {
-			/* translators: %s: smallest amount */
-			return sprintf( __( 'Payment amount must be at least %s.', 'subtleforms' ), number_format( (float) $min, 2, '.', '' ) );
-		}
-
-		$max = $this->attr( $field, 'max' );
-		if ( is_numeric( $max ) && (float) $max > 0 && $amount > (float) $max ) {
-			/* translators: %s: largest amount */
-			return sprintf( __( 'Payment amount cannot exceed %s.', 'subtleforms' ), number_format( (float) $max, 2, '.', '' ) );
-		}
-
-		return null;
-	}
-
-	/**
-	 * A Product quantity is a whole number within the field's minimum and
-	 * maximum (PAY-06). The order is never priced with a quantity other than
-	 * the one stored.
-	 *
-	 * @param mixed $value Value.
-	 * @param array $field Field.
-	 * @return string|null
-	 */
-	private function validatePaymentQuantity( $value, array $field ) {
-		if ( $this->isEmpty( $value ) || empty( $this->attr( $field, 'allowQuantity' ) ) ) {
-			return null;
-		}
-		$qty = self::wholeNumber( $value );
-		if ( null === $qty || $qty < 0 ) {
-			return __( 'Please enter a whole number for the quantity.', 'subtleforms' );
-		}
-		$min = max( 0, (int) ( $this->attr( $field, 'minQuantity' ) ?? 0 ) );
-		$max = (int) ( $this->attr( $field, 'maxQuantity' ) ?? 0 );
-		if ( $qty < $min ) {
-			/* translators: %d: smallest quantity */
-			return sprintf( __( 'The quantity must be at least %d.', 'subtleforms' ), $min );
-		}
-		if ( $max > 0 && $qty > $max ) {
-			/* translators: %d: largest quantity */
-			return sprintf( __( 'The quantity can be at most %d.', 'subtleforms' ), $max );
-		}
-		return null;
-	}
-
-	/**
-	 * Validate payment coupon field.
-	 *
-	 * @param mixed $value
-	 * @param array $field
-	 * @return string|null
-	 */
-	private function validatePaymentCoupon( $value, $field ) {
-		if ( $this->isEmpty( $value ) ) {
-			return null;
-		}
-
-		if ( ! is_string( $value ) ) {
-			return __( 'Enter the coupon code as text.', 'subtleforms' );
-		}
-
-		$maxLength = $this->attr( is_array( $field ) ? $field : array(), 'maxLength' );
-		$maxLength = is_numeric( $maxLength ) ? intval( $maxLength ) : 50;
-		$value     = trim( $value );
-
-		if ( strlen( $value ) > $maxLength ) {
-			/* translators: %d: maximum number of characters */
-			return sprintf( __( 'Coupon code cannot be longer than %d characters.', 'subtleforms' ), $maxLength );
-		}
-
-		// Letters, numbers, hyphens and underscores. Spaces are allowed: the
-		// code is read without them, as the summary's coupon box does (PAY-13).
-		if ( ! preg_match( '/^[a-zA-Z0-9\-_ ]+$/', $value ) ) {
-			return __( 'Coupon codes use only letters, numbers, hyphens and underscores.', 'subtleforms' );
-		}
-
-		return null;
 	}
 }

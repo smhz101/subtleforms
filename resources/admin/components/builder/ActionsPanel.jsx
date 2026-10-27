@@ -41,7 +41,7 @@ import { normalizeWebhookUrl } from '../../utils/webhookUrl';
 import Icon from '../../ui/Icon';
 import HeadersEditor from './webhook/HeadersEditor';
 import PayloadPicker, { currentSelection, payloadMode } from './webhook/PayloadPicker';
-import { collectPayloadFields, defaultSelection, formHasPayment, sampleAnswers } from './webhook/webhookModel';
+import { collectPayloadFields, defaultSelection, applicableGroups, sampleAnswers } from './webhook/webhookModel';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -189,7 +189,7 @@ function ActionConditions({ settings, fields, disabled, onChange }) {
   );
 }
 
-function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fields, payloadFields, hasPayment, form }) {
+function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fields, payloadFields, addonGroups, form }) {
   const {
     attributes,
     listeners,
@@ -439,7 +439,7 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fie
           <PayloadPicker
             settings={s}
             fields={payloadFields}
-            hasPayment={hasPayment}
+            addonGroups={addonGroups}
             formId={form.id}
             formTitle={form.title}
             siteUrl={form.siteUrl}
@@ -493,7 +493,7 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fie
                   secret: s.signing?.secret || '',
                   payload_mode: mode,
                   custom_payload: s.custom_payload || '',
-                  payload_selection: mode === 'selected' ? currentSelection(s, payloadFields, hasPayment) : [],
+                  payload_selection: mode === 'selected' ? currentSelection(s, payloadFields, addonGroups) : [],
                   fields: payloadFields.map((f) => ({ key: f.key, label: f.label, type: f.type })),
                   sample: sampleAnswers(payloadFields),
                   form_title: form.title,
@@ -550,7 +550,7 @@ export default function ActionsPanel({ schema, onChange, isReadOnly = false }) {
   const actions = normalizeActions(schema?.actions);
   const logicFields = collectLogicFields(schema?.fields || []);
   const payloadFields = useMemo(() => collectPayloadFields(schema?.fields || []), [schema?.fields]);
-  const hasPayment = useMemo(() => formHasPayment(schema?.fields || []), [schema?.fields]);
+  const addonGroups = useMemo(() => applicableGroups(schema?.fields || []), [schema?.fields]);
   const form = useMemo(() => {
     let id = 0;
     try {
@@ -664,7 +664,7 @@ export default function ActionsPanel({ schema, onChange, isReadOnly = false }) {
                   onRemove={handleRemove}
                   fields={logicFields}
                   payloadFields={payloadFields}
-                  hasPayment={hasPayment}
+                  addonGroups={addonGroups}
                   form={form}
                 />
               ))}

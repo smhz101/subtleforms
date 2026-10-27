@@ -377,8 +377,7 @@ final class FormsRepository {
 	public static function beforeSave( array $schema, int $formId, bool $activate ): array {
 		/**
 		 * Filter a form schema before it is saved (draft or published). Add-ons
-		 * use this to store data they need at render time, such as a snapshot
-		 * of WooCommerce products for the WooCommerce Product field.
+		 * use this to store data they need at render time.
 		 *
 		 * @param array $schema   Schema about to be saved.
 		 * @param int   $formId   Form ID.
@@ -478,13 +477,16 @@ final class FormsRepository {
 		// The type follows the structure (2.3.2), whatever the client sent.
 		list( $schema ) = \SubtleForms\Support\SchemaRepair::syncType( $schema );
 
+		// A field saved without a key gets one rather than breaking the form.
+		list( $schema ) = \SubtleForms\Support\SchemaRepair::assignMissingKeys( $schema );
+
 		// Appearance values are written into CSS custom properties on the rendered
 		// form, so they are checked here, at the point of storage, rather than
 		// escaped at output. Every save path goes through this method.
 		$schema = self::sanitizeAppearance( $schema, fn() => $this->storedCustomCss( $formId ) );
 
 		// Validate schema before saving
-		$validator = new \SubtleForms\Support\SchemaValidator();
+		$validator = ( new \SubtleForms\Support\SchemaValidator() )->keepUnregisteredTypes();
 		try {
 			$validator->validate( $schema );
 		} catch ( \InvalidArgumentException $e ) {
@@ -996,6 +998,7 @@ final class FormsRepository {
 	 */
 	public static function prepareStoredSchema( array $schema, ?callable $previousCss = null ): array {
 		list( $schema ) = \SubtleForms\Support\SchemaRepair::syncType( $schema );
+		list( $schema ) = \SubtleForms\Support\SchemaRepair::assignMissingKeys( $schema );
 		return self::sanitizeAppearance( $schema, $previousCss );
 	}
 
@@ -1034,7 +1037,7 @@ final class FormsRepository {
 		$schema = self::prepareStoredSchema( $schema, fn() => $this->storedCustomCss( $formId ) );
 
 		// Validate schema before saving
-		$validator = new \SubtleForms\Support\SchemaValidator();
+		$validator = ( new \SubtleForms\Support\SchemaValidator() )->keepUnregisteredTypes();
 		try {
 			$validator->validate( $schema );
 		} catch ( \InvalidArgumentException $e ) {

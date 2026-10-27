@@ -5,4 +5,4 @@
  * the templates in SubtleForms, and more from add-ons through the
  * `subtleforms/templates` filter.
  */
-export { TEMPLATE_CATEGORIES } from './categories';
+export { TEMPLATE_CATEGORIES, templateCategories } from './categories';

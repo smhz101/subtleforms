@@ -114,8 +114,9 @@ final class InlineFormData261Test extends TestCase {
 				'name'          => 'Secrets',
 				'notifications' => array( 'to' => $secrets['notify_to'] ),
 				'internal'      => $secrets['internal'],
+				// Saved but off: a form with payments on and no add-on is not shown.
 				'payment'       => array(
-					'enabled'   => true,
+					'enabled'   => false,
 					'currency'  => 'USD',
 					'secretKey' => $secrets['pay_secret'],
 					'apiKey'    => $secrets['api_key'],
