@@ -634,9 +634,11 @@ class AdminMenu {
 		}
 
 		// For our actions, require nonce and validate it (same pattern as Uploads).
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- This reads the nonce itself; actionNonceValid() verifies it on the next line.
 		$nonce = isset( $_GET['_wpnonce'] )
 			? sanitize_text_field( wp_unslash( (string) $_GET['_wpnonce'] ) )
 			: null;
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 		if ( ! self::actionNonceValid( $nonce ) ) {
 			wp_die( esc_html__( 'Security check failed.', 'subtleforms' ) );
 		}
