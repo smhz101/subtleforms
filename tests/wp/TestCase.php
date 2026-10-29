@@ -118,6 +118,21 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase {
 		return $row ? ( (string) $row['payload'] . ' ' . (string) $row['meta'] ) : '';
 	}
 
+	/**
+	 * Create a disposable user with the given role.
+	 *
+	 * Shared by WP integration tests that need non-admin actors.
+	 */
+	protected static function factory_user( string $role ): int {
+		return (int) wp_insert_user(
+			array(
+				'user_login' => 'sf_wp_' . wp_generate_password( 8, false ),
+				'user_pass'  => wp_generate_password(),
+				'role'       => $role,
+			)
+		);
+	}
+
 	/** Become the first administrator. */
 	protected function asAdmin(): void {
 		$admins = get_users(

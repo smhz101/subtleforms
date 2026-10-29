@@ -614,6 +614,7 @@ class AdminMenu {
 	 * Handle admin actions (delete, duplicate, etc.).
 	 */
 	public function handle_actions(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified below via actionNonceValid() before any state change.
 		if ( ! isset( $_GET['action'] ) ) {
 			return;
 		}
@@ -633,7 +634,10 @@ class AdminMenu {
 		}
 
 		// For our actions, require nonce and validate it (same pattern as Uploads).
-		if ( ! self::actionNonceValid( $_GET['_wpnonce'] ?? null ) ) {
+		$nonce = isset( $_GET['_wpnonce'] )
+			? sanitize_text_field( wp_unslash( (string) $_GET['_wpnonce'] ) )
+			: null;
+		if ( ! self::actionNonceValid( $nonce ) ) {
 			wp_die( esc_html__( 'Security check failed.', 'subtleforms' ) );
 		}
 

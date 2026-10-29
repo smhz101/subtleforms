@@ -85,8 +85,9 @@ final class PublicRoutes {
 		if ( isset( $wp->query_vars['rest_route'] ) && is_string( $wp->query_vars['rest_route'] ) ) {
 			return '/' . ltrim( $wp->query_vars['rest_route'], '/' );
 		}
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized in routeFromUri().
-		$uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : '';
+		$uri = isset( $_SERVER['REQUEST_URI'] )
+			? sanitize_text_field( wp_unslash( (string) $_SERVER['REQUEST_URI'] ) )
+			: '';
 		return self::routeFromUri( $uri );
 	}
 

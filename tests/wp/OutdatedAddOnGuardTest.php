@@ -159,13 +159,4 @@ class OutdatedAddOnGuardTest extends TestCase {
 		return array( 'error' => '-1' === $error || '' !== $error ? 'bad_nonce' : '', 'raw' => $out );
 	}
 
-	private static function factory_user( string $role ): int {
-		return (int) wp_insert_user(
-			array(
-				'user_login' => 'sf105_' . wp_generate_password( 6, false ),
-				'user_pass'  => wp_generate_password(),
-				'role'       => $role,
-			)
-		);
-	}
 }
