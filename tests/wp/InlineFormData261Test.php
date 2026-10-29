@@ -255,13 +255,4 @@ final class InlineFormData261Test extends TestCase {
 		$this->assertStringNotContainsString( 'subtleforms-skeleton__title', $hidden );
 	}
 
-	private static function factory_user( string $role ): int {
-		return (int) wp_insert_user(
-			array(
-				'user_login' => 'sf_inline_' . wp_generate_password( 6, false ),
-				'user_pass'  => wp_generate_password(),
-				'role'       => $role,
-			)
-		);
-	}
 }

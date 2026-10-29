@@ -361,8 +361,6 @@ class AdminMenu {
 			'themeStylesheets'   => self::themeStylesheets(),
 			'themeGlobalCss'     => function_exists( 'wp_get_global_stylesheet' ) ? wp_get_global_stylesheet() : '',
 			'themeFontFaces'     => self::themeFontFaces(),
-			// Whether this person may write a form's custom CSS (2.7.2).
-			'canCustomCss'       => current_user_can( 'unfiltered_html' ),
 			// Submissions inbox. A personal choice wins; otherwise these are the site defaults.
 			'submissionsView'    => ( new Settings() )->resolvedInboxView( get_current_user_id() ),
 		);
@@ -598,9 +596,25 @@ class AdminMenu {
 	}
 
 	/**
+	 * Whether a SubtleForms admin action nonce is valid.
+	 *
+	 * Sanitizes the same way as Uploads::download before wp_verify_nonce().
+	 *
+	 * @param mixed $nonce Raw `_wpnonce` value (typically from $_GET).
+	 */
+	public static function actionNonceValid( $nonce ): bool {
+		if ( null === $nonce || false === $nonce || is_array( $nonce ) || is_object( $nonce ) ) {
+			return false;
+		}
+		$clean = sanitize_text_field( wp_unslash( (string) $nonce ) );
+		return '' !== $clean && false !== wp_verify_nonce( $clean, 'subtleforms_action' );
+	}
+
+	/**
 	 * Handle admin actions (delete, duplicate, etc.).
 	 */
 	public function handle_actions(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified below via actionNonceValid() before any state change.
 		if ( ! isset( $_GET['action'] ) ) {
 			return;
 		}
@@ -619,11 +633,12 @@ class AdminMenu {
 			return;
 		}
 
-		// For our actions, require nonce and validate it.
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce is validated, not sanitized.
-		if ( empty( $_GET['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'subtleforms_action' ) ) {
+		// For our actions, require nonce and validate it (same pattern as Uploads).
+		$nonce = isset( $_GET['_wpnonce'] )
+			? sanitize_text_field( wp_unslash( (string) $_GET['_wpnonce'] ) )
+			: null;
+		if ( ! self::actionNonceValid( $nonce ) ) {
 			wp_die( esc_html__( 'Security check failed.', 'subtleforms' ) );
-		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified above.

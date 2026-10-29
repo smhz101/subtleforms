@@ -95,29 +95,6 @@ test('theme form preview matches the live page and a palette pick and radius sta
   expect(l1.labelFont).toBe(p1.labelFont);
 });
 
-test('custom CSS applies only to its own form', async ({ page, context }) => {
-  const api = await adminApi();
-  await loginPage(page);
-  await openBuilder(page, form.id);
-  await page.locator('#sf-builder-view-preview').click();
-  await page.locator('.sf-preview-workspace__form').waitFor({ timeout: 30000 });
-  await page.getByRole('radio', { name: 'Custom', exact: true }).click();
-  const panel = page.locator('.sf-form-appearance');
-  await panel.getByLabel('Show advanced').check();
-  await panel.locator('textarea').fill('.subtleforms-button-submit{letter-spacing:7px}');
-  const frame = page.frameLocator('iframe.sf-form-preview__frame');
-  await expect(frame.locator('.subtleforms-button-submit')).toHaveCSS('letter-spacing', '7px');
-  await page.getByRole('button', { name: /^(Save|Publish|Update)/ }).first().click();
-  await page.waitForTimeout(2000);
-
-  const a = await context.newPage();
-  await a.goto(form.url);
-  await expect(a.locator('.subtleforms-button-submit')).toHaveCSS('letter-spacing', '7px');
-  const b = await context.newPage();
-  await b.goto(other.url);
-  await expect(b.locator('.subtleforms-button-submit')).not.toHaveCSS('letter-spacing', '7px');
-});
-
 test.afterAll(() => {
   for (const f of fs.existsSync(SHOTS) ? fs.readdirSync(SHOTS) : []) {
     if (DIST && /^styling-.*\.png$/.test(f)) fs.copyFileSync(`${SHOTS}/${f}`, `${DIST}/${f}`);

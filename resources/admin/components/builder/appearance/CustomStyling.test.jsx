@@ -39,10 +39,10 @@ const THEME = {
 };
 
 let latest;
-function Harness( { initial, canCustomCss = true } ) {
+function Harness( { initial } ) {
   const [ schema, setSchema ] = useState( { metadata: { appearance: initial }, fields: [] } );
   latest = schema.metadata.appearance;
-  return <FormAppearancePanel schema={ schema } onChange={ setSchema } canCustomCss={ canCustomCss } formId={ 12 } />;
+  return <FormAppearancePanel schema={ schema } onChange={ setSchema } formId={ 12 } />;
 }
 
 function mount( initial, props = {} ) {
@@ -140,7 +140,7 @@ describe( 'reset buttons', () => {
   } );
 
   it( 'Reset all to theme asks first, then restores the theme preset', () => {
-    const ui = mount( { ...themeForm(), tokens: { ...themeForm().tokens, labelSize: '18px' }, customCss: '.a{b:c}' } );
+    const ui = mount( { ...themeForm(), tokens: { ...themeForm().tokens, labelSize: '18px' } } );
     openCustom( ui );
     ui.click( ui.byText( 'Reset all to theme' ) );
     expect( latest.tokens.labelSize ).toBe( '18px' );
@@ -148,7 +148,6 @@ describe( 'reset buttons', () => {
     const confirm = [ ...document.querySelectorAll( '.sf-form-appearance__confirm button' ) ].find( ( b ) => b.textContent === 'Reset all to theme' );
     ui.click( confirm );
     expect( latest.tokens ).toEqual( getPreset( 'theme' ).tokens );
-    expect( latest.customCss ).toBeUndefined();
     ui.unmount();
   } );
 } );
@@ -178,23 +177,17 @@ describe( 'contrast warning', () => {
   } );
 } );
 
-describe( 'custom CSS', () => {
-  it( 'is editable for someone who can post unfiltered HTML', () => {
-    const ui = mount( themeForm(), { canCustomCss: true } );
+describe( 'no arbitrary custom CSS', () => {
+  it( 'does not show a Custom CSS control', () => {
+    const ui = mount( themeForm() );
     openCustom( ui );
-    ui.click( ui.container.querySelector( '.sf-form-appearance__advanced-toggle input' ) );
-    const area = document.querySelector( 'textarea' );
-    expect( area ).not.toBeNull();
-    expect( document.body.textContent ).toContain( '.subtleforms-form-12' );
-    ui.unmount();
-  } );
-
-  it( 'is hidden without unfiltered_html', () => {
-    const ui = mount( { ...themeForm(), customCss: '.a{b:c}' }, { canCustomCss: false } );
-    openCustom( ui );
-    ui.click( ui.container.querySelector( '.sf-form-appearance__advanced-toggle input' ) );
-    expect( document.querySelector( 'textarea' ) ).toBeNull();
-    expect( document.body.textContent ).toContain( 'Custom CSS is available to people who can post unfiltered HTML' );
+    const toggle = ui.container.querySelector( '.sf-form-appearance__advanced-toggle input' );
+    if ( toggle ) {
+      ui.click( toggle );
+    }
+    expect( document.body.textContent ).not.toMatch( /Custom CSS/i );
+    expect( document.querySelector( 'textarea.sf-form-appearance__css' ) ).toBeNull();
+    expect( document.querySelector( '.sf-form-appearance__css' ) ).toBeNull();
     ui.unmount();
   } );
 } );

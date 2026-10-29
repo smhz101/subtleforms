@@ -94,52 +94,32 @@ final class CustomStyling272Test extends TestCase {
 		$this->assertSame( '#fff', ThemeStyles::preset( '#fff' ) );
 	}
 
-	public function test_custom_css_survives_a_save_by_someone_who_may_not_edit_it(): void {
+	public function test_arbitrary_custom_css_cannot_be_saved(): void {
 		$this->asAdmin();
 		$repo   = new FormsRepository();
 		$schema = array(
-			'metadata'       => array( 'type' => 'regular', 'name' => 'Css', 'title' => 'Css', 'appearance' => array( 'preset' => 'theme', 'customCss' => '.subtleforms-button{letter-spacing:2px}' ) ),
+			'metadata'       => array(
+				'type'       => 'regular',
+				'name'       => 'Css',
+				'title'      => 'Css',
+				'appearance' => array(
+					'preset'    => 'theme',
+					'tokens'    => array( 'labelSize' => '15px' ),
+					'customCss' => '.subtleforms-button{letter-spacing:2px}',
+				),
+			),
 			'schema_version' => 1,
 			'fields'         => array( array( 'type' => 'text', 'key' => 'a', 'label' => 'A' ) ),
 		);
 		$id = $repo->create( array( 'title' => 'Css', 'status' => 'published', 'schema' => $schema ) );
 		$this->formIds[] = $id;
 		$repo->saveSchemaVersion( $id, $schema, true );
-		$this->assertSame( '.subtleforms-button{letter-spacing:2px}', $repo->loadSchemaVersion( $id )['schema']['metadata']['appearance']['customCss'] );
-
-		// An author (no unfiltered_html) tries to replace it and to add a rule.
-		$author = self::factory_user( 'author' );
-		wp_set_current_user( $author );
-		$this->assertFalse( current_user_can( 'unfiltered_html' ) );
-		$schema['metadata']['appearance']['customCss'] = 'body{display:none}';
-		$schema['metadata']['appearance']['tokens']    = array( 'labelSize' => '15px' );
-		$repo->saveSchemaVersion( $id, $schema, true );
 		wp_cache_flush();
 		$saved = $repo->loadSchemaVersion( $id )['schema']['metadata']['appearance'];
-		$this->assertSame( '.subtleforms-button{letter-spacing:2px}', $saved['customCss'] );
+		$this->assertArrayNotHasKey( 'customCss', $saved );
 		$this->assertSame( '15px', $saved['tokens']['labelSize'] );
-
-		// The same person cannot remove it either.
-		unset( $schema['metadata']['appearance']['customCss'] );
-		$repo->saveSchemaVersion( $id, $schema, true );
-		wp_cache_flush();
-		$this->assertSame( '.subtleforms-button{letter-spacing:2px}', $repo->loadSchemaVersion( $id )['schema']['metadata']['appearance']['customCss'] );
-
-		// An administrator can.
-		$this->asAdmin();
-		$repo->saveSchemaVersion( $id, $schema, true );
-		wp_cache_flush();
-		$this->assertArrayNotHasKey( 'customCss', $repo->loadSchemaVersion( $id )['schema']['metadata']['appearance'] ?? array() );
-		wp_delete_user( $author );
+		$this->assertSame( 'theme', $saved['preset'] );
 	}
 
-	private static function factory_user( string $role ): int {
-		return (int) wp_insert_user(
-			array(
-				'user_login' => 'sf272_' . wp_generate_password( 6, false ),
-				'user_pass'  => wp_generate_password(),
-				'role'       => $role,
-			)
-		);
-	}
+
 }

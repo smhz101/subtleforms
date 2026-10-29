@@ -71,11 +71,23 @@ final class ClassicResult {
 			}
 		}
 
+		// Classic posts hand answers back through a short-lived transient for
+		// error redisplay. Never store raw POST. Plain answers are stripped like
+		// the AJAX submit path; only schema rich_text keys keep allowlisted markup
+		// so wp_kses does not entity-encode ordinary text (e.g. Tom & Jerry).
+		$kept = array_diff_key( $values, array_flip( \SubtleForms\Support\RequestKeys::all() ) );
+		$rich_keys = array();
+		$schema    = \SubtleForms\Engine\FormRestrictions::activeSchema( $formId );
+		if ( is_array( $schema ) ) {
+			$rich_keys = \SubtleForms\Validation\Sanitizer::fieldKeysOfType( $schema['fields'] ?? array(), 'rich_text' );
+		}
+		$kept = \SubtleForms\Validation\Sanitizer::sanitizeClassicRedisplay( $kept, $rich_keys );
+
 		return array(
 			'form_id'    => $formId,
 			'ok'         => $ok,
 			'body'       => $body,
-			'values'     => array_diff_key( $values, array_flip( \SubtleForms\Support\RequestKeys::all() ) ),
+			'values'     => $kept,
 			'redirect'   => $redirect,
 			'configured' => $configured,
 		);

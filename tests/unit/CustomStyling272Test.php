@@ -4,20 +4,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * 2.7.2: more styling tokens, the theme's own colours and fonts, and a form's
- * custom CSS.
+ * 2.7.2: more styling tokens and the theme's own colours and fonts.
  *
  * @package SubtleForms\Tests
  */
 
 use PHPUnit\Framework\TestCase;
 use SubtleForms\Frontend\FrontendAssets;
+use SubtleForms\Repositories\FormsRepository;
 use SubtleForms\Support\Appearance;
 
 final class CustomStyling272Test extends TestCase {
 
 	private function tokens( array $tokens ): array {
-		return Appearance::sanitizeForm( array( 'tokens' => $tokens ), null, false )['tokens'] ?? array();
+		return Appearance::sanitizeForm( array( 'tokens' => $tokens ) )['tokens'] ?? array();
 	}
 
 	public function test_good_values_are_kept(): void {
@@ -77,43 +77,33 @@ final class CustomStyling272Test extends TestCase {
 		$this->assertSame( array(), $this->tokens( $bad ) );
 	}
 
-	public function test_custom_css_is_cleaned(): void {
-		$ok = Appearance::sanitizeCustomCss( "/* note */ .subtleforms-button{letter-spacing:2px}\n@media (max-width:600px){.a{color:red}}" );
-		$this->assertStringContainsString( 'letter-spacing:2px', $ok );
-		$this->assertStringNotContainsString( 'note', $ok );
-
-		foreach ( array(
-			'a{b:expression(alert(1))}',
-			'a{background:url(javascript:alert(1))}',
-			'a{background:j\\61 vascript:x}',
-			'a{-moz-binding:url(x)}',
-			'a{behavior:url(x.htc)}',
-			'.a{color:red',
-			'.a{color:red}}',
-			str_repeat( 'a', 20001 ),
-		) as $hostile ) {
-			$this->assertSame( '', Appearance::sanitizeCustomCss( $hostile ), $hostile );
-		}
-
-		$tags = Appearance::sanitizeCustomCss( '</style><script>alert(1)</script>.a{color:red}' );
-		$this->assertStringNotContainsString( '<', $tags );
-		$this->assertStringNotContainsString( 'style>', $tags );
-
-		$this->assertSame( '.a{color:red}', Appearance::sanitizeCustomCss( '@import url(http://evil.test/x.css); .a{color:red}' ) );
-		$this->assertSame( '.a{color:red}', trim( Appearance::sanitizeCustomCss( '@import url(https://fonts.example/css); .a{color:red}' ) ) );
-		$this->assertStringContainsString( 'background:none', Appearance::sanitizeCustomCss( '.a{background:url(//evil.test/x.png)}' ) );
-		$this->assertStringContainsString( 'url("https://ok.test/x.png")', Appearance::sanitizeCustomCss( '.a{background:url(https://ok.test/x.png)}' ) );
+	public function test_prepare_stored_schema_strips_custom_css(): void {
+		$schema = array(
+			'metadata' => array(
+				'type'       => 'regular',
+				'appearance' => array(
+					'preset'    => 'theme',
+					'tokens'    => array( 'labelSize' => '15px' ),
+					'customCss' => '.subtleforms-button{color:red}',
+				),
+			),
+			'fields'   => array( array( 'type' => 'text', 'key' => 'a', 'label' => 'A' ) ),
+		);
+		$out = FormsRepository::prepareStoredSchema( $schema );
+		$this->assertArrayNotHasKey( 'customCss', $out['metadata']['appearance'] );
+		$this->assertSame( '15px', $out['metadata']['appearance']['tokens']['labelSize'] );
 	}
 
-	public function test_custom_css_needs_unfiltered_html(): void {
-		$sent = array( 'customCss' => '.a{color:blue}' );
-		// A person who may: their CSS is stored.
-		$this->assertSame( '.a{color:blue}', Appearance::sanitizeForm( $sent, '.a{color:red}', true )['customCss'] );
-		// A person who may not: what was stored stays, what they sent is ignored.
-		$this->assertSame( '.a{color:red}', Appearance::sanitizeForm( $sent, '.a{color:red}', false )['customCss'] );
-		$this->assertArrayNotHasKey( 'customCss', Appearance::sanitizeForm( $sent, null, false ) );
-		// Clearing it is a change too.
-		$this->assertArrayNotHasKey( 'customCss', Appearance::sanitizeForm( array( 'customCss' => '' ), '.a{color:red}', true ) );
+	public function test_arbitrary_custom_css_is_stripped_on_sanitize(): void {
+		$sent = array(
+			'preset'    => 'theme',
+			'tokens'    => array( 'labelSize' => '15px' ),
+			'customCss' => '.subtleforms-button{letter-spacing:2px}',
+		);
+		$clean = Appearance::sanitizeForm( $sent );
+		$this->assertArrayNotHasKey( 'customCss', $clean );
+		$this->assertSame( '15px', $clean['tokens']['labelSize'] );
+		$this->assertSame( 'theme', $clean['preset'] );
 	}
 
 	public function test_an_untouched_theme_form_is_unchanged_from_2_7(): void {
@@ -125,7 +115,7 @@ final class CustomStyling272Test extends TestCase {
 		// The only CSS it gets is the 2.7 layout lines.
 		$this->assertSame( 'a49d7b177ba961146f36a08ce1e134aa', md5( FrontendAssets::layoutCss() ) ); // 2.7 layout lines plus the 2.7.2 flag rule.
 		$this->assertStringNotContainsString( 'var(--subtleforms-label', FrontendAssets::layoutCss() );
-		// Custom CSS alone does not bring the stylesheet back: it is printed with the form.
+		// A legacy customCss key must not force the stylesheet; Free never renders it.
 		$schema['metadata']['appearance']['customCss'] = '.a{color:red}';
 		$this->assertTrue( FrontendAssets::isPlainThemeForm( $schema ) );
 	}
