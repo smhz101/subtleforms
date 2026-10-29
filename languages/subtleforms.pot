@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: SubtleForms 2.7.2\n"
+"Project-Id-Version: SubtleForms 2.7.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/subtleforms\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-26T16:39:47+00:00\n"
+"POT-Creation-Date: 2026-10-29T07:50:53+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -17,8 +17,8 @@ msgstr ""
 #. Plugin Name of the plugin
 #. Author of the plugin
 #: subtleforms.php
-#: src/Admin/AdminMenu.php:461
-#: src/Admin/AdminMenu.php:922
+#: src/Admin/AdminMenu.php:459
+#: src/Admin/AdminMenu.php:939
 #: resources/blocks/form/edit.jsx:213
 #: resources/blocks/form/edit.jsx:388
 msgid "SubtleForms"
@@ -124,47 +124,47 @@ msgstr ""
 msgid "Action completed successfully."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:539
+#: src/Admin/AdminMenu.php:537
 #: resources/admin/components/settings/extensions/WebhooksPanel.jsx:47
 #: resources/admin/pages/ToolsPage.jsx:17
 #: resources/admin/pages/ToolsPage.jsx:498
 msgid "Webhooks"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:540
+#: src/Admin/AdminMenu.php:538
 msgid "Send each entry as JSON to any URL, with retries and signed requests."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:625
+#: src/Admin/AdminMenu.php:643
 msgid "Security check failed."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:650
-#: src/Admin/AdminMenu.php:663
-#: src/Admin/AdminMenu.php:682
-#: src/Admin/AdminMenu.php:705
-#: src/Admin/AdminMenu.php:757
-#: src/Admin/AdminMenu.php:767
+#: src/Admin/AdminMenu.php:667
+#: src/Admin/AdminMenu.php:680
+#: src/Admin/AdminMenu.php:699
+#: src/Admin/AdminMenu.php:722
+#: src/Admin/AdminMenu.php:774
+#: src/Admin/AdminMenu.php:784
 msgid "You do not have permission to access this page."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:693
-#: src/Admin/AdminMenu.php:822
+#: src/Admin/AdminMenu.php:710
+#: src/Admin/AdminMenu.php:839
 msgid "Form not found."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:795
-#: src/Admin/AdminMenu.php:817
-#: src/Admin/AdminMenu.php:850
+#: src/Admin/AdminMenu.php:812
+#: src/Admin/AdminMenu.php:834
+#: src/Admin/AdminMenu.php:867
 msgid "Invalid request."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:879
+#: src/Admin/AdminMenu.php:896
 msgid "This screen could not be loaded."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:899
-#: src/Admin/AdminMenu.php:904
+#: src/Admin/AdminMenu.php:916
+#: src/Admin/AdminMenu.php:921
 msgid "WordPress Admin"
 msgstr ""
 
@@ -196,7 +196,8 @@ msgstr ""
 #: src/Api/ApiGuards.php:147
 #: src/Api/DashboardApi.php:465
 #: src/Api/OnboardingApi.php:290
-#: src/Api/OnboardingApi.php:311
+#: src/Api/OnboardingApi.php:320
+#: src/Api/OnboardingApi.php:341
 #: src/Api/SettingsApi.php:382
 #: src/Api/WebhooksApi.php:106
 msgid "Security check failed. Please refresh and try again."
@@ -206,7 +207,8 @@ msgstr ""
 #: src/Api/ApiGuards.php:189
 #: src/Api/DashboardApi.php:456
 #: src/Api/OnboardingApi.php:281
-#: src/Api/OnboardingApi.php:302
+#: src/Api/OnboardingApi.php:311
+#: src/Api/OnboardingApi.php:332
 #: src/Api/SettingsApi.php:302
 #: src/Api/SettingsApi.php:373
 #: src/Api/WebhooksApi.php:102
@@ -950,7 +952,7 @@ msgid "This form has reached its maximum number of entries."
 msgstr ""
 
 #: src/Engine/SpamProtection.php:460
-#: resources/frontend/components/FormRenderer.jsx:1203
+#: resources/frontend/components/FormRenderer.jsx:1193
 msgid "Leave this field empty"
 msgstr ""
 
@@ -1121,7 +1123,7 @@ msgstr ""
 
 #: src/Fields/CoreFields.php:264
 #: src/Fields/CoreFields.php:637
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:248
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:242
 msgid "Custom"
 msgstr ""
 
@@ -3189,9 +3191,9 @@ msgid "High end label"
 msgstr ""
 
 #: src/Frontend/FrontendAssets.php:137
-#: resources/frontend/components/FormRenderer.jsx:887
-#: resources/frontend/components/FormRenderer.jsx:1000
-#: resources/frontend/components/FormRenderer.jsx:1049
+#: resources/frontend/components/FormRenderer.jsx:885
+#: resources/frontend/components/FormRenderer.jsx:998
+#: resources/frontend/components/FormRenderer.jsx:1047
 msgid "Thank you! Your submission has been received."
 msgstr ""
 
@@ -3335,7 +3337,7 @@ msgstr ""
 
 #: src/Support/Captcha/CaptchaManager.php:313
 #: resources/frontend/components/ConversationalFormRenderer.jsx:261
-#: resources/frontend/components/FormRenderer.jsx:692
+#: resources/frontend/components/FormRenderer.jsx:690
 msgid "CAPTCHA verification failed. Please try again."
 msgstr ""
 
@@ -4861,7 +4863,7 @@ msgstr ""
 #: resources/admin/pages/ToolsPage.jsx:327
 #: resources/admin/pages/ToolsPage.jsx:516
 #: resources/admin/pages/ToolsPage.jsx:536
-#: resources/frontend/components/FormRenderer.jsx:1190
+#: resources/frontend/components/FormRenderer.jsx:1180
 msgid "Form"
 msgstr ""
 
@@ -4870,12 +4872,12 @@ msgid "Use form colour"
 msgstr ""
 
 #: resources/admin/components/builder/appearance/AppearanceControls.jsx:111
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:200
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:194
 msgid "Theme"
 msgstr ""
 
 #: resources/admin/components/builder/appearance/AppearanceControls.jsx:112
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:323
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:317
 #: resources/admin/components/builder/appearance/labels.js:68
 #: resources/admin/components/builder/appearance/labels.js:70
 #: resources/admin/components/builder/appearance/labels.js:134
@@ -4897,13 +4899,13 @@ msgstr ""
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:171
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:185
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:195
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:396
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:390
 #: resources/admin/components/builder/appearance/StyleFields.jsx:107
 msgid "Auto"
 msgstr ""
 
 #: resources/admin/components/builder/appearance/AppearanceControls.jsx:223
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:200
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:194
 #: resources/admin/components/builder/appearance/labels.js:94
 #: resources/admin/components/settings/GeneralSettings.jsx:124
 #: resources/admin/pages/SubmissionsPage.jsx:470
@@ -4928,21 +4930,21 @@ msgid "L"
 msgstr ""
 
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:46
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:411
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:405
 #: resources/admin/components/builder/appearance/labels.js:61
 #: resources/admin/components/builder/appearance/tokenDefs.js:174
 msgid "Left"
 msgstr ""
 
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:47
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:412
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:406
 #: resources/admin/components/builder/appearance/labels.js:62
 #: resources/admin/components/builder/appearance/tokenDefs.js:175
 msgid "Centre"
 msgstr ""
 
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:48
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:413
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:407
 #: resources/admin/components/builder/appearance/labels.js:63
 msgid "Right"
 msgstr ""
@@ -5021,157 +5023,134 @@ msgstr ""
 msgid "Text & shape"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:100
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:308
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:99
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:302
 msgid "edited"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:244
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:238
 msgid "Styling mode"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:247
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:241
 msgid "Presets"
 msgstr ""
 
 #. translators: %s: name of the style preset being applied
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:258
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:252
 #, js-format
 msgid "Applying “%s” replaces the custom styling on this form."
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:264
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:258
 msgid "Apply preset"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:267
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:261
 msgid "Keep mine"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:288
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:282
 msgid "Make it yours"
 msgstr ""
 
 #. translators: %s: preset name
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:291
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:285
 #, js-format
 msgid "Fine-tune colours, type, fields and buttons, starting from %s."
 msgstr ""
 
 #. translators: %s: preset name
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:305
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:299
 #, js-format
 msgid "Starting from %s."
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:313
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:307
 msgid "Your theme styles this form. Changing colours, type, or the field and button style below switches to SubtleForms styling that starts from your theme."
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:314
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:308
 msgid "SubtleForms styles this form, starting from your theme. Revert to let your theme style it again."
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:330
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:324
 msgid "Show advanced"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:339
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:333
 msgid "Your theme does not share its fonts with WordPress; the preview uses your site's stylesheet."
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:348
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:342
 msgid "Spacing"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:353
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:347
 #: resources/admin/components/builder/appearance/labels.js:114
 #: resources/admin/components/settings/GeneralSettings.jsx:125
 #: resources/admin/pages/SubmissionsPage.jsx:471
 msgid "Compact"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:354
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:348
 #: resources/admin/components/settings/GeneralSettings.jsx:123
 #: resources/admin/pages/SubmissionsPage.jsx:469
 msgid "Comfortable"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:382
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:376
 msgid "Button width"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:397
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:391
 #: resources/admin/components/builder/appearance/labels.js:64
 msgid "Full width"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:403
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:397
 #: resources/admin/components/builder/appearance/labels.js:44
 msgid "Button alignment"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:433
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:427
 msgid "Same as form font"
 msgstr ""
 
 #. translators: 1: which colours, 2: contrast ratio such as 3.2
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:444
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:438
 #, js-format
 msgid "%1$s have a contrast of %2$s:1. Aim for at least 4.5:1 so everyone can read them."
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:446
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:440
 msgid "The label and the form background"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:448
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:442
 msgid "The input text and the input background"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:449
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:443
 msgid "The button text and the button background"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:458
-#: resources/admin/components/builder/FieldDock.jsx:23
-#: resources/admin/components/builder/FieldInspector.jsx:425
-#: resources/admin/components/builder/FormSettings.jsx:128
-#: resources/admin/components/builder/FormSettings.jsx:130
-#: resources/blocks/form/edit.jsx:347
-msgid "Advanced"
-msgstr ""
-
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:463
-msgid "Custom CSS"
-msgstr ""
-
-#. translators: %s: the CSS class of this form, such as subtleforms-form-12
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:466
-#, js-format
-msgid "Applies to this form only. Every rule starts with .%s automatically. Shown in the preview."
-msgstr ""
-
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:486
-msgid "Custom CSS is available to people who can post unfiltered HTML, usually administrators."
-msgstr ""
-
 #. translators: %s: preset name
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:497
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:456
 #, js-format
 msgid "Revert to %s"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:502
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:513
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:461
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:472
 msgid "Reset all to theme"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:509
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:468
 msgid "This puts every colour, font, size and shape on this form back to your theme. It cannot be undone after you save."
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:516
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:475
 msgid "Keep my styling"
 msgstr ""
 
@@ -5901,7 +5880,7 @@ msgstr ""
 
 #: resources/admin/components/builder/ConversationalCanvas.jsx:239
 #: resources/admin/pages/ToolsPage.jsx:638
-#: resources/frontend/components/FormRenderer.jsx:1276
+#: resources/frontend/components/FormRenderer.jsx:1266
 msgid "Previous"
 msgstr ""
 
@@ -5921,7 +5900,7 @@ msgstr ""
 #: resources/admin/components/OnboardingWizard.jsx:580
 #: resources/admin/pages/ToolsPage.jsx:645
 #: resources/frontend/components/ConversationalFormRenderer.jsx:593
-#: resources/frontend/components/FormRenderer.jsx:1286
+#: resources/frontend/components/FormRenderer.jsx:1276
 msgid "Next"
 msgstr ""
 
@@ -5975,6 +5954,14 @@ msgstr ""
 #: resources/admin/components/builder/FieldDock.jsx:22
 #: resources/admin/components/builder/FieldInspector.jsx:295
 msgid "Choices"
+msgstr ""
+
+#: resources/admin/components/builder/FieldDock.jsx:23
+#: resources/admin/components/builder/FieldInspector.jsx:425
+#: resources/admin/components/builder/FormSettings.jsx:128
+#: resources/admin/components/builder/FormSettings.jsx:130
+#: resources/blocks/form/edit.jsx:347
+msgid "Advanced"
 msgstr ""
 
 #: resources/admin/components/builder/FieldDock.jsx:24
@@ -6364,7 +6351,7 @@ msgstr ""
 
 #: resources/admin/components/builder/FormBehaviorPanels.jsx:116
 #: resources/frontend/components/ConversationalFormRenderer.jsx:508
-#: resources/frontend/components/FormRenderer.jsx:1299
+#: resources/frontend/components/FormRenderer.jsx:1289
 msgid "Submit"
 msgstr ""
 
@@ -6438,7 +6425,7 @@ msgstr ""
 
 #: resources/admin/components/builder/FormBuilder.jsx:713
 #: resources/frontend/components/ConversationalFormRenderer.jsx:541
-#: resources/frontend/components/FormRenderer.jsx:1243
+#: resources/frontend/components/FormRenderer.jsx:1233
 msgid "indicates required fields"
 msgstr ""
 
@@ -11600,19 +11587,19 @@ msgid "Select a published form to embed"
 msgstr ""
 
 #: resources/frontend/components/ConversationalFormRenderer.jsx:227
-#: resources/frontend/components/FormRenderer.jsx:657
+#: resources/frontend/components/FormRenderer.jsx:655
 msgid "Save the form first, then submit the preview."
 msgstr ""
 
 #: resources/frontend/components/ConversationalFormRenderer.jsx:358
-#: resources/frontend/components/FormRenderer.jsx:800
-#: resources/frontend/components/FormRenderer.jsx:916
+#: resources/frontend/components/FormRenderer.jsx:798
+#: resources/frontend/components/FormRenderer.jsx:914
 #: resources/frontend/utils/classicResult.js:58
 msgid "Submission failed."
 msgstr ""
 
 #: resources/frontend/components/ConversationalFormRenderer.jsx:362
-#: resources/frontend/components/FormRenderer.jsx:921
+#: resources/frontend/components/FormRenderer.jsx:919
 msgid "Network error. Please try again."
 msgstr ""
 
@@ -11845,22 +11832,22 @@ msgstr ""
 msgid "This form couldn’t load. Please refresh the page and try again."
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:161
-#: resources/frontend/components/FormRenderer.jsx:170
+#: resources/frontend/components/FormRenderer.jsx:159
+#: resources/frontend/components/FormRenderer.jsx:168
 msgid "Failed to load form."
 msgstr ""
 
 #. translators: %s: URL
-#: resources/frontend/components/FormRenderer.jsx:883
+#: resources/frontend/components/FormRenderer.jsx:881
 #, js-format
 msgid "Visitors will be sent to %s."
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:1073
+#: resources/frontend/components/FormRenderer.jsx:1071
 msgid "Submit another response"
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:1296
+#: resources/frontend/components/FormRenderer.jsx:1286
 msgid "Submitting…"
 msgstr ""
 

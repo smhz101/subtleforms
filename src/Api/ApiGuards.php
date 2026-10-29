@@ -125,10 +125,10 @@ trait ApiGuards {
 			return true;
 		}
 
-		$nonce = $request->get_header( 'X-WP-Nonce' );
+		$nonce = sanitize_text_field( wp_unslash( (string) $request->get_header( 'X-WP-Nonce' ) ) );
 
 		if ( empty( $nonce ) ) {
-			$nonce = $request->get_param( '_wpnonce' );
+			$nonce = sanitize_text_field( wp_unslash( (string) $request->get_param( '_wpnonce' ) ) );
 		}
 
 		if ( empty( $nonce ) ) {

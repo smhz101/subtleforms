@@ -4,6 +4,13 @@ This file keeps the full release history. readme.txt lists only the latest versi
 
 == Changelog ==
 
+= 2.7.3 - 2026-10-29 =
+* New: Custom styling now has grouped, resettable controls that start from your theme colours and fonts, a compact or comfortable density, contrast warnings, and the builder preview shows the theme exactly as your site does.
+* New: The Phone and Country fields have a new "Show country flags" setting that draws a small flag next to each country, loading the flag image only for forms that use it.
+* Change: Removed freeform Custom CSS from the form builder for WordPress.org compliance. Structured appearance settings still work.
+* Security: Classic form result storage, admin action nonces and every REST nonce check now sanitize request input before use, and public REST route detection normalizes REQUEST_URI before parsing.
+* Security: The onboarding test email and the onboarding, tour and card dismiss routes now require the manage_options capability, the same as every SubtleForms screen.
+
 = 2.7.2 - 2026-10-24 =
 * Change: SubtleForms Pro builds older than 2.8.0 are not started by this version, to avoid errors. Update SubtleForms Pro to 2.8.0 or later.
 * Change: Payment, pricing and coupon features are provided only by the add-on. This plugin no longer includes the order engine, and an entry's order is shown by the add-on.

@@ -375,7 +375,7 @@ class SettingsApi {
 			);
 		}
 
-		$nonce = $request->get_header( 'X-WP-Nonce' );
+		$nonce = sanitize_text_field( wp_unslash( (string) $request->get_header( 'X-WP-Nonce' ) ) );
 		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
 			return new \WP_Error(
 				'subtleforms_invalid_nonce',

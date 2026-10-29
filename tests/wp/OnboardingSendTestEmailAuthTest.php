@@ -118,14 +118,22 @@ final class OnboardingSendTestEmailAuthTest extends TestCase {
 		$this->assertSame( array(), $this->mailSent );
 	}
 
-	public function test_editor_can_still_dismiss_more_features(): void {
+	public function test_only_admins_can_dismiss_more_features(): void {
 		$editor = $this->makeUser( 'editor' );
 		wp_set_current_user( $editor );
 		delete_user_meta( $editor, \SubtleForms\Admin\AdminMenu::MORE_FEATURES_META );
 		$request = new \WP_REST_Request( 'POST', '/subtleforms/v1/more-features/dismiss' );
 		$request->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
+		$this->assertContains( rest_do_request( $request )->get_status(), array( 401, 403 ) );
+		$this->assertEmpty( get_user_meta( $editor, \SubtleForms\Admin\AdminMenu::MORE_FEATURES_META, true ) );
+
+		$admin = $this->makeUser( 'administrator' );
+		wp_set_current_user( $admin );
+		delete_user_meta( $admin, \SubtleForms\Admin\AdminMenu::MORE_FEATURES_META );
+		$request = new \WP_REST_Request( 'POST', '/subtleforms/v1/more-features/dismiss' );
+		$request->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
 		$this->assertSame( 200, rest_do_request( $request )->get_status() );
-		$this->assertNotEmpty( get_user_meta( $editor, \SubtleForms\Admin\AdminMenu::MORE_FEATURES_META, true ) );
-		delete_user_meta( $editor, \SubtleForms\Admin\AdminMenu::MORE_FEATURES_META );
+		$this->assertNotEmpty( get_user_meta( $admin, \SubtleForms\Admin\AdminMenu::MORE_FEATURES_META, true ) );
+		delete_user_meta( $admin, \SubtleForms\Admin\AdminMenu::MORE_FEATURES_META );
 	}
 }

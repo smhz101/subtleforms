@@ -4,7 +4,7 @@ Tags: form builder, contact form, forms, multi-step form, file upload
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.7.2
+Stable tag: 2.7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -125,6 +125,13 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 
 == Changelog ==
 
+= 2.7.3 - 2026-10-29 =
+* New: Custom styling now has grouped, resettable controls that start from your theme colours and fonts, a compact or comfortable density, contrast warnings, and the builder preview shows the theme exactly as your site does.
+* New: The Phone and Country fields have a new "Show country flags" setting that draws a small flag next to each country, loading the flag image only for forms that use it.
+* Change: Removed freeform Custom CSS from the form builder for WordPress.org compliance. Structured appearance settings still work.
+* Security: Classic form result storage, admin action nonces and every REST nonce check now sanitize request input before use, and public REST route detection normalizes REQUEST_URI before parsing.
+* Security: The onboarding test email and the onboarding, tour and card dismiss routes now require the manage_options capability, the same as every SubtleForms screen.
+
 = 2.7.2 - 2026-10-24 =
 * Change: SubtleForms Pro builds older than 2.8.0 are not started by this version, to avoid errors. Update SubtleForms Pro to 2.8.0 or later.
 * Change: Payment, pricing and coupon features are provided only by the add-on. This plugin no longer includes the order engine, and an entry's order is shown by the add-on.
@@ -144,15 +151,12 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Security: Form schemas need the manage_options capability, reCAPTCHA v3 checks the score and action, and time tokens expire after two hours and work once.
 * Security: The client IP honours trusted proxies, and queued mail and webhook details stay out of the cron option.
 
-= 2.7.0 - 2026-10-23 =
-* New: Web addresses and links written as [text](https://example.com) in a form's confirmation message are now clickable; only http, https and site-relative links are allowed and anything else stays plain text.
-* New: Add-ons can register their own panel in the form builder under Integrations.
-* New: Extension points for add-ons: field type overrides, logic evaluators, Reports panel slots, form mount hooks and a form-deleted action, with placeholders in the builder and Reports.
-* Change: Removed two settings that were saved but never used: the WooCommerce product and currency fields.
-
 The full history is in changelog.txt in the plugin folder.
 
 == Upgrade Notice ==
+
+= 2.7.3 =
+If you use the SubtleForms Pro add-on, update it to 2.8.0 or later. Freeform Custom CSS is removed; structured appearance settings are kept.
 
 = 2.7.2 =
 If you use the SubtleForms Pro add-on, update it to 2.8.0 or later: older builds are not started by this version, to avoid errors. Payment, pricing and coupon features are provided only by the add-on.

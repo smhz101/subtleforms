@@ -275,7 +275,7 @@ final class OnboardingApi {
 	// ── Permissions ─────────────────────────────────────────────────────────
 
 	public function check_read_permission( \WP_REST_Request $request ) {
-		if ( ! current_user_can( 'edit_posts' ) ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
 			return new \WP_Error(
 				'subtleforms_forbidden',
 				__( 'You are not allowed to perform this action.', 'subtleforms' ),
@@ -283,7 +283,7 @@ final class OnboardingApi {
 			);
 		}
 
-		$nonce = $request->get_header( 'X-WP-Nonce' );
+		$nonce = sanitize_text_field( wp_unslash( (string) $request->get_header( 'X-WP-Nonce' ) ) );
 		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
 			return new \WP_Error(
 				'subtleforms_invalid_nonce',
@@ -299,7 +299,7 @@ final class OnboardingApi {
 	 * Administrator-only gate for the onboarding test email.
 	 *
 	 * Uses manage_options (same bar as FormsApi / ApiGuards). Other onboarding
-	 * write routes keep edit_posts so editors can dismiss tours for themselves.
+	 * write routes use the same bar, since every SubtleForms screen is admin-only.
 	 *
 	 * @param \WP_REST_Request $request Incoming request.
 	 * @return true|\WP_Error
@@ -313,7 +313,7 @@ final class OnboardingApi {
 			);
 		}
 
-		$nonce = $request->get_header( 'X-WP-Nonce' );
+		$nonce = sanitize_text_field( wp_unslash( (string) $request->get_header( 'X-WP-Nonce' ) ) );
 		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
 			return new \WP_Error(
 				'subtleforms_invalid_nonce',
@@ -326,7 +326,7 @@ final class OnboardingApi {
 	}
 
 	public function check_write_permission( \WP_REST_Request $request ) {
-		if ( ! current_user_can( 'edit_posts' ) ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
 			return new \WP_Error(
 				'subtleforms_forbidden',
 				__( 'You are not allowed to perform this action.', 'subtleforms' ),
@@ -334,7 +334,7 @@ final class OnboardingApi {
 			);
 		}
 
-		$nonce = $request->get_header( 'X-WP-Nonce' );
+		$nonce = sanitize_text_field( wp_unslash( (string) $request->get_header( 'X-WP-Nonce' ) ) );
 		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
 			return new \WP_Error(
 				'subtleforms_invalid_nonce',
