@@ -1,7 +1,7 @@
 <?php
 // phpcs:disable -- Unit test file; not shipped in production plugin.
 /**
- * WPORG-P0-B: send-test-email needs manage_options; other onboarding writes stay on edit_posts.
+ * WPORG-P0-B: send-test-email needs manage_options; every other onboarding route needs manage_options too.
  *
  * @package SubtleForms\Tests\Unit
  */
@@ -92,7 +92,7 @@ namespace SubtleForms\Tests\Unit {
 			$this->assertStringContainsString( 'function check_send_test_email_permission', $api );
 		}
 
-		public function test_other_onboarding_write_routes_still_use_edit_posts_write_gate(): void {
+		public function test_other_onboarding_write_routes_use_the_admin_write_gate(): void {
 			$api = $this->apiSource();
 			foreach ( array( '/onboarding/dismiss', '/create-wizard/dismiss', '/more-features/dismiss', '/tour/complete' ) as $route ) {
 				$this->assertMatchesRegularExpression(
@@ -102,7 +102,7 @@ namespace SubtleForms\Tests\Unit {
 				);
 			}
 			$this->assertMatchesRegularExpression(
-				"/function check_write_permission\\([\\s\\S]*?current_user_can\\(\\s*'edit_posts'\\s*\\)/",
+				"/function check_write_permission\\([\\s\\S]*?current_user_can\\(\\s*'manage_options'\\s*\\)/",
 				$api
 			);
 		}
@@ -177,12 +177,14 @@ namespace SubtleForms\Tests\Unit {
 			$this->assertSame( 'subtleforms_invalid_nonce', $bad_result->get_error_code() );
 		}
 
-		public function test_shared_write_gate_still_allows_editors(): void {
+		public function test_shared_write_gate_refuses_editors_and_allows_admins(): void {
 			$GLOBALS['sf_test_logged_in'] = true;
-			$GLOBALS['sf_test_caps']      = array( 'edit_posts' => true );
 			$GLOBALS['sf_test_nonce_ok']  = true;
 			$request = new \WP_REST_Request();
 			$request->set_header( 'X-WP-Nonce', 'good-nonce' );
+			$GLOBALS['sf_test_caps'] = array( 'edit_posts' => true );
+			$this->assertInstanceOf( \WP_Error::class, ( new OnboardingApi() )->check_write_permission( $request ) );
+			$GLOBALS['sf_test_caps'] = array( 'manage_options' => true );
 			$this->assertTrue( ( new OnboardingApi() )->check_write_permission( $request ) );
 		}
 	}

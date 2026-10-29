@@ -211,4 +211,25 @@ final class WporgP0CInputSanitizationTest extends TestCase {
 		$this->assertStringContainsString( 'actionNonceValid', $menu );
 		$this->assertStringContainsString( 'sanitize_text_field( wp_unslash( $_GET[\'_wpnonce\'] ) )', $uploads );
 	}
+
+	public function test_every_nonce_is_sanitized_before_wp_verify_nonce(): void {
+		$src = dirname( __DIR__, 2 ) . '/src';
+		$it  = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $src ) );
+		foreach ( $it as $file ) {
+			if ( 'php' !== $file->getExtension() ) {
+				continue;
+			}
+			$code = (string) file_get_contents( $file->getPathname() );
+			$this->assertDoesNotMatchRegularExpression(
+				'/\$nonce\s*=\s*\$request->get_(header|param)\(/',
+				$code,
+				$file->getPathname() . ' passes an unsanitized request nonce to wp_verify_nonce()'
+			);
+			$this->assertDoesNotMatchRegularExpression(
+				'/wp_verify_nonce\(\s*(wp_unslash\()?\s*\$_(GET|POST|REQUEST|SERVER|COOKIE)/',
+				$code,
+				$file->getPathname() . ' verifies a raw superglobal nonce'
+			);
+		}
+	}
 }
