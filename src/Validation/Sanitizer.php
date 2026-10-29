@@ -167,38 +167,81 @@ class Sanitizer {
 	}
 
 	/**
-	 * Sanitize array deeply with recursion protection
+	 * Collect field keys of a given type from a schema field list.
 	 *
-	 * @param mixed $arr Value to sanitize (should be array)
-	 * @param int   $depth Current recursion depth
-	 * @param int   $maxDepth Maximum allowed depth
-	 * @return array
+	 * Walks nested fields, children and column containers the same way the
+	 * public submit path restores rich_text values.
+	 *
+	 * @param mixed  $fields Schema fields.
+	 * @param string $type   Field type to collect.
+	 * @return list<string>
 	 */
+	public static function fieldKeysOfType( $fields, string $type ): array {
+		$out = array();
+		self::collectFieldKeysOfType( $fields, $type, $out );
+		return $out;
+	}
+
+	/**
+	 * @param mixed        $fields Schema fields.
+	 * @param string       $type   Field type.
+	 * @param list<string> $out    Accumulator.
+	 */
+	private static function collectFieldKeysOfType( $fields, string $type, array &$out ): void {
+		if ( ! is_array( $fields ) ) {
+			return;
+		}
+		foreach ( $fields as $field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+			if ( ( $field['type'] ?? '' ) === $type && ! empty( $field['key'] ) ) {
+				$out[] = (string) $field['key'];
+			}
+			if ( ! empty( $field['fields'] ) ) {
+				self::collectFieldKeysOfType( $field['fields'], $type, $out );
+			}
+			if ( ! empty( $field['children'] ) ) {
+				self::collectFieldKeysOfType( $field['children'], $type, $out );
+			}
+			if ( ! empty( $field['columns'] ) && is_array( $field['columns'] ) ) {
+				foreach ( $field['columns'] as $column ) {
+					self::collectFieldKeysOfType( $column, $type, $out );
+				}
+			}
+		}
+	}
+
 	/**
 	 * Sanitize classic-form redisplay values (transient).
 	 *
-	 * Like sanitizeArrayDeep(), but string leaves use sanitizeRichText() so
-	 * allowlisted markup survives while scripts and other tags are removed.
+	 * Plain-text leaves use sanitizeSubmissionValue() so characters like "&"
+	 * are not entity-encoded by wp_kses. Only keys listed in $richTextKeys
+	 * (schema rich_text fields) keep allowlisted markup via sanitizeRichText().
 	 *
-	 * @param mixed $arr      Input array.
-	 * @param int   $depth    Current depth.
-	 * @param int   $maxDepth Max nesting.
+	 * @param mixed        $arr          Input array.
+	 * @param list<string> $richTextKeys Field keys allowed to keep markup.
+	 * @param int          $depth        Current depth.
+	 * @param int          $maxDepth     Max nesting.
 	 * @return array
 	 */
-	public static function sanitizeClassicRedisplay( $arr, int $depth = 0, int $maxDepth = self::MAX_DEPTH ): array {
+	public static function sanitizeClassicRedisplay( $arr, array $richTextKeys = array(), int $depth = 0, int $maxDepth = self::MAX_DEPTH ): array {
 		if ( ! is_array( $arr ) ) {
 			return array();
 		}
 		if ( $depth >= $maxDepth ) {
 			return array();
 		}
-		$sanitized = array();
+		$richLookup = array_fill_keys( $richTextKeys, true );
+		$sanitized  = array();
 		foreach ( $arr as $key => $value ) {
 			$sanitizedKey = self::sanitizeText( $key );
 			if ( is_array( $value ) ) {
-				$sanitized[ $sanitizedKey ] = self::sanitizeClassicRedisplay( $value, $depth + 1, $maxDepth );
+				$sanitized[ $sanitizedKey ] = self::sanitizeClassicRedisplay( $value, $richTextKeys, $depth + 1, $maxDepth );
 			} elseif ( is_string( $value ) ) {
-				$sanitized[ $sanitizedKey ] = self::sanitizeRichText( $value );
+				$sanitized[ $sanitizedKey ] = isset( $richLookup[ $sanitizedKey ] )
+					? self::sanitizeRichText( $value )
+					: self::sanitizeSubmissionValue( $value );
 			} elseif ( is_int( $value ) || is_float( $value ) || is_bool( $value ) || is_null( $value ) ) {
 				$sanitized[ $sanitizedKey ] = $value;
 			} else {

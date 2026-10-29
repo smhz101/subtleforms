@@ -76,7 +76,8 @@ final class WporgP0CInputSanitizationTest extends TestCase {
 		$this->assertSame( 'ada@example.com', $outcome['values']['email'] );
 		$this->assertSame( 3, $outcome['values']['count'] );
 		$this->assertSame( '2026-01-02', $outcome['values']['when'] );
-		$this->assertSame( array( 'city' => '<b>London</b>' ), $outcome['values']['address'] );
+		// No schema in unit stubs → plain strip; nested city is not rich_text.
+		$this->assertSame( array( 'city' => 'London' ), $outcome['values']['address'] );
 		$this->assertArrayNotHasKey( 'g-recaptcha-response', $outcome['values'] );
 		$this->assertStringNotContainsString( '<script>', (string) wp_json_encode( $outcome['values'] ) );
 	}
@@ -100,12 +101,43 @@ final class WporgP0CInputSanitizationTest extends TestCase {
 				'notes' => "Keep\nnewlines",
 				'bio'   => '<p>Hi</p><script>x</script>',
 				'city'  => '<b>London</b>',
-			)
+				'name'  => 'Tom & Jerry',
+			),
+			array( 'bio' )
 		);
 		$this->assertSame( "Keep\nnewlines", $out['notes'] );
 		$this->assertSame( '<p>Hi</p>', $out['bio'] );
-		$this->assertSame( '<b>London</b>', $out['city'] );
+		$this->assertSame( 'London', $out['city'] );
+		// Plain text must not be run through wp_kses (which would turn & into &amp;).
+		$this->assertSame( 'Tom & Jerry', $out['name'] );
 		$this->assertStringNotContainsString( 'script', $out['bio'] );
+	}
+
+	public function test_classic_redisplay_without_rich_keys_strips_all_markup(): void {
+		$out = Sanitizer::sanitizeClassicRedisplay(
+			array(
+				'bio'  => '<p>Hi</p><script>x</script>',
+				'name' => 'Tom & Jerry',
+			)
+		);
+		$this->assertSame( 'Hi', $out['bio'] );
+		$this->assertSame( 'Tom & Jerry', $out['name'] );
+	}
+
+	public function test_field_keys_of_type_walks_columns(): void {
+		$keys = Sanitizer::fieldKeysOfType(
+			array(
+				array(
+					'type'    => 'columns',
+					'columns' => array(
+						array( array( 'type' => 'rich_text', 'key' => 'about' ) ),
+						array( array( 'type' => 'text', 'key' => 'title' ) ),
+					),
+				),
+			),
+			'rich_text'
+		);
+		$this->assertSame( array( 'about' ), $keys );
 	}
 
 	public function test_sanitize_rich_text_allowlist_keeps_safe_markup(): void {

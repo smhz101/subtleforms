@@ -72,12 +72,16 @@ final class ClassicResult {
 		}
 
 		// Classic posts hand answers back through a short-lived transient for
-		// error redisplay. Never store raw POST: deep-sanitize with the rich-text
-		// allowlist for strings so multiline and supported markup survive while
-		// scripts/tags outside the allowlist are removed. Permanent storage still
-		// goes through submit_form() (strict sanitize + schema-aware rich_text restore).
+		// error redisplay. Never store raw POST. Plain answers are stripped like
+		// the AJAX submit path; only schema rich_text keys keep allowlisted markup
+		// so wp_kses does not entity-encode ordinary text (e.g. Tom & Jerry).
 		$kept = array_diff_key( $values, array_flip( \SubtleForms\Support\RequestKeys::all() ) );
-		$kept = \SubtleForms\Validation\Sanitizer::sanitizeClassicRedisplay( $kept );
+		$rich_keys = array();
+		$schema    = \SubtleForms\Engine\FormRestrictions::activeSchema( $formId );
+		if ( is_array( $schema ) ) {
+			$rich_keys = \SubtleForms\Validation\Sanitizer::fieldKeysOfType( $schema['fields'] ?? array(), 'rich_text' );
+		}
+		$kept = \SubtleForms\Validation\Sanitizer::sanitizeClassicRedisplay( $kept, $rich_keys );
 
 		return array(
 			'form_id'    => $formId,
