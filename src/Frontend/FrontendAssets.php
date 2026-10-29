@@ -608,6 +608,7 @@ final class FrontendAssets {
 	 * @return string URL ending in a slash, or ''.
 	 */
 	private static function chunkBaseUrl(): string {
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core filter, applied so the URL matches what WordPress prints for this script.
 		$src = (string) apply_filters( 'script_loader_src', SUBTLEFORMS_PLUGIN_URL . 'build/frontend/frontend.js', self::HANDLE );
 		$src = (string) preg_replace( '/[?#].*$/', '', $src );
 		$pos = strrpos( $src, '/' );

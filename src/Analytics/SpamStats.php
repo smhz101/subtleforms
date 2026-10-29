@@ -94,7 +94,7 @@ final class SpamStats {
 		 * @param string $reason honeypot, time_trap, rate_limit, captcha_failed, spam_rule or other.
 		 * @since 2.6.0
 		 */
-		do_action( self::BLOCKED_ACTION, $formId, self::normalizeReason( $reason ) );
+		do_action( 'subtleforms/spam/blocked', $formId, self::normalizeReason( $reason ) );
 	}
 
 	/**
