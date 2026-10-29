@@ -37,7 +37,7 @@ final class OnboardingApi {
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( $this, 'send_test_email' ),
-				'permission_callback' => array( $this, 'check_write_permission' ),
+				'permission_callback' => array( $this, 'check_send_test_email_permission' ),
 			)
 		);
 		register_rest_route(
@@ -276,6 +276,36 @@ final class OnboardingApi {
 
 	public function check_read_permission( \WP_REST_Request $request ) {
 		if ( ! current_user_can( 'edit_posts' ) ) {
+			return new \WP_Error(
+				'subtleforms_forbidden',
+				__( 'You are not allowed to perform this action.', 'subtleforms' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		$nonce = $request->get_header( 'X-WP-Nonce' );
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+			return new \WP_Error(
+				'subtleforms_invalid_nonce',
+				__( 'Security check failed. Please refresh and try again.', 'subtleforms' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Administrator-only gate for the onboarding test email.
+	 *
+	 * Uses manage_options (same bar as FormsApi / ApiGuards). Other onboarding
+	 * write routes keep edit_posts so editors can dismiss tours for themselves.
+	 *
+	 * @param \WP_REST_Request $request Incoming request.
+	 * @return true|\WP_Error
+	 */
+	public function check_send_test_email_permission( \WP_REST_Request $request ) {
+		if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
 			return new \WP_Error(
 				'subtleforms_forbidden',
 				__( 'You are not allowed to perform this action.', 'subtleforms' ),
