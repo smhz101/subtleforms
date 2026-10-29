@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from '@wordpress/element';
+import { useState, useEffect, useCallback, useMemo, useRef } from '@wordpress/element';
 import { __, sprintf, _n } from '@wordpress/i18n';
 import FieldRenderer from './FieldRenderer';
 import StepNavigation from './StepNavigation';
@@ -62,8 +62,6 @@ function ConversationalLoading() {
 }
 
 // One question at a time is its own download (2.6.0).
-// A form's own CSS is fetched only when the form has some (2.7.2).
-const CustomCssStyle = lazy(() => import(/* webpackChunkName: "custom-css" */ './CustomCssStyle'));
 const ConversationalFormRenderer = lazyField('conversational', 'default', ConversationalLoading);
 
 export default function FormRenderer({
@@ -1123,9 +1121,6 @@ export default function FormRenderer({
   // Appearance is applied as custom properties on the root, so every rule in the
   // public stylesheet picks it up by inheritance and no per-form CSS is emitted.
   const appearanceStyle = formAppearanceStyle(effectiveAppearance);
-  // The form's own CSS, limited to this form (2.7.2).
-  // It belongs to the form, so a block theme choice does not remove it.
-  const customCss = schema.metadata?.appearance?.customCss;
   // A theme form's buttons take the theme's button design (2.4.1).
   const buttonClass = (kind) =>
     ['subtleforms-button', `subtleforms-button-${kind}`, buttonThemeClass(effectiveAppearance)]
@@ -1140,11 +1135,6 @@ export default function FormRenderer({
       className={formClassNames}
       style={appearanceStyle}
       data-sf-step={hasSteps ? currentStepIndex : undefined}>
-      {customCss && (
-        <Suspense fallback={null}>
-          <CustomCssStyle css={customCss} formId={formId} />
-        </Suspense>
-      )}
       {/* Screen reader live region for submission results and validation announcements */}
       <div
         ref={liveRegionRef}

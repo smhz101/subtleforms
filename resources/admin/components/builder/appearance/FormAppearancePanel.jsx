@@ -3,7 +3,6 @@ import {
   Button,
   Notice,
   PanelBody,
-  TextareaControl,
   ToggleControl,
   __experimentalToggleGroupControl as ToggleGroupControl,
   __experimentalToggleGroupControlOption as ToggleGroupControlOption,
@@ -109,7 +108,6 @@ export default function FormAppearancePanel( {
   onChange,
   isReadOnly = false,
   formId = null,
-  canCustomCss = !! window.subtleformsAdmin?.canCustomCss,
 } ) {
   const theme = useThemeStyles();
   const metadata = schema?.metadata || {};
@@ -156,20 +154,17 @@ export default function FormAppearancePanel( {
   };
 
   const applyPreset = ( preset ) => {
-    // The form's own CSS is not part of a preset, so it stays.
     // Form width is a separate control; presets never set it.
     const { width: _presetWidth, ...presetVariants } = preset.variants || {};
     writeAppearance( {
       preset: preset.id,
       tokens: { ...preset.tokens },
       variants: { ...presetVariants },
-      ...( appearance.customCss ? { customCss: appearance.customCss } : {} ),
     } );
     setConfirmingPreset( null );
   };
 
-  // Back to the theme, everything (2.7.2). The form's own CSS goes too, unless
-  // this person may not change it.
+  // Back to the theme, everything.
   const resetAllToTheme = () => {
     const base = getPreset( 'theme' );
     const { width: _presetWidth, ...presetVariants } = base.variants || {};
@@ -177,7 +172,6 @@ export default function FormAppearancePanel( {
       preset: base.id,
       tokens: { ...base.tokens },
       variants: { ...presetVariants },
-      ...( ! canCustomCss && appearance.customCss ? { customCss: appearance.customCss } : {} ),
     } );
     setConfirmingReset( false );
   };
@@ -235,7 +229,7 @@ export default function FormAppearancePanel( {
   const noFontsNote = theme && ! theme.isBlockTheme && ! ( theme.fontFamilies || [] ).length;
 
   return (
-    <div className='sf-form-appearance'>
+    <div className='sf-form-appearance' data-form-id={ formId || undefined }>
       <ToggleGroupControl
         __nextHasNoMarginBottom
         __next40pxDefaultSize
@@ -453,41 +447,6 @@ export default function FormAppearancePanel( {
               ) ) }
             </PanelBody>
           ) ) }
-
-          { showAdvanced && (
-            <PanelBody title={ __( 'Advanced', 'subtleforms' ) } initialOpen className='sf-form-appearance__panel sf-form-appearance__panel--advanced'>
-              { canCustomCss ? (
-                <TextareaControl
-                  __nextHasNoMarginBottom
-                  className='sf-form-appearance__css'
-                  label={ __( 'Custom CSS', 'subtleforms' ) }
-                  help={ sprintf(
-                    /* translators: %s: the CSS class of this form, such as subtleforms-form-12 */
-                    __( 'Applies to this form only. Every rule starts with .%s automatically. Shown in the preview.', 'subtleforms' ),
-                    `subtleforms-form-${ Number( formId ) || 0 }`
-                  ) }
-                  value={ appearance.customCss || '' }
-                  rows={ 8 }
-                  maxLength={ 20000 }
-                  spellCheck={ false }
-                  disabled={ isReadOnly }
-                  onChange={ ( css ) => {
-                    const next = { preset: appearance.preset || 'default', ...appearance };
-                    if ( css ) {
-                      next.customCss = css;
-                    } else {
-                      delete next.customCss;
-                    }
-                    writeAppearance( next );
-                  } }
-                />
-              ) : (
-                <p className='components-base-control__help sf-form-appearance__css-note'>
-                  { __( 'Custom CSS is available to people who can post unfiltered HTML, usually administrators.', 'subtleforms' ) }
-                </p>
-              ) }
-            </PanelBody>
-          ) }
 
           { ! isReadOnly && (
             <div className='sf-form-appearance__footer'>

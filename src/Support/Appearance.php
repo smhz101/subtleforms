@@ -136,9 +136,6 @@ final class Appearance {
 	 */
 	private const FONT_TOKENS = array( 'fontFamily', 'labelFont', 'inputFont' );
 
-	/** Longest custom CSS a form can store, in bytes. */
-	public const CUSTOM_CSS_MAX = 20000;
-
 	/**
 	 * Variant keys and their permitted values.
 	 */
@@ -156,7 +153,7 @@ final class Appearance {
 	 * @param mixed $appearance Raw appearance value from the request.
 	 * @return array Sanitised appearance, or an empty array.
 	 */
-	public static function sanitizeForm( $appearance, ?string $previousCss = null, ?bool $canEditCss = null ): array {
+	public static function sanitizeForm( $appearance ): array {
 		if ( ! is_array( $appearance ) ) {
 			return array();
 		}
@@ -180,136 +177,12 @@ final class Appearance {
 			$clean['variants'] = $variants;
 		}
 
-		// Custom CSS (2.7.2). Only a person who may post unfiltered HTML can
-		// write it. Everyone else keeps what is already stored: it comes back
-		// unchanged and nothing they send replaces it.
-		$canEditCss = $canEditCss ?? self::canEditCustomCss();
-		$css        = $canEditCss ? self::sanitizeCustomCss( $appearance['customCss'] ?? '' ) : (string) $previousCss;
-		if ( '' !== $css ) {
-			$clean['customCss'] = $css;
-		}
+		// Arbitrary customCss is not accepted (WordPress.org compliance).
+		// Keys in stored JSON are ignored and stripped on save.
 
 		return $clean;
 	}
 
-	/**
-	 * Whether the current user may write a form's custom CSS.
-	 */
-	public static function canEditCustomCss(): bool {
-		return function_exists( 'current_user_can' ) && current_user_can( 'unfiltered_html' );
-	}
-
-	/**
-	 * Make a form's custom CSS safe to store and to print inside a style tag.
-	 *
-	 * Rules are kept as written. What is removed: markup (every angle
-	 * bracket), comments, `@import` of anything but an https address,
-	 * `@charset` and `@namespace`, and `url()` that is not https or a path on
-	 * this site. CSS that holds `expression(`, `javascript:`, `vbscript:`,
-	 * `behavior:` or `-moz-binding`, even hidden behind CSS escapes, or whose
-	 * braces do not match, or that is longer than 20,000 bytes, is rejected as
-	 * a whole (an empty string), so a half-cut rule never reaches a page.
-	 *
-	 * The rules are scoped to the form at output time (scopeCustomCss in
-	 * resources/shared/appearance.js), so the preview, the block editor and
-	 * the page apply them to that form only.
-	 *
-	 * @param mixed $css Raw CSS.
-	 * @return string Safe CSS, or ''.
-	 */
-	public static function sanitizeCustomCss( $css ): string {
-		if ( ! is_string( $css ) ) {
-			return '';
-		}
-		$css = str_replace( "\0", '', $css );
-		$css = (string) preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F]/', '', $css );
-		if ( strlen( $css ) > self::CUSTOM_CSS_MAX ) {
-			return '';
-		}
-		$css = (string) preg_replace( '#/\*.*?\*/#s', '', $css );
-		// No markup can end the style element: whole tags go, then any stray bracket.
-		$css = (string) preg_replace( '#<\s*/?\s*[a-z!][^>]*>?#i', '', $css );
-		$css = str_replace( '<', '', $css );
-		$css = trim( $css );
-		if ( '' === $css ) {
-			return '';
-		}
-
-		// Look at the CSS the way a browser reads it: escapes decoded.
-		$decoded = (string) preg_replace_callback(
-			'/\\\\([0-9a-fA-F]{1,6})\s?|\\\\(.)/s',
-			static function ( $m ) {
-				if ( isset( $m[2] ) && '' !== $m[2] ) {
-					return $m[2];
-				}
-				$code = hexdec( $m[1] );
-				return ( $code > 0 && $code < 0x110000 ) ? html_entity_decode( '&#' . $code . ';', ENT_QUOTES, 'UTF-8' ) : '';
-			},
-			$css
-		);
-		$check   = strtolower( (string) preg_replace( '/\s+/', '', $decoded ) );
-		foreach ( array( 'expression(', 'javascript:', 'vbscript:', 'behavior:', '-moz-binding', 'livescript:' ) as $bad ) {
-			if ( false !== strpos( $check, $bad ) ) {
-				return '';
-			}
-		}
-
-		// Braces must match outside strings.
-		$depth  = 0;
-		$quote  = '';
-		$length = strlen( $css );
-		for ( $i = 0; $i < $length; $i++ ) {
-			$ch = $css[ $i ];
-			if ( '' !== $quote ) {
-				if ( '\\' === $ch ) {
-					++$i;
-				} elseif ( $ch === $quote ) {
-					$quote = '';
-				}
-				continue;
-			}
-			if ( '"' === $ch || "'" === $ch ) {
-				$quote = $ch;
-			} elseif ( '{' === $ch ) {
-				++$depth;
-			} elseif ( '}' === $ch ) {
-				--$depth;
-				if ( $depth < 0 ) {
-					return '';
-				}
-			}
-		}
-		if ( 0 !== $depth || '' !== $quote ) {
-			return '';
-		}
-
-		// An imported stylesheet cannot be limited to the form, so it is dropped.
-		$css = (string) preg_replace( '/@import\b[^;{}]*;?/i', '', $css );
-		$css = (string) preg_replace( '/@(?:charset|namespace)\b[^;{}]*;?/i', '', $css );
-		$css = (string) preg_replace_callback(
-			'/url\(\s*(["\']?)([^"\')]*)\1\s*\)/i',
-			static function ( $m ) {
-				$url = trim( $m[2] );
-				if ( preg_match( '#^https://[^\s"\'()<>\\\\]+$#i', $url ) || preg_match( '#^/(?!/)[^\s"\'()<>\\\\:]*$#', $url ) ) {
-					return 'url("' . $url . '")';
-				}
-				return 'none';
-			},
-			$css
-		);
-
-		return trim( $css );
-	}
-
-	/**
-	 * Sanitise a field's appearance object.
-	 *
-	 * Field overrides use the same token names as the form plus a few layout
-	 * keys, so they go through the same value checks.
-	 *
-	 * @param mixed $appearance Raw appearance value from the request.
-	 * @return array Sanitised appearance, or an empty array.
-	 */
 	public static function sanitizeField( $appearance ): array {
 		if ( ! is_array( $appearance ) ) {
 			return array();

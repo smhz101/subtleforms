@@ -255,12 +255,4 @@
 	color: var(--sf-text);
 }
 
-.sf-form-appearance__css textarea {
-	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-	font-size: 12px;
-	line-height: 1.5;
-	tab-size: 2;
-}
-
-.sf-form-appearance__fonts-note,
-.sf-form-appearance__css-note { margin: 0 0 8px; }
+.sf-form-appearance__fonts-note { margin: 0 0 8px; }
