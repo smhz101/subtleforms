@@ -85,9 +85,25 @@ final class PublicRoutes {
 		if ( isset( $wp->query_vars['rest_route'] ) && is_string( $wp->query_vars['rest_route'] ) ) {
 			return '/' . ltrim( $wp->query_vars['rest_route'], '/' );
 		}
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Only matched against a fixed pattern.
-		$uri    = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized in routeFromUri().
+		$uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : '';
+		return self::routeFromUri( $uri );
+	}
+
+	/**
+	 * Extract the REST route from a raw REQUEST_URI value.
+	 *
+	 * Sanitizes then parses the path; used when `$wp->query_vars['rest_route']`
+	 * is not set. Empty string when the URI is not under the REST prefix.
+	 *
+	 * @param string $uri Raw request URI (may be slash-magic encoded).
+	 */
+	public static function routeFromUri( string $uri ): string {
+		$uri    = sanitize_text_field( wp_unslash( $uri ) );
 		$path   = (string) wp_parse_url( $uri, PHP_URL_PATH );
+		if ( '' === $path ) {
+			return '';
+		}
 		$prefix = '/' . trim( rest_get_url_prefix(), '/' );
 		$pos    = strpos( $path, $prefix . '/' );
 		return false === $pos ? '' : substr( $path, $pos + strlen( $prefix ) );

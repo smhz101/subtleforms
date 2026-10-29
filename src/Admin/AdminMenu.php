@@ -596,6 +596,21 @@ class AdminMenu {
 	}
 
 	/**
+	 * Whether a SubtleForms admin action nonce is valid.
+	 *
+	 * Sanitizes the same way as Uploads::download before wp_verify_nonce().
+	 *
+	 * @param mixed $nonce Raw `_wpnonce` value (typically from $_GET).
+	 */
+	public static function actionNonceValid( $nonce ): bool {
+		if ( null === $nonce || false === $nonce || is_array( $nonce ) || is_object( $nonce ) ) {
+			return false;
+		}
+		$clean = sanitize_text_field( wp_unslash( (string) $nonce ) );
+		return '' !== $clean && false !== wp_verify_nonce( $clean, 'subtleforms_action' );
+	}
+
+	/**
 	 * Handle admin actions (delete, duplicate, etc.).
 	 */
 	public function handle_actions(): void {
@@ -617,11 +632,9 @@ class AdminMenu {
 			return;
 		}
 
-		// For our actions, require nonce and validate it.
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce is validated, not sanitized.
-		if ( empty( $_GET['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'subtleforms_action' ) ) {
+		// For our actions, require nonce and validate it (same pattern as Uploads).
+		if ( ! self::actionNonceValid( $_GET['_wpnonce'] ?? null ) ) {
 			wp_die( esc_html__( 'Security check failed.', 'subtleforms' ) );
-		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified above.

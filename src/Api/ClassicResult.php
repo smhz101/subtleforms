@@ -71,11 +71,19 @@ final class ClassicResult {
 			}
 		}
 
+		// Classic posts hand answers back through a short-lived transient for
+		// error redisplay. Never store raw POST: deep-sanitize with the rich-text
+		// allowlist for strings so multiline and supported markup survive while
+		// scripts/tags outside the allowlist are removed. Permanent storage still
+		// goes through submit_form() (strict sanitize + schema-aware rich_text restore).
+		$kept = array_diff_key( $values, array_flip( \SubtleForms\Support\RequestKeys::all() ) );
+		$kept = \SubtleForms\Validation\Sanitizer::sanitizeClassicRedisplay( $kept );
+
 		return array(
 			'form_id'    => $formId,
 			'ok'         => $ok,
 			'body'       => $body,
-			'values'     => array_diff_key( $values, array_flip( \SubtleForms\Support\RequestKeys::all() ) ),
+			'values'     => $kept,
 			'redirect'   => $redirect,
 			'configured' => $configured,
 		);

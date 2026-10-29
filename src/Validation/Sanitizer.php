@@ -174,6 +174,40 @@ class Sanitizer {
 	 * @param int   $maxDepth Maximum allowed depth
 	 * @return array
 	 */
+	/**
+	 * Sanitize classic-form redisplay values (transient).
+	 *
+	 * Like sanitizeArrayDeep(), but string leaves use sanitizeRichText() so
+	 * allowlisted markup survives while scripts and other tags are removed.
+	 *
+	 * @param mixed $arr      Input array.
+	 * @param int   $depth    Current depth.
+	 * @param int   $maxDepth Max nesting.
+	 * @return array
+	 */
+	public static function sanitizeClassicRedisplay( $arr, int $depth = 0, int $maxDepth = self::MAX_DEPTH ): array {
+		if ( ! is_array( $arr ) ) {
+			return array();
+		}
+		if ( $depth >= $maxDepth ) {
+			return array();
+		}
+		$sanitized = array();
+		foreach ( $arr as $key => $value ) {
+			$sanitizedKey = self::sanitizeText( $key );
+			if ( is_array( $value ) ) {
+				$sanitized[ $sanitizedKey ] = self::sanitizeClassicRedisplay( $value, $depth + 1, $maxDepth );
+			} elseif ( is_string( $value ) ) {
+				$sanitized[ $sanitizedKey ] = self::sanitizeRichText( $value );
+			} elseif ( is_int( $value ) || is_float( $value ) || is_bool( $value ) || is_null( $value ) ) {
+				$sanitized[ $sanitizedKey ] = $value;
+			} else {
+				$sanitized[ $sanitizedKey ] = self::sanitizeText( (string) $value );
+			}
+		}
+		return $sanitized;
+	}
+
 	public static function sanitizeArrayDeep( $arr, int $depth = 0, int $maxDepth = self::MAX_DEPTH ): array {
 		if ( ! is_array( $arr ) ) {
 			return array();
