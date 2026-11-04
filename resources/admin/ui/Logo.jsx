@@ -1,10 +1,15 @@
 /**
  * SubtleForms logo mark.
  *
- * A neutral ink tile with a white form glyph. It deliberately does not use the
- * brand colour: the brand follows the admin colour scheme, and a logo that
- * changes colour with the user's preferences stops reading as a logo. Ink on
- * the white stage matches how core renders the WordPress mark.
+ * A rounded tile with the S cut out as empty space, drawn from two paths on a
+ * 512 by 512 grid. The tile takes its colour from `--sf-logo-fg` (ink by
+ * default). On a dark background set `--sf-logo-fg: #f2f1f1` on the logo or a
+ * parent. It deliberately does not follow the admin colour scheme: a logo that
+ * changes colour with the user's preferences stops reading as a logo.
+ *
+ * An add-on can replace the mark through `markSvg` in the
+ * `subtleforms/admin_branding` filter. The server sanitises that markup to
+ * svg, g and path elements, so it is safe to render as it is.
  *
  * @param {Object}  props
  * @param {number}  props.size      Pixel size of the square mark.
@@ -43,28 +48,36 @@ export default function Logo({
     );
   }
 
-  const mark = (
+  const a11y = {
+    'aria-hidden': wordmark ? 'true' : undefined,
+    role: wordmark ? undefined : 'img',
+    'aria-label': wordmark ? undefined : 'SubtleForms',
+  };
+
+  const mark = branding.markSvg ? (
+    <span
+      className='sf-logo__mark sf-logo__mark--custom'
+      style={{ width: size, height: size }}
+      {...a11y}
+      dangerouslySetInnerHTML={{ __html: branding.markSvg }}
+    />
+  ) : (
     <svg
       className='sf-logo__mark'
       width={size}
       height={size}
-      viewBox='0 0 32 32'
+      viewBox='0 0 512 512'
       fill='none'
-      aria-hidden={wordmark ? 'true' : undefined}
-      role={wordmark ? undefined : 'img'}
-      aria-label={wordmark ? undefined : 'SubtleForms'}
+      {...a11y}
       xmlns='http://www.w3.org/2000/svg'
       focusable='false'>
-      <rect width='32' height='32' rx='8' fill='var(--sf-logo-bg, #1e1e1e)' />
-      <rect x='8' y='8.5' width='16' height='3' rx='1.5' fill='#fff' />
-      <rect x='8' y='14.5' width='10' height='3' rx='1.5' fill='#fff' />
-      <rect x='8' y='20.5' width='6' height='3' rx='1.5' fill='#fff' />
       <path
-        d='M18.6 21.6l2.3 2.3 4.3-4.6'
-        stroke='var(--sf-logo-accent, #fff)'
-        strokeWidth='2.4'
-        strokeLinecap='round'
-        strokeLinejoin='round'
+        fill='var(--sf-logo-fg, #1e1e1e)'
+        d='M0 122.88 C0 55.015 55.015 0 122.88 0 L389.12 0 C406.467 0 422.974 3.594 437.937 10.079 L170.586 117.679 C131.238 133.516 112.178 178.252 128.015 217.6 L128 217.6 C128 260.015 162.385 294.4 204.8 294.4 L383.975 294.4 L12.8 443.787 C4.607 427.322 0 408.759 0 389.12 Z'
+      />
+      <path
+        fill='var(--sf-logo-fg, #1e1e1e)'
+        d='M128.015 217.6 L499.199 68.21 C507.392 84.676 512 103.24 512 122.88 L512 389.12 C512 456.985 456.985 512 389.12 512 L122.88 512 C105.531 512 89.023 508.405 74.058 501.919 L341.403 394.321 C380.751 378.484 399.811 333.748 383.975 294.4 L384 294.4 C384 251.985 349.615 217.6 307.2 217.6 Z'
       />
     </svg>
   );

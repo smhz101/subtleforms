@@ -135,26 +135,131 @@ class AdminMenu {
 	}
 
 	/**
-	 * Menu mark, the same tile used in the admin header.
+	 * Path data of the SubtleForms mark (512 by 512): a rounded tile with the
+	 * S cut out as empty space. Never edit the geometry.
+	 */
+	private const MARK_TILE_TOP    = 'M0 122.88 C0 55.015 55.015 0 122.88 0 L389.12 0 C406.467 0 422.974 3.594 437.937 10.079 L170.586 117.679 C131.238 133.516 112.178 178.252 128.015 217.6 L128 217.6 C128 260.015 162.385 294.4 204.8 294.4 L383.975 294.4 L12.8 443.787 C4.607 427.322 0 408.759 0 389.12 Z';
+	private const MARK_TILE_BOTTOM = 'M128.015 217.6 L499.199 68.21 C507.392 84.676 512 103.24 512 122.88 L512 389.12 C512 456.985 456.985 512 389.12 512 L122.88 512 C105.531 512 89.023 508.405 74.058 501.919 L341.403 394.321 C380.751 378.484 399.811 333.748 383.975 294.4 L384 294.4 C384 251.985 349.615 217.6 307.2 217.6 Z';
+
+	/**
+	 * Menu mark as a data URI. Core paints `fill` attributes of a base64 SVG
+	 * icon in the admin colour scheme (grey, white on hover and for the current
+	 * page), so the mark is a single-colour silhouette with `fill="black"`.
+	 * The viewBox pads the 512 tile so it draws at 16 of the 20 pixels, the
+	 * visual size of the core menu icons; a full-bleed tile looks too big.
+	 *
+	 * @return string
+	 */
+	public static function default_menu_icon(): string {
+		$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-64 -64 640 640">'
+			. '<path fill="black" d="' . self::MARK_TILE_TOP . '"/>'
+			. '<path fill="black" d="' . self::MARK_TILE_BOTTOM . '"/>'
+			. '</svg>';
+		return 'data:image/svg+xml;base64,' . base64_encode( $svg ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- builds a static data URI icon, as core documents for add_menu_page().
+	}
+
+	/**
+	 * Menu icon: the filtered `menuIcon` or the default mark.
 	 *
 	 * @return string
 	 */
 	private static function menu_icon(): string {
-		// A file URL is drawn as an <img>. A data-URI SVG is painted as a flat
-		// admin-menu shape, which turns this mark into a white square.
-		return SUBTLEFORMS_PLUGIN_URL . 'assets/menu-icon.svg';
+		$icon = self::branding()['menuIcon'];
+		return '' !== $icon ? $icon : self::default_menu_icon();
 	}
 
 	/**
-	 * Keep the menu mark at the header size. Core fades and pads image icons.
+	 * Keep an image-URL menu icon at 16 by 16, the visual size of core icons. Core draws a URL icon as an
+	 * <img> and pads and fades it. A data-URI icon needs no styles.
 	 */
 	public function menu_icon_styles(): void {
+		if ( 0 === strpos( self::menu_icon(), 'data:' ) ) {
+			return;
+		}
 		wp_register_style( 'subtleforms-menu-icon', false, array(), SUBTLEFORMS_VERSION );
 		wp_enqueue_style( 'subtleforms-menu-icon' );
 		wp_add_inline_style(
 			'subtleforms-menu-icon',
-			'#adminmenu #toplevel_page_subtleforms .wp-menu-image img{width:20px;height:20px;padding:7px 0 0;opacity:1;object-fit:contain;}'
+			'#adminmenu #toplevel_page_subtleforms .wp-menu-image img{width:16px;height:16px;padding:9px 0 0;opacity:1;object-fit:contain;}'
 		);
+	}
+
+	/**
+	 * Accept a menu icon: an SVG data URI with valid base64, or an http(s) URL.
+	 * Anything else is dropped so the default mark is used.
+	 *
+	 * @param mixed $icon Raw value from the branding filter.
+	 * @return string
+	 */
+	public static function sanitize_menu_icon( $icon ): string {
+		if ( ! is_string( $icon ) ) {
+			return '';
+		}
+		$icon   = trim( $icon );
+		$prefix = 'data:image/svg+xml;base64,';
+		if ( 0 === strpos( $icon, $prefix ) ) {
+			$payload = substr( $icon, strlen( $prefix ) );
+			$decoded = '' === $payload ? false : base64_decode( $payload, true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- validates a data URI icon.
+			if ( false === $decoded || false === stripos( $decoded, '<svg' ) || preg_match( '/<script|\bon\w+\s*=|javascript:/i', $decoded ) ) {
+				return '';
+			}
+			return $icon;
+		}
+		if ( preg_match( '#^https?://#i', $icon ) ) {
+			return esc_url_raw( $icon, array( 'http', 'https' ) );
+		}
+		return '';
+	}
+
+	/**
+	 * Accept an inline SVG for the in-app mark. Only svg, g and path with a
+	 * few presentation attributes survive; the result is empty when nothing
+	 * drawable is left.
+	 *
+	 * @param mixed $svg Raw value from the branding filter.
+	 * @return string
+	 */
+	public static function sanitize_mark_svg( $svg ): string {
+		if ( ! is_string( $svg ) || '' === trim( $svg ) || strlen( $svg ) > 20000 ) {
+			return '';
+		}
+		$allowed = array(
+			'svg'  => array(
+				'xmlns'   => true,
+				'viewbox' => true,
+			),
+			'g'    => array( 'fill' => true ),
+			'path' => array(
+				'd'    => true,
+				'fill' => true,
+			),
+		);
+		// Drop element bodies kses would keep as text, then keep allowed tags only.
+		$svg   = (string) preg_replace( '#<(script|style|title|desc|metadata)\b[^>]*>.*?</\1\s*>#is', '', $svg );
+		$clean = wp_kses( $svg, $allowed );
+		$clean = (string) preg_replace( '/>[^<]+</', '><', $clean );
+		$clean = str_replace( ' viewbox=', ' viewBox=', $clean );
+		// Keep fills to plain colours and path data to path characters.
+		$clean = (string) preg_replace_callback(
+			'/\s(fill|d|viewBox)="([^"]*)"/i',
+			static function ( array $m ): string {
+				$name  = strtolower( $m[1] );
+				$value = $m[2];
+				if ( 'fill' === $name ) {
+					$ok = preg_match( '/^(#[0-9a-f]{3,8}|[a-z]+|var\(--[a-z0-9-]+(,\s*#[0-9a-f]{3,8})?\))$/i', $value );
+				} elseif ( 'd' === $name ) {
+					$ok = preg_match( '/^[0-9a-z\s,.+\-]*$/i', $value );
+				} else {
+					$ok = preg_match( '/^[0-9.\s-]+$/', $value );
+				}
+				return $ok ? $m[0] : '';
+			},
+			$clean
+		);
+		if ( false === stripos( $clean, '<svg' ) || false === stripos( $clean, '<path' ) ) {
+			return '';
+		}
+		return trim( $clean );
 	}
 
 	/**
@@ -446,7 +551,7 @@ class AdminMenu {
 	/**
 	 * How the admin app names the plugin: name, menu name and logo.
 	 *
-	 * @return array{name:string,menuName:string,logoUrl:string}
+	 * @return array{name:string,menuName:string,logoUrl:string,menuIcon:string,markSvg:string}
 	 */
 	public static function branding(): array {
 		static $cache = null;
@@ -458,6 +563,8 @@ class AdminMenu {
 			'name'        => 'SubtleForms',
 			'menuName'    => __( 'SubtleForms', 'subtleforms' ),
 			'logoUrl'     => '',
+			'menuIcon'    => '',
+			'markSvg'     => '',
 		);
 
 		/**
@@ -467,6 +574,11 @@ class AdminMenu {
 		 *     @type string $name     Product name in the app header and copy.
 		 *     @type string $menuName wp-admin menu label.
 		 *     @type string $logoUrl  Logo image URL; empty for the default mark.
+		 *     @type string $menuIcon Menu icon: a data URI (data:image/svg+xml;base64,...) or an image URL;
+		 *                            empty for the default mark. A data URI is repainted by core in the admin
+		 *                            colour scheme; an image URL is drawn as it is.
+		 *     @type string $markSvg  Inline SVG (svg, g and path only) that replaces the built-in mark in the
+		 *                            app header; empty for the default mark. A logoUrl still wins over it.
 		 * }
 		 * @since 2.1.0
 		 */
@@ -479,6 +591,8 @@ class AdminMenu {
 			'name'        => $name !== '' ? $name : $defaults['name'],
 			'menuName'    => $menu !== '' ? $menu : ( $name !== '' && $name !== $defaults['name'] ? $name : $defaults['menuName'] ),
 			'logoUrl'     => esc_url_raw( (string) $b['logoUrl'] ),
+			'menuIcon'    => self::sanitize_menu_icon( $b['menuIcon'] ),
+			'markSvg'     => self::sanitize_mark_svg( $b['markSvg'] ),
 		);
 		return $cache;
 	}

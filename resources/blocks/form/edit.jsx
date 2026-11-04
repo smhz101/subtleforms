@@ -23,6 +23,7 @@ import {
 } from '@wordpress/components';
 import { FORM_PRESETS } from '../../shared/appearance';
 import { whenRendererReady } from './rendererReady';
+import markIcon from './icon.jsx';
 
 /**
  * Fetch published forms from REST API
@@ -384,7 +385,7 @@ export default function Edit({ attributes, setAttributes }) {
 		<div {...blockProps}>
 		{inspector}
 		<Placeholder
-			icon='feedback'
+			icon={markIcon}
 			label={__('SubtleForms', 'subtleforms')}
 			instructions={__('Select a published form to embed', 'subtleforms')}>
 			{loading ? (

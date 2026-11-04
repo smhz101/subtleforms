@@ -106,7 +106,7 @@ Screen slots for `registerSlotItem( slot, id, { component, order } )` that the a
 | `subtleforms/admin_menu` | action `( Capabilities $caps )` | Add your own admin pages. |
 | `subtleforms/admin_enqueue_scripts` | action `( string $hook )` | Enqueue add-on scripts on SubtleForms admin pages. |
 | `subtleforms/admin_data` | filter `( array $data, string $hook )` | Add keys to `window.subtleformsAdmin`. Add-ons read their own keys from there. |
-| `subtleforms/admin_branding` | filter `( array $branding )` | Change the product name, menu name and logo URL the admin app shows. |
+| `subtleforms/admin_branding` | filter `( array $branding )` | Change what the admin app shows: `name`, `menuName`, `logoUrl` (a custom logo replaces the mark and the wordmark), `menuIcon` (a data URI, `data:image/svg+xml;base64,...`, or an image URL; empty for the default mark; core repaints a data URI in the admin colour scheme and draws a URL as an image) and `markSvg` (inline SVG made of `svg`, `g` and `path` only, which replaces the built-in mark in the app header; empty for the default mark). Invalid values fall back to the default mark. |
 | `subtleforms/admin/integrations` | filter `( array $integrations )` | List an integration in Settings, keyed by slug. |
 | `subtleforms/forms/schema_before_save` | filter `( array $schema, int $formId, bool $activate )` | Change a schema before it is saved. |
 | `subtleforms/forms/schema_published` | action `( int $formId, array $schema, int $version )` | A schema version was published. |

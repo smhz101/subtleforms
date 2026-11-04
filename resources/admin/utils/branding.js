@@ -1,6 +1,7 @@
 /**
  * How the admin app names the plugin (2.1): name, menu name and logo.
  *
+ * `markSvg` is sanitised server side (svg, g and path only).
  * Comes from `subtleformsAdmin.branding`, built by AdminMenu::branding() and
  * filtered by `subtleforms/admin_branding`.
  */
@@ -8,6 +9,7 @@ const DEFAULTS = {
   name: 'SubtleForms',
   menuName: 'SubtleForms',
   logoUrl: '',
+  markSvg: '',
 };
 
 const SUPPORT_URL = 'https://subtleforms.com/support';
@@ -21,7 +23,7 @@ export function getBranding() {
   const b = window.subtleformsAdmin?.branding;
   const out = { ...DEFAULTS };
   if (b && typeof b === 'object') {
-    ['name', 'menuName', 'logoUrl'].forEach((key) => {
+    ['name', 'menuName', 'logoUrl', 'markSvg'].forEach((key) => {
       if (typeof b[key] === 'string') out[key] = b[key];
     });
   }
