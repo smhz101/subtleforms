@@ -95,7 +95,7 @@ Fields have labels, errors are announced and tied to their fields, choice groups
 
 = SubtleForms Pro =
 
-SubtleForms Pro is a separate plugin sold at [subtleforms.com/pro](https://subtleforms.com/pro/). It adds Signature, Calculation and Picture choice fields, several files per upload field, Stripe payments, WooCommerce checkout, Mailchimp, Brevo, Kit, HubSpot and Zapier connections, form analytics, entry PDFs and more templates.
+SubtleForms Pro is a separate plugin sold at [subtleforms.com/pro](https://subtleforms.com/pro/). It adds Signature, Calculation and Picture choice fields, several files per upload field, advanced conditional logic, form analytics, Stripe payments with coupons, WooCommerce checkout, Mailchimp, Brevo, Kit, HubSpot, Salesforce, Pipedrive and Close connections, Zapier, Make and n8n, entry PDFs and more templates.
 
 = Documentation and support =
 
@@ -244,30 +244,3 @@ If you use the SubtleForms Pro add-on, update it to 2.8.0 or later. Freeform Cus
 
 = 2.7.2 =
 If you use the SubtleForms Pro add-on, update it to 2.8.0 or later: older builds are not started by this version, to avoid errors. Payment, pricing and coupon features are provided only by the add-on.
-
-= 2.7.1 =
-Forms with payment fields need the separate SubtleForms Pro plugin.
-
-= 2.7.0 =
-Links written as [text](https://example.com) in confirmation messages are now clickable.
-
-= 2.6.1 =
-Forms appear faster, and the SubtleForms block shows the form with its own style in the editor and on the site.
-
-= 2.6.0 =
-Spam protection (the hidden trap field and the too-fast check) is on for new forms only. Nothing changes for your existing forms unless you accept the offer on the SubtleForms dashboard to turn it on for all of them.
-
-= 2.5.0 =
-The Branding tab is gone from Settings.
-
-= 2.4.1 =
-Webhooks now send the documented body, with answers under "fields", and can be tested in Settings. If a receiver reads answers at the top level of the body, update it to read them from "fields". Field IDs can be edited.
-
-= 2.4.0 =
-Field options, CAPTCHA keys, dependent dropdowns and keyboard use of dropdowns, country, phone and date fields.
-
-= 2.3.9 =
-Requires WordPress 6.6.
-
-= 2.3.8 =
-Dependent dropdowns are edited as columns and can show as dropdowns, buttons or columns on the form.
