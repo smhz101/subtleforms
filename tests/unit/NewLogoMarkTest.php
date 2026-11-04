@@ -13,7 +13,7 @@ final class NewLogoMarkTest extends TestCase {
 		$this->assertStringStartsWith( 'data:image/svg+xml;base64,', $icon );
 		$svg = base64_decode( substr( $icon, 26 ), true );
 		$this->assertNotFalse( $svg );
-		$this->assertStringContainsString( 'viewBox="0 0 512 512"', $svg );
+		$this->assertStringContainsString( 'viewBox="-64 -64 640 640"', $svg );
 		$this->assertSame( 2, substr_count( $svg, '<path fill="black"' ) );
 		$this->assertStringNotContainsString( '<rect', $svg );
 	}

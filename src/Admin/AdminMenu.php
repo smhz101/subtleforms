@@ -145,11 +145,13 @@ class AdminMenu {
 	 * Menu mark as a data URI. Core paints `fill` attributes of a base64 SVG
 	 * icon in the admin colour scheme (grey, white on hover and for the current
 	 * page), so the mark is a single-colour silhouette with `fill="black"`.
+	 * The viewBox pads the 512 tile so it draws at 16 of the 20 pixels, the
+	 * visual size of the core menu icons; a full-bleed tile looks too big.
 	 *
 	 * @return string
 	 */
 	public static function default_menu_icon(): string {
-		$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">'
+		$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-64 -64 640 640">'
 			. '<path fill="black" d="' . self::MARK_TILE_TOP . '"/>'
 			. '<path fill="black" d="' . self::MARK_TILE_BOTTOM . '"/>'
 			. '</svg>';
@@ -167,7 +169,7 @@ class AdminMenu {
 	}
 
 	/**
-	 * Keep an image-URL menu icon at 20 by 20. Core draws a URL icon as an
+	 * Keep an image-URL menu icon at 16 by 16, the visual size of core icons. Core draws a URL icon as an
 	 * <img> and pads and fades it. A data-URI icon needs no styles.
 	 */
 	public function menu_icon_styles(): void {
@@ -178,7 +180,7 @@ class AdminMenu {
 		wp_enqueue_style( 'subtleforms-menu-icon' );
 		wp_add_inline_style(
 			'subtleforms-menu-icon',
-			'#adminmenu #toplevel_page_subtleforms .wp-menu-image img{width:20px;height:20px;padding:7px 0 0;opacity:1;object-fit:contain;}'
+			'#adminmenu #toplevel_page_subtleforms .wp-menu-image img{width:16px;height:16px;padding:9px 0 0;opacity:1;object-fit:contain;}'
 		);
 	}
 
