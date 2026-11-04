@@ -50,7 +50,7 @@ final class AdminBrandingMarkTest extends TestCase {
 		$icon = $this->menuIcon();
 		$this->assertStringStartsWith( 'data:image/svg+xml;base64,', $icon );
 		$svg = base64_decode( substr( $icon, strlen( 'data:image/svg+xml;base64,' ) ), true );
-		$this->assertStringContainsString( 'viewBox="0 0 512 512"', $svg );
+		$this->assertStringContainsString( 'viewBox="-64 -64 640 640"', $svg );
 		$this->assertSame( 2, substr_count( $svg, 'fill="black"' ) );
 		$this->assertStringNotContainsString( '#', $svg );
 	}
