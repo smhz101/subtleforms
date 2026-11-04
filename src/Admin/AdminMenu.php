@@ -124,7 +124,7 @@ class AdminMenu {
 
 	/**
 	 * Unread count bubble for a menu label, styled like core's comment count.
-	 * Counts above 99 show as "99+".
+	 * Counts above 9 show as "9+".
 	 *
 	 * @param int $count Unread entries.
 	 * @return string Empty when there is nothing unread.
@@ -133,10 +133,10 @@ class AdminMenu {
 		if ( $count < 1 ) {
 			return '';
 		}
-		$label = $count > 99 ? '99+' : number_format_i18n( $count );
+		$label = $count > 9 ? '9+' : number_format_i18n( $count );
 		return sprintf(
 			' <span class="awaiting-mod count-%1$d"><span class="pending-count" aria-hidden="true">%2$s</span><span class="screen-reader-text">%3$s</span></span>',
-			min( $count, 100 ),
+			min( $count, 10 ),
 			esc_html( $label ),
 			esc_html(
 				sprintf(

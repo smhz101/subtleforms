@@ -24,11 +24,13 @@ final class UnreadMenuBadgeTest extends TestCase {
 		$this->assertStringContainsString( '1 unread entry', AdminMenu::unread_badge( 1 ) );
 	}
 
-	public function test_counts_above_99_show_as_99_plus(): void {
-		$this->assertStringContainsString( '>99<', AdminMenu::unread_badge( 99 ) );
+	public function test_counts_above_9_show_as_9_plus(): void {
+		$this->assertStringContainsString( '>9<', AdminMenu::unread_badge( 9 ) );
+		$this->assertStringContainsString( 'count-9', AdminMenu::unread_badge( 9 ) );
 		$badge = AdminMenu::unread_badge( 1250 );
-		$this->assertStringContainsString( '>99+<', $badge );
-		$this->assertStringContainsString( 'count-100', $badge );
+		$this->assertStringContainsString( '>9+<', $badge );
+		$this->assertStringContainsString( 'count-10', $badge );
 		$this->assertStringContainsString( '1,250 unread entries', $badge );
+		$this->assertStringContainsString( '>9+<', AdminMenu::unread_badge( 10 ) );
 	}
 }

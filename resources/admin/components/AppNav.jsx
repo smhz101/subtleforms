@@ -95,7 +95,7 @@ export default function AppNav() {
                 <span className='sf-appnav__label'>{item.label}</span>
                 {count > 0 && (
                   <span className='sf-appnav__count'>
-                    {count > 99 ? '99+' : count}
+                    {count > 9 ? '9+' : count}
                     <span className='screen-reader-text'>
                       {' '}
                       {__('unread', 'subtleforms')}
