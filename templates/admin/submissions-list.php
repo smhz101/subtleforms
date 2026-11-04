@@ -11,5 +11,6 @@ $submissionId = isset($_GET['submission_id']) ? intval($_GET['submission_id']) :
 $page = $submissionId ? 'submission-detail' : 'submissions-list';
 ?>
 <div class="wrap subtleforms-admin subtleforms-admin-page">
+    <hr class="wp-header-end">
     <div id="subtleforms-admin-app" data-page="<?php echo esc_attr($page); ?>" data-form-id="<?php echo esc_attr($formId); ?>" data-submission-id="<?php echo esc_attr($submissionId); ?>"></div>
 </div>

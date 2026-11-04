@@ -1,0 +1,63 @@
+/**
+ * The notices region under the header. Notices from WordPress and other
+ * plugins keep their own look (left border colour, white card) and are
+ * aligned to the page gutter.
+ */
+.sf-site-notices {
+	flex-shrink: 0;
+	min-width: 0;
+	width: 100%;
+	box-sizing: border-box;
+	padding-inline: var(--sf-gutter);
+
+	&:has(.sf-site-notices__list:not(:empty), .sf-site-notices__more, .sf-notices-wrapper) {
+		padding-top: 12px;
+	}
+
+	@media (max-width: 782px) {
+		padding-inline: 16px;
+	}
+}
+
+.sf-site-notices__list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-width: 0;
+
+	> * {
+		box-sizing: border-box;
+		width: 100%;
+		max-width: 100%;
+		margin: 0 !important;
+		border-radius: var(--sf-radius-md);
+		// The core notice look: white card, hairline, coloured left border.
+		background: var(--sf-bg-surface);
+		box-shadow: none;
+		overflow-wrap: anywhere;
+	}
+
+	> .sf-site-notice--folded {
+		display: none;
+	}
+}
+
+.sf-site-notices__more.components-button.is-link {
+	display: inline-flex;
+	margin-top: 8px;
+	font-size: var(--sf-text-sm);
+}
+
+// The app's own notices share the region without adding their own padding.
+.sf-site-notices .sf-notices-wrapper {
+	padding: 0;
+	margin-top: 8px;
+
+	.subtleforms-notices {
+		margin-bottom: 0;
+	}
+}
+
+.sf-site-notices__list:empty + .sf-notices-wrapper {
+	margin-top: 0;
+}
