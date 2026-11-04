@@ -1,9 +1,13 @@
+import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Spinner, Notice, Button } from '@wordpress/components';
 import clsx from 'clsx';
 import AdminHeader from './AdminHeader';
 import ActionBar from './ActionBar';
 import Notices from './Notices';
+import SiteNotices from './SiteNotices';
+import AdminFooter from './AdminFooter';
+import { ShellFooterProvider } from './ShellFooterContext';
 import ImportOfferNotice from './ImportOfferNotice';
 import ImportOfferModal from './ImportOfferModal';
 import './AdminShell.scss';
@@ -22,7 +26,13 @@ import './AdminShell.scss';
  *   │ page header   title / description        actions    │  ← scrolls
  *   │ toolbar       tabs · filters        search (sticky) │
  *   │ body                                                │
+ *   ├─────────────────────────────────────────────────────┤
+ *   │ footer   page controls (pagination)   version · links│
  *   └─────────────────────────────────────────────────────┘
+ *
+ * Notices from WordPress and other plugins are collected into a region at the
+ * top of the scrolling area, under the header (see SiteNotices). The footer
+ * is part of the app screens only; the builder keeps its full height.
  *
  * The `editor` variant swaps the navigation for a focused builder bar and hands
  * scrolling to the builder's own panels.
@@ -55,6 +65,9 @@ export default function AdminShell({
   empty = null,
 }) {
   const isEditor = variant === 'editor';
+  // The footer's page slot. Components such as the list tables draw their
+  // pagination into it (see ShellFooterContext).
+  const [footerSlot, setFooterSlot] = useState(null);
   const hasToolbar = !!(actionBarLeft || actionBarRight);
   const hasPageHeader = !isEditor && !!(title || actions || description);
 
@@ -94,6 +107,7 @@ export default function AdminShell({
   };
 
   return (
+    <ShellFooterProvider value={isEditor ? undefined : footerSlot}>
     <div
       className={clsx('subtleforms-admin', 'sf-app', `sf-app--${variant}`, {
         'sf-app--fixed': noScroll,
@@ -114,6 +128,10 @@ export default function AdminShell({
           className={clsx('sf-app__main', { 'is-fixed': noScroll })}
           id='sf-main'
           tabIndex={-1}>
+          <SiteNotices>
+            <Notices />
+          </SiteNotices>
+
           {hasPageHeader && (
             <div
               className={clsx('sf-page-header', {
@@ -146,7 +164,6 @@ export default function AdminShell({
             </div>
           )}
 
-          <Notices />
           <ImportOfferNotice />
           <ImportOfferModal />
 
@@ -159,8 +176,11 @@ export default function AdminShell({
           </div>
         </main>
 
-        {pagination && <footer className='sf-app__footer'>{pagination}</footer>}
+        {!isEditor && (
+          <AdminFooter slotRef={setFooterSlot}>{pagination}</AdminFooter>
+        )}
       </div>
     </div>
+    </ShellFooterProvider>
   );
 }

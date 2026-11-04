@@ -1,4 +1,4 @@
-import { memo, useRef } from '@wordpress/element';
+import { memo, useRef, createPortal } from '@wordpress/element';
 import { Button, SelectControl, CheckboxControl, DropdownMenu, MenuGroup, MenuItem } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -6,6 +6,7 @@ import usePhoneLayout from '../hooks/usePhoneLayout';
 import Icon from '../ui/Icon';
 import TableSkeleton from './TableSkeleton';
 import IconAction from './IconAction';
+import { useShellFooterSlot } from './ShellFooterContext';
 import './DataTable.scss';
 
 /**
@@ -37,6 +38,7 @@ import './DataTable.scss';
  * @param {Function} props.onPerPageChange - Callback when per page changes (newPerPage)
  * @param {boolean} props.loading - Loading state
  * @param {string} props.emptyMessage - Message when no data
+ * @param {boolean} props.paginationInFooter - Draw the pagination in the app footer's page slot (inside the app shell) instead of under the table; behaviour is the same
  * @param {boolean} props.alwaysShowPagination - Keep the footer ("0 results", disabled page buttons, rows per page) when there are no rows
  * @param {Function|null} props.onRowClick - Optional row click handler (row)
  * @param {boolean} props.selectable - Enable row selection
@@ -301,11 +303,22 @@ const DataTable = memo(function DataTable({
   compact = false,
   renderCompactRow = null,
   alwaysShowPagination = false,
+  paginationInFooter = false,
   // Off where the table already sits in a scrolling pane (the Submissions
   // inbox): a virtual list needs a fixed-height box of its own, which would
   // be a second scrollbar inside the pane. Pages hold at most 100 rows.
   virtualize = true,
 }) {
+  const footerSlot = useShellFooterSlot();
+  // Inside the app shell the pagination goes to the footer once the footer's
+  // slot exists. Without a shell it stays under the table.
+  const placePagination = (node) => {
+    if (!paginationInFooter || footerSlot === undefined) {
+      return node;
+    }
+    return footerSlot ? createPortal(node, footerSlot) : null;
+  };
+
   const totalPages = Math.ceil(totalItems / perPage);
   
   // Virtualization setup - only for large lists
@@ -405,14 +418,14 @@ const DataTable = memo(function DataTable({
     return (
       <div className={`sf-data-table sf-data-table--empty${compact ? ' sf-data-table--compact' : ''}`}>
         {empty}
-        <FooterComponent
+        {placePagination(<FooterComponent
           currentPage={currentPage}
           totalPages={Math.max(1, totalPages)}
           perPage={perPage}
           totalItems={totalItems}
           onPageChange={onPageChange}
           onPerPageChange={onPerPageChange}
-        />
+        />)}
       </div>
     );
   }
@@ -507,7 +520,8 @@ const DataTable = memo(function DataTable({
           })}
         </ul>
 
-        {totalPages > 0 && (
+        {totalPages > 0 &&
+          placePagination(
           <CompactPagination
             currentPage={currentPage}
             totalPages={totalPages}
@@ -516,7 +530,7 @@ const DataTable = memo(function DataTable({
             onPageChange={onPageChange}
             onPerPageChange={onPerPageChange}
           />
-        )}
+          )}
       </div>
     );
   }
@@ -694,7 +708,8 @@ const DataTable = memo(function DataTable({
         </table>
       </div>
 
-      {totalPages > 0 && (
+      {totalPages > 0 &&
+        placePagination(
         <FullPagination
           currentPage={currentPage}
           totalPages={totalPages}
@@ -703,7 +718,7 @@ const DataTable = memo(function DataTable({
           onPageChange={onPageChange}
           onPerPageChange={onPerPageChange}
         />
-      )}
+        )}
     </div>
   );
 });

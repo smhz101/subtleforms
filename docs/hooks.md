@@ -94,6 +94,7 @@ Screen slots for `registerSlotItem( slot, id, { component, order } )` that the a
 | `dashboard.panels` | Panels on the Dashboard | `{ forms }` |
 | `reports.panels` | Panels on the Reports screen | `{ forms }` |
 | `forms.list.column` | One extra column in the forms list; the item sets `header` for the column title | `{ form }` |
+| `footer.meta` | An item in the footer of the app screens, between the version and the Documentation link (a short text or link; the footer is one line) | `{ version }` (the SubtleForms version) |
 
 ## Other PHP hooks add-ons use
 
@@ -179,7 +180,7 @@ Counts already stored in the `subtleforms_stats` and `subtleforms_funnel` tables
 | `registerFormMountHook( fn )` | `fn( { container, formId, config } )` runs when a form mounts on a page (view beacon, funnel tracker). |
 | `registerFieldType`, `registerInspectorControl`, `registerCanvasPreview` | Existing. |
 
-Slots: `reports.panels` and `dashboard.panels` (props: `forms`), `forms.list.column` (`{ component( form ), header, order }`), `settings.extensions` (id is the extension slug), `form.integrations` (props: `schema`, `integrations`, `patch`, `isReadOnly`, `fieldOptions`), `form.confirmations` (props: `schema`, `onMetadata`, `isReadOnly`), `form.settings.sections` (`{ component, title, description, icon, order, appliesTo( schema ) }`; props: `schema`, `onChange`, `onMetadata`, `isReadOnly`, `fields`), `builder.canvas.notes` (props: `schema`), `submission.panels` (props: `submission`, `meta`) and `submission.actions` (props: `submission`).
+Slots: `reports.panels` and `dashboard.panels` (props: `forms`), `forms.list.column` (`{ component( form ), header, order }`), `footer.meta` (props: `version`), `settings.extensions` (id is the extension slug), `form.integrations` (props: `schema`, `integrations`, `patch`, `isReadOnly`, `fieldOptions`), `form.confirmations` (props: `schema`, `onMetadata`, `isReadOnly`), `form.settings.sections` (`{ component, title, description, icon, order, appliesTo( schema ) }`; props: `schema`, `onChange`, `onMetadata`, `isReadOnly`, `fields`), `builder.canvas.notes` (props: `schema`), `submission.panels` (props: `submission`, `meta`) and `submission.actions` (props: `submission`).
 
 The front end dispatches the `subtleforms:submitted` event on `document` with `detail.formId` after a successful send. Field wrappers carry `data-sf-key` and steps carry `data-sf-step`, which Pro reads for the funnel.
 
