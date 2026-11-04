@@ -212,8 +212,10 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 == Changelog ==
 
 = 2.7.4 - 2026-11-04 =
-* New: The SubtleForms menu and its Submissions item show the number of unread entries in a bubble, like the Comments menu, with counts above 99 shown as 99+.
+* New: The SubtleForms menu and its Submissions item show the number of unread entries in a bubble, like the Comments menu, with counts above 9 shown as 9+.
 * Change: SubtleForms has a new logo: the admin menu icon, the header mark and the block icon now use it.
+* Change: Notices from WordPress and other plugins now appear under the SubtleForms header instead of above it.
+* Change: SubtleForms screens have a footer with the version, documentation and support links and the list pagination, while the page content scrolls between the header and the footer.
 
 = 2.7.3 - 2026-10-29 =
 * New: Custom styling now has grouped, resettable controls that start from your theme colours and fonts, a compact or comfortable density, contrast warnings, and the builder preview shows the theme exactly as your site does.
