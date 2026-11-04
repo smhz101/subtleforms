@@ -211,6 +211,10 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 
 == Changelog ==
 
+= 2.7.4 - 2026-11-04 =
+* New: The SubtleForms menu and its Submissions item show the number of unread entries in a bubble, like the Comments menu, with counts above 99 shown as 99+.
+* Change: SubtleForms has a new logo: the admin menu icon, the header mark and the block icon now use it.
+
 = 2.7.3 - 2026-10-29 =
 * New: Custom styling now has grouped, resettable controls that start from your theme colours and fonts, a compact or comfortable density, contrast warnings, and the builder preview shows the theme exactly as your site does.
 * New: The Phone and Country fields have a new "Show country flags" setting that draws a small flag next to each country, loading the flag image only for forms that use it.
@@ -228,18 +232,12 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Change: Appearance presets no longer set form width; Layout / Form width stays a separate control so columns flex at full content width.
 * Fix: The date picker trigger matches other fields, and the calendar panel is easier to read.
 
-= 2.7.1 - 2026-10-23 =
-* Change: Forms with payment fields show a not available message instead of taking orders.
-* Change: Forms that inherit the theme load no SubtleForms stylesheet, and the stylesheet has an RTL version.
-* Change: Choice groups use a fieldset with a legend, and error and success boxes use theme-neutral colours.
-* Fix: The keep-data uninstall setting is now saved and honoured.
-* Fix: The per-user entry limit works.
-* Security: Form schemas need the manage_options capability, reCAPTCHA v3 checks the score and action, and time tokens expire after two hours and work once.
-* Security: The client IP honours trusted proxies, and queued mail and webhook details stay out of the cron option.
-
 The full history is in changelog.txt in the plugin folder.
 
 == Upgrade Notice ==
+
+= 2.7.4 =
+SubtleForms has a new logo, and the admin menu shows how many entries are unread.
 
 = 2.7.3 =
 If you use the SubtleForms Pro add-on, update it to 2.8.0 or later. Freeform Custom CSS is removed; structured appearance settings are kept.
