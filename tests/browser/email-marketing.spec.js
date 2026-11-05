@@ -80,7 +80,7 @@ test.afterAll(async () => {
 test.describe.configure({ mode: 'serial' });
 
 // Tall enough for the whole form panel in screenshots.
-if (SHOTS) test.use({ viewport: { width: 1280, height: 2000 } });
+if (SHOTS) test.use({ viewport: { width: Number(process.env.SF_SHOT_WIDTH || 1280), height: 2000 } });
 
 test('Grid: one Email marketing entry, three tiles, all off, and one plain note about Pro', async ({ page }) => {
   await loginPage(page);
