@@ -13,6 +13,7 @@ import TextareaInspectorControl from './controls/TextareaInspectorControl';
 import OptionsInspectorControl from './controls/OptionsInspectorControl';
 import SubfieldInspectorControl from './controls/SubfieldInspectorControl';
 import LinesInspectorControl from './controls/LinesInspectorControl';
+import MaskTryControl from './controls/MaskTryControl';
 import ChainedLevelsControl from './controls/ChainedLevelsControl';
 import { getInspectorControl } from '../../../../shared/extend';
 
@@ -44,6 +45,7 @@ const CONTROL_REGISTRY = {
 	subfield: SubfieldInspectorControl,
 	lines: LinesInspectorControl,
 	chained_levels: ChainedLevelsControl,
+	mask_try: MaskTryControl,
 };
 
 /**

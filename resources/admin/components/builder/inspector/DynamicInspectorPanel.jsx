@@ -82,6 +82,17 @@ function ControlRenderer( { ctrl, field, onUpdate, isReadOnly } ) {
 		return null;
 	}
 
+	// A control can name the settings that decide whether it is shown:
+	// `showWhen: { inputMask: [ 'custom' ] }` shows it only for those values.
+	if ( ctrl.showWhen && typeof ctrl.showWhen === 'object' ) {
+		const visible = Object.entries( ctrl.showWhen ).every( ( [ name, allowed ] ) =>
+			Array.isArray( allowed ) ? allowed.includes( field[ name ] ?? '' ) : ( field[ name ] ?? '' ) === allowed
+		);
+		if ( ! visible ) {
+			return null;
+		}
+	}
+
 	const value = field[ fieldKey ] ?? '';
 
 	const props = {
@@ -111,7 +122,7 @@ function ControlRenderer( { ctrl, field, onUpdate, isReadOnly } ) {
 	// Add-on controls get the full definition, the selected field and the
 	// other fields of the form ({ key, label, type }), for example to insert
 	// a field into a formula.
-	if ( ! CONTROL_REGISTRY[ ctrl.type ] || ctrl.type === 'pro_notice' ) {
+	if ( ! CONTROL_REGISTRY[ ctrl.type ] || ctrl.type === 'pro_notice' || ctrl.type === 'mask_try' ) {
 		props.control = ctrl;
 		props.field = field;
 		props.onUpdate = onUpdate;

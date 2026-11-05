@@ -211,6 +211,12 @@ final class SaveAction implements ActionInterface {
 					$sanitized[ $key ] = esc_url_raw( sanitize_text_field( (string) $value ) );
 					break;
 				case 'number':
+					// A masked number such as "12-34" is kept as the visitor typed it
+					// (the server checked it against the mask already).
+					if ( ! is_numeric( $value ) && null !== \SubtleForms\Engine\FieldValidator::maskOf( is_array( $field ) ? $field : array() ) ) {
+						$sanitized[ $key ] = sanitize_text_field( (string) $value );
+						break;
+					}
 					$sanitized[ $key ] = is_numeric( $value ) ? $value : 0;
 					break;
 				default:

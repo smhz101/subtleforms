@@ -8,7 +8,7 @@ import {
   phoneCountry,
   splitPhoneValue,
 } from '../../../shared/phone';
-import { formatUsPhone } from '../../../shared/phoneFormat';
+import { formatUsPhone, phoneDigits, sanitizePhone } from '../../../shared/phoneFormat';
 import FlagIcon from './FlagIcon';
 
 /**
@@ -66,6 +66,11 @@ export default function PhoneField({
       ? picked
       : parsed.country;
   const national = parsed.national;
+  // The "Phone" input mask (2.8.0): digits, spaces, dashes and brackets, up to
+  // 15 digits. Numbers of the +1 plan keep the US layout.
+  const phoneMask = config.inputMask === 'phone';
+  const usLayout = config.format === 'us' || (phoneMask && country?.dial === '1');
+  const keepDigits = phoneMask && config.maskStore === 'digits';
   const matches = useMemo(() => filterPhoneCountries(query), [query]);
 
   useEffect(() => {
@@ -207,7 +212,7 @@ export default function PhoneField({
         type="tel"
         className={`${inputClassName} subtleforms-phone__input`}
         name={name}
-        value={config.format === 'us' ? formatUsPhone(national) : national}
+        value={usLayout ? formatUsPhone(national) : phoneMask ? sanitizePhone(national) : national}
         inputMode="tel"
         autoComplete="tel-national"
         placeholder={placeholder || __('Phone number', 'subtleforms')}
@@ -230,8 +235,11 @@ export default function PhoneField({
             }
           }
           setPickedCode(country?.code || '');
-          const national = config.format === 'us' ? formatUsPhone(typed) : typed;
-          emit(joinPhoneValue(country, national));
+          let next = usLayout ? formatUsPhone(typed) : phoneMask ? sanitizePhone(typed) : typed;
+          if (keepDigits) {
+            next = phoneDigits(next);
+          }
+          emit(joinPhoneValue(country, next));
         }}
       />
     </div>

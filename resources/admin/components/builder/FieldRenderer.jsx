@@ -9,6 +9,7 @@ import { getCanvasPreview, addonProvides } from '../../../shared/extend';
 import { fieldDisplay, requiredIndicatorMark } from '../../../shared/fieldDisplay';
 import { fieldConfig } from '../../../shared/fieldConfig';
 import { flagsOn } from '../../../shared/flagsOn';
+import { resolveMask } from '../../../shared/inputMask';
 import { choiceChecked, choiceShowsDefault } from '../../../shared/canvasDefaults';
 import { consentParts } from '../../../shared/consentLabel';
 import { toggleInitialValue, toggleIsOn } from '../../../shared/toggleState';
@@ -248,8 +249,8 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         <div className={field.prefix || field.suffix ? 'sf-field-renderer__affix' : undefined}>
           {field.prefix && <span className='sf-field-renderer__affix-part'>{field.prefix}</span>}
           <input
-            type={type === 'email' ? 'email' : type === 'url' ? 'url' : type === 'number' ? 'number' : 'text'}
-            placeholder={placeholder || ''}
+            type={type === 'email' ? 'email' : type === 'url' ? 'url' : type === 'number' && !fieldConfig(field).inputMask ? 'number' : 'text'}
+            placeholder={placeholder || (resolveMask(fieldConfig(field))?.kind !== 'phone' && resolveMask(fieldConfig(field))?.example) || ''}
             className={inputClass}
             readOnly
             aria-label={canvasControlName(field)} tabIndex='-1'

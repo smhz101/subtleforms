@@ -22,3 +22,37 @@ export function isCompleteUsPhone(value) {
   }
   return digits.length === 10;
 }
+
+/** Maximum digits in a phone number (E.164). */
+export const PHONE_MAX_DIGITS = 15;
+
+/**
+ * Keep phone characters only: digits, spaces, dashes, brackets and a
+ * leading plus, up to 15 digits.
+ *
+ * @param {string} input Text.
+ * @return {string} Cleaned text.
+ */
+export function sanitizePhone(input) {
+  let out = '';
+  let digits = 0;
+  Array.from(String(input ?? '')).forEach((ch) => {
+    if (/\d/.test(ch)) {
+      if (digits < PHONE_MAX_DIGITS) {
+        out += ch;
+        digits += 1;
+      }
+    } else if (ch === '+' && out.trim() === '') {
+      out += ch;
+    } else if (/[ ()-]/.test(ch)) {
+      out += ch;
+    }
+  });
+  return out.replace(/^\s+/, '');
+}
+
+/** Phone number without the formatting characters ("+" is kept in front). */
+export function phoneDigits(input) {
+  const text = String(input ?? '').trim();
+  return (text.startsWith('+') ? '+' : '') + text.replace(/\D/g, '');
+}
