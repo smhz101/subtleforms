@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * to Mailchimp, Brevo or Kit and its Email marketing screens leave the screen
  * to the add-on (this is how SubtleForms Pro 2.8.0 keeps working beside this
  * plugin). To take over a single service, use
- * `subtleforms/email_marketing/services` instead.
+ * `subtleforms/email/marketing/services` instead.
  */
 final class Registry {
 

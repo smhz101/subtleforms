@@ -29,7 +29,7 @@ final class EmailMarketingTest extends TestCase {
 	protected function tearDown(): void {
 		unset(
 			$GLOBALS['sf_test_filters']['subtleforms/admin/integrations'],
-			$GLOBALS['sf_test_filters']['subtleforms/email_marketing/services'],
+			$GLOBALS['sf_test_filters']['subtleforms/email/marketing/services'],
 			$GLOBALS['sf_test_options']['subtleforms_mailchimp_connection'],
 			$GLOBALS['sf_test_options']['subtleforms_brevo_connection'],
 			$GLOBALS['sf_test_options']['subtleforms_kit_connection']
@@ -405,7 +405,7 @@ final class EmailMarketingTest extends TestCase {
 	}
 
 	public function test_an_add_on_that_lists_one_service_takes_only_that_service(): void {
-		$GLOBALS['sf_test_filters']['subtleforms/email_marketing/services'] = static function ( $list ) {
+		$GLOBALS['sf_test_filters']['subtleforms/email/marketing/services'] = static function ( $list ) {
 			$list['brevo'] = array( 'slug' => 'brevo', 'label' => 'Brevo', 'available' => true );
 			return $list;
 		};
@@ -415,7 +415,7 @@ final class EmailMarketingTest extends TestCase {
 	}
 
 	public function test_an_add_on_that_keeps_builtin_does_not_take_a_service_over(): void {
-		$GLOBALS['sf_test_filters']['subtleforms/email_marketing/services'] = static function ( $list ) {
+		$GLOBALS['sf_test_filters']['subtleforms/email/marketing/services'] = static function ( $list ) {
 			$list['kit']['label'] = 'Kit (renamed)';
 			return $list;
 		};

@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * failure is written to the entry's activity log and never reaches the
  * visitor.
  *
- * Add-ons take part through the `subtleforms/email_marketing/*` hooks
+ * Add-ons take part through the `subtleforms/email/marketing/*` hooks
  * documented in docs/hooks.md.
  */
 final class Sender {
@@ -187,7 +187,7 @@ final class Sender {
 		 * @param string  $service Service slug.
 		 * @since 2.8.0
 		 */
-		$feeds = apply_filters( 'subtleforms/email_marketing/feeds', array( $default ), $context, $service );
+		$feeds = apply_filters( 'subtleforms/email/marketing/feeds', array( $default ), $context, $service );
 		$feeds = is_array( $feeds ) ? $feeds : array( $default );
 
 		$client = Services::clientFor( $service, AbstractClient::JOB_TIMEOUT );
@@ -236,7 +236,7 @@ final class Sender {
 		 * @param string      $service Service slug.
 		 * @since 2.8.0
 		 */
-		$reason = apply_filters( 'subtleforms/email_marketing/skip_reason', null, $feed, $context, $service );
+		$reason = apply_filters( 'subtleforms/email/marketing/skip_reason', null, $feed, $context, $service );
 		if ( is_string( $reason ) && '' !== trim( $reason ) ) {
 			/* translators: 1: service name, 2: reason */
 			ActivityLog::record( $submissionId, $service, $step, 'skipped', sprintf( __( '%1$s: skipped (%2$s)', 'subtleforms' ), $label, trim( $reason ) ), array( 'reason' => trim( $reason ) ) );
@@ -266,7 +266,7 @@ final class Sender {
 		 * @param string     $service    Service slug.
 		 * @since 2.8.0
 		 */
-		$filtered = apply_filters( 'subtleforms/email_marketing/subscriber', $sub, $feed, $context, $service );
+		$filtered = apply_filters( 'subtleforms/email/marketing/subscriber', $sub, $feed, $context, $service );
 		$sub      = $filtered instanceof Subscriber ? $filtered : $sub;
 
 		try {
@@ -306,7 +306,7 @@ final class Sender {
 					 * @param string     $service    Service slug.
 					 * @since 2.8.0
 					 */
-					$changed = apply_filters( 'subtleforms/email_marketing/request_body', $body, $sub, $feed, $context, $service );
+					$changed = apply_filters( 'subtleforms/email/marketing/request_body', $body, $sub, $feed, $context, $service );
 					return is_array( $changed ) ? $changed : $body;
 				}
 			);
@@ -343,7 +343,7 @@ final class Sender {
 			 * @param string $service   Service slug.
 			 * @since 2.8.0
 			 */
-			do_action( 'subtleforms/email_marketing/failed', $e->getMessage(), $feed, $context, $willRetry, $service );
+			do_action( 'subtleforms/email/marketing/failed', $e->getMessage(), $feed, $context, $willRetry, $service );
 			return $willRetry;
 		}
 
@@ -366,7 +366,7 @@ final class Sender {
 		 * @param string $service Service slug.
 		 * @since 2.8.0
 		 */
-		do_action( 'subtleforms/email_marketing/delivered', $result, $feed, $context, $service );
+		do_action( 'subtleforms/email/marketing/delivered', $result, $feed, $context, $service );
 		return false;
 	}
 

@@ -134,7 +134,7 @@ Settings of a form, for every service: `enabled`, `list_id`, `fields` (`email`, 
 An add-on takes over in one of two ways:
 
 - Listing its own `email_marketing` entry in `subtleforms/admin/integrations`, without `builtin => true`, takes over the whole integration. This plugin then sends nothing to any service (a job that was already queued also steps aside) and draws neither the settings nor the form panel; the add-on draws its own through the `settings.extensions` slot (item id `email_marketing`) and `registerFormIntegration`. Removing the entry has the same effect. SubtleForms Pro 2.8.0 works this way.
-- Listing a service slug (`mailchimp`, `brevo`, `kit`) in `subtleforms/email_marketing/services`, without `builtin => true`, takes over only that service. A new slug adds a tile, and the add-on draws its screens with `registerEmailMarketingService`.
+- Listing a service slug (`mailchimp`, `brevo`, `kit`) in `subtleforms/email/marketing/services`, without `builtin => true`, takes over only that service. A new slug adds a tile, and the add-on draws its screens with `registerEmailMarketingService`.
 
 No other entry has this effect.
 
@@ -144,14 +144,14 @@ An add-on that leaves the entry alone adds to it through the filter, the slots a
 
 | Hook | Type | Use |
 | --- | --- | --- |
-| `subtleforms/email_marketing/services` | filter `( array $services )` | The services listed in the grid, keyed by slug. See "Taking over". |
-| `subtleforms/email_marketing/extras` | filter `( string[] $slugs )` | The services an add-on adds options to. While the list is empty this plugin shows its note about SubtleForms Pro. |
-| `subtleforms/email_marketing/feeds` | filter `( array $feeds, array $context, string $service )` | The feeds to send for the entry. Add feeds (another list, another mapping) or change the built-in one. Only runs for forms with the service switched on. Each feed gets its own line in the activity log, step `<service>:<id>`. |
-| `subtleforms/email_marketing/skip_reason` | filter `( ?string $reason, array $feed, array $context, string $service )` | Return a short plain reason to skip a feed for this entry ("the rule did not match"); the log says "Mailchimp: skipped (reason)". Return null to send. |
-| `subtleforms/email_marketing/subscriber` | filter `( Subscriber $subscriber, array $feed, array $context, string $service )` | Change who is sent: tags (`$subscriber->tags`), fields (`->fields`), list (`->listId`). Return the object. |
-| `subtleforms/email_marketing/request_body` | filter `( array $body, Subscriber $subscriber, array $feed, array $context, string $service )` | Change the body of the add-or-update request, for example Mailchimp `interests` or `marketing_permissions`. Return the array. |
-| `subtleforms/email_marketing/delivered` | action `( array $result, array $feed, array $context, string $service )` | A person was added or updated (`service`, `list`, `email`, `status`, `tags`, `member`). |
-| `subtleforms/email_marketing/failed` | action `( string $message, array $feed, array $context, bool $willRetry, string $service )` | A request failed. A transport error, a rate limit or a server error is tried again by this plugin up to twice (after 2 and 15 minutes); `$willRetry` says so. |
+| `subtleforms/email/marketing/services` | filter `( array $services )` | The services listed in the grid, keyed by slug. See "Taking over". |
+| `subtleforms/email/marketing/extras` | filter `( string[] $slugs )` | The services an add-on adds options to. While the list is empty this plugin shows its note about SubtleForms Pro. |
+| `subtleforms/email/marketing/feeds` | filter `( array $feeds, array $context, string $service )` | The feeds to send for the entry. Add feeds (another list, another mapping) or change the built-in one. Only runs for forms with the service switched on. Each feed gets its own line in the activity log, step `<service>:<id>`. |
+| `subtleforms/email/marketing/skip_reason` | filter `( ?string $reason, array $feed, array $context, string $service )` | Return a short plain reason to skip a feed for this entry ("the rule did not match"); the log says "Mailchimp: skipped (reason)". Return null to send. |
+| `subtleforms/email/marketing/subscriber` | filter `( Subscriber $subscriber, array $feed, array $context, string $service )` | Change who is sent: tags (`$subscriber->tags`), fields (`->fields`), list (`->listId`). Return the object. |
+| `subtleforms/email/marketing/request_body` | filter `( array $body, Subscriber $subscriber, array $feed, array $context, string $service )` | Change the body of the add-or-update request, for example Mailchimp `interests` or `marketing_permissions`. Return the array. |
+| `subtleforms/email/marketing/delivered` | action `( array $result, array $feed, array $context, string $service )` | A person was added or updated (`service`, `list`, `email`, `status`, `tags`, `member`). |
+| `subtleforms/email/marketing/failed` | action `( string $message, array $feed, array $context, bool $willRetry, string $service )` | A request failed. A transport error, a rate limit or a server error is tried again by this plugin up to twice (after 2 and 15 minutes); `$willRetry` says so. |
 
 `SubtleForms\Integrations\EmailMarketing\Sender::process( $service, $submissionId, $retryCount = 0, $onlyFeedIds = [] )` sends one entry again and returns the feed IDs worth another try; an add-on calls it for a manual retry or a resync. `Connection::state()` is a connection without its key.
 

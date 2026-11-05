@@ -452,7 +452,7 @@ export function payloadGroups() {
  * Register an email marketing service: a tile in Settings > Integrations >
  * Email marketing and the screens behind it. This plugin registers Mailchimp,
  * Brevo and Kit the same way. The server lists the service through the PHP
- * filter `subtleforms/email_marketing/services`; a tile shows only when both
+ * filter `subtleforms/email/marketing/services`; a tile shows only when both
  * sides know the slug.
  *
  * A slug this plugin already registered is replaced, which is how an add-on

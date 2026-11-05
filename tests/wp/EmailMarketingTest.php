@@ -45,11 +45,11 @@ final class EmailMarketingTest extends TestCase {
 		remove_filter( 'pre_http_request', array( $this, 'mock' ), 10 );
 		remove_filter( 'pre_schedule_event', array( $this, 'capture' ), 10 );
 		remove_all_filters( 'subtleforms/admin/integrations' );
-		remove_all_filters( 'subtleforms/email_marketing/services' );
-		remove_all_filters( 'subtleforms/email_marketing/extras' );
-		remove_all_filters( 'subtleforms/email_marketing/feeds' );
-		remove_all_filters( 'subtleforms/email_marketing/skip_reason' );
-		remove_all_filters( 'subtleforms/email_marketing/request_body' );
+		remove_all_filters( 'subtleforms/email/marketing/services' );
+		remove_all_filters( 'subtleforms/email/marketing/extras' );
+		remove_all_filters( 'subtleforms/email/marketing/feeds' );
+		remove_all_filters( 'subtleforms/email/marketing/skip_reason' );
+		remove_all_filters( 'subtleforms/email/marketing/request_body' );
 		$this->wipe();
 		parent::tearDown();
 	}
@@ -562,7 +562,7 @@ final class EmailMarketingTest extends TestCase {
 		$this->connect( 'kit' );
 		$form = $this->mailchimpForm();
 		add_filter(
-			'subtleforms/email_marketing/services',
+			'subtleforms/email/marketing/services',
 			static function ( $list ) {
 				$list['mailchimp'] = array( 'slug' => 'mailchimp', 'label' => 'Mailchimp', 'available' => true, 'enabled' => true, 'configured' => true );
 				return $list;
@@ -577,7 +577,7 @@ final class EmailMarketingTest extends TestCase {
 		$this->connect();
 		$form = $this->mailchimpForm();
 		add_filter(
-			'subtleforms/email_marketing/feeds',
+			'subtleforms/email/marketing/feeds',
 			static function ( $feeds ) {
 				$second           = $feeds[0];
 				$second['id']     = 'second';
@@ -586,8 +586,8 @@ final class EmailMarketingTest extends TestCase {
 				return $feeds;
 			}
 		);
-		add_filter( 'subtleforms/email_marketing/skip_reason', static fn( $reason, $feed ) => 'second' === $feed['id'] ? null : $reason, 10, 2 );
-		add_filter( 'subtleforms/email_marketing/request_body', static function ( $body ) {
+		add_filter( 'subtleforms/email/marketing/skip_reason', static fn( $reason, $feed ) => 'second' === $feed['id'] ? null : $reason, 10, 2 );
+		add_filter( 'subtleforms/email/marketing/request_body', static function ( $body ) {
 			$body['interests'] = array( 'g1' => true );
 			return $body;
 		} );
@@ -600,8 +600,8 @@ final class EmailMarketingTest extends TestCase {
 
 		// A skip reason skips the feed and says why.
 		$this->http = array();
-		remove_all_filters( 'subtleforms/email_marketing/skip_reason' );
-		add_filter( 'subtleforms/email_marketing/skip_reason', static fn() => 'the rule did not match' );
+		remove_all_filters( 'subtleforms/email/marketing/skip_reason' );
+		add_filter( 'subtleforms/email/marketing/skip_reason', static fn() => 'the rule did not match' );
 		$this->jobs = array();
 		$id2 = $this->submitAndRun( $form, array( 'fname' => 'Bob', 'email' => 'bob@example.com' ) );
 		$this->assertSame( array(), $this->http );

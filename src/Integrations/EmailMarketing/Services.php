@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Mailchimp, Brevo and Kit are part of this plugin and complete without an
  * add-on. An add-on lists more services, or takes one over, through the
- * `subtleforms/email_marketing/services` filter: an entry with the slug of a
+ * `subtleforms/email/marketing/services` filter: an entry with the slug of a
  * service this plugin has, without `builtin => true`, takes that service
  * over. This plugin then sends nothing to it. That is the only rule; it does
  * not depend on which add-on it is.
@@ -151,7 +151,7 @@ final class Services {
 		 * @param array<string, array> $services Map of slug to { slug, label, description, available, enabled, configured, builtin }.
 		 * @since 2.8.0
 		 */
-		$result = apply_filters( 'subtleforms/email_marketing/services', $result );
+		$result = apply_filters( 'subtleforms/email/marketing/services', $result );
 		return is_array( $result ) ? $result : array();
 	}
 
@@ -190,7 +190,7 @@ final class Services {
 		 * @param string[] $slugs Service slugs. Default none.
 		 * @since 2.8.0
 		 */
-		$slugs = apply_filters( 'subtleforms/email_marketing/extras', array() );
+		$slugs = apply_filters( 'subtleforms/email/marketing/extras', array() );
 		return is_array( $slugs ) ? array_values( array_unique( array_map( 'strval', $slugs ) ) ) : array();
 	}
 }
