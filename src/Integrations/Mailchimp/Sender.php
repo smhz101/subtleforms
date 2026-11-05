@@ -244,7 +244,10 @@ final class Sender {
 				// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
-			if ( ! $sub->updateExisting && $client->isMember( $sub->listId, $sub->email ) ) {
+			// Only the first attempt asks: a retry follows a half-finished first
+			// attempt (the person was added, the tags were not), so a member
+			// found then is the one this job created.
+			if ( 0 === $retryCount && ! $sub->updateExisting && $client->isMember( $sub->listId, $sub->email ) ) {
 				ActivityLog::record( $submissionId, $step, 'skipped', __( 'Mailchimp: skipped (already in the audience)', 'subtleforms' ), array( 'reason' => 'already_member' ) );
 				return false;
 			}

@@ -358,6 +358,35 @@ final class MailchimpTest extends TestCase {
 		$this->assertSame( array( 'Mailchimp: skipped (already in the audience)' ), $this->lines( $id ) );
 	}
 
+	public function test_a_retry_after_a_half_finished_send_still_adds_the_tags(): void {
+		$this->connect();
+		$form = $this->mailchimpForm( array( 'update_existing' => false ) );
+
+		// The person is new, the add works, the tags request fails.
+		$this->answer = function ( $method, $url, $body ) {
+			if ( 'GET' === $method ) {
+				return array( 404, array() );
+			}
+			if ( false !== strpos( $url, '/tags' ) ) {
+				return array( 503, array() );
+			}
+			return $this->defaultAnswer( $method, $url, $body );
+		};
+		$id    = $this->submitAndRun( $form, array( 'fname' => 'Ada', 'email' => 'ada@example.com' ) );
+		$retry = $this->jobs[1];
+
+		// On the retry the person exists, because this job added them.
+		$this->http   = array();
+		$this->answer = function ( $method, $url, $body ) {
+			return 'GET' === $method ? array( 200, array( 'id' => 'x', 'status' => 'subscribed' ) ) : $this->defaultAnswer( $method, $url, $body );
+		};
+		AsyncDispatcher::executeMailchimp( $retry );
+		$this->assertNotContains( 'GET', array_column( $this->http, 'method' ), 'The retry does not ask again.' );
+		$lines = $this->lines( $id );
+		$this->assertSame( 'Mailchimp: subscribed', end( $lines ) );
+		$this->assertContains( 'POST', array_column( $this->http, 'method' ), 'The tags went out.' );
+	}
+
 	public function test_a_mailchimp_error_is_logged_and_never_fails_the_submission(): void {
 		$this->connect();
 		$form         = $this->mailchimpForm();
