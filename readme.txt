@@ -1,82 +1,168 @@
 === SubtleForms ===
 Contributors: subtleforms, smhz101
-Tags: form builder, contact form, forms, multi-step form, file upload
+Tags: form builder, contact form, multi-step form, conversational form, forms
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.7.3
+Stable tag: 2.7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Build contact, multi-step and conversational forms on a visual canvas, then read every entry in a clean inbox. Spam protection built in.
+Build contact, multi-step and conversational forms on a visual canvas, then read every entry in a clean inbox. No account needed.
 
 == Description ==
 
-SubtleForms is a form builder for WordPress. You build a form on a canvas that looks like the live form, publish it with a shortcode or the SubtleForms block, and read the entries in an inbox inside wp-admin. Everything listed here is in this plugin and works without an account.
+SubtleForms is a form builder for WordPress. You build on a canvas that looks like the live form, publish with a shortcode or the SubtleForms block, and read every entry in an inbox inside wp-admin. One builder makes regular, multi-step and conversational forms, and everything described here is in this plugin and works without an account or a licence.
 
-= Building forms =
+= Everything in the free plugin =
 
-* Visual builder with a field library, a live canvas and a settings panel for each field (Settings, Validation, Logic, Style)
+* Visual drag and drop builder with a live canvas and undo
 * Regular, multi-step and conversational (one question at a time) forms
-* Ready-made templates, including contact, lead capture and newsletter forms, plus a blank form
-* Field widths to place fields side by side, and an inline layout for email and button on one row
-* Appearance presets, a custom mode for colours, fonts, fields and buttons, and an option to inherit the active theme
+* 38 field types, including file and image uploads
+* 12 ready-made templates, plus a blank form
+* Field widths to place fields side by side
+* Conditional logic: show or hide a field based on other answers
+* Per-field settings for validation, logic and style
+* Appearance presets, or custom colours and fonts that start from your theme
 * Desktop, tablet and mobile preview
+* The SubtleForms block and a shortcode
+* Entries inbox with search, filters, stars, flags, notes and a Trash
+* Unread entries counted in the admin menu
+* Reports with a chart of recent submissions
+* Email notifications with merge tags, plain text or HTML
+* Webhooks after each entry, with a test button
+* Confirmation message or redirect after submit
+* Open and close dates, entry limits and logged-in-only forms
+* CSV export of entries, JSON export and import of forms and entries
+* Honeypot, minimum time and rate limiting on every form
+* Optional Google reCAPTCHA, hCaptcha or Cloudflare Turnstile
+* Data retention settings and WordPress personal data export and erase support
+* Import forms from Contact Form 7, Gravity Forms and Fluent Forms
+* Translation ready, with an RTL stylesheet
 
-= Fields =
+= Three form types, one builder =
 
-* Text, Paragraph, Email, Number, Phone, Website, Password, Name and Address
-* Dropdown, Radio buttons, Checkboxes, Single checkbox, Toggle, Country, Consent and Dependent dropdowns (as menus, buttons or columns, typed in or loaded from CSV)
-* Date, Time, Date and time, Rating, Opinion scale, NPS, Slider, Matrix, Colour picker and Rich text
-* File and image uploads, one file per field, with allowed types and size limits, stored in a private folder and downloaded by admins only
-* Hidden fields with merge values such as {user_email} and {get:param}, HTML blocks, section breaks, Repeater, Group and Columns
+Start with a regular form that shows every field on one page. Add a Page Break and the same form becomes multi-step, with progress shown to the visitor. Switch to conversational and visitors answer one question at a time, full screen, then review their answers before they send. You change the type in the form settings and keep your fields.
 
-= Logic and after submit =
+= Drag and drop builder =
 
-* Show or hide fields when all of their rules match, with these operators: equals, does not equal, contains, does not contain, is empty, is not empty, greater than and less than. Hidden fields are not validated or saved, in the browser and on the server
-* Email notifications and webhooks after each entry, with merge tags such as {all_fields}, {field:email} and {entry_id}, plain text or HTML
-* A confirmation message with answers merged in and clickable links, or a redirect
-* Availability rules: logged-in visitors only, open and close dates, and an entry limit
+The field library is on the left, the canvas in the middle and the settings for the selected field on the right. The canvas shows the form as visitors see it, so there is no separate preview step to trust. Each field has tabs for Settings, Validation, Logic and Style. Drag a field from the library, click it to add it after the current one, or press the slash key to search the library. Undo is in the header, and the Preview tab shows the form at desktop, tablet and mobile widths.
 
-= Entries =
+= Fields included =
 
-* An inbox with tabs, search, filters and a reading pane
-* Read and unread, star, flag, notes, resend notifications and a Trash, one entry at a time or in bulk
-* CSV export of entries, JSON export and import of forms and entries, and import of Gravity Forms and Fluent Forms export files as draft forms
-* Reports: submissions, unread entries and a chart of the last days
-* Activity, webhook and API logs
+* **Basic:** Text, Paragraph, Email, Number, Phone, Website, Name, Address and Password
+* **Choices:** Dropdown, Radio buttons, Checkboxes, Single checkbox, Toggle, Country, Chained select (dependent dropdowns, typed in or loaded from CSV) and Consent
+* **Date and time, and more:** Date, Time, Date and time, Rating, Opinion scale, NPS, Slider, Matrix, Colour picker, Rich text and Hidden (with merge values such as {user_email} and {get:param})
+* **Uploads:** File and image uploads, one file per field, with allowed types and size limits, kept in a private folder and downloaded by admins only
+* **Layout:** Section heading, Custom HTML, Notice, Page Break and Repeater
+* **Spam protection:** reCAPTCHA, hCaptcha and Turnstile fields
+
+= Ready-made templates =
+
+Start from a template and change what you need: Contact Form, Simple Contact, Contact + Attachment, Lead Capture, Newsletter, Newsletter Sign-Up, Free Resource Download, Product Feedback, Website Feedback, Customer Satisfaction (CSAT), RSVP and Bug Report. Or start with a blank form.
+
+= Conditional logic =
+
+Show or hide a field when other answers match. Rules can use equals, does not equal, contains, does not contain, is empty, is not empty, greater than and less than, and a field is shown only when all of its rules match. Hidden fields are not validated or saved, in the browser and on the server, so a hidden required field never blocks a submission.
+
+= Entries inbox and reports =
+
+Entries arrive in an inbox with tabs, search, filters and a reading pane. Mark entries read or unread, star or flag them, add notes, resend notifications, and move them to the Trash, one at a time or in bulk. The SubtleForms menu shows how many entries are unread. Reports show submissions, unread entries and a chart of the last days. Activity, webhook and API logs show what happened and when. Export entries as CSV whenever you need them.
+
+= Email notifications and webhooks =
+
+Send an email after each entry to the people you choose, with merge tags such as {all_fields}, {field:email} and {entry_id}, in plain text or HTML. Set the reply-to address from a field. Add a webhook to send each entry as JSON to a URL you enter, and test it from the settings. After submit, show a confirmation message with the visitor's answers merged in and clickable links, or send them to another page.
+
+= Looks like your site =
+
+Pick an appearance preset, or switch to custom mode and set colours, fonts, fields and buttons with grouped controls that start from your theme colours and fonts. Choose a compact or comfortable density, and get a warning when text and background colours do not have enough contrast. Or let the form inherit the look of your active theme. There is no freeform custom CSS box: styling is done with structured settings.
+
+= Fast and light =
+
+SubtleForms adds its scripts and styles only to pages that contain a form. Code for date pickers, phone and country fields, uploads, repeaters, rich text and conversational forms is loaded only when the form uses that field or type. For a simple contact form, the plugin's own JavaScript is about 35 KB and its stylesheet about 11 KB, both gzip-compressed. It uses the copy of React that WordPress already ships.
 
 = Spam protection and privacy =
 
-* Honeypot, minimum time and rate limiting on every form
-* Optional Google reCAPTCHA (v2 and v3), hCaptcha or Cloudflare Turnstile (see External services)
-* Data retention settings and the WordPress personal data export and erase tools
+Every form has a honeypot, a minimum time check and rate limiting, with no setup. You can add Google reCAPTCHA (v2 or v3), hCaptcha or Cloudflare Turnstile under Settings, Security and privacy; these are the only outside services the plugin can contact besides webhook URLs you enter (see External services). Choose how long entries are kept, and use the WordPress personal data export and erase tools for a person's entries. Uploaded files are stored under random names and served to admins only. SubtleForms sends no usage data or telemetry.
 
-SubtleForms Pro is a separate plugin that adds Signature, Calculation and Picture choice fields, several files per upload field, Stripe payments, WooCommerce checkout, marketing and CRM integrations, more conditional logic options, form analytics, entry PDFs and translation support. See [subtleforms.com](https://subtleforms.com/pro/).
+= Move from another form plugin =
+
+Under Settings, Tools, Migrate, copy forms you made with Contact Form 7, Gravity Forms or Fluent Forms. The other plugin does not need to be active. Forms arrive as drafts with their fields, required rules, choices, email notifications and thank-you message, and a report names anything that was not copied. Entries and payment settings are not imported, no emails are sent, and your original forms are not changed. On a site with no forms yet, SubtleForms offers to import any it finds. You can also import a Gravity Forms or Fluent Forms export file.
+
+= Accessible and translation ready =
+
+Fields have labels, errors are announced and tied to their fields, choice groups use a fieldset with a legend, and dropdown, country, phone and date fields work with the keyboard. The plugin loads an RTL stylesheet for right-to-left sites and all text uses the `subtleforms` text domain with a translation template included.
+
+= SubtleForms Pro =
+
+SubtleForms Pro is a separate plugin sold at [subtleforms.com/pro](https://subtleforms.com/pro/). It adds Signature, Calculation and Picture choice fields, several files per upload field, advanced conditional logic, form analytics, Stripe payments with coupons, WooCommerce checkout, Mailchimp, Brevo, Kit, HubSpot, Salesforce, Pipedrive and Close connections, Zapier, Make and n8n, entry PDFs and more templates.
+
+= Documentation and support =
+
+* Documentation: [subtleforms.com/docs](https://subtleforms.com/docs/)
+* Support forum: [wordpress.org/support/plugin/subtleforms](https://wordpress.org/support/plugin/subtleforms/)
+* Bug reports and source code: [github.com/smhz101/subtleforms](https://github.com/smhz101/subtleforms)
 
 == Installation ==
 
-1. In wp-admin, go to Plugins, Add New, search for "SubtleForms", then click Install Now and Activate.
+1. In wp-admin, go to Plugins, Add New, search for "SubtleForms", then click Install Now and Activate. Or upload the plugin ZIP under Plugins, Add New, Upload Plugin.
 2. Go to SubtleForms, Add New, and start from a template or a blank form.
-3. Publish the form and add it to a page with the SubtleForms block or the shortcode `[subtleforms id="123"]`.
+3. Build the form on the canvas, set where notifications go, and click Publish.
+4. Add the form to a page with the SubtleForms block, or paste the shortcode `[subtleforms id="123"]` where you want it.
 
 == Frequently Asked Questions ==
 
+= Do I need to know how to code? =
+
+No. You build forms by dragging fields onto a canvas and setting options in panels. Writing code is never required.
+
+= Will SubtleForms slow down my site? =
+
+The plugin loads its scripts and styles only on pages that contain a form, and the code for a date picker, uploads or other bigger fields only when a form uses it. See "Fast and light" in the description for measured sizes.
+
 = How do I add a form to a page? =
 
-Publish the form, then add the SubtleForms block, or paste the shortcode shown in SubtleForms, All Forms, for example `[subtleforms id="123"]`.
+Publish the form, then add the SubtleForms block in the block editor, or paste the shortcode shown in SubtleForms, All Forms, for example `[subtleforms id="123"]`.
 
-= Does SubtleForms contact any outside server? =
+= Does it work with my theme and page builders? =
 
-Not by default. It only contacts a CAPTCHA provider if you turn one on, and the URLs you enter yourself for webhooks. It sends no usage data or telemetry. See External services.
+The block works in the block editor, and the shortcode works anywhere WordPress runs shortcodes, such as a Shortcode or Text widget in a page builder. By default the form follows its own appearance preset, and you can set it to inherit your theme's colours and fonts.
+
+= Can I build multi-step forms? =
+
+Yes. Add a Page Break between fields and the form becomes multi-step. Visitors move through one step at a time and see their progress.
+
+= What is a conversational form? =
+
+A form that asks one question at a time, full screen, and lets the visitor review their answers before sending. Choose Conversational as the form type in the form settings.
+
+= Can I use conditional logic? =
+
+Yes. Open a field, go to its Logic tab and choose to show or hide it when other answers match. A hidden field is not validated or saved.
+
+= Can I put fields side by side? =
+
+Yes. Give fields a width such as 50% or 33% and they sit in one row. The inline layout puts an email field and a button on one row.
+
+= Can I export entries? =
+
+Yes. The Submissions screen exports entries as CSV, and SubtleForms, Settings, Tools exports forms and entries as JSON.
+
+= Can I import my forms from another plugin? =
+
+Yes, from Contact Form 7, Gravity Forms and Fluent Forms. Open SubtleForms, Settings, Tools, Migrate, pick the forms and import them as drafts. Entries are not imported.
+
+= Is SubtleForms translation ready? =
+
+Yes. All text uses the `subtleforms` text domain and a translation template is included, so it can be translated on translate.wordpress.org or with a translation plugin. Forms also have an RTL stylesheet.
 
 = How do I stop spam? =
 
 Every form has a honeypot, a minimum time check and rate limiting. You can also turn on one CAPTCHA provider under SubtleForms, Settings, Security and privacy.
 
-= Can I export entries? =
+= Does SubtleForms contact any outside server? =
 
-Yes. Settings, Tools exports forms and entries as JSON, and the Submissions screen exports entries as CSV.
+Not by default. It only contacts a CAPTCHA provider if you turn one on, and the URLs you enter yourself for webhooks. It sends no usage data or telemetry. See External services.
 
 = Are uploaded files private on nginx? =
 
@@ -86,9 +172,9 @@ Files are saved under a folder with a random name, without file extensions, and 
 
 The answers a visitor sends, the time, and the visitor's IP address and browser user agent for spam checks. You can set how long entries are kept, and the WordPress privacy tools can export or erase a person's entries.
 
-= Where are the docs and support? =
+= Where do I report a bug or get help? =
 
-Documentation is at [subtleforms.com/docs](https://subtleforms.com/docs/). Ask questions in the support forum on WordPress.org.
+Ask in the [support forum](https://wordpress.org/support/plugin/subtleforms/) on WordPress.org, or open an issue on [GitHub](https://github.com/smhz101/subtleforms/issues). Documentation is at [subtleforms.com/docs](https://subtleforms.com/docs/).
 
 == External services ==
 
@@ -125,6 +211,12 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 
 == Changelog ==
 
+= 2.7.4 - 2026-11-04 =
+* New: The SubtleForms menu and its Submissions item show the number of unread entries in a bubble, like the Comments menu, with counts above 9 shown as 9+.
+* Change: SubtleForms has a new logo: the admin menu icon, the header mark and the block icon now use it.
+* Change: Notices from WordPress and other plugins now appear under the SubtleForms header instead of above it.
+* Change: SubtleForms screens have a footer with the version, documentation and support links and the list pagination, while the page content scrolls between the header and the footer.
+
 = 2.7.3 - 2026-10-29 =
 * New: Custom styling now has grouped, resettable controls that start from your theme colours and fonts, a compact or comfortable density, contrast warnings, and the builder preview shows the theme exactly as your site does.
 * New: The Phone and Country fields have a new "Show country flags" setting that draws a small flag next to each country, loading the flag image only for forms that use it.
@@ -142,48 +234,15 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Change: Appearance presets no longer set form width; Layout / Form width stays a separate control so columns flex at full content width.
 * Fix: The date picker trigger matches other fields, and the calendar panel is easier to read.
 
-= 2.7.1 - 2026-10-23 =
-* Change: Forms with payment fields show a not available message instead of taking orders.
-* Change: Forms that inherit the theme load no SubtleForms stylesheet, and the stylesheet has an RTL version.
-* Change: Choice groups use a fieldset with a legend, and error and success boxes use theme-neutral colours.
-* Fix: The keep-data uninstall setting is now saved and honoured.
-* Fix: The per-user entry limit works.
-* Security: Form schemas need the manage_options capability, reCAPTCHA v3 checks the score and action, and time tokens expire after two hours and work once.
-* Security: The client IP honours trusted proxies, and queued mail and webhook details stay out of the cron option.
-
 The full history is in changelog.txt in the plugin folder.
 
 == Upgrade Notice ==
+
+= 2.7.4 =
+SubtleForms has a new logo, and the admin menu shows how many entries are unread.
 
 = 2.7.3 =
 If you use the SubtleForms Pro add-on, update it to 2.8.0 or later. Freeform Custom CSS is removed; structured appearance settings are kept.
 
 = 2.7.2 =
 If you use the SubtleForms Pro add-on, update it to 2.8.0 or later: older builds are not started by this version, to avoid errors. Payment, pricing and coupon features are provided only by the add-on.
-
-= 2.7.1 =
-Forms with payment fields need the separate SubtleForms Pro plugin.
-
-= 2.7.0 =
-Links written as [text](https://example.com) in confirmation messages are now clickable.
-
-= 2.6.1 =
-Forms appear faster, and the SubtleForms block shows the form with its own style in the editor and on the site.
-
-= 2.6.0 =
-Spam protection (the hidden trap field and the too-fast check) is on for new forms only. Nothing changes for your existing forms unless you accept the offer on the SubtleForms dashboard to turn it on for all of them.
-
-= 2.5.0 =
-The Branding tab is gone from Settings.
-
-= 2.4.1 =
-Webhooks now send the documented body, with answers under "fields", and can be tested in Settings. If a receiver reads answers at the top level of the body, update it to read them from "fields". Field IDs can be edited.
-
-= 2.4.0 =
-Field options, CAPTCHA keys, dependent dropdowns and keyboard use of dropdowns, country, phone and date fields.
-
-= 2.3.9 =
-Requires WordPress 6.6.
-
-= 2.3.8 =
-Dependent dropdowns are edited as columns and can show as dropdowns, buttons or columns on the form.

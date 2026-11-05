@@ -823,6 +823,7 @@ export default function FormsList({
         onPageChange={handlePageChange}
         onPerPageChange={handlePerPageChange}
         loading={isLoading}
+        paginationInFooter
         selectable={true}
         selectedItems={selectedForms}
         onSelectionChange={setSelectedForms}

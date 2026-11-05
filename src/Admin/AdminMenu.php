@@ -110,28 +110,46 @@ class AdminMenu {
 	 * @return int
 	 */
 	private function get_unread_count(): int {
+		static $count = null;
+		if ( null !== $count && ! ( defined( 'SUBTLEFORMS_TESTING' ) && SUBTLEFORMS_TESTING ) ) {
+			return $count;
+		}
 		try {
-			return (int) $this->submissionsRepo->count( array( 'is_read' => 0 ) );
+			$count = (int) $this->submissionsRepo->count( array( 'is_read' => 0 ) );
+			return $count;
 		} catch ( \Exception $e ) {
 			return 0;
 		}
 	}
 
-	private function getSubmissionMenuTitle(): string {
-		$baseTitle = esc_html__( 'Submissions', 'subtleforms' );
-
-		try {
-			$unreadCount = $this->submissionsRepo->count( array( 'is_read' => 0 ) );
-
-			if ( $unreadCount > 0 ) {
-				$badge = sprintf( '<span class="awaiting-mod count-%d"><span class="pending-count">%d</span></span>', $unreadCount, $unreadCount );
-				return $baseTitle . ' ' . $badge;
-			}
-		} catch ( \Exception $e ) {
-			// Silently fail if there's an issue getting the count
+	/**
+	 * Unread count bubble for a menu label, styled like core's comment count.
+	 * Counts above 9 show as "9+".
+	 *
+	 * @param int $count Unread entries.
+	 * @return string Empty when there is nothing unread.
+	 */
+	public static function unread_badge( int $count ): string {
+		if ( $count < 1 ) {
+			return '';
 		}
+		$label = $count > 9 ? '9+' : number_format_i18n( $count );
+		return sprintf(
+			' <span class="awaiting-mod count-%1$d"><span class="pending-count" aria-hidden="true">%2$s</span><span class="screen-reader-text">%3$s</span></span>',
+			min( $count, 10 ),
+			esc_html( $label ),
+			esc_html(
+				sprintf(
+					/* translators: %s: number of unread entries. */
+					_n( '%s unread entry', '%s unread entries', $count, 'subtleforms' ),
+					number_format_i18n( $count )
+				)
+			)
+		);
+	}
 
-		return $baseTitle;
+	private function getSubmissionMenuTitle(): string {
+		return esc_html__( 'Submissions', 'subtleforms' ) . self::unread_badge( $this->get_unread_count() );
 	}
 
 	/**
@@ -173,15 +191,18 @@ class AdminMenu {
 	 * <img> and pads and fades it. A data-URI icon needs no styles.
 	 */
 	public function menu_icon_styles(): void {
-		if ( 0 === strpos( self::menu_icon(), 'data:' ) ) {
-			return;
+		$row = '#adminmenu #toplevel_page_subtleforms';
+		// The name and the unread bubble stay on one line, and the bubble keeps
+		// its contrast on the highlighted row, whose background is the same
+		// colour as the bubble.
+		$css = $row . ' > a .wp-menu-name{white-space:nowrap;padding-right:4px;}'
+			. $row . '.wp-has-current-submenu > a .awaiting-mod,' . $row . '.current > a .awaiting-mod{background:#fff;color:var(--wp-admin-theme-color,#2271b1);}';
+		if ( 0 !== strpos( self::menu_icon(), 'data:' ) ) {
+			$css .= $row . ' .wp-menu-image img{width:16px;height:16px;padding:9px 0 0;opacity:1;object-fit:contain;}';
 		}
 		wp_register_style( 'subtleforms-menu-icon', false, array(), SUBTLEFORMS_VERSION );
 		wp_enqueue_style( 'subtleforms-menu-icon' );
-		wp_add_inline_style(
-			'subtleforms-menu-icon',
-			'#adminmenu #toplevel_page_subtleforms .wp-menu-image img{width:16px;height:16px;padding:9px 0 0;opacity:1;object-fit:contain;}'
-		);
+		wp_add_inline_style( 'subtleforms-menu-icon', $css );
 	}
 
 	/**
@@ -270,7 +291,7 @@ class AdminMenu {
 		$branding = self::branding();
 		add_menu_page(
 			$branding['menuName'],
-			$branding['menuName'],
+			esc_html( $branding['menuName'] ) . self::unread_badge( $this->get_unread_count() ),
 			$this->caps->manage_cap(),
 			'subtleforms',
 			array( $this, 'render_dashboard' ),

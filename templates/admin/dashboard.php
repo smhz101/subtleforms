@@ -6,5 +6,6 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
  */
 ?>
 <div class="wrap subtleforms-admin">
+    <hr class="wp-header-end">
     <div id="subtleforms-admin-app" data-page="dashboard"></div>
 </div>

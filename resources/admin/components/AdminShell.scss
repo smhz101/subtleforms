@@ -62,7 +62,9 @@ body.subtleforms-admin-scope {
 			background: transparent;
 		}
 
-		// Core and third-party admin notices sit above the stage, on the frame.
+		// Notices that are not (yet) in the app's notices region sit above the
+		// stage, on the frame. This is only seen when the app has not mounted
+		// (a script error): the app moves them under its header.
 		> .notice,
 		> div.error,
 		> div.updated {
@@ -89,6 +91,57 @@ body.subtleforms-admin-scope {
 #subtleforms-admin-app {
 	height: 100%;
 	min-height: 0;
+}
+
+// ── Notices from WordPress and other plugins ─────────────────────────────────
+// Core prints them above the app. The app moves them under its header (see
+// SiteNotices). `sf-notices-pending` is added by a small inline script on
+// SubtleForms screens and removed when the app mounts (or after a few seconds
+// if it never does), so they do not flash above the header and are never lost.
+// Without JavaScript the class is never added and nothing is hidden.
+body.subtleforms-admin-page.sf-notices-pending #wpbody-content {
+	> :is(.notice, .error, .updated, .update-nag),
+	> .wrap > :is(.notice, .error, .updated, .update-nag) {
+		display: none !important;
+	}
+}
+
+// The anchor core inserts notices after; it draws nothing.
+.subtleforms-admin > .wp-header-end {
+	display: none;
+}
+
+// ── Phones and tablets: the page scrolls as in WordPress ─────────────────────
+// Below 783px a fixed-height frame with a pinned footer is cramped, so the
+// frame grows with its content and the footer is simply the last thing on the
+// page. The builder and the split inbox keep their own fixed layouts.
+@media (max-width: 782px) {
+	body.subtleforms-admin-page #wpbody-content:not(:has(.sf-app--fixed, .sf-app--editor)) {
+		display: block;
+		height: auto;
+		overflow: visible;
+
+		> .wrap.subtleforms-admin,
+		> .wrap:has(#subtleforms-admin-app) {
+			min-height: calc(100dvh - var(--wp-admin--admin-bar--height, 46px));
+		}
+
+		#subtleforms-admin-app,
+		.sf-app,
+		.sf-app__stage {
+			height: auto;
+			min-height: calc(100dvh - var(--wp-admin--admin-bar--height, 46px));
+			overflow: visible;
+		}
+
+		.sf-app__main {
+			overflow: visible;
+		}
+
+		.sf-app__toolbar {
+			position: static;
+		}
+	}
 }
 
 // ── App ──────────────────────────────────────────────────────────────────────
@@ -163,13 +216,6 @@ body.subtleforms-admin-scope {
 		max-width: var(--sf-content-max);
 		margin-inline: auto;
 	}
-}
-
-.sf-app__footer {
-	flex-shrink: 0;
-	padding: 12px var(--sf-gutter);
-	border-top: 1px solid var(--sf-border-subtle);
-	background: var(--sf-bg-surface);
 }
 
 // ── Page header ──────────────────────────────────────────────────────────────

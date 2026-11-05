@@ -16,5 +16,6 @@ add_filter('admin_body_class', function ($classes) {
 });
 ?>
 <div class="wrap subtleforms-admin subtleforms-admin-page">
+    <hr class="wp-header-end">
     <div id="subtleforms-admin-app" data-page="form-editor" data-form-id="<?php echo esc_attr($form['id'] ?? 0); ?>"></div>
 </div>

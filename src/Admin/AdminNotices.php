@@ -36,10 +36,30 @@ class AdminNotices {
 	 * Register WordPress hooks.
 	 */
 	public static function register(): void {
+		add_action( 'in_admin_header', array( self::class, 'print_notice_guard' ) );
 		add_action( 'admin_notices', array( self::class, 'maybe_show_permalink_notice' ) );
 		add_action( 'admin_notices', array( self::class, 'maybe_show_outdated_add_on_notice' ) );
 		add_action( 'network_admin_notices', array( self::class, 'maybe_show_outdated_add_on_notice' ) );
 		add_action( 'wp_ajax_' . self::OUTDATED_DISMISS_ACTION, array( self::class, 'dismiss_outdated_add_on_notice' ) );
+	}
+
+	/**
+	 * Keep notices from other plugins and WordPress from flashing above the
+	 * SubtleForms header while the app loads.
+	 *
+	 * The app moves them into a region under its header (nothing is hidden or
+	 * removed). This adds a body class that hides them until then. The class is
+	 * added by script, so without JavaScript nothing is hidden, and it drops
+	 * off on its own after a few seconds if the app never mounts.
+	 */
+	public static function print_notice_guard(): void {
+		$screen = get_current_screen();
+		if ( ! $screen || strpos( $screen->id, 'subtleforms' ) === false ) {
+			return;
+		}
+		wp_print_inline_script_tag(
+			"(function(){var b=document.body;if(!b){return;}b.classList.add('sf-notices-pending');setTimeout(function(){b.classList.remove('sf-notices-pending');},5000);})();"
+		);
 	}
 
 	/**
