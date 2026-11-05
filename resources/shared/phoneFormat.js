@@ -44,7 +44,7 @@ export function sanitizePhone(input) {
       }
     } else if (ch === '+' && out.trim() === '') {
       out += ch;
-    } else if (/[ ()\-]/.test(ch)) {
+    } else if (/[ ()-]/.test(ch)) {
       out += ch;
     }
   });
