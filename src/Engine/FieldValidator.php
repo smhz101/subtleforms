@@ -320,6 +320,13 @@ final class FieldValidator {
 					$payload[ $key ] = self::normalizePhone( $value );
 					break;
 			}
+			// A mask that saves digits only: a typed answer loses its dashes and spaces (2.8.0).
+			if ( in_array( $type, array( 'text', 'number', 'phone', 'tel' ), true ) && is_string( $payload[ $key ] ) ) {
+				$mask = self::maskOf( $field );
+				if ( null !== $mask ) {
+					$payload[ $key ] = \SubtleForms\Fields\InputMask::normalize( $mask, $payload[ $key ] );
+				}
+			}
 		}
 		return $payload;
 	}
@@ -507,12 +514,28 @@ final class FieldValidator {
 			case 'url':
 				return $this->validateUrl( $value );
 			case 'number':
+				$mask = self::maskOf( $field );
+				if ( null !== $mask ) {
+					// A masked number such as "12-34" is not numeric; the mask is its rule.
+					$error = $this->validateMask( $value, $mask );
+					if ( $error || ! is_numeric( $value ) ) {
+						return $error;
+					}
+					return $this->validateNumberRange( $value, $field );
+				}
 				$error = $this->validateNumber( $value );
 				if ( $error ) {
 					return $error;
 				}
 				return $this->validateNumberRange( $value, $field );
 			case 'text':
+				$mask = self::maskOf( $field );
+				if ( null !== $mask ) {
+					$maskError = $this->validateMask( $value, $mask );
+					if ( $maskError ) {
+						return $maskError;
+					}
+				}
 				$error = $this->validateTextLength( $value, $field );
 				return $error ?: $this->validatePattern( $value, $field );
 			case 'textarea':
@@ -565,6 +588,13 @@ final class FieldValidator {
 				return $this->validateColour( $value );
 			case 'phone':
 			case 'tel':
+				$mask = self::maskOf( $field );
+				if ( null !== $mask ) {
+					$maskError = $this->validateMask( $value, $mask );
+					if ( $maskError ) {
+						return $maskError;
+					}
+				}
 				return $this->validatePhone( $value, $field );
 			case 'name_group':
 			case 'address_group':
@@ -1115,6 +1145,39 @@ final class FieldValidator {
 			return __( 'Please enter a colour as a hex value, such as #336699.', 'subtleforms' );
 		}
 		return null;
+	}
+
+	/**
+	 * The input mask a field asks for, or null (2.8.0).
+	 *
+	 * @param array $field Field.
+	 * @return array<string, mixed>|null
+	 */
+	private static function maskOf( array $field ): ?array {
+		$key = self::attr( $field, 'inputMask' );
+		if ( ! is_string( $key ) || '' === $key ) {
+			return null;
+		}
+		$pattern = self::attr( $field, 'maskPattern' );
+		$store   = self::attr( $field, 'maskStore' );
+		return \SubtleForms\Fields\InputMask::resolve( $key, is_string( $pattern ) ? $pattern : '', is_string( $store ) ? $store : 'typed' );
+	}
+
+	/**
+	 * Check an answer against an input mask. An empty answer passes.
+	 *
+	 * @param mixed                $value Value.
+	 * @param array<string, mixed> $mask  From maskOf().
+	 * @return string|null
+	 */
+	private function validateMask( $value, array $mask ): ?string {
+		if ( $this->isEmpty( $value ) ) {
+			return null;
+		}
+		if ( ! is_string( $value ) && ! is_int( $value ) && ! is_float( $value ) ) {
+			return __( 'Please enter a single value.', 'subtleforms' );
+		}
+		return \SubtleForms\Fields\InputMask::error( $mask, (string) $value );
 	}
 
 	/**

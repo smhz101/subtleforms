@@ -400,6 +400,12 @@ final class FormsRepository {
 				continue;
 			}
 
+			// Input mask settings (2.8.0): only known masks, a short plain pattern.
+			$field = \SubtleForms\Fields\InputMask::sanitizeSettings( $field );
+			if ( isset( $field['config'] ) && is_array( $field['config'] ) ) {
+				$field['config'] = \SubtleForms\Fields\InputMask::sanitizeSettings( $field['config'] );
+			}
+
 			if ( isset( $field['config']['appearance'] ) ) {
 				$clean = \SubtleForms\Support\Appearance::sanitizeField( $field['config']['appearance'] );
 

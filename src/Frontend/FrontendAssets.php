@@ -386,6 +386,12 @@ final class FrontendAssets {
 			if ( ( $phonePicker || 'country' === $type ) && self::wantsFlags( $node, $config ) ) {
 				$groups['flags'] = true;
 			}
+			// Input mask (2.8.0): one more lazy group, only for a field that asks.
+			// A Phone field with the country picker handles the phone mask itself.
+			$mask = self::flatOrConfig( $node, $config, 'inputMask' );
+			if ( in_array( $type, array( 'text', 'number', 'phone', 'tel' ), true ) && is_string( $mask ) && '' !== $mask && ! $phonePicker ) {
+				$groups['mask'] = true;
+			}
 			if ( $phonePicker ) {
 				$groups['geo'] = true;
 			} elseif ( isset( self::TYPE_GROUPS[ $type ] ) ) {
@@ -400,6 +406,19 @@ final class FrontendAssets {
 		$names = array_keys( $groups );
 		sort( $names );
 		return $names;
+	}
+
+	/**
+	 * A setting from the config when it holds one, else from the node.
+	 *
+	 * @param array<string, mixed> $node   Field node.
+	 * @param array<string, mixed> $config Its config.
+	 * @param string               $name   Setting name.
+	 * @return mixed
+	 */
+	private static function flatOrConfig( array $node, array $config, string $name ) {
+		$value = $config[ $name ] ?? null;
+		return ( null === $value || '' === $value ) ? ( $node[ $name ] ?? null ) : $value;
 	}
 
 	/**
@@ -434,6 +453,7 @@ final class FrontendAssets {
 		'date'           => 'field-date',
 		'flags'          => 'feature-flags',
 		'geo'            => 'field-phone-country',
+		'mask'           => 'field-mask',
 		'repeater'       => 'field-repeater',
 		'richText'       => 'field-rich-text',
 		'upload'         => 'field-upload',

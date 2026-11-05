@@ -399,6 +399,53 @@ final class FieldSettings {
 					)
 				);
 			}
+			// Input mask (2.8.0).
+			if ( in_array( $type, array( 'text', 'number', 'phone' ), true ) && ! $has( 'inputMask' ) ) {
+				$add(
+					array(
+						'type'    => 'select',
+						'name'    => 'inputMask',
+						'label'   => __( 'Input mask', 'subtleforms' ),
+						'help'    => __( 'Formats the answer as the visitor types.', 'subtleforms' ),
+						'options' => InputMask::options( $type ),
+						'section' => 'validation',
+					)
+				);
+				$add(
+					array(
+						'type'        => 'text',
+						'name'        => 'maskPattern',
+						'label'       => __( 'Pattern', 'subtleforms' ),
+						'help'        => __( '9 is a digit, A is a letter, * is a letter or digit. Anything else is typed for the visitor, for example AA-9999.', 'subtleforms' ),
+						'placeholder' => 'AA-9999',
+						'section'     => 'validation',
+						'showWhen'    => array( 'inputMask' => array( 'custom' ) ),
+					)
+				);
+				$add(
+					array(
+						'type'     => 'mask_try',
+						'name'     => 'maskTry',
+						'label'    => __( 'Try it', 'subtleforms' ),
+						'section'  => 'validation',
+						'showWhen' => array( 'inputMask' => array( 'phone', 'date_dmy', 'date_mdy', 'date_ymd', 'time_24', 'zip_us', 'custom' ) ),
+					)
+				);
+				$add(
+					array(
+						'type'     => 'select',
+						'name'     => 'maskStore',
+						'label'    => __( 'Save as', 'subtleforms' ),
+						'help'     => __( 'Digits only removes the dashes, spaces and brackets the mask adds before the answer is saved.', 'subtleforms' ),
+						'options'  => array(
+							array( 'value' => 'typed', 'label' => __( 'Save as typed', 'subtleforms' ) ),
+							array( 'value' => 'digits', 'label' => __( 'Save digits only', 'subtleforms' ) ),
+						),
+						'section'  => 'validation',
+						'showWhen' => array( 'inputMask' => array( 'phone', 'zip_us', 'custom' ) ),
+					)
+				);
+			}
 			if ( 'multiple_choice' === $type ) {
 				if ( ! $has( 'minChoices' ) ) {
 					$add(
