@@ -1,3 +1,5 @@
+// Preloaded REST answers must be registered before any module that talks to the API.
+import './data/preload';
 import { render } from '@wordpress/element';
 import AdminApp from './app/AdminApp';
 // Add-on registry (window.SubtleFormsExtend) must exist before add-on scripts run.

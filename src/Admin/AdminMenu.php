@@ -491,6 +491,9 @@ class AdminMenu {
 			'themeFontFaces'     => self::themeFontFaces(),
 			// Submissions inbox. A personal choice wins; otherwise these are the site defaults.
 			'submissionsView'    => ( new Settings() )->resolvedInboxView( get_current_user_id() ),
+			// REST answers sent with the page, served to apiFetch before the
+			// app renders (see AdminPreload and the subtleforms/admin/preload_paths filter).
+			'preloaded'          => (object) AdminPreload::collect( AdminPreload::currentScreen() ),
 		);
 
 		/**

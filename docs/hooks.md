@@ -98,6 +98,16 @@ Screen slots for `registerSlotItem( slot, id, { component, order } )` that the a
 | `forms.list.column` | One extra column in the forms list; the item sets `header` for the column title | `{ form }` |
 | `footer.meta` | An item in the footer of the app screens, between the version and the Documentation link (a short text or link; the footer is one line) | `{ version }` (the SubtleForms version) |
 
+## Preloaded admin data (PHP)
+
+A SubtleForms admin screen can receive the answer of a few REST requests inside the page, so the screen shows its data in the first paint instead of after a request. The answers are computed with the current user, so permissions are the ones a normal request meets. The app registers them with `apiFetch.createPreloadingMiddleware()` before it renders and they show up in `window.subtleformsAdmin.preloaded`, keyed by path.
+
+| Hook | Kind and arguments | What it does |
+| --- | --- | --- |
+| `subtleforms/admin/preload_paths` | filter `( string[] $paths, string $screen )` | REST paths to preload on a screen. `$screen` is the `page` value of the screen (`subtleforms`, `subtleforms-forms`, `subtleforms-submissions`, `subtleforms-reports`, `subtleforms-settings`). Only GET paths below `/subtleforms/v1/` are kept, at most 12 per screen; anything else is dropped. The plugin adds the first request of its own Forms list on `subtleforms-forms`. Since 2.7.4. |
+
+Use the exact path string the script requests, query included. A preloaded answer is used once: the first request for that path gets it and later requests (a refetch, another filter) go to the server as usual. The script can read the answer at once from `window.subtleformsAdmin.preloaded[ path ]` (`{ body, headers }`), for a first paint with no loading step.
+
 ## Other PHP hooks add-ons use
 
 | Hook | Type | Use |

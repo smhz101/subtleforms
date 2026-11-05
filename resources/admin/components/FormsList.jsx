@@ -33,6 +33,8 @@ import { formsEmptyState } from './formsEmptyState';
 import { keepRowsAfterFailedLoad, listQueryKey } from '../utils/failedLoad';
 import { confirmDialog } from '../utils/confirmDialog';
 import { chunkPages } from '../utils/listBatches';
+import { takePreloaded } from '../data/preload';
+import { formsBatchPath, preloadedFormsBatch } from '../utils/formsBatch';
 
 export const ALL_FORM_COLUMNS = ['title', 'form_type', 'status', 'id', 'submission_count', 'performance', 'updated_at', 'actions'];
 export const DEFAULT_FORM_VISIBLE = ['title', 'form_type', 'status', 'id', 'submission_count', 'performance', 'updated_at', 'actions'];
@@ -79,13 +81,25 @@ export default function FormsList({
   onFormsChanged,
 }) {
   // Chunked prefetch: buffer accumulates rows; sliced client-side per page.
-  const [buffer, setBuffer] = useState([]);
+  // The first batch can arrive with the page (see data/preload.js). It is read
+  // once, before the first render, so the list is in the first paint.
+  const firstBatchRef = useRef(undefined);
+  if (firstBatchRef.current === undefined) {
+    firstBatchRef.current = preloadedFormsBatch(takePreloaded, {
+      statusFilter, searchTerm, sortBy: 'created_at', sortDirection: 'desc', perPage: 20,
+    });
+  }
+  const firstBatch = firstBatchRef.current;
+  const skipFirstLoadRef = useRef(!!firstBatch);
+  const [buffer, setBuffer] = useState(firstBatch ? firstBatch.rows : []);
   const [loadError, setLoadError] = useState('');
-  const loadedQueryRef = useRef('');
+  const loadedQueryRef = useRef(
+    firstBatch ? listQueryKey([statusFilter, searchTerm, 'created_at', 'desc', 20]) : ''
+  );
   const loadGenerationRef = useRef(0);
-  const [pagesLoaded, setPagesLoaded] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [totalItems, setTotalItems] = useState(0);
+  const [pagesLoaded, setPagesLoaded] = useState(firstBatch ? Math.ceil(firstBatch.rows.length / 20) || 0 : 0);
+  const [isLoading, setIsLoading] = useState(!firstBatch);
+  const [totalItems, setTotalItems] = useState(firstBatch ? firstBatch.total : 0);
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
   // Each API call fetches several pages at once, never more rows than the
@@ -142,24 +156,12 @@ export default function FormsList({
     setCurrentPage(1);
   };
 
-  const buildFilterParams = () => {
-    const params = new URLSearchParams({
-      orderby: sortBy,
-      order: sortDirection,
-    });
-    if (searchTerm) params.append('search', searchTerm);
-    if (statusFilter && statusFilter !== 'all') params.append('status', statusFilter);
-    return params;
-  };
-
   // Fetch one batch: batchIndex 0 → rows 1..(CHUNK_PAGES*perPage), index 1 → next batch, etc.
   const fetchBatch = async (batchIndex) => {
     const batchSize = perPage * CHUNK_PAGES;
-    const params = buildFilterParams();
-    params.set('page', (batchIndex + 1).toString());
-    params.set('per_page', batchSize.toString());
-
-    const { ok, status, body, headers } = await apiGet(`/forms?${params}`);
+    const { ok, status, body, headers } = await apiGet(
+      formsBatchPath({ statusFilter, searchTerm, sortBy, sortDirection, page: batchIndex + 1, perPage: batchSize })
+    );
     if (!ok) throw new Error(`API request failed: ${status}`);
 
     const data = body || {};
@@ -222,6 +224,11 @@ export default function FormsList({
 
   // Fresh load on any filter, sort, or perPage change
   useEffect(() => {
+    // The page came with the first batch: nothing to load until a filter changes.
+    if (skipFirstLoadRef.current) {
+      skipFirstLoadRef.current = false;
+      return;
+    }
     loadFresh();
   }, [statusFilter, searchTerm, sortBy, sortDirection, perPage]);
 
