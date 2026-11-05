@@ -401,15 +401,15 @@ final class Importer {
 		global $wpdb;
 		$table = $wpdb->prefix . 'subtleforms_submissions';
 		$found = array();
-		foreach ( array_chunk( $refs, 50 ) as $chunk ) {
-			$likes = array();
-			$args  = array( $table, $formId );
-			foreach ( $chunk as $ref ) {
-				$likes[] = 'meta LIKE %s';
-				$args[]  = '%' . $wpdb->esc_like( '"ref":' . wp_json_encode( $ref ) ) . '%';
+		foreach ( array_chunk( $refs, 10 ) as $chunk ) {
+			// Always ten patterns, so the query text is fixed; a short last chunk repeats its final reference.
+			$like = array();
+			for ( $i = 0; $i < 10; $i++ ) {
+				$ref    = $chunk[ min( $i, count( $chunk ) - 1 ) ];
+				$like[] = '%' . $wpdb->esc_like( '"ref":' . wp_json_encode( $ref ) ) . '%';
 			}
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Placeholders only; lookup by a value inside entry meta.
-			$metas = $wpdb->get_col( $wpdb->prepare( 'SELECT meta FROM %i WHERE form_id = %d AND ( ' . implode( ' OR ', $likes ) . ' )', $args ) );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Lookup by a value inside entry meta.
+			$metas = $wpdb->get_col( $wpdb->prepare( 'SELECT meta FROM %i WHERE form_id = %d AND ( meta LIKE %s OR meta LIKE %s OR meta LIKE %s OR meta LIKE %s OR meta LIKE %s OR meta LIKE %s OR meta LIKE %s OR meta LIKE %s OR meta LIKE %s OR meta LIKE %s )', $table, $formId, ...$like ) );
 			foreach ( (array) $metas as $meta ) {
 				$decoded = json_decode( (string) $meta, true );
 				$ref     = is_array( $decoded ) ? (string) ( $decoded['import']['ref'] ?? '' ) : '';

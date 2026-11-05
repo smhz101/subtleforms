@@ -18,9 +18,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 final class WPFormsSource implements Source, EntrySource {
 
-	/** Entry statuses that are not real submissions. */
-	private const SKIP_STATUS = "'spam','trash','abandoned','partial'";
-
 	/** @var string|null|false Entry table, false when absent. */
 	private $entries = null;
 
@@ -100,22 +97,18 @@ final class WPFormsSource implements Source, EntrySource {
 	}
 
 	/**
-	 * Extra WHERE for real entries.
+	 * Whether the entry table has a `type` column (older WPForms had none).
 	 *
 	 * @param string $table Table.
-	 * @return string
+	 * @return bool
 	 */
-	private function realEntries( string $table ): string {
+	private function hasType( string $table ): bool {
 		global $wpdb;
 		if ( null === $this->hasType ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Column check of another plugin's table.
 			$this->hasType = (bool) $wpdb->get_var( $wpdb->prepare( 'SHOW COLUMNS FROM %i LIKE %s', $table, 'type' ) );
 		}
-		$where = ' AND ( status IS NULL OR status NOT IN (' . self::SKIP_STATUS . ') )';
-		if ( $this->hasType ) {
-			$where .= " AND ( type IS NULL OR type NOT IN ('partial','payment') )";
-		}
-		return $where;
+		return $this->hasType;
 	}
 
 	/** @inheritDoc */
@@ -125,9 +118,12 @@ final class WPFormsSource implements Source, EntrySource {
 			return 0;
 		}
 		global $wpdb;
-		$where = $this->realEntries( $table );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Read of another plugin's table; $where holds fixed strings.
-		return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i WHERE form_id = %d' . $where, $table, (int) $id ) );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Read of another plugin's table.
+		if ( $this->hasType( $table ) ) {
+			return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE form_id = %d AND ( status IS NULL OR status NOT IN ('spam','trash','abandoned','partial') ) AND ( type IS NULL OR type NOT IN ('partial','payment') )", $table, (int) $id ) );
+		}
+		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE form_id = %d AND ( status IS NULL OR status NOT IN ('spam','trash','abandoned','partial') )", $table, (int) $id ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 	}
 
 	/** @inheritDoc */
@@ -137,10 +133,13 @@ final class WPFormsSource implements Source, EntrySource {
 			return array();
 		}
 		global $wpdb;
-		$where = $this->realEntries( $table );
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Read of another plugin's table; $where holds fixed strings.
-		$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i WHERE form_id = %d AND entry_id > %d' . $where . ' ORDER BY entry_id ASC LIMIT %d', $table, (int) $id, $after, $limit ), ARRAY_A );
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Read of another plugin's table.
+		if ( $this->hasType( $table ) ) {
+			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM %i WHERE form_id = %d AND entry_id > %d AND ( status IS NULL OR status NOT IN ('spam','trash','abandoned','partial') ) AND ( type IS NULL OR type NOT IN ('partial','payment') ) ORDER BY entry_id ASC LIMIT %d", $table, (int) $id, $after, $limit ), ARRAY_A );
+		} else {
+			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM %i WHERE form_id = %d AND entry_id > %d AND ( status IS NULL OR status NOT IN ('spam','trash','abandoned','partial') ) ORDER BY entry_id ASC LIMIT %d", $table, (int) $id, $after, $limit ), ARRAY_A );
+		}
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$out = array();
 		foreach ( (array) $rows as $row ) {
 			$values = json_decode( (string) ( $row['fields'] ?? '' ), true );

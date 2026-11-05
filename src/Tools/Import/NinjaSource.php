@@ -201,17 +201,16 @@ final class NinjaSource implements Source, EntrySource {
 		if ( ! $posts ) {
 			return array();
 		}
-		$ids    = array_map( 'intval', array_column( $posts, 'ID' ) );
-		$marks  = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
-		$metas  = (array) $wpdb->get_results(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Placeholders only.
-			$wpdb->prepare( "SELECT post_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE meta_key LIKE '\\_field\\_%' AND post_id IN ($marks)", $ids ),
-			ARRAY_A
-		);
+		$ids = array_map( 'intval', array_column( $posts, 'ID' ) );
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		update_meta_cache( 'post', $ids );
 		$byPost = array();
-		foreach ( $metas as $meta ) {
-			$byPost[ (int) $meta['post_id'] ][ substr( (string) $meta['meta_key'], 7 ) ] = self::value( $meta['meta_value'] );
+		foreach ( $ids as $postId ) {
+			foreach ( (array) get_post_meta( $postId ) as $metaKey => $list ) {
+				if ( 0 === strpos( (string) $metaKey, '_field_' ) ) {
+					$byPost[ $postId ][ substr( (string) $metaKey, 7 ) ] = self::value( is_array( $list ) ? ( $list[0] ?? '' ) : $list );
+				}
+			}
 		}
 		$out = array();
 		foreach ( $posts as $post ) {
