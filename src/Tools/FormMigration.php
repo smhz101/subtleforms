@@ -1,6 +1,6 @@
 <?php
 /**
- * Import a form from a Gravity Forms or Fluent Forms export file.
+ * Import a form from a Gravity Forms, Fluent Forms, WPForms or Ninja Forms export file.
  *
  * The fields are mapped by the same mappers as the one-click import in
  * Tools, Migrate (Import\GravityMapper, Import\FluentMapper), so a form
@@ -25,12 +25,18 @@ final class FormMigration {
 	 * Which importer can read this file.
 	 *
 	 * @param array $payload Decoded JSON.
-	 * @return string gravity, fluent, or an empty string.
+	 * @return string gravity, fluent, wpforms, ninja, or an empty string.
 	 */
 	public static function detect( array $payload ): string {
 		foreach ( self::candidates( $payload ) as $form ) {
 			if ( isset( $form['form_fields'] ) ) {
 				return 'fluent';
+			}
+			if ( self::looksLikeNinja( $form ) ) {
+				return 'ninja';
+			}
+			if ( self::looksLikeWpforms( $form ) ) {
+				return 'wpforms';
 			}
 			if ( self::looksLikeGravity( $form ) ) {
 				return 'gravity';
@@ -84,6 +90,12 @@ final class FormMigration {
 			if ( 'fluent' === $source && isset( $form['form_fields'] ) ) {
 				$raw[] = $form;
 			}
+			if ( 'ninja' === $source && self::looksLikeNinja( $form ) ) {
+				$raw[] = $form;
+			}
+			if ( 'wpforms' === $source && self::looksLikeWpforms( $form ) ) {
+				$raw[] = $form;
+			}
 		}
 		if ( ! $raw ) {
 			return array(
@@ -103,7 +115,15 @@ final class FormMigration {
 		}
 		$forms = array();
 		foreach ( $raw as $form ) {
-			$forms[] = 'gravity' === $source ? self::fromGravity( $form ) : self::fromFluent( $form );
+			if ( 'gravity' === $source ) {
+				$forms[] = self::fromGravity( $form );
+			} elseif ( 'wpforms' === $source ) {
+				$forms[] = self::result( Import\WPFormsMapper::map( $form, array_merge( self::context(), array( 'from_file' => true ) ) ) );
+			} elseif ( 'ninja' === $source ) {
+				$forms[] = self::result( Import\NinjaMapper::map( $form, self::context() ) );
+			} else {
+				$forms[] = self::fromFluent( $form );
+			}
 		}
 		return array(
 			'forms' => $forms,
@@ -142,10 +162,44 @@ final class FormMigration {
 	}
 
 	/**
+	 * A Ninja Forms export: a list of fields that carry a type, and a list of actions.
+	 *
+	 * @param array $form Form.
+	 * @return bool
+	 */
+	private static function looksLikeNinja( array $form ): bool {
+		if ( ! isset( $form['fields'], $form['actions'] ) || ! is_array( $form['fields'] ) || ! is_array( $form['actions'] ) || ! array_is_list( $form['fields'] ) ) {
+			return false;
+		}
+		foreach ( $form['fields'] as $field ) {
+			if ( is_array( $field ) && ( isset( $field['type'] ) || isset( $field['settings']['type'] ) ) ) {
+				return true;
+			}
+		}
+		return ! $form['fields'];
+	}
+
+	/**
+	 * A WPForms export: fields keyed by id, and settings with the form title.
+	 *
+	 * @param array $form Form.
+	 * @return bool
+	 */
+	private static function looksLikeWpforms( array $form ): bool {
+		if ( ! isset( $form['fields'], $form['settings'] ) || ! is_array( $form['fields'] ) || ! is_array( $form['settings'] ) ) {
+			return false;
+		}
+		return isset( $form['field_id'] ) || isset( $form['settings']['form_title'] ) || isset( $form['settings']['submit_text'] );
+	}
+
+	/**
 	 * @param array $form Form.
 	 * @return bool
 	 */
 	private static function looksLikeGravity( array $form ): bool {
+		if ( self::looksLikeWpforms( $form ) || self::looksLikeNinja( $form ) ) {
+			return false;
+		}
 		if ( ! isset( $form['fields'] ) || ! is_array( $form['fields'] ) ) {
 			return false;
 		}

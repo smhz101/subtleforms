@@ -466,4 +466,22 @@ final class FormMigrationTest extends TestCase {
 		$this->assertSame( array( 'company-name', 'email' ), array_column( $fluent['fields'], 'key' ) );
 		self::validator()->validate( $fluent );
 	}
+
+	public function test_wpforms_and_ninja_files_are_told_apart_from_gravity(): void {
+		$dir = dirname( __DIR__ ) . '/fixtures/import/';
+		$wp  = json_decode( (string) file_get_contents( $dir . 'wpforms-export.json' ), true );
+		$nf  = json_decode( (string) file_get_contents( $dir . 'ninja-export.nff' ), true );
+		$this->assertSame( 'wpforms', FormMigration::detect( $wp ) );
+		$this->assertSame( 'ninja', FormMigration::detect( $nf ) );
+
+		$built = FormMigration::schemas( 'wpforms', $wp );
+		$this->assertSame( '', $built['error'] );
+		$this->assertSame( array( 'Contact request', 'Tiny form' ), array_column( $built['forms'], 'title' ) );
+		$this->assertStringContainsString( 'page of the other site', implode( ' ', $built['forms'][1]['notes'] ), 'Page numbers from another site are not followed.' );
+
+		$built = FormMigration::schemas( 'ninja', $nf );
+		$this->assertSame( 'Ninja contact', $built['forms'][0]['title'] );
+		$this->assertSame( '', FormMigration::schemas( 'ninja', array( $nf ) )['error'] );
+		$this->assertNotSame( '', FormMigration::schemas( 'wpforms', $nf )['error'] );
+	}
 }
