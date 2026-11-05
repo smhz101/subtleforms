@@ -192,6 +192,10 @@ Used for the same purpose when hCaptcha is enabled. The form page loads the scri
 
 Used for the same purpose when Turnstile is enabled. The form page loads the script from challenges.cloudflare.com, and on submit the site sends your secret key, the response token and the visitor's IP address to https://challenges.cloudflare.com/turnstile/v0/siteverify. [Terms of Use](https://www.cloudflare.com/website-terms/), [Privacy Policy](https://www.cloudflare.com/privacypolicy/).
 
+= Mailchimp =
+
+Used only when a site administrator connects a Mailchimp account under Settings, Integrations, Mailchimp, and only for forms where the administrator turns Mailchimp on. After an entry is saved, the site sends the person's email address to Mailchimp, with the form answers the administrator mapped (such as first name, last name or other audience fields), the tags the administrator typed, and the subscription status (subscribed, or pending when double opt-in is on). Entries marked as spam, and entries where the consent box the administrator chose was not ticked, are not sent. The visitor's IP address and browser are not sent. When the administrator connects, tests the connection or loads their audiences in wp-admin, the site sends the API key to Mailchimp to sign in and receives the account name and email, the audience list and its fields. Requests go to https://<data center>.api.mailchimp.com/3.0, where the data center (for example us21) is the end of your API key. The API key is stored in the WordPress options table and is never shown again after saving. [Terms of Use](https://mailchimp.com/legal/terms/), [Privacy Statement](https://www.intuit.com/privacy/statement/).
+
 = Webhooks =
 
 When you add a webhook action to a form, each new entry is sent as JSON to the URL you, the site owner, enter, after the entry is saved (and when you press Test). The data goes only to that URL: nothing is sent to SubtleForms or to any address you did not enter. What that service does with it is set by its own terms.

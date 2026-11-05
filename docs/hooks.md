@@ -91,6 +91,8 @@ Screen slots for `registerSlotItem( slot, id, { component, order } )` that the a
 | `form.confirmations` | Conditional confirmations in a form's settings | `{ schema, onMetadata, isReadOnly }` |
 | `form.integrations` | A form's Integrations tab (see `registerFormIntegration`) | see above |
 | `settings.extensions` | The panel of an integration listed through `subtleforms/admin/integrations`; the slot item id is the integration slug | none |
+| `integration.mailchimp.settings` | More controls below the Mailchimp connection card in Settings > Integrations > Mailchimp | `{ connection }` (`status`, `has_key`, `last4`, `account_name`, `account_email`; never the key) |
+| `form.integration.mailchimp` | More controls at the end of a form's Mailchimp panel (Form settings > Integrations). They keep their values in the form's `metadata.integrations`, under a key of the add-on's own | `{ schema, config, patch( values ), isReadOnly, fieldOptions, audienceId, mergeFields }` (`config` is the Mailchimp settings of the form, `patch` merges values into them, `mergeFields` lists the chosen audience's fields as `{ tag, name, type, required }`) |
 | `dashboard.panels` | Panels on the Dashboard | `{ forms }` |
 | `reports.panels` | Panels on the Reports screen | `{ forms }` |
 | `forms.list.column` | One extra column in the forms list; the item sets `header` for the column title | `{ form }` |
@@ -108,7 +110,7 @@ Screen slots for `registerSlotItem( slot, id, { component, order } )` that the a
 | `subtleforms/admin_enqueue_scripts` | action `( string $hook )` | Enqueue add-on scripts on SubtleForms admin pages. |
 | `subtleforms/admin_data` | filter `( array $data, string $hook )` | Add keys to `window.subtleformsAdmin`. Add-ons read their own keys from there. |
 | `subtleforms/admin_branding` | filter `( array $branding )` | Change what the admin app shows: `name`, `menuName`, `logoUrl` (a custom logo replaces the mark and the wordmark), `menuIcon` (a data URI, `data:image/svg+xml;base64,...`, or an image URL; empty for the default mark; core repaints a data URI in the admin colour scheme and draws a URL as an image) and `markSvg` (inline SVG made of `svg`, `g` and `path` only, which replaces the built-in mark in the app header; empty for the default mark). Invalid values fall back to the default mark. |
-| `subtleforms/admin/integrations` | filter `( array $integrations )` | List an integration in Settings, keyed by slug. |
+| `subtleforms/admin/integrations` | filter `( array $integrations )` | List an integration in Settings, keyed by slug. This plugin lists `webhooks` and `mailchimp` (the Mailchimp entry carries `builtin => true`). See "Mailchimp" below for what listing a `mailchimp` entry of your own does. |
 | `subtleforms/forms/schema_before_save` | filter `( array $schema, int $formId, bool $activate )` | Change a schema before it is saved. |
 | `subtleforms/forms/schema_published` | action `( int $formId, array $schema, int $version )` | A schema version was published. |
 | `subtleforms/frontend/language` | filter `( string $lang )` | The language code the public form asks its schema in. |
@@ -120,6 +122,29 @@ Screen slots for `registerSlotItem( slot, id, { component, order } )` that the a
 | `subtleforms/email/attachments` | filter `( string[] $attachments, array $job )` | Files to attach to an email. |
 | `subtleforms/email/after_send` | action `( array $job, string[] $attachments )` | An email was sent. |
 | `subtleforms/transfer/entry_meta_keys` | filter `( string[] $keys, array $record )` | Entry meta records that go into the submissions export and come back on import. The default is every record (an array) that another plugin saved on the entry, so an entry keeps what an add-on stored on it even when the add-on is not active. Records this plugin writes itself (the visitor's address and browser, request state, spam checks, consents, notes) never travel, nor do records over 64 KB or keys that name a token, secret, password or API key. An add-on narrows the list to the records it wants to travel. Since 2.7.2. |
+
+## Mailchimp
+
+This plugin adds people to a Mailchimp audience after an entry is saved, for forms where the site owner turned Mailchimp on (Form settings > Integrations > Mailchimp, stored in `metadata.integrations.mailchimp`). The key is saved under Settings > Integrations > Mailchimp in the non-autoloaded option `subtleforms_mailchimp_connection`. The job runs in the background (`subtleforms_async_mailchimp`) and writes "Mailchimp: subscribed", "pending (double opt-in)", "skipped (...)" or "failed: ..." to the entry's activity log. Everything works without an add-on.
+
+### Taking Mailchimp over
+
+An add-on that lists its own integration under the slug `mailchimp` in `subtleforms/admin/integrations`, without `builtin => true`, owns Mailchimp. This plugin then sends nothing to Mailchimp (a job that was already queued also steps aside) and neither of its two Mailchimp panels is drawn; the add-on draws its own through the `settings.extensions` slot (item id `mailchimp`) and `registerFormIntegration`. Removing the entry switches Mailchimp off in the same way. No other slug has this effect.
+
+### Adding to the built-in Mailchimp
+
+An add-on that leaves the entry alone adds to it through these hooks. They run in the background job, with a `$context` array of `submission_id`, `form_id`, `payload`, `schema` and `entry` (the stored row). A feed is a set of Mailchimp settings in the shape of `metadata.integrations.mailchimp` (`list_id`, `fields`, `merge_fields`, `tags`, `double_optin`, `update_existing`, `consent_field`) with a string `id`; the built-in one has the id `default`. Since 2.8.0.
+
+| Hook | Type | Use |
+| --- | --- | --- |
+| `subtleforms/mailchimp/feeds` | filter `( array $feeds, array $context )` | The feeds to send for the entry. Add feeds (another audience, another mapping) or change the built-in one. Only runs for forms with Mailchimp switched on. Each feed gets its own line in the activity log, step `mailchimp:<id>`. |
+| `subtleforms/mailchimp/skip_reason` | filter `( ?string $reason, array $feed, array $context )` | Return a short plain reason to skip a feed for this entry ("the rule did not match"); the log says "Mailchimp: skipped (reason)". Return null to send. |
+| `subtleforms/mailchimp/subscriber` | filter `( Subscriber $subscriber, array $feed, array $context )` | Change who is sent: tags (`$subscriber->tags`), merge fields (`->fields`), audience (`->listId`). Return the object. |
+| `subtleforms/mailchimp/member_body` | filter `( array $body, Subscriber $subscriber, array $feed, array $context )` | Change the body of the add-or-update request, for example to add `interests` or `marketing_permissions`. Return the array. |
+| `subtleforms/mailchimp/delivered` | action `( array $result, array $feed, array $context )` | A person was added or updated (`audience`, `email`, `status`, `tags`, `member`). |
+| `subtleforms/mailchimp/failed` | action `( string $message, array $feed, array $context, bool $willRetry )` | A request failed. A transport error, a rate limit or a server error is tried again by this plugin up to twice (after 2 and 15 minutes); `$willRetry` says so. |
+
+`SubtleForms\Integrations\Mailchimp\Sender::process( $submissionId )` sends one entry again and returns the feed IDs worth another try; an add-on calls it for a manual retry or a resync. `Connection::state()` is the connection without its key.
 
 ## Capabilities
 
