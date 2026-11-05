@@ -1,14 +1,14 @@
 <?php
 /**
- * A subscriber built from an entry and the form's Mailchimp settings.
+ * A subscriber built from an entry and the form's settings for one service.
  *
- * @package SubtleForms\Integrations\Mailchimp
+ * @package SubtleForms\Integrations\EmailMarketing
  * @since   2.8.0
  */
 
 declare(strict_types=1);
 
-namespace SubtleForms\Integrations\Mailchimp;
+namespace SubtleForms\Integrations\EmailMarketing;
 
 use SubtleForms\Support\FieldMapper;
 
@@ -30,32 +30,40 @@ final class Subscriber {
 	/** @var string */
 	public string $lastName = '';
 
-	/** @var array<string,string> Merge field tag => value. */
+	/** @var bool Whether the last name was mapped by hand (Kit stores it as a custom field). */
+	public bool $lastNameMapped = false;
+
+	/** @var string Slug of the service this subscriber goes to. */
+	public string $service = '';
+
+	/** @var array<string,string> Field name (merge tag, attribute, custom field key) => value. */
 	public array $fields = array();
 
 	/** @var string[] */
 	public array $tags = array();
 
-	/** @var string Audience ID. */
+	/** @var string Audience, list or form ID. */
 	public string $listId = '';
 
-	/** @var bool New contacts get "pending" and Mailchimp asks them to confirm. */
+	/** @var bool New contacts are asked to confirm (where the service has that). */
 	public bool $doubleOptIn = false;
 
 	/** @var bool Existing members get their merge fields updated. */
 	public bool $updateExisting = true;
 
 	/**
-	 * Settings of a form (metadata.integrations.mailchimp), cleaned.
+	 * Settings of a form (metadata.integrations.{service}), cleaned.
 	 *
 	 * Keys: enabled, list_id, fields { email, first_name, last_name },
 	 * merge_fields [ { field, target } ], tags (comma separated), double_optin,
 	 * update_existing, consent_field.
 	 *
-	 * @param mixed $config Stored settings.
+	 * @param mixed  $config  Stored settings.
+	 * @param string $service Service slug, which decides how a target is written.
 	 * @return array<string,mixed>
 	 */
-	public static function normalize( $config ): array {
+	public static function normalize( $config, string $service = 'mailchimp' ): array {
+		$upper  = 'kit' !== $service;
 		$config = is_array( $config ) ? $config : array();
 		$fields = is_array( $config['fields'] ?? null ) ? $config['fields'] : array();
 		$rows   = array();
@@ -63,7 +71,7 @@ final class Subscriber {
 			if ( is_array( $row ) ) {
 				$rows[] = array(
 					'field'  => trim( (string) ( $row['field'] ?? '' ) ),
-					'target' => strtoupper( trim( (string) ( $row['target'] ?? '' ) ) ),
+					'target' => $upper ? strtoupper( trim( (string) ( $row['target'] ?? '' ) ) ) : trim( (string) ( $row['target'] ?? '' ) ),
 				);
 			}
 		}
@@ -86,13 +94,14 @@ final class Subscriber {
 	/**
 	 * Build a subscriber from an entry.
 	 *
-	 * @param array $config  Settings from normalize().
-	 * @param array $schema  Form schema.
-	 * @param array $payload Answers.
+	 * @param array  $config  Settings from normalize().
+	 * @param array  $schema  Form schema.
+	 * @param array  $payload Answers.
+	 * @param string $service Service slug.
 	 * @return array{subscriber:?self,skip:?string} `skip` is `consent_not_given` or `no_email` when nobody is added.
 	 */
-	public static function build( array $config, array $schema, array $payload ): array {
-		$config = self::normalize( $config );
+	public static function build( array $config, array $schema, array $payload, string $service = 'mailchimp' ): array {
+		$config = self::normalize( $config, $service );
 		$auto   = FieldMapper::defaults( $schema );
 		$fields = $config['fields'];
 
@@ -122,8 +131,9 @@ final class Subscriber {
 			);
 		}
 
-		$sub        = new self();
-		$sub->email = $email;
+		$sub          = new self();
+		$sub->email   = $email;
+		$sub->service = $service;
 
 		$lastMapped  = '' !== $fields['last_name'];
 		$firstSource = '' !== $fields['first_name'] ? $fields['first_name'] : $auto['first_name'];
@@ -137,6 +147,7 @@ final class Subscriber {
 			list( $first, $last ) = FieldMapper::splitName( $first );
 		}
 
+		$sub->lastNameMapped = $lastMapped;
 		$sub->firstName      = $first;
 		$sub->lastName       = $last;
 		$sub->fields         = FieldMapper::mapRows( $payload, $config['merge_fields'], 'target', $schema );

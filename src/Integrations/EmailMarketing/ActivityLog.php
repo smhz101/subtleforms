@@ -1,14 +1,14 @@
 <?php
 /**
- * Writes Mailchimp results to the entry's activity log.
+ * Writes email marketing results to the entry's activity log.
  *
- * @package SubtleForms\Integrations\Mailchimp
+ * @package SubtleForms\Integrations\EmailMarketing
  * @since   2.8.0
  */
 
 declare(strict_types=1);
 
-namespace SubtleForms\Integrations\Mailchimp;
+namespace SubtleForms\Integrations\EmailMarketing;
 
 use SubtleForms\Repositories\LogsRepository;
 use SubtleForms\Support\Logger;
@@ -28,12 +28,13 @@ final class ActivityLog {
 	 * Record an outcome.
 	 *
 	 * @param int    $submissionId Entry ID.
-	 * @param string $stepId       `mailchimp` or `mailchimp:<feed id>`.
+	 * @param string $service      Service slug (mailchimp, brevo, kit).
+	 * @param string $stepId       The service slug, or `<slug>:<feed id>`.
 	 * @param string $status       succeeded, skipped or failed.
 	 * @param string $message      The line shown on the entry ("Mailchimp: subscribed").
 	 * @param array  $data         Details (no secrets).
 	 */
-	public static function record( int $submissionId, string $stepId, string $status, string $message, array $data = array() ): void {
+	public static function record( int $submissionId, string $service, string $stepId, string $status, string $message, array $data = array() ): void {
 		if ( $submissionId <= 0 ) {
 			return;
 		}
@@ -48,7 +49,7 @@ final class ActivityLog {
 					'context'       => array(
 						'submission_id' => $submissionId,
 						'step_id'       => $stepId,
-						'action_type'   => 'mailchimp',
+						'action_type'   => $service,
 						'status'        => $status,
 						'data'          => $data,
 						'error'         => $failed ? (string) ( $data['error'] ?? '' ) : null,
@@ -57,7 +58,7 @@ final class ActivityLog {
 				)
 			);
 		} catch ( \Throwable $e ) {
-			Logger::error( 'Could not write the Mailchimp line for entry %d: %s', $submissionId, $e->getMessage() );
+			Logger::error( 'Could not write the %s line for entry %d: %s', $service, $submissionId, $e->getMessage() );
 		}
 	}
 }

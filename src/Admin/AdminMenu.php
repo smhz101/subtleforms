@@ -450,6 +450,8 @@ class AdminMenu {
 			// The More features card on the Dashboard (see more_features()).
 			'moreFeatures'   => self::more_features(),
 			'extensions'     => $this->buildExtensionsData(),
+			// Email marketing: the services, who adds extras to them and the Pro note.
+			'emailMarketing' => self::email_marketing_data(),
 			'isDev'          => defined( 'WP_DEBUG' ) && WP_DEBUG,
 			// The builder preview renders the real frontend markup inside an
 			// iframe, so it needs the public stylesheet to look like production
@@ -657,10 +659,33 @@ class AdminMenu {
 	}
 
 	/**
+	 * What the Email marketing screens need beside the integration list.
+	 *
+	 * `services` lists every service (this plugin's and an add-on's) with its
+	 * switch and whether it is connected. `extras` names the services an add-on
+	 * adds options to. `banner.show` is false for a user who dismissed the
+	 * note about SubtleForms Pro and while an add-on adds extras.
+	 *
+	 * @return array{services:array,extras:string[],banner:array{show:bool,url:string}}
+	 */
+	public static function email_marketing_data(): array {
+		$extras    = \SubtleForms\Integrations\EmailMarketing\Services::extras();
+		$dismissed = \SubtleForms\Api\EmailMarketingApi::bannerDismissed( get_current_user_id() );
+		return array(
+			'services' => (object) \SubtleForms\Integrations\EmailMarketing\Services::all(),
+			'extras'   => $extras,
+			'banner'   => array(
+				'show' => ! $dismissed && array() === $extras,
+				'url'  => self::MORE_FEATURES_URL,
+			),
+		);
+	}
+
+	/**
 	 * The integrations the Settings screen lists.
 	 *
-	 * Webhooks and Mailchimp are part of this plugin. Any other integration
-	 * comes from an add-on, which adds its entry through the
+	 * Webhooks and Email marketing are part of this plugin. Any other
+	 * integration comes from an add-on, which adds its entry through the
 	 * `subtleforms/admin/integrations` filter (see Integrations\Registry).
 	 *
 	 * @return array<string, array> Map of slug to { slug, label, description,

@@ -10,25 +10,25 @@ declare(strict_types=1);
 
 namespace SubtleForms\Integrations;
 
-use SubtleForms\Integrations\Mailchimp\Connection;
+use SubtleForms\Integrations\EmailMarketing\Connection;
+use SubtleForms\Integrations\EmailMarketing\Services;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * Webhooks and Mailchimp are part of this plugin. An add-on lists its own
- * integrations through `subtleforms/admin/integrations`.
+ * Webhooks and Email marketing are part of this plugin. An add-on lists its
+ * own integrations through `subtleforms/admin/integrations`.
  *
- * An add-on that lists an entry under the slug `mailchimp` without the
- * `builtin` flag takes Mailchimp over: this plugin sends nothing to
- * Mailchimp and both Mailchimp panels in the admin leave the screen to the
- * add-on. That is the only rule; it does not depend on which add-on it is.
+ * An add-on that lists an entry under the slug `email_marketing` without the
+ * `builtin` flag takes the whole integration over: this plugin sends nothing
+ * to Mailchimp, Brevo or Kit and its Email marketing screens leave the screen
+ * to the add-on (this is how SubtleForms Pro 2.8.0 keeps working beside this
+ * plugin). To take over a single service, use
+ * `subtleforms/email_marketing/services` instead.
  */
 final class Registry {
-
-	/** Slug of the Mailchimp integration. */
-	const MAILCHIMP = 'mailchimp';
 
 	/**
 	 * The integrations to list, keyed by slug.
@@ -37,7 +37,7 @@ final class Registry {
 	 */
 	public static function all(): array {
 		$result = array(
-			'webhooks'        => array(
+			'webhooks'                => array(
 				'slug'        => 'webhooks',
 				'label'       => __( 'Webhooks', 'subtleforms' ),
 				'description' => __( 'Send each entry as JSON to any URL, with retries and signed requests.', 'subtleforms' ),
@@ -45,15 +45,15 @@ final class Registry {
 				'enabled'     => true,
 				'configured'  => true,
 			),
-			self::MAILCHIMP   => self::mailchimp(),
+			Services::INTEGRATION     => self::emailMarketing(),
 		);
 
 		/**
 		 * Integrations an add-on lists in Settings.
 		 *
-		 * Listing an entry with the slug `mailchimp` that does not carry
-		 * `builtin => true` replaces this plugin's Mailchimp: it then sends
-		 * nothing and shows no Mailchimp panels of its own.
+		 * Listing an entry with the slug `email_marketing` that does not
+		 * carry `builtin => true` replaces this plugin's Email marketing: it
+		 * then sends nothing and shows no Email marketing screens of its own.
 		 *
 		 * @param array<string, array> $integrations Map of slug to integration data.
 		 * @since 2.8.0
@@ -64,34 +64,45 @@ final class Registry {
 	}
 
 	/**
-	 * This plugin's Mailchimp entry.
+	 * This plugin's Email marketing entry. It is on while any of its services
+	 * is switched on, and set up while a switched-on service is connected.
 	 *
 	 * @return array<string,mixed>
 	 */
-	private static function mailchimp(): array {
-		$status = Connection::status();
+	private static function emailMarketing(): array {
+		$enabled    = false;
+		$configured = false;
+		foreach ( Services::slugs() as $slug ) {
+			$connection = new Connection( $slug );
+			if ( $connection->isEnabled() ) {
+				$enabled = true;
+				if ( Connection::STATUS_CONNECTED === $connection->status() ) {
+					$configured = true;
+				}
+			}
+		}
 		return array(
-			'slug'        => self::MAILCHIMP,
-			'label'       => __( 'Mailchimp', 'subtleforms' ),
-			'description' => __( 'Add people who fill in a form to a Mailchimp audience.', 'subtleforms' ),
+			'slug'        => Services::INTEGRATION,
+			'label'       => __( 'Email marketing', 'subtleforms' ),
+			'description' => __( 'Add people who fill in a form to Mailchimp, Brevo or Kit.', 'subtleforms' ),
 			'available'   => true,
-			'enabled'     => Connection::STATUS_NONE !== $status,
-			'configured'  => Connection::STATUS_CONNECTED === $status,
+			'enabled'     => $enabled,
+			'configured'  => $configured,
 			'builtin'     => true,
 		);
 	}
 
 	/**
-	 * Whether this plugin's own Mailchimp is the one in charge: nothing
+	 * Whether this plugin's own Email marketing is the one in charge: nothing
 	 * replaced the entry.
 	 */
-	public static function coreOwnsMailchimp(): bool {
+	public static function coreOwnsEmailMarketing(): bool {
 		try {
 			$all = self::all();
 		} catch ( \Throwable $e ) {
 			return true;
 		}
-		$entry = $all[ self::MAILCHIMP ] ?? null;
+		$entry = $all[ Services::INTEGRATION ] ?? null;
 		return is_array( $entry ) && ! empty( $entry['builtin'] );
 	}
 }

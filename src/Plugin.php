@@ -149,9 +149,9 @@ final class Plugin {
 		// Register async webhook handler
 		add_action( 'subtleforms_async_webhook', array( \SubtleForms\Async\AsyncDispatcher::class, 'executeWebhook' ), 10, 1 );
 
-		// Mailchimp: queue a job for each saved entry, and run it.
-		add_action( 'subtleforms_async_mailchimp', array( \SubtleForms\Async\AsyncDispatcher::class, 'executeMailchimp' ), 10, 1 );
-		\SubtleForms\Integrations\Mailchimp\Sender::register();
+		// Email marketing (Mailchimp, Brevo, Kit): queue a job for each saved entry, and run it.
+		add_action( 'subtleforms_async_email_marketing', array( \SubtleForms\Async\AsyncDispatcher::class, 'executeEmailMarketing' ), 10, 1 );
+		\SubtleForms\Integrations\EmailMarketing\Sender::register();
 	}
 
 	/**

@@ -4,43 +4,26 @@
  *
  * Docs: https://mailchimp.com/developer/marketing/api/list-members/add-or-update-list-member/
  *
- * @package SubtleForms\Integrations\Mailchimp
+ * @package SubtleForms\Integrations\EmailMarketing
  * @since   2.8.0
  */
 
 declare(strict_types=1);
 
-namespace SubtleForms\Integrations\Mailchimp;
+namespace SubtleForms\Integrations\EmailMarketing;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * Builds and sends the requests. Requests are plain arrays (method, url,
- * headers, body) so they can be checked without a network.
+ * Adds or updates one audience member by the MD5 of the email address, so
+ * the same person is never added twice.
  */
-final class Client {
+final class MailchimpClient extends AbstractClient {
 
-	/** Seconds to wait for Mailchimp when a person is waiting in wp-admin. */
-	const ADMIN_TIMEOUT = 10;
-
-	/** Seconds to wait for Mailchimp in the background job. */
-	const JOB_TIMEOUT = 15;
-
-	/** @var string */
-	private string $apiKey;
-
-	/** @var int */
-	private int $timeout;
-
-	/**
-	 * @param string $apiKey  API key, ending in the data center (for example "-us21").
-	 * @param int    $timeout Seconds.
-	 */
-	public function __construct( string $apiKey, int $timeout = self::ADMIN_TIMEOUT ) {
-		$this->apiKey  = trim( $apiKey );
-		$this->timeout = max( 3, $timeout );
+	public static function serviceLabel(): string {
+		return 'Mailchimp';
 	}
 
 	/**
@@ -55,17 +38,24 @@ final class Client {
 	/**
 	 * API root for the key's data center.
 	 *
-	 * @throws MailchimpException When the key has no data center suffix.
+	 * @throws ServiceException When the key has no data center suffix.
 	 */
 	public function baseUrl(): string {
 		$dash = strrpos( $this->apiKey, '-' );
 		$dc   = false === $dash ? '' : substr( $this->apiKey, $dash + 1 );
 		if ( '' === $dc || 1 !== preg_match( '/^[a-z]+[0-9]+$/', $dc ) ) {
 			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Messages are shown as JSON or in the entry log, never printed as HTML.
-			throw new MailchimpException( __( 'This does not look like a Mailchimp API key. Keys end with a dash and the data center, for example "-us21".', 'subtleforms' ) );
+			throw new ServiceException( self::badKeyMessage() );
 			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 		return 'https://' . $dc . '.api.mailchimp.com/3.0';
+	}
+
+	/**
+	 * The sentence for a key that is not a Mailchimp key.
+	 */
+	public static function badKeyMessage(): string {
+		return __( 'This does not look like a Mailchimp API key. Keys end with a dash and the data center, for example "-us21".', 'subtleforms' );
 	}
 
 	/**
@@ -73,11 +63,20 @@ final class Client {
 	 *
 	 * @return array<string,string>
 	 */
-	private function headers(): array {
+	protected function headers(): array {
 		return array(
 			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- HTTP Basic credentials, as the Mailchimp API requires.
 			'Authorization' => 'Basic ' . base64_encode( 'subtleforms:' . $this->apiKey ),
 		);
+	}
+
+	protected function errorDetail( array $decoded ): string {
+		foreach ( array( 'detail', 'title' ) as $key ) {
+			if ( ! empty( $decoded[ $key ] ) && is_string( $decoded[ $key ] ) ) {
+				return $decoded[ $key ];
+			}
+		}
+		return '';
 	}
 
 	/**
@@ -94,7 +93,7 @@ final class Client {
 	 *
 	 * @param string $listId Audience ID.
 	 * @param string $email  Email address.
-	 * @throws MailchimpException When the key is not a Mailchimp key.
+	 * @throws ServiceException When the key is not a Mailchimp key.
 	 */
 	private function memberUrl( string $listId, string $email ): string {
 		return $this->baseUrl() . '/lists/' . rawurlencode( $listId ) . '/members/' . self::subscriberHash( $email );
@@ -160,96 +159,21 @@ final class Client {
 		);
 	}
 
-	/**
-	 * Send a request.
-	 *
-	 * @param array $request Method, url, headers and an optional array body.
-	 * @return array{status:int,body:array}
-	 * @throws MailchimpException On a transport error or an answer that is not 2xx.
-	 */
-	public function send( array $request ): array {
-		$method  = strtoupper( (string) ( $request['method'] ?? 'GET' ) );
-		$headers = is_array( $request['headers'] ?? null ) ? $request['headers'] : array();
-		$body    = $request['body'] ?? null;
-
-		$headers['Accept'] = 'application/json';
-		$args              = array(
-			'method'      => $method,
-			'headers'     => $headers,
-			'timeout'     => $this->timeout,
-			'redirection' => 0,
-			'user-agent'  => 'SubtleForms/' . ( defined( 'SUBTLEFORMS_VERSION' ) ? SUBTLEFORMS_VERSION : '2' ) . '; ' . home_url( '/' ),
-		);
-		if ( is_array( $body ) && 'GET' !== $method ) {
-			$args['body']            = wp_json_encode( $body );
-			$args['headers']['Content-Type'] = 'application/json';
+	public function subscribe( Subscriber $sub, ?callable $bodyFilter = null ): array {
+		$request         = $this->upsertRequest( $sub );
+		$request['body'] = self::filtered( $request['body'], $bodyFilter );
+		$response        = $this->send( $request );
+		$status          = (string) ( $response['body']['status'] ?? '' );
+		if ( $sub->tags ) {
+			$this->send( $this->tagsRequest( $sub ) );
 		}
-
-		// The safe client refuses private addresses and unusual ports; the
-		// only host this class calls is <data center>.api.mailchimp.com.
-		$response = wp_safe_remote_request( (string) $request['url'], $args );
-		if ( is_wp_error( $response ) ) {
-			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Messages are shown as JSON or in the entry log, never printed as HTML.
-			throw new MailchimpException(
-				sprintf(
-					/* translators: %s: error text from the connection */
-					__( 'Could not reach Mailchimp: %s', 'subtleforms' ),
-					$response->get_error_message()
-				),
-				0,
-				true
-			);
-			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
-		}
-
-		$status  = (int) wp_remote_retrieve_response_code( $response );
-		$raw     = (string) wp_remote_retrieve_body( $response );
-		$decoded = '' !== $raw ? json_decode( $raw, true ) : array();
-		$decoded = is_array( $decoded ) ? $decoded : array();
-
-		if ( $status < 200 || $status >= 300 ) {
-			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Messages are shown as JSON or in the entry log, never printed as HTML.
-			throw new MailchimpException( self::errorMessage( $status, $decoded ), $status, 429 === $status || $status >= 500 );
-			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
-		}
-
 		return array(
-			'status' => $status,
-			'body'   => $decoded,
+			'status' => '' === $status ? 'subscribed' : $status,
+			'member' => (string) ( $response['body']['id'] ?? self::subscriberHash( $sub->email ) ),
+			'notes'  => array(),
 		);
 	}
 
-	/**
-	 * A plain sentence for an error answer.
-	 *
-	 * @param int   $status  HTTP status.
-	 * @param array $decoded Decoded body.
-	 */
-	public static function errorMessage( int $status, array $decoded ): string {
-		if ( 401 === $status || 403 === $status ) {
-			return __( 'Mailchimp did not accept this API key.', 'subtleforms' );
-		}
-		$detail = '';
-		foreach ( array( 'detail', 'title' ) as $key ) {
-			if ( ! empty( $decoded[ $key ] ) && is_string( $decoded[ $key ] ) ) {
-				$detail = wp_strip_all_tags( $decoded[ $key ] );
-				break;
-			}
-		}
-		if ( '' === $detail ) {
-			/* translators: %d: HTTP status code */
-			return sprintf( __( 'Mailchimp answered with an error (HTTP %d).', 'subtleforms' ), $status );
-		}
-		/* translators: 1: HTTP status code, 2: text from Mailchimp */
-		return sprintf( __( 'Mailchimp said (HTTP %1$d): %2$s', 'subtleforms' ), $status, $detail );
-	}
-
-	/**
-	 * Check the key and read the account behind it.
-	 *
-	 * @return array{name:string,email:string}
-	 * @throws MailchimpException When the key is refused or Mailchimp cannot be reached.
-	 */
 	public function account(): array {
 		$response = $this->send(
 			array(
@@ -264,13 +188,7 @@ final class Client {
 		);
 	}
 
-	/**
-	 * The audiences of the account.
-	 *
-	 * @return array<int,array{id:string,name:string,count:?int}>
-	 * @throws MailchimpException On an error answer.
-	 */
-	public function audiences(): array {
+	public function lists(): array {
 		$response = $this->send(
 			array(
 				'method'  => 'GET',
@@ -298,10 +216,8 @@ final class Client {
 	 * which need a structured value a form answer cannot give.
 	 *
 	 * @param string $listId Audience ID.
-	 * @return array<int,array{tag:string,name:string,type:string,required:bool}>
-	 * @throws MailchimpException On an error answer.
 	 */
-	public function mergeFields( string $listId ): array {
+	public function fields( string $listId ): array {
 		if ( '' === $listId ) {
 			return array();
 		}
@@ -329,13 +245,6 @@ final class Client {
 		return $out;
 	}
 
-	/**
-	 * Whether the person is already a member of the audience.
-	 *
-	 * @param string $listId Audience ID.
-	 * @param string $email  Email address.
-	 * @throws MailchimpException On an error answer other than "not found".
-	 */
 	public function isMember( string $listId, string $email ): bool {
 		try {
 			$this->send(
@@ -346,7 +255,7 @@ final class Client {
 				)
 			);
 			return true;
-		} catch ( MailchimpException $e ) {
+		} catch ( ServiceException $e ) {
 			if ( 404 === $e->status() ) {
 				return false;
 			}

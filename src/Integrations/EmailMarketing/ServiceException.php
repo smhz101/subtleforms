@@ -1,14 +1,14 @@
 <?php
 /**
- * A failed Mailchimp request.
+ * A failed request to an email marketing service.
  *
- * @package SubtleForms\Integrations\Mailchimp
+ * @package SubtleForms\Integrations\EmailMarketing
  * @since   2.8.0
  */
 
 declare(strict_types=1);
 
-namespace SubtleForms\Integrations\Mailchimp;
+namespace SubtleForms\Integrations\EmailMarketing;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Carries the HTTP status and whether trying again later can help.
  */
-final class MailchimpException extends \RuntimeException {
+final class ServiceException extends \RuntimeException {
 
 	/** @var int */
 	private int $httpStatus;
