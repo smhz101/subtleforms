@@ -7,6 +7,6 @@
 		"WP_ENVIRONMENT_TYPE": "local"
 	},
 	"mappings": {
-		"wp-content/mu-plugins/subtleforms-mailchimp-mock.php": "./tests/browser/fixtures/mailchimp-mock-mu.php"
+		"wp-content/mu-plugins/subtleforms-email-marketing-mock.php": "./tests/browser/fixtures/email-marketing-mock-mu.php"
 	}
 }
