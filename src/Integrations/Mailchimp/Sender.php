@@ -239,7 +239,9 @@ final class Sender {
 
 		try {
 			if ( '' === $sub->listId ) {
+				// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Messages are shown as JSON or in the entry log, never printed as HTML.
 				throw new MailchimpException( __( 'No audience is chosen in the form\'s Mailchimp settings.', 'subtleforms' ) );
+				// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
 			if ( ! $sub->updateExisting && $client->isMember( $sub->listId, $sub->email ) ) {

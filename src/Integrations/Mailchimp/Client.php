@@ -61,7 +61,9 @@ final class Client {
 		$dash = strrpos( $this->apiKey, '-' );
 		$dc   = false === $dash ? '' : substr( $this->apiKey, $dash + 1 );
 		if ( '' === $dc || 1 !== preg_match( '/^[a-z]+[0-9]+$/', $dc ) ) {
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Messages are shown as JSON or in the entry log, never printed as HTML.
 			throw new MailchimpException( __( 'This does not look like a Mailchimp API key. Keys end with a dash and the data center, for example "-us21".', 'subtleforms' ) );
+			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 		return 'https://' . $dc . '.api.mailchimp.com/3.0';
 	}
@@ -187,6 +189,7 @@ final class Client {
 		// only host this class calls is <data center>.api.mailchimp.com.
 		$response = wp_safe_remote_request( (string) $request['url'], $args );
 		if ( is_wp_error( $response ) ) {
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Messages are shown as JSON or in the entry log, never printed as HTML.
 			throw new MailchimpException(
 				sprintf(
 					/* translators: %s: error text from the connection */
@@ -196,6 +199,7 @@ final class Client {
 				0,
 				true
 			);
+			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		$status  = (int) wp_remote_retrieve_response_code( $response );
@@ -204,7 +208,9 @@ final class Client {
 		$decoded = is_array( $decoded ) ? $decoded : array();
 
 		if ( $status < 200 || $status >= 300 ) {
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Messages are shown as JSON or in the entry log, never printed as HTML.
 			throw new MailchimpException( self::errorMessage( $status, $decoded ), $status, 429 === $status || $status >= 500 );
+			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		return array(
