@@ -1,19 +1,19 @@
 import { useEffect, useReducer, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import WebhooksPanel from './extensions/WebhooksPanel';
-import MailchimpSettingsPanel from '../integrations/mailchimp/MailchimpSettingsPanel';
+import EmailMarketingSettings from '../integrations/emailMarketing/EmailMarketingSettings';
 import { getSlotItems } from '../../../shared/extend';
 
 // Panels add-ons bring are registered in the `settings.extensions` slot with
-// the integration slug as id. Webhooks and Mailchimp are the panels this
-// plugin ships. Mailchimp's panel is drawn only while the integration list
-// carries this plugin's own entry (`builtin`); an add-on that lists its own
-// `mailchimp` entry draws its panel from the slot instead.
+// the integration slug as id. Webhooks and Email marketing are the panels this
+// plugin ships. The Email marketing panel is drawn only while the integration
+// list carries this plugin's own entry (`builtin`); an add-on that lists its
+// own `email_marketing` entry draws its panel from the slot instead.
 const EXTENSION_PANELS = {
   webhooks: WebhooksPanel,
 };
 const BUILT_IN_WHEN_LISTED = {
-  mailchimp: MailchimpSettingsPanel,
+  email_marketing: EmailMarketingSettings,
 };
 
 /**
@@ -37,14 +37,15 @@ function panelFor(slug, ext = null) {
 }
 
 /**
- * Slugs to list in the sidebar: Webhooks first, then what an add-on lists.
+ * Slugs to list in the sidebar: Webhooks, Email marketing, then what an add-on lists.
  * An entry is shown only when it is available and something draws its panel.
  *
  * @param {Object} extensions Integrations by slug.
  * @return {string[]} Slugs.
  */
 export function listedExtensions(extensions) {
-  const slugs = Object.keys(extensions).sort((a, b) => (a === 'webhooks' ? -1 : b === 'webhooks' ? 1 : 0));
+  const rank = (slug) => (slug === 'webhooks' ? 0 : slug === 'email_marketing' ? 1 : 2);
+  const slugs = Object.keys(extensions).sort((a, b) => rank(a) - rank(b));
   return slugs.filter((slug) => {
     const ext = extensions[slug];
     return !!ext && ext.available !== false && !!panelFor(slug, ext);
@@ -93,7 +94,7 @@ export default function ExtensionsSettings({ settings, updateSetting, fieldError
   const firstSlug = (hashSlug && listed.includes(hashSlug) ? hashSlug : null) ?? listed[0] ?? 'webhooks';
   const [activeSlug, setActiveSlug] = useState(firstSlug);
 
-  // The Mailchimp panel changes the status dot as soon as the connection does.
+  // The Email marketing panel changes the status dot as soon as a service does.
   const [, refreshStatus] = useReducer((n) => n + 1, 0);
   useEffect(() => {
     window.addEventListener('subtleforms:extension-status', refreshStatus);
@@ -121,6 +122,7 @@ export default function ExtensionsSettings({ settings, updateSetting, fieldError
                     setActiveSlug(slug);
                     const params = new URLSearchParams(window.location.hash.replace(/^#/, ''));
                     params.set('ext', slug);
+                    params.delete('service');
                     window.history.replaceState(null, '', `#${params.toString()}`);
                   }}>
                   <span className='sf-ext-settings__item-label'>{ext.label}</span>

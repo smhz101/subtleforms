@@ -34,6 +34,7 @@ store.choiceTypes = store.choiceTypes || {};
 store.fieldIcons = store.fieldIcons || {};
 store.fieldCategories = store.fieldCategories || {};
 store.payloadGroups = store.payloadGroups || {};
+store.emailMarketing = store.emailMarketing || {};
 
 /**
  * Register a public field renderer.
@@ -447,6 +448,43 @@ export function payloadGroups() {
   return Object.keys(store.payloadGroups).map((id) => ({ id, ...store.payloadGroups[id] }));
 }
 
+/**
+ * Register an email marketing service: a tile in Settings > Integrations >
+ * Email marketing and the screens behind it. This plugin registers Mailchimp,
+ * Brevo and Kit the same way. The server lists the service through the PHP
+ * filter `subtleforms/email_marketing/services`; a tile shows only when both
+ * sides know the slug.
+ *
+ * A slug this plugin already registered is replaced, which is how an add-on
+ * takes a service over.
+ *
+ * @param {string} slug Service slug (lowercase letters, numbers, dashes and underscores).
+ * @param {Object} def  {
+ *   label,               Name shown on the tile and in headings.
+ *   icon,                Component drawing the logo: receives { size, className }. Optional: the label is shown instead.
+ *   brandColor,          Hex colour the logo takes on hover and while the service is on.
+ *   order,               Position in the grid (lower first).
+ *   settingsComponent,   Settings screen of the service: receives { service, connection, onConnection }.
+ *   formComponent,       The service's section in a form's Integrations tab: receives
+ *                        { service, connected, schema, config, patch( values ), isReadOnly, fieldOptions }.
+ * }
+ */
+export function registerEmailMarketingService(slug, def) {
+  if (typeof slug === 'string' && /^[a-z0-9_-]+$/.test(slug) && def && typeof def.label === 'string') {
+    store.emailMarketing[slug] = { order: 100, ...def, slug };
+  }
+}
+
+/** Registered email marketing services as [{ slug, label, ... }], by `order` then slug. */
+export function getEmailMarketingServices() {
+  return Object.values(store.emailMarketing).sort((a, b) => (a.order - b.order) || a.slug.localeCompare(b.slug));
+}
+
+/** One registered email marketing service, or null. */
+export function getEmailMarketingService(slug) {
+  return store.emailMarketing[slug] || null;
+}
+
 root.SubtleFormsExtend = Object.assign(root.SubtleFormsExtend || {}, {
   registerFieldType,
   registerValueComputer,
@@ -464,4 +502,5 @@ root.SubtleFormsExtend = Object.assign(root.SubtleFormsExtend || {}, {
   registerFieldIcon,
   registerFieldCategory,
   registerPayloadGroup,
+  registerEmailMarketingService,
 });

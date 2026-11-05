@@ -28,6 +28,8 @@ const ACTION_META = {
   webhook: { iconName: 'Zap',      label: 'Call Webhook' },
   email_marketing: { iconName: 'Mail',     label: 'Email Marketing' },
   mailchimp: { iconName: 'Mail',     label: 'Mailchimp' },
+  brevo:     { iconName: 'Mail',     label: 'Brevo' },
+  kit:       { iconName: 'Mail',     label: 'Kit' },
   crm:     { iconName: 'Users',    label: 'CRM' },
   pdf:     { iconName: 'FileText', label: 'Entry PDF' },
 };

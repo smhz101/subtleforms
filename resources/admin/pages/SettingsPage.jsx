@@ -146,7 +146,10 @@ export default function Settings() {
     const params = new URLSearchParams(hash);
     if (params.get('tab') !== current.name) {
       params.set('tab', current.name);
-      if (current.name !== 'extensions') params.delete('ext');
+      if (current.name !== 'extensions') {
+        params.delete('ext');
+        params.delete('service');
+      }
       window.history.replaceState(null, '', `#${params.toString()}`);
     }
   }, [current.name]);
