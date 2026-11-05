@@ -91,8 +91,8 @@ Screen slots for `registerSlotItem( slot, id, { component, order } )` that the a
 | `form.confirmations` | Conditional confirmations in a form's settings | `{ schema, onMetadata, isReadOnly }` |
 | `form.integrations` | A form's Integrations tab (see `registerFormIntegration`) | see above |
 | `settings.extensions` | The panel of an integration listed through `subtleforms/admin/integrations`; the slot item id is the integration slug | none |
-| `integration.mailchimp.settings` | More controls below the Mailchimp connection card in Settings > Integrations > Mailchimp | `{ connection }` (`status`, `has_key`, `last4`, `account_name`, `account_email`; never the key) |
-| `form.integration.mailchimp` | More controls at the end of a form's Mailchimp panel (Form settings > Integrations). They keep their values in the form's `metadata.integrations`, under a key of the add-on's own | `{ schema, config, patch( values ), isReadOnly, fieldOptions, audienceId, mergeFields }` (`config` is the Mailchimp settings of the form, `patch` merges values into them, `mergeFields` lists the chosen audience's fields as `{ tag, name, type, required }`) |
+| `email_marketing.service.settings` | More controls below a service's connection in Settings > Integrations > Email marketing. An add-on that registers anything here counts as adding extras, so this plugin hides its note about SubtleForms Pro | `{ service, connected }` (`service` is the slug, `connected` is true once the service accepted its key) |
+| `email_marketing.service.form` | More controls at the end of a service's block in a form's Email marketing panel (Form settings > Integrations). They keep their values in the form's `metadata.integrations`, under a key of the add-on's own | `{ service, connected, schema, config, patch( values ), isReadOnly, fieldOptions }` (`config` is the service's settings of the form, `patch` merges values into them) |
 | `dashboard.panels` | Panels on the Dashboard | `{ forms }` |
 | `reports.panels` | Panels on the Reports screen | `{ forms }` |
 | `forms.list.column` | One extra column in the forms list; the item sets `header` for the column title | `{ form }` |
@@ -110,7 +110,7 @@ Screen slots for `registerSlotItem( slot, id, { component, order } )` that the a
 | `subtleforms/admin_enqueue_scripts` | action `( string $hook )` | Enqueue add-on scripts on SubtleForms admin pages. |
 | `subtleforms/admin_data` | filter `( array $data, string $hook )` | Add keys to `window.subtleformsAdmin`. Add-ons read their own keys from there. |
 | `subtleforms/admin_branding` | filter `( array $branding )` | Change what the admin app shows: `name`, `menuName`, `logoUrl` (a custom logo replaces the mark and the wordmark), `menuIcon` (a data URI, `data:image/svg+xml;base64,...`, or an image URL; empty for the default mark; core repaints a data URI in the admin colour scheme and draws a URL as an image) and `markSvg` (inline SVG made of `svg`, `g` and `path` only, which replaces the built-in mark in the app header; empty for the default mark). Invalid values fall back to the default mark. |
-| `subtleforms/admin/integrations` | filter `( array $integrations )` | List an integration in Settings, keyed by slug. This plugin lists `webhooks` and `mailchimp` (the Mailchimp entry carries `builtin => true`). See "Mailchimp" below for what listing a `mailchimp` entry of your own does. |
+| `subtleforms/admin/integrations` | filter `( array $integrations )` | List an integration in Settings, keyed by slug. This plugin lists `webhooks` and `email_marketing` (the Email marketing entry carries `builtin => true`). See "Email marketing" below for what listing an `email_marketing` entry of your own does. |
 | `subtleforms/forms/schema_before_save` | filter `( array $schema, int $formId, bool $activate )` | Change a schema before it is saved. |
 | `subtleforms/forms/schema_published` | action `( int $formId, array $schema, int $version )` | A schema version was published. |
 | `subtleforms/frontend/language` | filter `( string $lang )` | The language code the public form asks its schema in. |
@@ -123,28 +123,43 @@ Screen slots for `registerSlotItem( slot, id, { component, order } )` that the a
 | `subtleforms/email/after_send` | action `( array $job, string[] $attachments )` | An email was sent. |
 | `subtleforms/transfer/entry_meta_keys` | filter `( string[] $keys, array $record )` | Entry meta records that go into the submissions export and come back on import. The default is every record (an array) that another plugin saved on the entry, so an entry keeps what an add-on stored on it even when the add-on is not active. Records this plugin writes itself (the visitor's address and browser, request state, spam checks, consents, notes) never travel, nor do records over 64 KB or keys that name a token, secret, password or API key. An add-on narrows the list to the records it wants to travel. Since 2.7.2. |
 
-## Mailchimp
+## Email marketing
 
-This plugin adds people to a Mailchimp audience after an entry is saved, for forms where the site owner turned Mailchimp on (Form settings > Integrations > Mailchimp, stored in `metadata.integrations.mailchimp`). The key is saved under Settings > Integrations > Mailchimp in the non-autoloaded option `subtleforms_mailchimp_connection`. The job runs in the background (`subtleforms_async_mailchimp`) and writes "Mailchimp: subscribed", "pending (double opt-in)", "skipped (...)" or "failed: ..." to the entry's activity log. Everything works without an add-on.
+This plugin adds people to Mailchimp, Brevo or Kit after an entry is saved, for forms where the site owner turned a service on (Form settings > Integrations > Email marketing, stored in `metadata.integrations.mailchimp`, `.brevo` and `.kit`). There is one Email marketing entry in Settings > Integrations; the three services live inside it. Each service has its own connection in the non-autoloaded option `subtleforms_<slug>_connection`, with the API key, a switch and the service's own settings. Switching a service off keeps its key and settings. The job runs in the background (`subtleforms_async_email_marketing`, one per service) and writes "Mailchimp: subscribed", "pending (double opt-in)", "skipped (...)" or "failed: ..." to the entry's activity log, with the service name in front. Everything works without an add-on.
 
-### Taking Mailchimp over
+Settings of a form, for every service: `enabled`, `list_id`, `fields` (`email`, `first_name`, `last_name`), `merge_fields` (`[ { field, target } ]`), `tags` (comma separated), `double_optin`, `update_existing`, `consent_field`. Mailchimp needs a list (audience); Brevo and Kit do not, and Kit's list is one of its forms. Brevo adds people with `updateEnabled`, and Kit with `POST /v4/subscribers`; both create or update by email, so a repeat is an update.
 
-An add-on that lists its own integration under the slug `mailchimp` in `subtleforms/admin/integrations`, without `builtin => true`, owns Mailchimp. This plugin then sends nothing to Mailchimp (a job that was already queued also steps aside) and neither of its two Mailchimp panels is drawn; the add-on draws its own through the `settings.extensions` slot (item id `mailchimp`) and `registerFormIntegration`. Removing the entry switches Mailchimp off in the same way. No other slug has this effect.
+### Taking over
 
-### Adding to the built-in Mailchimp
+An add-on takes over in one of two ways:
 
-An add-on that leaves the entry alone adds to it through these hooks. They run in the background job, with a `$context` array of `submission_id`, `form_id`, `payload`, `schema` and `entry` (the stored row). A feed is a set of Mailchimp settings in the shape of `metadata.integrations.mailchimp` (`list_id`, `fields`, `merge_fields`, `tags`, `double_optin`, `update_existing`, `consent_field`) with a string `id`; the built-in one has the id `default`. Since 2.8.0.
+- Listing its own `email_marketing` entry in `subtleforms/admin/integrations`, without `builtin => true`, takes over the whole integration. This plugin then sends nothing to any service (a job that was already queued also steps aside) and draws neither the settings nor the form panel; the add-on draws its own through the `settings.extensions` slot (item id `email_marketing`) and `registerFormIntegration`. Removing the entry has the same effect. SubtleForms Pro 2.8.0 works this way.
+- Listing a service slug (`mailchimp`, `brevo`, `kit`) in `subtleforms/email_marketing/services`, without `builtin => true`, takes over only that service. A new slug adds a tile, and the add-on draws its screens with `registerEmailMarketingService`.
+
+No other entry has this effect.
+
+### Adding to the built-in services
+
+An add-on that leaves the entry alone adds to it through the filter, the slots and the hooks below. The hooks run in the background job, with a `$context` array of `submission_id`, `form_id`, `payload`, `schema` and `entry` (the stored row), and receive the service slug as the last argument. A feed is a set of the service's settings in the shape of `metadata.integrations.<slug>` with a string `id`; the built-in one has the id `default`. Since 2.8.0.
 
 | Hook | Type | Use |
 | --- | --- | --- |
-| `subtleforms/mailchimp/feeds` | filter `( array $feeds, array $context )` | The feeds to send for the entry. Add feeds (another audience, another mapping) or change the built-in one. Only runs for forms with Mailchimp switched on. Each feed gets its own line in the activity log, step `mailchimp:<id>`. |
-| `subtleforms/mailchimp/skip_reason` | filter `( ?string $reason, array $feed, array $context )` | Return a short plain reason to skip a feed for this entry ("the rule did not match"); the log says "Mailchimp: skipped (reason)". Return null to send. |
-| `subtleforms/mailchimp/subscriber` | filter `( Subscriber $subscriber, array $feed, array $context )` | Change who is sent: tags (`$subscriber->tags`), merge fields (`->fields`), audience (`->listId`). Return the object. |
-| `subtleforms/mailchimp/member_body` | filter `( array $body, Subscriber $subscriber, array $feed, array $context )` | Change the body of the add-or-update request, for example to add `interests` or `marketing_permissions`. Return the array. |
-| `subtleforms/mailchimp/delivered` | action `( array $result, array $feed, array $context )` | A person was added or updated (`audience`, `email`, `status`, `tags`, `member`). |
-| `subtleforms/mailchimp/failed` | action `( string $message, array $feed, array $context, bool $willRetry )` | A request failed. A transport error, a rate limit or a server error is tried again by this plugin up to twice (after 2 and 15 minutes); `$willRetry` says so. |
+| `subtleforms/email_marketing/services` | filter `( array $services )` | The services listed in the grid, keyed by slug. See "Taking over". |
+| `subtleforms/email_marketing/extras` | filter `( string[] $slugs )` | The services an add-on adds options to. While the list is empty this plugin shows its note about SubtleForms Pro. |
+| `subtleforms/email_marketing/feeds` | filter `( array $feeds, array $context, string $service )` | The feeds to send for the entry. Add feeds (another list, another mapping) or change the built-in one. Only runs for forms with the service switched on. Each feed gets its own line in the activity log, step `<service>:<id>`. |
+| `subtleforms/email_marketing/skip_reason` | filter `( ?string $reason, array $feed, array $context, string $service )` | Return a short plain reason to skip a feed for this entry ("the rule did not match"); the log says "Mailchimp: skipped (reason)". Return null to send. |
+| `subtleforms/email_marketing/subscriber` | filter `( Subscriber $subscriber, array $feed, array $context, string $service )` | Change who is sent: tags (`$subscriber->tags`), fields (`->fields`), list (`->listId`). Return the object. |
+| `subtleforms/email_marketing/request_body` | filter `( array $body, Subscriber $subscriber, array $feed, array $context, string $service )` | Change the body of the add-or-update request, for example Mailchimp `interests` or `marketing_permissions`. Return the array. |
+| `subtleforms/email_marketing/delivered` | action `( array $result, array $feed, array $context, string $service )` | A person was added or updated (`service`, `list`, `email`, `status`, `tags`, `member`). |
+| `subtleforms/email_marketing/failed` | action `( string $message, array $feed, array $context, bool $willRetry, string $service )` | A request failed. A transport error, a rate limit or a server error is tried again by this plugin up to twice (after 2 and 15 minutes); `$willRetry` says so. |
 
-`SubtleForms\Integrations\Mailchimp\Sender::process( $submissionId )` sends one entry again and returns the feed IDs worth another try; an add-on calls it for a manual retry or a resync. `Connection::state()` is the connection without its key.
+`SubtleForms\Integrations\EmailMarketing\Sender::process( $service, $submissionId, $retryCount = 0, $onlyFeedIds = [] )` sends one entry again and returns the feed IDs worth another try; an add-on calls it for a manual retry or a resync. `Connection::state()` is a connection without its key.
+
+In the browser, `registerEmailMarketingService( slug, { label, icon, settingsComponent, formComponent } )` adds a service (or replaces a built-in one with the same slug), and the two `email_marketing.service.*` slots add options to a service this plugin draws. A control that needs the service should stay disabled until `connected` is true.
+
+### Older add-ons
+
+The hooks `subtleforms/mailchimp/*` were never released and are gone. An add-on built before this change that sends Mailchimp, Brevo or Kit by itself (SubtleForms Pro 2.8.0) lists its own `email_marketing` entry, so this plugin sends nothing and no one is added twice.
 
 ## Capabilities
 
@@ -202,10 +217,11 @@ Counts already stored in the `subtleforms_stats` and `subtleforms_funnel` tables
 | `registerLogicExtension( { supports, passes, evaluateCondition } )` | Browser side of the logic hooks. Functions get a helpers object: `toText`, `listOf`, `norm`, `isNumeric`, `isEmptyValue`, `textEquals`, `countryEquals`, `readValue`, `today`, `evaluateCondition`. |
 | `registerLogicEditor( Component )` | Replace the builder logic editor. It gets the editor props (`logic`, `availableFields`, `onChange`, `scope`, `disabled`, ...) plus `countries` (the country list for country rules) and `Fallback`, the free editor. |
 | `registerSlotItem( slot, id, { component, order } )` | Add an item to a screen slot. |
+| `registerEmailMarketingService( slug, { label, icon, settingsComponent, formComponent } )` | Add a tile to Settings > Integrations > Email marketing, or replace the one of the same slug. `icon` is a component, `settingsComponent` draws the service's screen and `formComponent` its block in a form's panel. |
 | `registerFormMountHook( fn )` | `fn( { container, formId, config } )` runs when a form mounts on a page (view beacon, funnel tracker). |
 | `registerFieldType`, `registerInspectorControl`, `registerCanvasPreview` | Existing. |
 
-Slots: `reports.panels` and `dashboard.panels` (props: `forms`), `forms.list.column` (`{ component( form ), header, order }`), `footer.meta` (props: `version`), `settings.extensions` (id is the extension slug), `form.integrations` (props: `schema`, `integrations`, `patch`, `isReadOnly`, `fieldOptions`), `form.confirmations` (props: `schema`, `onMetadata`, `isReadOnly`), `form.settings.sections` (`{ component, title, description, icon, order, appliesTo( schema ) }`; props: `schema`, `onChange`, `onMetadata`, `isReadOnly`, `fields`), `builder.canvas.notes` (props: `schema`), `submission.panels` (props: `submission`, `meta`) and `submission.actions` (props: `submission`).
+Slots: `reports.panels` and `dashboard.panels` (props: `forms`), `forms.list.column` (`{ component( form ), header, order }`), `footer.meta` (props: `version`), `settings.extensions` (id is the extension slug), `form.integrations` (props: `schema`, `integrations`, `patch`, `isReadOnly`, `fieldOptions`), `form.confirmations` (props: `schema`, `onMetadata`, `isReadOnly`), `form.settings.sections` (`{ component, title, description, icon, order, appliesTo( schema ) }`; props: `schema`, `onChange`, `onMetadata`, `isReadOnly`, `fields`), `builder.canvas.notes` (props: `schema`), `submission.panels` (props: `submission`, `meta`), `submission.actions` (props: `submission`), `email_marketing.service.settings` (props: `service`, `connected`) and `email_marketing.service.form` (props: `service`, `connected`, `schema`, `config`, `patch`, `isReadOnly`, `fieldOptions`).
 
 The front end dispatches the `subtleforms:submitted` event on `document` with `detail.formId` after a successful send. Field wrappers carry `data-sf-key` and steps carry `data-sf-step`, which Pro reads for the funnel.
 

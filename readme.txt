@@ -95,7 +95,7 @@ Fields have labels, errors are announced and tied to their fields, choice groups
 
 = SubtleForms Pro =
 
-SubtleForms Pro is a separate plugin sold at [subtleforms.com/pro](https://subtleforms.com/pro/). It adds Signature, Calculation and Picture choice fields, several files per upload field, advanced conditional logic, form analytics, Stripe payments with coupons, WooCommerce checkout, Mailchimp, Brevo, Kit, HubSpot, Salesforce, Pipedrive and Close connections, Zapier, Make and n8n, entry PDFs and more templates.
+SubtleForms Pro is a separate plugin sold at [subtleforms.com/pro](https://subtleforms.com/pro/). It adds Signature, Calculation and Picture choice fields, several files per upload field, advanced conditional logic, form analytics, Stripe payments with coupons, WooCommerce checkout, extra email marketing options, HubSpot, Salesforce, Pipedrive and Close connections, Zapier, Make and n8n, entry PDFs and more templates.
 
 = Documentation and support =
 
@@ -192,9 +192,19 @@ Used for the same purpose when hCaptcha is enabled. The form page loads the scri
 
 Used for the same purpose when Turnstile is enabled. The form page loads the script from challenges.cloudflare.com, and on submit the site sends your secret key, the response token and the visitor's IP address to https://challenges.cloudflare.com/turnstile/v0/siteverify. [Terms of Use](https://www.cloudflare.com/website-terms/), [Privacy Policy](https://www.cloudflare.com/privacypolicy/).
 
-= Mailchimp =
+= Mailchimp, Brevo and Kit (email marketing) =
 
-Used only when a site administrator connects a Mailchimp account under Settings, Integrations, Mailchimp, and only for forms where the administrator turns Mailchimp on. After an entry is saved, the site sends the person's email address to Mailchimp, with the form answers the administrator mapped (such as first name, last name or other audience fields), the tags the administrator typed, and the subscription status (subscribed, or pending when double opt-in is on). Entries marked as spam, and entries where the consent box the administrator chose was not ticked, are not sent. The visitor's IP address and browser are not sent. When the administrator connects, tests the connection or loads their audiences in wp-admin, the site sends the API key to Mailchimp to sign in and receives the account name and email, the audience list and its fields. Requests go to https://<data center>.api.mailchimp.com/3.0, where the data center (for example us21) is the end of your API key. The API key is stored in the WordPress options table and is never shown again after saving. [Terms of Use](https://mailchimp.com/legal/terms/), [Privacy Statement](https://www.intuit.com/privacy/statement/).
+Used only when a site administrator connects an account under Settings, Integrations, Email marketing, and only for forms where the administrator turns that service on. After an entry is saved, the site sends the person's email address to the service, with the form answers the administrator mapped (such as first name, last name or other contact fields), the tags the administrator typed, and the subscription status (subscribed, or pending when double opt-in is on). Entries marked as spam, and entries where the consent box the administrator chose was not ticked, are not sent. The visitor's IP address and browser are not sent. When the administrator connects, tests the connection or loads their lists in wp-admin, the site sends the API key to the service to sign in and receives the account name and email, the lists and their fields. The API key is stored in the WordPress options table and is never shown again after saving.
+
+Mailchimp: requests go to https://<data center>.api.mailchimp.com/3.0, where the data center (for example us21) is the end of your API key. [Terms of Use](https://mailchimp.com/legal/terms/), [Privacy Statement](https://www.intuit.com/privacy/statement/).
+
+= Brevo =
+
+Used for the same purpose when the administrator connects Brevo. Requests go to https://api.brevo.com, with the contact's email address, the mapped answers and the list. With double opt-in on, Brevo sends the confirmation email from the template the administrator chose. [Terms of Use](https://www.brevo.com/legal/termsofuse/), [Privacy Policy](https://www.brevo.com/legal/privacypolicy/).
+
+= Kit =
+
+Used for the same purpose when the administrator connects Kit (formerly ConvertKit). Requests go to https://api.kit.com, with the subscriber's email address, the mapped answers, the Kit form the administrator chose and the tags the administrator typed. [Terms of Service](https://kit.com/terms), [Privacy Policy](https://kit.com/privacy).
 
 = Webhooks =
 

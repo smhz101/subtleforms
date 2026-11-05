@@ -103,6 +103,20 @@ if (fs.existsSync(flagLicence)) {
   missing.push('flag-icons');
 }
 
+// Email marketing logos. The path data is copied into the admin source, so
+// no package is bundled and the section is written from here.
+sections.push(
+  [
+    'simple-icons (Mailchimp, Brevo and Kit logo paths, resources/admin/components/integrations/emailMarketing/logos.js)',
+    'Licence: CC0-1.0',
+    'Source: https://github.com/simple-icons/simple-icons',
+    '',
+    'The icon path data is dedicated to the public domain under CC0 1.0 Universal',
+    '(https://creativecommons.org/publicdomain/zero/1.0/). The marks are trademarks',
+    'of their owners and are shown only to name the service.',
+  ].join('\n')
+);
+
 // PHP packages shipped in vendor/.
 if (vendorDir) {
   const composerLicence = path.join(vendorDir, 'composer', 'LICENSE');
