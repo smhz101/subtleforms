@@ -1,0 +1,180 @@
+{
+ "settings": {
+  "title": "Ninja contact",
+  "sub_limit_number": "100"
+ },
+ "fields": [
+  {
+   "label": "First name",
+   "key": "firstname",
+   "type": "firstname",
+   "order": "1",
+   "required": "1",
+   "id": 1
+  },
+  {
+   "label": "Last name",
+   "key": "lastname",
+   "type": "lastname",
+   "order": "2",
+   "required": "1",
+   "id": 2
+  },
+  {
+   "label": "Email",
+   "key": "email",
+   "type": "email",
+   "order": "3",
+   "required": "1",
+   "placeholder": "you@example.com",
+   "desc_text": "Never shared.",
+   "id": 3
+  },
+  {
+   "label": "Topic",
+   "key": "topic",
+   "type": "listselect",
+   "order": "4",
+   "options": [
+    {
+     "label": "Sales",
+     "value": "sales",
+     "selected": 0,
+     "order": 0
+    },
+    {
+     "label": "Support",
+     "value": "support",
+     "selected": 0,
+     "order": 1
+    }
+   ],
+   "required": "1",
+   "conditions": [
+    {
+     "process": 1,
+     "connector": "all",
+     "when": [
+      {
+       "connector": "AND",
+       "key": "topic",
+       "comparator": "equal",
+       "value": "support",
+       "type": "field",
+       "modelType": "when"
+      }
+     ],
+     "then": [
+      {
+       "key": "details",
+       "trigger": "show_field",
+       "value": "",
+       "type": "field",
+       "modelType": "then"
+      }
+     ]
+    }
+   ],
+   "id": 4
+  },
+  {
+   "label": "Details",
+   "key": "details",
+   "type": "textarea",
+   "order": "5",
+   "input_limit": "300",
+   "input_limit_type": "characters",
+   "id": 5
+  },
+  {
+   "label": "Extras",
+   "key": "extras",
+   "type": "listcheckbox",
+   "order": "6",
+   "options": [
+    {
+     "label": "Gift wrap",
+     "value": "gift wrap",
+     "selected": 0,
+     "order": 0
+    },
+    {
+     "label": "Express",
+     "value": "express",
+     "selected": 0,
+     "order": 1
+    }
+   ],
+   "id": 6
+  }
+ ],
+ "actions": [
+  {
+   "settings": {
+    "type": "save",
+    "label": "Store",
+    "active": 1
+   },
+   "id": 20
+  },
+  {
+   "settings": {
+    "to": "{wp:admin_email}",
+    "email_subject": "New message from {field:firstname}",
+    "email_message": "{field:details}\n{fields_table}\nBy {field:email}",
+    "from_name": "{wp:site_title}",
+    "from_address": "{system:admin_email}",
+    "reply_to": "{field:email}",
+    "email_format": "html",
+    "cc": "",
+    "bcc": "",
+    "type": "email",
+    "label": "Admin email",
+    "active": 1
+   },
+   "id": 21
+  },
+  {
+   "settings": {
+    "to": "{field:email}",
+    "email_subject": "Thanks",
+    "email_message": "Hi {field:firstname}, {post:id}",
+    "conditions": {
+     "process": 1,
+     "connector": "all",
+     "when": [
+      {
+       "connector": "AND",
+       "key": "subscribe",
+       "comparator": "equal",
+       "value": "1",
+       "type": "field",
+       "modelType": "when"
+      }
+     ]
+    },
+    "type": "email",
+    "label": "Copy to visitor",
+    "active": 1
+   },
+   "id": 22
+  },
+  {
+   "settings": {
+    "success_msg": "<p>Thank you {field:firstname}.</p>",
+    "type": "successmessage",
+    "label": "Success",
+    "active": 1
+   },
+   "id": 23
+  },
+  {
+   "settings": {
+    "type": "mailchimp",
+    "label": "Newsletter",
+    "active": 1
+   },
+   "id": 24
+  }
+ ]
+}

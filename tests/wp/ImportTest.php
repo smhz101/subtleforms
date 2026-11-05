@@ -17,7 +17,7 @@ use SubtleForms\Tests\Fixtures\ImportSeeder;
 
 final class ImportTest extends TestCase {
 
-	/** @var array{cf7: int[], gravity: int[], fluent: int[]} */
+	/** @var array */
 	private $seeded;
 
 	/** @var int Emails WordPress tried to send. */
@@ -99,7 +99,9 @@ final class ImportTest extends TestCase {
 		$response = $this->rest( 'GET', '/tools/migrate/sources' );
 		$this->assertSame( 200, $response->get_status() );
 		$sources = array_column( $response->get_data()['data'], null, 'id' );
-		$this->assertSame( array( 'cf7', 'gravity', 'fluent' ), array_keys( $sources ) );
+		$this->assertSame( array( 'cf7', 'gravity', 'fluent', 'wpforms', 'ninja' ), array_keys( $sources ) );
+		$this->assertGreaterThanOrEqual( 1, $sources['wpforms']['count'] );
+		$this->assertGreaterThanOrEqual( 1, $sources['ninja']['count'] );
 		$this->assertGreaterThanOrEqual( 2, $sources['cf7']['count'] );
 		$this->assertGreaterThanOrEqual( 1, $sources['gravity']['count'] );
 		$this->assertGreaterThanOrEqual( 1, $sources['fluent']['count'] );
@@ -299,7 +301,7 @@ final class ImportTest extends TestCase {
 	}
 
 	public function test_bad_requests_are_refused(): void {
-		$this->assertSame( 404, $this->rest( 'GET', '/tools/migrate/sources/wpforms/forms' )->get_status() );
+		$this->assertSame( 404, $this->rest( 'GET', '/tools/migrate/sources/made-up/forms' )->get_status() );
 		$this->assertSame( 422, $this->rest( 'POST', '/tools/migrate/sources/cf7/import', array( 'ids' => array() ) )->get_status() );
 		$this->assertSame( 422, $this->rest( 'POST', '/tools/migrate/sources/cf7/import', array( 'ids' => array( '../1' ) ) )->get_status() );
 		$missing = $this->import( 'cf7', array( 999999 ) );

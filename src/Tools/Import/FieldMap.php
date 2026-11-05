@@ -28,6 +28,9 @@ final class FieldMap {
 	public const STEP   = 'step';
 	public const SUBMIT = '@submit';
 
+	/** A WPForms layout: its columns hold the fields that follow it. */
+	public const LAYOUT = '@layout';
+
 	/**
 	 * Contact Form 7 form-tags.
 	 */
@@ -165,6 +168,104 @@ final class FieldMap {
 	);
 
 	/**
+	 * WPForms field types.
+	 */
+	public const WPFORMS = array(
+		'name'                => 'name_group',
+		'email'               => 'email',
+		'text'                => 'text',
+		'textarea'            => 'textarea',
+		'number'              => 'number',
+		'number-slider'       => 'range_slider',
+		'phone'               => 'phone',
+		'address'             => 'address_group',
+		'url'                 => 'url',
+		'select'              => 'dropdown',
+		'radio'               => 'radio',
+		'checkbox'            => 'multiple_choice',
+		'gdpr-checkbox'       => 'consent',
+		'date-time'           => 'date',
+		'hidden'              => 'hidden',
+		'html'                => 'html',
+		'content'             => 'html',
+		'divider'             => 'section_break',
+		'pagebreak'           => self::STEP,
+		'file-upload'         => 'file_upload',
+		'rating'              => 'rating',
+		'net_promoter_score'  => 'net_promoter_score',
+		'password'            => 'password',
+		'richtext'            => 'rich_text',
+		'layout'              => self::LAYOUT,
+		'likert_scale'        => '!quiz',
+		'captcha'             => '!captcha',
+		'payment-single'      => '!payment',
+		'payment-multiple'    => '!payment',
+		'payment-checkbox'    => '!payment',
+		'payment-select'      => '!payment',
+		'payment-total'       => '!payment',
+		'payment-coupon'      => '!payment',
+		'credit-card'         => '!payment',
+		'stripe-credit-card'  => '!payment',
+		'square'              => '!payment',
+		'authorize_net'       => '!payment',
+		'paypal-commerce'     => '!payment',
+		'signature'           => '!signature',
+		'repeater'            => '!repeater',
+		'entry-preview'       => '!preview',
+	);
+
+	/**
+	 * Ninja Forms field types.
+	 */
+	public const NINJA = array(
+		'firstname'              => 'text',
+		'lastname'               => 'text',
+		'email'                  => 'email',
+		'textbox'                => 'text',
+		'textarea'               => 'textarea',
+		'phone'                  => 'phone',
+		'number'                 => 'number',
+		'listselect'             => 'dropdown',
+		'listradio'              => 'radio',
+		'listcheckbox'           => 'multiple_choice',
+		'listmultiselect'        => 'multiple_choice',
+		'checkbox'               => 'checkbox',
+		'date'                   => 'date',
+		'address'                => 'text',
+		'city'                   => 'text',
+		'zip'                    => 'text',
+		'liststate'              => 'dropdown',
+		'listcountry'            => 'country',
+		'hidden'                 => 'hidden',
+		'html'                   => 'html',
+		'hr'                     => 'section_break',
+		'starrating'             => 'rating',
+		'file_upload'            => 'file_upload',
+		'password'               => 'password',
+		'submit'                 => self::SUBMIT,
+		'recaptcha'              => '!captcha',
+		'recaptcha_v3'           => '!captcha',
+		'hcaptcha'               => '!captcha',
+		'spam'                   => '!captcha',
+		'timed_submit'           => '!captcha',
+		'confirm'                => '!confirm',
+		'passwordconfirm'        => '!confirm',
+		'repeater'               => '!repeater',
+		'product'                => '!payment',
+		'quantity'               => '!payment',
+		'shipping'               => '!payment',
+		'total'                  => '!payment',
+		'tax'                    => '!payment',
+		'creditcard'             => '!payment',
+		'creditcardcvc'          => '!payment',
+		'creditcardexpiration'   => '!payment',
+		'creditcardfullname'     => '!payment',
+		'creditcardnumber'       => '!payment',
+		'creditcardzip'          => '!payment',
+		'signature'              => '!signature',
+	);
+
+	/**
 	 * Plain names of the sources, for report lines.
 	 *
 	 * @return array<string, string>
@@ -174,13 +275,15 @@ final class FieldMap {
 			'cf7'     => __( 'Contact Form 7', 'subtleforms' ),
 			'gravity' => __( 'Gravity Forms', 'subtleforms' ),
 			'fluent'  => __( 'Fluent Forms', 'subtleforms' ),
+			'wpforms' => __( 'WPForms', 'subtleforms' ),
+			'ninja'   => __( 'Ninja Forms', 'subtleforms' ),
 		);
 	}
 
 	/**
 	 * The table for a source.
 	 *
-	 * @param string $source cf7, gravity or fluent.
+	 * @param string $source cf7, gravity, fluent, wpforms or ninja.
 	 * @return array<string, string>
 	 */
 	public static function table( string $source ): array {
@@ -191,6 +294,10 @@ final class FieldMap {
 				return self::GRAVITY;
 			case 'fluent':
 				return self::FLUENT;
+			case 'wpforms':
+				return self::WPFORMS;
+			case 'ninja':
+				return self::NINJA;
 		}
 		return array();
 	}
@@ -226,6 +333,8 @@ final class FieldMap {
 			'list'      => __( 'list fields have no SubtleForms equivalent', 'subtleforms' ),
 			'repeater'  => __( 'repeating fields are not imported', 'subtleforms' ),
 			'signature' => __( 'signature fields are not imported', 'subtleforms' ),
+			'preview'   => __( 'entry preview fields are not imported', 'subtleforms' ),
+			'confirm'   => __( 'confirm fields are not imported', 'subtleforms' ),
 			'unknown'   => __( 'this field type has no SubtleForms equivalent', 'subtleforms' ),
 		);
 		return $why[ $key ] ?? $why['unknown'];

@@ -34,6 +34,8 @@ final class ImportSharedTest extends ImportTestCase {
 			'cf7'     => '### Contact Form 7',
 			'gravity' => '### Gravity Forms',
 			'fluent'  => '### Fluent Forms',
+			'wpforms' => '### WPForms',
+			'ninja'   => '### Ninja Forms',
 		);
 		foreach ( $sections as $source => $heading ) {
 			$start = strpos( $doc, $heading );

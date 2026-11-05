@@ -12,7 +12,7 @@ import './ToolsPage.scss';
 
 const SECTIONS = [
   { id: 'transfer', label: __( 'Transfer', 'subtleforms' ), icon: Icon.Package, description: __( 'Move SubtleForms forms and submissions between sites.', 'subtleforms' ) },
-  { id: 'migrate', label: __( 'Migrate', 'subtleforms' ), icon: Icon.FileUp, description: __( 'Bring forms across from Contact Form 7, Gravity Forms or Fluent Forms.', 'subtleforms' ) },
+  { id: 'migrate', label: __( 'Migrate', 'subtleforms' ), icon: Icon.FileUp, description: __( 'Bring forms across from Contact Form 7, Gravity Forms, Fluent Forms, WPForms or Ninja Forms.', 'subtleforms' ) },
   { id: 'activity', label: __( 'Activity', 'subtleforms' ), icon: Icon.Activity, description: __( 'What happened after each entry was sent.', 'subtleforms' ) },
   { id: 'webhooks', label: __( 'Webhooks', 'subtleforms' ), icon: Icon.Webhook, description: __( 'Calls this site made to another address.', 'subtleforms' ) },
   { id: 'api', label: __( 'API', 'subtleforms' ), icon: Icon.Code, description: __( 'SubtleForms REST calls from the last 30 days.', 'subtleforms' ) },
@@ -347,7 +347,7 @@ function Transfer( { forms, busy, setBusy, tell } ) {
   );
 }
 
-export function FileButton( { label, busy, onFile } ) {
+export function FileButton( { label, busy, onFile, accept = 'application/json,.json' } ) {
   const inputRef = useRef( null );
   return (
     <>
@@ -360,7 +360,7 @@ export function FileButton( { label, busy, onFile } ) {
       <input
         ref={ inputRef }
         type='file'
-        accept='application/json,.json'
+        accept={ accept }
         tabIndex={ -1 }
         aria-hidden='true'
         disabled={ busy }
@@ -384,17 +384,25 @@ function Migrate( { busy, setBusy, tell } ) {
   const onFile = async ( file ) => {
     setBusy( true );
     try {
-      const packageJson = await readJsonFile( file );
-      const result = await apiPost( '/tools/migrate/preview', { package: packageJson } );
+      // A Ninja Forms .nff file is JSON, or JSON or a PHP array in base64.
+      // What is not JSON goes to the server as text, which reads or refuses it.
+      const text = await file.text();
+      let body;
+      try {
+        body = { package: JSON.parse( text ) };
+      } catch {
+        body = { raw: text };
+      }
+      const result = await apiPost( '/tools/migrate/preview', body );
       if ( ! result.ok ) {
         setPreview( null );
         tell( 'error', messageFrom( result ) );
       } else {
-        setFileJson( packageJson );
+        setFileJson( body );
         setPreview( result.body.data );
       }
     } catch {
-      tell( 'error', __( 'That file is not JSON.', 'subtleforms' ) );
+      tell( 'error', __( 'That file could not be read.', 'subtleforms' ) );
     }
     setBusy( false );
   };
@@ -404,7 +412,7 @@ function Migrate( { busy, setBusy, tell } ) {
       return;
     }
     setBusy( true );
-    const result = await apiPost( '/tools/migrate/import', { source: preview.source, package: fileJson } );
+    const result = await apiPost( '/tools/migrate/import', { source: preview.source, ...fileJson } );
     setBusy( false );
     if ( ! result.ok ) {
       tell( 'error', messageFrom( result ) );
@@ -425,11 +433,11 @@ function Migrate( { busy, setBusy, tell } ) {
       <header className='sf-panel__header'>
         <div>
           <h2 className='sf-panel__title'>{ __( 'From an export file', 'subtleforms' ) }</h2>
-          <p className='sf-panel__subtitle'>{ __( 'A Gravity Forms or Fluent Forms JSON export, for forms made on another site.', 'subtleforms' ) }</p>
+          <p className='sf-panel__subtitle'>{ __( 'A Gravity Forms, Fluent Forms or WPForms JSON export, or a Ninja Forms .nff file, for forms made on another site.', 'subtleforms' ) }</p>
         </div>
       </header>
       <div className='sf-panel__body'>
-        <p>{ __( 'Upload the JSON export. You will see what will be created, and what is left out, before anything is saved. New forms are drafts.', 'subtleforms' ) }</p>
+        <p>{ __( 'Upload the export file. You will see what will be created, and what is left out, before anything is saved. New forms are drafts.', 'subtleforms' ) }</p>
         { preview && (
           <ul className='sf-tools__preview'>
             { preview.forms.map( ( form, index ) => (
@@ -451,7 +459,7 @@ function Migrate( { busy, setBusy, tell } ) {
         ) }
       </div>
       <footer className='sf-panel__footer'>
-        <FileButton label={ __( 'Choose export file', 'subtleforms' ) } busy={ busy } onFile={ onFile } />
+        <FileButton label={ __( 'Choose export file', 'subtleforms' ) } busy={ busy } onFile={ onFile } accept='application/json,.json,.nff' />
         { preview && (
           <Button variant='primary' disabled={ busy } onClick={ run }>{ __( 'Create draft forms', 'subtleforms' ) }</Button>
         ) }

@@ -1,0 +1,347 @@
+{
+ "form": {
+  "id": 7,
+  "title": "Ninja contact"
+ },
+ "form_meta": [
+  {
+   "key": "sub_limit_number",
+   "value": "100"
+  },
+  {
+   "key": "sub_limit_msg",
+   "value": "No more entries."
+  }
+ ],
+ "fields": [
+  {
+   "id": 1,
+   "type": "firstname",
+   "label": "First name",
+   "key": "firstname",
+   "order": 1,
+   "meta": {
+    "label": "First name",
+    "key": "firstname",
+    "type": "firstname",
+    "order": "1",
+    "required": "1"
+   }
+  },
+  {
+   "id": 2,
+   "type": "lastname",
+   "label": "Last name",
+   "key": "lastname",
+   "order": 2,
+   "meta": {
+    "label": "Last name",
+    "key": "lastname",
+    "type": "lastname",
+    "order": "2",
+    "required": "1"
+   }
+  },
+  {
+   "id": 3,
+   "type": "email",
+   "label": "Email",
+   "key": "email",
+   "order": 3,
+   "meta": {
+    "label": "Email",
+    "key": "email",
+    "type": "email",
+    "order": "3",
+    "required": "1",
+    "placeholder": "you@example.com",
+    "desc_text": "Never shared."
+   }
+  },
+  {
+   "id": 4,
+   "type": "listselect",
+   "label": "Topic",
+   "key": "topic",
+   "order": 4,
+   "meta": {
+    "label": "Topic",
+    "key": "topic",
+    "type": "listselect",
+    "order": "4",
+    "options": [
+     {
+      "label": "Sales",
+      "value": "sales",
+      "selected": 0,
+      "order": 0
+     },
+     {
+      "label": "Support",
+      "value": "support",
+      "selected": 0,
+      "order": 1
+     }
+    ],
+    "required": "1",
+    "conditions": [
+     {
+      "process": 1,
+      "connector": "all",
+      "when": [
+       {
+        "connector": "AND",
+        "key": "topic",
+        "comparator": "equal",
+        "value": "support",
+        "type": "field",
+        "modelType": "when"
+       }
+      ],
+      "then": [
+       {
+        "key": "details",
+        "trigger": "show_field",
+        "value": "",
+        "type": "field",
+        "modelType": "then"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": 5,
+   "type": "textarea",
+   "label": "Details",
+   "key": "details",
+   "order": 5,
+   "meta": {
+    "label": "Details",
+    "key": "details",
+    "type": "textarea",
+    "order": "5",
+    "input_limit": "300",
+    "input_limit_type": "characters"
+   }
+  },
+  {
+   "id": 6,
+   "type": "listcheckbox",
+   "label": "Extras",
+   "key": "extras",
+   "order": 6,
+   "meta": {
+    "label": "Extras",
+    "key": "extras",
+    "type": "listcheckbox",
+    "order": "6",
+    "options": [
+     {
+      "label": "Gift wrap",
+      "value": "gift wrap",
+      "selected": 0,
+      "order": 0
+     },
+     {
+      "label": "Express",
+      "value": "express",
+      "selected": 0,
+      "order": 1
+     }
+    ]
+   }
+  },
+  {
+   "id": 7,
+   "type": "checkbox",
+   "label": "Subscribe",
+   "key": "subscribe",
+   "order": 7,
+   "meta": {
+    "label": "Subscribe",
+    "key": "subscribe",
+    "type": "checkbox",
+    "order": "7",
+    "default_value": "unchecked"
+   }
+  },
+  {
+   "id": 8,
+   "type": "date",
+   "label": "Visit date",
+   "key": "visit",
+   "order": 8,
+   "meta": {
+    "label": "Visit date",
+    "key": "visit",
+    "type": "date",
+    "order": "8",
+    "date_format": "DD/MM/YYYY"
+   }
+  },
+  {
+   "id": 9,
+   "type": "starrating",
+   "label": "Rating",
+   "key": "rating",
+   "order": 9,
+   "meta": {
+    "label": "Rating",
+    "key": "rating",
+    "type": "starrating",
+    "order": "9",
+    "number_of_stars": "5"
+   }
+  },
+  {
+   "id": 10,
+   "type": "file_upload",
+   "label": "File",
+   "key": "file",
+   "order": 10,
+   "meta": {
+    "label": "File",
+    "key": "file",
+    "type": "file_upload",
+    "order": "10",
+    "upload_types": "pdf png",
+    "max_file_size": "2"
+   }
+  },
+  {
+   "id": 11,
+   "type": "recaptcha",
+   "label": "reCAPTCHA",
+   "key": "recaptcha",
+   "order": 11,
+   "meta": {
+    "label": "reCAPTCHA",
+    "key": "recaptcha",
+    "type": "recaptcha",
+    "order": "11"
+   }
+  },
+  {
+   "id": 12,
+   "type": "product",
+   "label": "Item",
+   "key": "item",
+   "order": 12,
+   "meta": {
+    "label": "Item",
+    "key": "item",
+    "type": "product",
+    "order": "12"
+   }
+  },
+  {
+   "id": 13,
+   "type": "html",
+   "label": "Note",
+   "key": "note",
+   "order": 13,
+   "meta": {
+    "label": "Note",
+    "key": "note",
+    "type": "html",
+    "order": "13",
+    "default": "<p>Read this first.</p>"
+   }
+  },
+  {
+   "id": 14,
+   "type": "submit",
+   "label": "Send it",
+   "key": "submit",
+   "order": 14,
+   "meta": {
+    "label": "Send it",
+    "key": "submit",
+    "type": "submit",
+    "order": "14"
+   }
+  },
+  {
+   "id": 15,
+   "type": "confirm",
+   "label": "Confirm email",
+   "key": "confirm",
+   "order": 15,
+   "meta": {
+    "label": "Confirm email",
+    "key": "confirm",
+    "type": "confirm",
+    "order": "15"
+   }
+  }
+ ],
+ "actions": [
+  {
+   "id": 20,
+   "type": "save",
+   "label": "Store",
+   "active": 1,
+   "meta": {}
+  },
+  {
+   "id": 21,
+   "type": "email",
+   "label": "Admin email",
+   "active": 1,
+   "meta": {
+    "to": "{wp:admin_email}",
+    "email_subject": "New message from {field:firstname}",
+    "email_message": "{field:details}\n{fields_table}\nBy {field:email}",
+    "from_name": "{wp:site_title}",
+    "from_address": "{system:admin_email}",
+    "reply_to": "{field:email}",
+    "email_format": "html",
+    "cc": "",
+    "bcc": ""
+   }
+  },
+  {
+   "id": 22,
+   "type": "email",
+   "label": "Copy to visitor",
+   "active": 1,
+   "meta": {
+    "to": "{field:email}",
+    "email_subject": "Thanks",
+    "email_message": "Hi {field:firstname}, {post:id}",
+    "conditions": {
+     "process": 1,
+     "connector": "all",
+     "when": [
+      {
+       "connector": "AND",
+       "key": "subscribe",
+       "comparator": "equal",
+       "value": "1",
+       "type": "field",
+       "modelType": "when"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": 23,
+   "type": "successmessage",
+   "label": "Success",
+   "active": 1,
+   "meta": {
+    "success_msg": "<p>Thank you {field:firstname}.</p>"
+   }
+  },
+  {
+   "id": 24,
+   "type": "mailchimp",
+   "label": "Newsletter",
+   "active": 1,
+   "meta": {}
+  }
+ ]
+}

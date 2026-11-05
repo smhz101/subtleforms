@@ -31,7 +31,7 @@ final class ImportOffer {
 	const OPTION = 'subtleforms_import_offer';
 
 	/** Source ids that Site Import can actually migrate. */
-	const IMPORTABLE = array( 'cf7', 'gravity', 'fluent' );
+	const IMPORTABLE = array( 'cf7', 'gravity', 'fluent', 'wpforms', 'ninja' );
 
 	/**
 	 * Unit-test override for formsCount(). Null uses the live count.

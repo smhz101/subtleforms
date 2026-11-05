@@ -70,7 +70,7 @@ abstract class ImportTestCase extends TestCase {
 	 * @param array $schema Schema.
 	 */
 	protected static function assertSavable( array $schema ): void {
-		( new SchemaValidator( array( 'text', 'email', 'textarea', 'number', 'phone', 'url', 'password', 'checkbox', 'consent', 'radio', 'multiple_choice', 'dropdown', 'date', 'time', 'file_upload', 'image_upload', 'hidden', 'html', 'section_break', 'step', 'name_group', 'address_group', 'country', 'range_slider' ) ) )->validate( $schema );
+		( new SchemaValidator( array( 'text', 'email', 'textarea', 'number', 'phone', 'url', 'password', 'checkbox', 'consent', 'radio', 'multiple_choice', 'dropdown', 'date', 'time', 'file_upload', 'image_upload', 'hidden', 'html', 'section_break', 'step', 'name_group', 'address_group', 'country', 'range_slider', 'rating', 'datetime', 'net_promoter_score', 'rich_text' ) ) )->validate( $schema );
 		self::assertTrue( true );
 	}
 }

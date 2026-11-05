@@ -13,7 +13,7 @@ jest.mock('../../utils/api', () => ({
 }));
 
 import { apiGet, apiPost } from '../../utils/api';
-import SiteImport, { resultSummary } from './SiteImport';
+import SiteImport, { resultSummary, consentLabel, entriesSummary } from './SiteImport';
 
 global.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -91,8 +91,8 @@ describe('one-click import', () => {
     expect(radios[0].checked).toBe(true);
     expect(radios[2].disabled).toBe(true);
     expect(apiGet).toHaveBeenCalledWith('/tools/migrate/sources/cf7/forms');
-    expect(container.textContent).toContain('Entries and payment settings are not imported, no emails are sent, and your original forms are not changed.');
-    expect(container.textContent).toContain('Entries are not imported in this version.');
+    expect(container.textContent).toContain('Payment settings are not imported, no emails are sent, and your original forms are not changed. Entries are copied only if you tick the box below.');
+    expect(container.textContent).toContain('Entries are copied only if you tick the box.');
     unmount();
   });
 
@@ -235,7 +235,7 @@ describe('one-click import', () => {
   test('says so when no other form plugin left forms', async () => {
     apiGet.mockResolvedValue(ok(SOURCES.map((s) => ({ ...s, count: 0 }))));
     const { container, unmount } = await mount();
-    expect(container.textContent).toContain('No Contact Form 7, Gravity Forms or Fluent Forms forms were found on this site.');
+    expect(container.textContent).toContain('No Contact Form 7, Gravity Forms, Fluent Forms, WPForms or Ninja Forms forms were found on this site.');
     expect(container.querySelector('.sf-import__list')).toBeNull();
     unmount();
   });
@@ -243,5 +243,148 @@ describe('one-click import', () => {
   test('the summary counts only lines that need attention', () => {
     expect(resultSummary({ fields: 1, notes: [ { level: 'info', text: 'x' } ] })).toBe('Imported with 1 field.');
     expect(resultSummary({ fields: 12, notes: [ { level: 'skipped' }, { level: 'changed' }, { level: 'info' } ] })).toBe('Imported with 12 fields, 2 notes.');
+  });
+});
+
+describe('entries and consent', () => {
+  const WP_SOURCES = [
+    { id: 'wpforms', label: 'WPForms', active: false, count: 2 },
+    { id: 'ninja', label: 'Ninja Forms', active: false, count: 1 },
+  ];
+  const WP_FORMS = [
+    { id: '101', title: 'Contact request', fields: 14, notes: 4, entries: 450, imported: [] },
+    { id: '102', title: 'Tiny form', fields: 1, notes: 0, entries: 0, imported: [] },
+  ];
+
+  function wpRoutes() {
+    apiGet.mockImplementation((path) => {
+      if (path === '/tools/migrate/sources') {
+        return Promise.resolve(ok(WP_SOURCES));
+      }
+      return Promise.resolve(ok(path.includes('/wpforms/') ? WP_FORMS : []));
+    });
+  }
+
+  const tick = (box) => click(box);
+
+  test('lists WPForms and Ninja Forms with their counts and the entries of each form', async () => {
+    wpRoutes();
+    const { container, unmount } = await mount();
+    const radios = [ ...container.querySelectorAll('input[name="sf-import-source"]') ];
+    expect(radios.map((r) => r.closest('label').textContent)).toEqual([
+      'WPForms2 formsplugin not active',
+      'Ninja Forms1 formplugin not active',
+    ]);
+    const rows = [ ...container.querySelectorAll('.sf-import__list li') ];
+    expect(rows[0].textContent).toBe('Contact request14 fields450 entries');
+    expect(rows[1].textContent).toBe('Tiny form1 field');
+    unmount();
+  });
+
+  test('the consent box is hidden until a form with entries is ticked, then unticked by default', async () => {
+    wpRoutes();
+    const { container, unmount } = await mount();
+    expect(container.querySelector('.sf-import__consent')).toBeNull();
+    tick(container.querySelectorAll('.sf-import__list input')[1]);
+    expect(container.querySelector('.sf-import__consent')).toBeNull();
+    tick(container.querySelectorAll('.sf-import__list input')[0]);
+    const consent = container.querySelector('.sf-import__consent');
+    expect(consent.textContent).toBe(consentLabel(450));
+    expect(consent.textContent).toBe('Also import 450 entries. Entries contain personal data your visitors sent. They are copied into SubtleForms; the originals are not changed or deleted.');
+    expect(consent.querySelector('input').checked).toBe(false);
+    unmount();
+  });
+
+  test('without the box ticked no entries are requested', async () => {
+    wpRoutes();
+    apiPost.mockResolvedValue(ok([ { ...imported('101', 'Contact request', 55), entries: 450 } ]));
+    const { container, unmount } = await mount();
+    tick(container.querySelectorAll('.sf-import__list input')[0]);
+    click([ ...container.querySelectorAll('button') ].find((b) => b.textContent === 'Import 1 form'));
+    await flush();
+    await flush();
+    expect(apiPost).toHaveBeenCalledTimes(1);
+    expect(apiPost.mock.calls[0][0]).toBe('/tools/migrate/sources/wpforms/import');
+    expect(container.querySelector('.sf-import__entries')).toBeNull();
+    unmount();
+  });
+
+  test('with the box ticked entries are copied in batches with a progress bar and summed in the report', async () => {
+    wpRoutes();
+    let resolveSecond;
+    apiPost.mockImplementation((path, body) => {
+      if (path.endsWith('/import')) {
+        return Promise.resolve(ok([ { ...imported('101', 'Contact request', 55), entries: 450 } ]));
+      }
+      if (body.after === 0) {
+        return Promise.resolve(ok({ imported: 200, skipped: 0, failed: 0, files: 3, next: 200, done: false, error: '' }));
+      }
+      return new Promise((resolve) => {
+        resolveSecond = () => resolve(ok({ imported: 248, skipped: 2, failed: 0, files: 1, next: 452, done: true, error: '' }));
+      });
+    });
+    const { container, unmount } = await mount();
+    tick(container.querySelectorAll('.sf-import__list input')[0]);
+    tick(container.querySelector('.sf-import__consent input'));
+    expect(container.querySelector('.sf-import__consent input').checked).toBe(true);
+    click([ ...container.querySelectorAll('button') ].find((b) => b.textContent === 'Import 1 form'));
+    await flush();
+    await flush();
+
+    const bar = container.querySelector('.sf-import__status progress');
+    expect(bar.getAttribute('max')).toBe('450');
+    expect(bar.getAttribute('value')).toBe('200');
+    expect(container.querySelector('.sf-import__status').textContent).toContain('Copying entries: 200 of 450');
+    const calls = apiPost.mock.calls.filter(([ path ]) => path.endsWith('/entries'));
+    expect(calls[0][1]).toEqual({ id: '101', form_id: 55, after: 0, consent: true });
+
+    await act(async () => { resolveSecond(); });
+    await flush();
+    expect(apiPost.mock.calls.filter(([ path ]) => path.endsWith('/entries'))[1][1].after).toBe(200);
+    const report = container.querySelector('.sf-import__entries').textContent;
+    expect(report).toContain('448 entries copied, 2 already there and skipped.');
+    expect(report).toContain('4 uploaded files were not copied');
+    // The box starts unticked again for the next run.
+    expect(container.querySelector('.sf-import__consent')).toBeNull();
+    unmount();
+  });
+
+  test('a failed batch stops that form and says so', async () => {
+    wpRoutes();
+    apiPost.mockImplementation((path) => (path.endsWith('/import')
+      ? Promise.resolve(ok([ { ...imported('101', 'Contact request', 55), entries: 450 } ]))
+      : Promise.resolve({ ok: false, status: 500, body: { message: 'Server broke.' } })));
+    const { container, unmount } = await mount();
+    tick(container.querySelectorAll('.sf-import__list input')[0]);
+    tick(container.querySelector('.sf-import__consent input'));
+    click([ ...container.querySelectorAll('button') ].find((b) => b.textContent === 'Import 1 form'));
+    await flush();
+    await flush();
+    expect(container.querySelector('.sf-import__entries').textContent).toContain('Server broke.');
+    unmount();
+  });
+
+  test('a form imported before takes its entries into the form you already have', async () => {
+    apiGet.mockImplementation((path) => Promise.resolve(ok(path === '/tools/migrate/sources'
+      ? WP_SOURCES
+      : [ { ...WP_FORMS[0], imported: [ { id: 77, title: 'Contact request', status: 'draft', edit_url: '/edit?form_id=77' } ] } ])));
+    apiPost.mockImplementation((path) => (path.endsWith('/import')
+      ? Promise.resolve(ok([ { source_id: '101', title: 'Contact request', status: 'exists', existing: [ { id: 77, title: 'Contact request', edit_url: '/edit?form_id=77' } ], entries: 450, notes: [] } ]))
+      : Promise.resolve(ok({ imported: 12, skipped: 438, failed: 0, files: 0, next: 450, done: true, error: '' }))));
+    const { container, unmount } = await mount();
+    tick(container.querySelectorAll('.sf-import__list input')[0]);
+    tick(container.querySelector('.sf-import__consent input'));
+    click([ ...container.querySelectorAll('button') ].find((b) => b.textContent === 'Import 1 form'));
+    await flush();
+    await flush();
+    const entryCall = apiPost.mock.calls.find(([ path ]) => path.endsWith('/entries'));
+    expect(entryCall[1]).toEqual({ id: '101', form_id: 77, after: 0, consent: true });
+    expect(container.querySelector('.sf-import__result.is-exists .sf-import__entries').textContent).toContain('12 entries copied, 438 already there and skipped.');
+    unmount();
+  });
+
+  test('the sentences', () => {
+    expect(consentLabel(1)).toContain('Also import 1 entry.');
+    expect(entriesSummary({ imported: 1, skipped: 0, failed: 2, files: 0 })).toBe('1 entry copied, 2 could not be copied.');
   });
 });

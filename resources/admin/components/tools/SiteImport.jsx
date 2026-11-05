@@ -1,7 +1,11 @@
 /**
- * One-click import (2.6.0): find the forms Contact Form 7, Gravity Forms and
- * Fluent Forms left on this site, tick the ones to bring across, import them
- * as drafts and read a report for each.
+ * One-click import (2.6.0): find the forms Contact Form 7, Gravity Forms,
+ * Fluent Forms, WPForms and Ninja Forms left on this site, tick the ones to
+ * bring across, import them as drafts and read a report for each.
+ *
+ * Entries hold personal data, so they are copied only when the owner ticks the
+ * consent box, which is unticked by default. They are sent in batches with a
+ * progress bar.
  *
  * Forms are imported one request at a time so the screen can show progress.
  * A form imported before is not imported again silently: its card asks
@@ -13,6 +17,56 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { apiGet, apiPost } from '../../utils/api';
 import './SiteImport.scss';
+
+/**
+ * The consent sentence, with the number of entries that would be copied.
+ *
+ * @param {number} count Entries in the selected forms.
+ * @return {string} Label.
+ */
+export function consentLabel( count ) {
+  return sprintf(
+    /* translators: %s: number of entries */
+    _n(
+      'Also import %s entry. Entries contain personal data your visitors sent. They are copied into SubtleForms; the originals are not changed or deleted.',
+      'Also import %s entries. Entries contain personal data your visitors sent. They are copied into SubtleForms; the originals are not changed or deleted.',
+      count,
+      'subtleforms'
+    ),
+    count.toLocaleString()
+  );
+}
+
+/**
+ * "450 entries copied, 2 skipped".
+ *
+ * @param {Object} entries Totals: imported, skipped, failed, files.
+ * @return {string} Summary.
+ */
+export function entriesSummary( entries ) {
+  const parts = [
+    sprintf(
+      /* translators: %s: number of entries */
+      _n( '%s entry copied', '%s entries copied', entries.imported, 'subtleforms' ),
+      entries.imported.toLocaleString()
+    ),
+  ];
+  if ( entries.skipped > 0 ) {
+    parts.push( sprintf(
+      /* translators: %s: number of entries */
+      __( '%s already there and skipped', 'subtleforms' ),
+      entries.skipped.toLocaleString()
+    ) );
+  }
+  if ( entries.failed > 0 ) {
+    parts.push( sprintf(
+      /* translators: %s: number of entries */
+      __( '%s could not be copied', 'subtleforms' ),
+      entries.failed.toLocaleString()
+    ) );
+  }
+  return parts.join( ', ' ) + '.';
+}
 
 const LEVEL_LABELS = {
   skipped: __( 'Not copied', 'subtleforms' ),
@@ -64,6 +118,9 @@ export default function SiteImport() {
   const [ forms, setForms ] = useState( null );
   const [ selected, setSelected ] = useState( [] );
   const [ progress, setProgress ] = useState( null );
+  const [ consent, setConsent ] = useState( false );
+  // Entries copied so far: { done, total }, while a batch run is going.
+  const [ entryProgress, setEntryProgress ] = useState( null );
   const [ results, setResults ] = useState( [] );
   const [ error, setError ] = useState( '' );
   const resultsHeading = useRef( null );
@@ -111,6 +168,7 @@ export default function SiteImport() {
 
   useEffect( () => {
     setSelected( [] );
+    setConsent( false );
     loadForms( sourceId );
   }, [ sourceId, loadForms ] );
 
@@ -118,13 +176,62 @@ export default function SiteImport() {
   const allIds = ( forms || [] ).map( ( form ) => form.id );
   const allTicked = allIds.length > 0 && allIds.every( ( id ) => selected.includes( id ) );
 
-  const toggle = ( id ) => setSelected( ( current ) => (
-    current.includes( id ) ? current.filter( ( item ) => item !== id ) : [ ...current, id ]
-  ) );
+  // A changed selection is a new question: the box starts unticked again.
+  const choose = ( ids ) => {
+    setConsent( false );
+    setSelected( ids );
+  };
+  const toggle = ( id ) => choose(
+    selected.includes( id ) ? selected.filter( ( item ) => item !== id ) : [ ...selected, id ]
+  );
+  const entryTotal = ( forms || [] )
+    .filter( ( form ) => selected.includes( form.id ) )
+    .reduce( ( sum, form ) => sum + ( form.entries || 0 ), 0 );
 
-  const importForms = async ( ids, copies = [] ) => {
+  /**
+   * Copy the entries of one imported form, a batch per request.
+   *
+   * @param {Object} item   Import result for the form.
+   * @param {number} before Entries already copied in this run, for the bar.
+   * @return {Promise<Object>} Totals: imported, skipped, failed, files, stopped.
+   */
+  const copyEntries = async ( item, before, grandTotal ) => {
+    const totals = { imported: 0, skipped: 0, failed: 0, files: 0, stopped: '' };
+    let after = 0;
+    let handled = 0;
+    for ( let guard = 0; guard < 1000; guard++ ) {
+      const result = await apiPost( `/tools/migrate/sources/${ sourceId }/entries`, {
+        id: item.source_id,
+        form_id: item.form_id,
+        after,
+        consent: true,
+      } );
+      if ( ! result.ok || ! result.body?.data ) {
+        totals.stopped = errorText( result );
+        break;
+      }
+      const data = result.body.data;
+      totals.imported += data.imported;
+      totals.skipped += data.skipped;
+      totals.failed += data.failed;
+      totals.files += data.files;
+      handled += data.imported + data.skipped + data.failed;
+      after = data.next;
+      setEntryProgress( { done: Math.min( before + handled, grandTotal ), total: grandTotal } );
+      if ( data.done ) {
+        break;
+      }
+    }
+    return totals;
+  };
+
+  const importForms = async ( ids, copies = [], withEntries = false ) => {
     setError( '' );
     setProgress( { done: 0, total: ids.length } );
+    const wanted = withEntries
+      ? ( forms || [] ).filter( ( form ) => ids.includes( form.id ) ).reduce( ( sum, form ) => sum + ( form.entries || 0 ), 0 )
+      : 0;
+    let copied = 0;
     const collected = [];
     for ( let i = 0; i < ids.length; i++ ) {
       const result = await apiPost( `/tools/migrate/sources/${ sourceId }/import`, {
@@ -132,7 +239,18 @@ export default function SiteImport() {
         copies: copies.includes( ids[ i ] ) ? [ ids[ i ] ] : [],
       } );
       if ( result.ok && Array.isArray( result.body?.data ) ) {
-        collected.push( ...result.body.data.map( ( item ) => ( { ...item, source: sourceId } ) ) );
+        for ( const item of result.body.data ) {
+          const row = { ...item, source: sourceId };
+          // A form imported before takes its entries into the form you already have;
+          // entries already copied are skipped, so this is also how to finish an interrupted run.
+          const target = item.status === 'imported' ? item.form_id : item.existing?.[ 0 ]?.id;
+          if ( withEntries && ( item.status === 'imported' || item.status === 'exists' ) && target && item.entries > 0 ) {
+            setEntryProgress( { done: copied, total: wanted } );
+            row.entriesResult = await copyEntries( { ...item, form_id: target }, copied, wanted );
+            copied += item.entries;
+          }
+          collected.push( row );
+        }
       } else {
         const form = ( forms || [] ).find( ( item ) => item.id === ids[ i ] );
         collected.push( { source_id: ids[ i ], source: sourceId, title: form?.title || ids[ i ], status: 'failed', error: errorText( result ), notes: [] } );
@@ -145,6 +263,8 @@ export default function SiteImport() {
       ...current.filter( ( item ) => ! collected.some( ( done ) => done.source === item.source && done.source_id === item.source_id ) ),
     ] );
     setProgress( null );
+    setEntryProgress( null );
+    setConsent( false );
     setSelected( [] );
     await loadForms( sourceId );
     window.requestAnimationFrame( () => resultsHeading.current?.focus() );
@@ -167,18 +287,18 @@ export default function SiteImport() {
       <header className='sf-panel__header'>
         <div>
           <h2 className='sf-panel__title' id='sf-import-title'>{ __( 'From this site', 'subtleforms' ) }</h2>
-          <p className='sf-panel__subtitle'>{ __( 'Copy forms you made with Contact Form 7, Gravity Forms or Fluent Forms. The other plugin does not need to be active.', 'subtleforms' ) }</p>
+          <p className='sf-panel__subtitle'>{ __( 'Copy forms you made with Contact Form 7, Gravity Forms, Fluent Forms, WPForms or Ninja Forms. The other plugin does not need to be active.', 'subtleforms' ) }</p>
         </div>
       </header>
       <div className='sf-panel__body'>
         <p className='sf-import__promise'>
-          { __( 'Forms are copied as drafts with their fields, required rules, choices, email notifications and thank-you message. Entries and payment settings are not imported, no emails are sent, and your original forms are not changed.', 'subtleforms' ) }
+          { __( 'Forms are copied as drafts with their fields, required rules, choices, email notifications and thank-you message. Payment settings are not imported, no emails are sent, and your original forms are not changed. Entries are copied only if you tick the box below.', 'subtleforms' ) }
         </p>
 
         { error && <p className='sf-import__error' role='alert'>{ error }</p> }
 
         { found.length === 0 ? (
-          <p className='sf-tools__empty'>{ __( 'No Contact Form 7, Gravity Forms or Fluent Forms forms were found on this site.', 'subtleforms' ) }</p>
+          <p className='sf-tools__empty'>{ __( 'No Contact Form 7, Gravity Forms, Fluent Forms, WPForms or Ninja Forms forms were found on this site.', 'subtleforms' ) }</p>
         ) : (
           <fieldset className='sf-import__sources'>
             <legend>{ __( 'Plugin', 'subtleforms' ) }</legend>
@@ -224,7 +344,7 @@ export default function SiteImport() {
                 <input
                   type='checkbox'
                   checked={ allTicked }
-                  onChange={ () => setSelected( allTicked ? [] : allIds ) }
+                  onChange={ () => choose( allTicked ? [] : allIds ) }
                 />
                 <span>{ __( 'Select all', 'subtleforms' ) }</span>
               </label>
@@ -245,6 +365,15 @@ export default function SiteImport() {
                           form.fields
                         ) }
                       </span>
+                      { form.entries > 0 && (
+                        <span className='sf-import__form-meta'>
+                          { sprintf(
+                            /* translators: %s: number of entries */
+                            _n( '%s entry', '%s entries', form.entries, 'subtleforms' ),
+                            form.entries.toLocaleString()
+                          ) }
+                        </span>
+                      ) }
                       { form.imported?.length > 0 && (
                         <span className='sf-pill sf-pill--info'>{ __( 'Imported before', 'subtleforms' ) }</span>
                       ) }
@@ -252,12 +381,33 @@ export default function SiteImport() {
                   </li>
                 ) ) }
               </ul>
+              { entryTotal > 0 && (
+                <label className='sf-import__consent'>
+                  <input
+                    type='checkbox'
+                    checked={ consent }
+                    onChange={ () => setConsent( ! consent ) }
+                  />
+                  <span>{ consentLabel( entryTotal ) }</span>
+                </label>
+              ) }
             </fieldset>
           )
         ) }
 
         <div className='sf-import__status' role='status' aria-live='polite'>
-          { busy && (
+          { busy && entryProgress && (
+            <>
+              <span>{ sprintf(
+                /* translators: 1: entries copied, 2: entries to copy */
+                __( 'Copying entries: %1$s of %2$s', 'subtleforms' ),
+                entryProgress.done.toLocaleString(),
+                entryProgress.total.toLocaleString()
+              ) }</span>
+              <progress max={ entryProgress.total } value={ entryProgress.done } aria-hidden='true' />
+            </>
+          ) }
+          { busy && ! entryProgress && (
             <>
               <span>{ sprintf(
                 /* translators: 1: forms done, 2: forms to import */
@@ -293,7 +443,7 @@ export default function SiteImport() {
           variant='primary'
           disabled={ busy || selected.length === 0 }
           isBusy={ busy }
-          onClick={ () => importForms( selected ) }>
+          onClick={ () => importForms( selected, [], consent && entryTotal > 0 ) }>
           { selected.length > 0
             ? sprintf(
               /* translators: %d: number of forms */
@@ -302,9 +452,31 @@ export default function SiteImport() {
             )
             : __( 'Import', 'subtleforms' ) }
         </Button>
-        <span className='sf-tools__hint sf-import__hint'>{ __( 'Entries are not imported in this version.', 'subtleforms' ) }</span>
+        <span className='sf-tools__hint sf-import__hint'>{ __( 'Entries are copied only if you tick the box.', 'subtleforms' ) }</span>
       </footer>
     </section>
+  );
+}
+
+function EntriesReport( { result } ) {
+  if ( ! result ) {
+    return null;
+  }
+  return (
+    <p className='sf-import__entries'>
+      { entriesSummary( result ) }
+      { result.files > 0 && ' ' + sprintf(
+        /* translators: %s: number of files */
+        _n(
+          '%s uploaded file was not copied. Its address is kept in the answer.',
+          '%s uploaded files were not copied. Their addresses are kept in the answers.',
+          result.files,
+          'subtleforms'
+        ),
+        result.files.toLocaleString()
+      ) }
+      { result.stopped && ' ' + result.stopped }
+    </p>
   );
 }
 
@@ -321,6 +493,7 @@ function ResultCard( { item, busy, onCopy, onDismiss, canCopy } ) {
             <span className='screen-reader-text'>{ `: ${ item.title }` }</span>
           </a>
         </div>
+        <EntriesReport result={ item.entriesResult } />
         { notes.length > 0 && (
           <details className='sf-import__report'>
             <summary>{ __( 'Show the report', 'subtleforms' ) }</summary>
@@ -349,6 +522,7 @@ function ResultCard( { item, busy, onCopy, onDismiss, canCopy } ) {
             { __( 'Import again as a copy?', 'subtleforms' ) }
           </span>
         </div>
+        <EntriesReport result={ item.entriesResult } />
         <div className='sf-import__actions'>
           <Button variant='secondary' size='compact' disabled={ busy || ! canCopy } onClick={ onCopy }>
             { __( 'Import a copy', 'subtleforms' ) }

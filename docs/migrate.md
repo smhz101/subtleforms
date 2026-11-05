@@ -1,19 +1,31 @@
 # Migrate: importing forms from other plugins
 
-Settings > Tools > Migrate brings forms across from Contact Form 7, Gravity Forms and Fluent Forms.
+Settings > Tools > Migrate brings forms across from Contact Form 7, Gravity Forms, Fluent Forms, WPForms and Ninja Forms.
 
 There are two ways in:
 
 - **From this site (one click).** SubtleForms looks in the database for forms those plugins left, lists them with their field counts, and imports the ones you tick. The other plugin does not need to be active.
-- **From an export file.** Upload a Gravity Forms or Fluent Forms JSON export. The same mapping is used, so a form comes across the same way either way.
+- **From an export file.** Upload a Gravity Forms, Fluent Forms or WPForms JSON export, or a Ninja Forms `.nff` file (plain JSON, or JSON or a PHP array in base64; any other content is refused with a plain message). The same mapping is used, so a form comes across the same way either way.
 
 What always holds:
 
 - Forms are created as **drafts**, titled like the original. Open them in the builder, check them and publish.
 - The original forms are only read. Nothing in the other plugin changes.
-- **Entries are not imported** in this version. **Payment settings are not imported.** **No email is sent** during an import: the form is saved, not submitted.
+- **Payment settings are not imported.** **No email is sent** during an import: the form is saved, not submitted.
+- **Entries are copied only when the owner ticks a box** (see Entries below). Nothing is copied by default.
 - Each imported form remembers where it came from (`metadata.importRef`, for example `cf7:12`, and `metadata.importedFrom`). Importing the same form again asks "Import again as a copy?" instead of making a silent duplicate. A copy is titled "<title> (copy)".
 - Each form gets a report. Every field, setting, merge tag or email that could not be copied, or was copied in a different shape, has its own line. Example: `Gravity Forms field 'Product' (type product) was skipped: payments are not imported.`
+
+## Entries (WPForms and Ninja Forms)
+
+Entries hold personal data your visitors sent, so they are never copied by default. When a selected WPForms or Ninja Forms form has entries, the screen shows the count and an unticked box: "Also import N entries. Entries contain personal data your visitors sent. They are copied into SubtleForms; the originals are not changed or deleted." The entries of a form are copied only if that box is ticked, and the server refuses the request without `consent`.
+
+- WPForms Lite keeps no entries. WPForms Pro keeps them in `{prefix}wpforms_entries` (the `fields` column, or `wpforms_entry_fields` when that is empty). Spam, trash, abandoned and partial entries are left out.
+- Ninja Forms keeps entries as `nf_sub` posts with `_form_id` and `_field_{id}` post meta. Trashed ones are left out.
+- Entries go into the form that was just imported, in batches of 200 per request, with a progress bar. Each keeps its original date, is marked read, and keeps the IP address and browser only when the other plugin stored them (WPForms Pro does, Ninja Forms does not).
+- Each entry records `meta.import`: `ref` (for example `wpforms:12:345`), `imported_from`, `original_form_id` and `original_id`. A second run skips entries whose `ref` is already in the form.
+- Uploaded files are not copied. The address of each file is kept as text in the answer, and the screen says how many were linked.
+- Answers are matched to the new field keys. Answers to fields that were skipped (payments, captcha and so on) are not copied.
 
 ## Reply-To
 
@@ -29,6 +41,9 @@ An importer copies Reply-To when the original is one field tag or one address. A
 | Contact Form 7 | `Cf7Source.php` (reads posts and meta), `Cf7Parser.php` (form-tags), `Cf7Mapper.php` |
 | Gravity Forms | `GravitySource.php` (reads `gf_form` and `gf_form_meta`, or `rg_` before 2.3), `GravityMapper.php` |
 | Fluent Forms | `FluentSource.php` (reads `fluentform_forms` and `fluentform_form_meta`), `FluentMapper.php` |
+| WPForms | `WPFormsSource.php` (reads `wpforms` posts, and `wpforms_entries` for entries), `WPFormsMapper.php` |
+| Ninja Forms | `NinjaSource.php` (reads the `nf3_` tables and `nf_sub` posts), `NinjaMapper.php`, `NinjaExport.php` (.nff files) |
+| Entries | `EntrySource.php` (count, read, convert), `Importer::importEntries()` |
 | Field type table (this page lists the same) | `src/Tools/Import/FieldMap.php` |
 | Shared schema helpers and report | `SchemaBuilder.php`, `ImportNotes.php` |
 | Saving, re-import guard | `Importer.php` |
@@ -36,7 +51,7 @@ An importer copies Reply-To when the original is one field tag or one address. A
 
 Mappers are pure: they take the rows a source read and return `{ title, schema, notes }` without touching the database, so they are unit tested field by field (`tests/unit/Import*Test.php`, fixtures in `tests/fixtures/import/`).
 
-To add a plugin later (WPForms, Ninja Forms), write a class that implements `Source` and add it with the `subtleforms/import/sources` filter. Add its types to `FieldMap` and to this page. After a form is saved, `subtleforms/import/imported` fires with the new form ID, the source id and the original form id.
+To add another plugin, write a class that implements `Source` and add it with the `subtleforms/import/sources` filter. Add its types to `FieldMap` and to this page. After a form is saved, `subtleforms/import/imported` fires with the new form ID, the source id and the original form id.
 
 ### REST
 
@@ -45,8 +60,9 @@ All routes need the `manage_options` capability and the REST nonce, like the res
 | Route | What it does |
 | --- | --- |
 | `GET /subtleforms/v1/tools/migrate/sources` | Each source with `count` (forms found) and `active` (plugin active) |
-| `GET /subtleforms/v1/tools/migrate/sources/{source}/forms` | Forms of one source: `id`, `title`, `fields`, `notes` (report lines an import would give), `imported` (SubtleForms forms already made from it) |
-| `POST /subtleforms/v1/tools/migrate/sources/{source}/import` | Body `{ "ids": ["12"], "copies": [] }`. One result per form: `status` is `imported`, `exists` (imported before; send the id in `copies` to import a copy), `missing` or `failed`, with `form_id`, `edit_url`, `fields` and `notes` (`[{ level: skipped|changed|info, text }]`) |
+| `GET /subtleforms/v1/tools/migrate/sources/{source}/forms` | Forms of one source: `id`, `title`, `fields`, `notes` (report lines an import would give), `imported` (SubtleForms forms already made from it), `entries` (entries the plugin holds for it) |
+| `POST /subtleforms/v1/tools/migrate/sources/{source}/entries` | Body `{ "id": "12", "form_id": 34, "after": 0, "consent": true }`. Copies up to 200 entries after the source entry id `after` into SubtleForms form `form_id`, which must be a form imported from source form `id`. Returns `imported`, `skipped`, `failed`, `files`, `next` (send it as `after`) and `done` |
+| `POST /subtleforms/v1/tools/migrate/sources/{source}/import` | Body `{ "ids": ["12"], "copies": [] }`. One result per form: `status` is `imported`, `exists` (imported before; send the id in `copies` to import a copy), `missing` or `failed`, with `form_id`, `edit_url`, `fields`, `entries` (how many entries the source has) and `notes` (`[{ level: skipped|changed|info, text }]`) |
 
 ## Field types
 
@@ -204,3 +220,105 @@ Fields inside a column container come across one under the other (reported). The
 Notifications: `{inputs.email}` becomes `{field:email}` (a part such as `{inputs.names.first_name}` becomes the whole answer, reported), `{all_data}` `{all_fields}`, `{wp.admin_email}` `{admin_email}`, `{wp.site_title}` `{site_name}`, `{submission.id}` `{entry_id}`, `{date.*}` `{date}`. Other smart codes are left as typed and reported. Sent to a field: that answer. Routing: switched off, reported. Conditions become "only when" conditions. Reply-To (`{inputs.email}` or one address) becomes the email's Reply-To setting. Plain text emails stay plain text.
 
 The confirmation message, a custom URL or a page carries across. Require login and a total entry limit carry across; other limits and the schedule are reported.
+
+### WPForms
+
+| WPForms | SubtleForms | Notes |
+| --- | --- | --- |
+| `name` | Name | `simple` is one Text box; first-last and first-middle-last give the Name parts, with placeholders |
+| `email` | Email | the confirm email box is reported |
+| `text` | Text | character limit; word limit and input mask are reported |
+| `textarea` | Paragraph | character limit |
+| `number` | Number | `min`, `max` |
+| `number-slider` | Slider | `min`, `max`, `step` |
+| `phone` | Phone |  |
+| `address` | Address | parts shown or hidden, placeholders |
+| `url` | Website |  |
+| `select` | Dropdown | choices, placeholder, selected choice; `multiple` becomes Checkboxes |
+| `radio` | Radio Buttons | choices, selected choice |
+| `checkbox` | Checkboxes | choices, selected choices |
+| `gdpr-checkbox` | Consent / GDPR | the checkbox text; always required |
+| `date-time` | Date | Date, Time or Date and time by its format |
+| `hidden` | Hidden | default value |
+| `html` | Custom HTML | the code |
+| `content` | Custom HTML | the content |
+| `divider` | Section Heading | label and description |
+| `pagebreak` | step | a new step; the top break gives the first step its title, each break the title of the page after it; the bottom break is ignored |
+| `file-upload` | File upload | extensions, size in MB, number of files; entries keep the file address as text |
+| `rating` | Rating | number of stars |
+| `net_promoter_score` | Net Promoter Score |  |
+| `password` | Password |  |
+| `richtext` | Rich text |  |
+| `layout` | (layout) | its fields come one under the other (reported) |
+| `likert_scale` | skipped | quizzes, polls, surveys and ratings are not imported |
+| `captcha` | skipped | SubtleForms has its own spam protection and CAPTCHA settings |
+| `payment-single` | skipped | payments are not imported |
+| `payment-multiple` | skipped | payments are not imported |
+| `payment-checkbox` | skipped | payments are not imported |
+| `payment-select` | skipped | payments are not imported |
+| `payment-total` | skipped | payments are not imported |
+| `payment-coupon` | skipped | payments are not imported |
+| `credit-card` | skipped | payments are not imported |
+| `stripe-credit-card` | skipped | payments are not imported |
+| `square` | skipped | payments are not imported |
+| `authorize_net` | skipped | payments are not imported |
+| `paypal-commerce` | skipped | payments are not imported |
+| `signature` | skipped | signature fields are not imported |
+| `repeater` | skipped | repeating fields are not imported |
+| `entry-preview` | skipped | entry preview fields are not imported |
+
+Fields show or hide on the rules WPForms keeps in groups: rules in one group must all match. One group with `==`, `!=`, contains, does not contain, empty, not empty, `>` or `<` is copied (choice ids become the choice values). Several groups joined by OR, or starts with and ends with, are reported on the field and not copied.
+
+Each notification becomes an email. `{field_id="3"}` becomes `{field:key}`, `{all_fields}`, `{admin_email}`, `{form_name}`, `{site_name}`, `{entry_id}` and `{date}` map; others (`{user_ip}`, `{page_url}` ...) are left as typed and reported. Reply-To, sender, conditions that send when a rule matches, and the switch that turns all notifications off carry across; conditions that stop an email are imported switched off and reported. The first confirmation is used: a message, a redirect, or a page (as a redirect to its address on this site; from an export file the address is left for you to set). Other confirmations are reported. The honeypot is noted, since SubtleForms has its own spam protection.
+
+### Ninja Forms
+
+| Ninja Forms | SubtleForms | Notes |
+| --- | --- | --- |
+| `firstname` | Text | a Text box of its own |
+| `lastname` | Text | a Text box of its own |
+| `email` | Email |  |
+| `textbox` | Text | character limit; mask is reported |
+| `textarea` | Paragraph | character limit; the rich text editor is reported |
+| `phone` | Phone |  |
+| `number` | Number | `min`, `max`, step |
+| `listselect` | Dropdown | choices, selected choice |
+| `listradio` | Radio Buttons | choices, selected choice |
+| `listcheckbox` | Checkboxes | choices, selected choices |
+| `listmultiselect` | Checkboxes | reported as changed |
+| `checkbox` | Checkbox | a single yes or no box |
+| `date` | Date | format; Date and time gives a Date and time field |
+| `address` | Text | a Text box of its own |
+| `city` | Text | a Text box of its own |
+| `zip` | Text | a Text box of its own |
+| `liststate` | Dropdown | choices |
+| `listcountry` | Country |  |
+| `hidden` | Hidden | default value |
+| `html` | Custom HTML | the content |
+| `hr` | Section Heading |  |
+| `starrating` | Rating | number of stars |
+| `file_upload` | File upload | types, size in MB; entries keep the file address as text |
+| `password` | Password |  |
+| `submit` | (submit button text) | its label is the submit button text |
+| `recaptcha` | skipped | SubtleForms has its own spam protection and CAPTCHA settings |
+| `recaptcha_v3` | skipped | SubtleForms has its own spam protection and CAPTCHA settings |
+| `hcaptcha` | skipped | SubtleForms has its own spam protection and CAPTCHA settings |
+| `spam` | skipped | SubtleForms has its own spam protection and CAPTCHA settings |
+| `timed_submit` | skipped | SubtleForms has its own spam protection and CAPTCHA settings |
+| `confirm` | skipped | confirm fields are not imported |
+| `passwordconfirm` | skipped | confirm fields are not imported |
+| `repeater` | skipped | repeating fields are not imported |
+| `product` | skipped | payments are not imported |
+| `quantity` | skipped | payments are not imported |
+| `shipping` | skipped | payments are not imported |
+| `total` | skipped | payments are not imported |
+| `tax` | skipped | payments are not imported |
+| `creditcard` | skipped | payments are not imported |
+| `creditcardcvc` | skipped | payments are not imported |
+| `creditcardexpiration` | skipped | payments are not imported |
+| `creditcardfullname` | skipped | payments are not imported |
+| `creditcardnumber` | skipped | payments are not imported |
+| `creditcardzip` | skipped | payments are not imported |
+| `signature` | skipped | signature fields are not imported |
+
+Conditional logic (a Ninja Forms add-on) is kept on the field it shows or hides: one `show_field` or `hide_field` result with rules that all must match, using equal, not equal, contains, not contains, greater and less. Anything else is reported. Email actions become emails (`{field:key}` and `{fields_table}` map; `{wp:admin_email}`, `{system:date}` and similar map; others are reported); a Success Message action is the confirmation message, a Redirect action the redirect. The Store Submission action needs nothing, since SubtleForms always saves entries. Other actions (Mailchimp and so on) are reported. Form settings: the submission limit and require login carry across.

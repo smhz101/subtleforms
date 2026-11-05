@@ -97,7 +97,7 @@ test('finds the forms, imports them as drafts and reports what was not copied', 
   await expect(sources.getByRole('radio', { name: /Contact Form 7/ })).toBeChecked();
   await expect(sources).toContainText('2 forms');
   await expect(sources).toContainText('plugin not active');
-  await expect(page.locator('.sf-import__promise')).toContainText('Entries and payment settings are not imported');
+  await expect(page.locator('.sf-import__promise')).toContainText('Payment settings are not imported');
   await expect(formRow(page, 'Contact form 1')).toContainText('4 fields');
   await page.locator('.sf-import').screenshot({ path: path.join(SHOTS, 'import-sources.png') });
 
