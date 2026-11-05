@@ -220,6 +220,37 @@ final class InputMask {
 	}
 
 	/**
+	 * Put stored characters (no literals) into a pattern's slots one by one.
+	 * Unlike format(), a stored character is never taken for a literal of the
+	 * pattern, so "123" fills "1-999" as "1-123".
+	 *
+	 * @param string $stored  Characters without literals.
+	 * @param string $pattern Pattern.
+	 * @return array{value: string, raw: string}
+	 */
+	public static function fill( string $stored, string $pattern ): array {
+		$chars   = (array) preg_split( '//u', $stored, -1, PREG_SPLIT_NO_EMPTY );
+		$value   = '';
+		$raw     = '';
+		$pending = '';
+		$next    = 0;
+		foreach ( self::slots( $pattern ) as list( $token, $literal ) ) {
+			if ( null !== $literal ) {
+				$pending .= $literal;
+				continue;
+			}
+			if ( ! isset( $chars[ $next ] ) || ! self::fits( $token, $chars[ $next ] ) ) {
+				break;
+			}
+			$value  .= $pending . $chars[ $next ];
+			$raw    .= $chars[ $next ];
+			$pending = '';
+			++$next;
+		}
+		return array( 'value' => $value, 'raw' => $raw );
+	}
+
+	/**
 	 * Answer to store: a typed answer is cut down to its typed characters
 	 * when the field saves digits only. An answer that does not fit the
 	 * pattern is returned as it came, so it fails the check.
@@ -238,6 +269,10 @@ final class InputMask {
 				return '+' . $m[1] . ' ' . preg_replace( '/\D/', '', $m[2] );
 			}
 			return ( str_starts_with( $value, '+' ) ? '+' : '' ) . preg_replace( '/\D/', '', $value );
+		}
+		// Already without literals?
+		if ( self::fill( $value, $mask['pattern'] )['raw'] === $value ) {
+			return $value;
 		}
 		$parsed = self::format( $value, $mask['pattern'] );
 		return $parsed['value'] === $value ? $parsed['raw'] : $value;
@@ -280,8 +315,9 @@ final class InputMask {
 			return ( $clean && $digits >= 4 && $digits <= self::PHONE_MAX_DIGITS ) ? null : __( 'Invalid phone number.', 'subtleforms' );
 		}
 
-		$parsed  = self::format( $value, $mask['pattern'] );
-		$shown   = 'digits' === $mask['store'] ? $parsed['raw'] : $parsed['value'];
+		$digits  = 'digits' === $mask['store'];
+		$parsed  = $digits ? self::fill( $value, $mask['pattern'] ) : self::format( $value, $mask['pattern'] );
+		$shown   = $digits ? $parsed['raw'] : $parsed['value'];
 		$lengths = array_map( array( self::class, 'tokenCount' ), $mask['patterns'] );
 		$fits    = $shown === $value && in_array( mb_strlen( $parsed['raw'] ), $lengths, true );
 

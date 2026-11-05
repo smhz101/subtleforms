@@ -151,6 +151,17 @@ describe('custom masks and storage', () => {
     expect(maskProblem(typed, '12345')).toBe('format');
   });
 
+  it('round-trips digits only storage for patterns with literal digits or letters', () => {
+    const mask = resolveMask({ inputMask: 'custom', maskPattern: '1-999', maskStore: 'digits' });
+    expect(storedValue(mask, '1-123')).toBe('123');
+    expect(shownValue(mask, '123')).toBe('1-123');
+    expect(maskProblem(mask, '123')).toBe('');
+    expect(maskProblem(mask, '1-123')).toBe('format');
+    const letters = resolveMask({ inputMask: 'custom', maskPattern: 'x-AA99', maskStore: 'digits' });
+    expect(shownValue(letters, 'AB12')).toBe('x-AB12');
+    expect(maskProblem(letters, 'AB12')).toBe('');
+  });
+
   it('uses numeric input only for digit patterns', () => {
     expect(resolveMask({ inputMask: 'custom', maskPattern: '999-99' }).inputMode).toBe('numeric');
     expect(resolveMask({ inputMask: 'custom', maskPattern: 'AA-99' }).inputMode).toBe('text');

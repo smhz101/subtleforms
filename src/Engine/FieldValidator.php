@@ -1153,7 +1153,7 @@ final class FieldValidator {
 	 * @param array $field Field.
 	 * @return array<string, mixed>|null
 	 */
-	private static function maskOf( array $field ): ?array {
+	public static function maskOf( array $field ): ?array {
 		$key = self::attr( $field, 'inputMask' );
 		if ( ! is_string( $key ) || '' === $key ) {
 			return null;

@@ -113,6 +113,37 @@ export function formatMask(input, pattern) {
 }
 
 /**
+ * Put stored characters (no literals) into a pattern's slots one by one. A
+ * stored character is never taken for a literal of the pattern, so "123"
+ * fills "1-999" as "1-123".
+ *
+ * @param {string} stored  Characters without literals.
+ * @param {string} pattern Mask pattern.
+ * @return {{value: string, raw: string}} Formatted text and the characters used.
+ */
+export function fillMask(stored, pattern) {
+  const chars = Array.from(String(stored ?? ''));
+  let value = '';
+  let raw = '';
+  let pending = '';
+  let next = 0;
+  for (const slot of parsePattern(pattern)) {
+    if (slot.literal !== undefined) {
+      pending += slot.literal;
+    } else {
+      if (next >= chars.length || !tokenMatches(slot.token, chars[next])) {
+        break;
+      }
+      value += pending + chars[next];
+      raw += chars[next];
+      pending = '';
+      next += 1;
+    }
+  }
+  return { value, raw };
+}
+
+/**
  * Format what an input holds after an edit, and where the caret goes.
  * The caret stays after the same number of typed characters, so deleting a
  * literal moves the caret back over it and typing before a literal skips it.
@@ -234,7 +265,7 @@ export function shownValue(mask, stored) {
   if (mask.kind === 'phone') {
     return sanitizePhone(text);
   }
-  return formatMask(text, mask.pattern).value;
+  return mask.store === 'digits' ? fillMask(text, mask.pattern).value : formatMask(text, mask.pattern).value;
 }
 
 /**
@@ -273,7 +304,7 @@ export function maskProblem(mask, value) {
     return clean && digits >= 4 && digits <= PHONE_MAX_DIGITS ? '' : 'format';
   }
   // The raw characters, whichever way the value is stored.
-  const parsed = formatMask(text, mask.pattern);
+  const parsed = mask.store === 'digits' ? fillMask(text, mask.pattern) : formatMask(text, mask.pattern);
   const shownAgain = mask.store === 'digits' ? parsed.raw === text : parsed.value === text;
   if (!shownAgain) {
     return 'format';

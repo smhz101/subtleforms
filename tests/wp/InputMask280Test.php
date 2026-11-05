@@ -98,4 +98,18 @@ final class InputMask280Test extends TestCase {
 		$without = \SubtleForms\Frontend\FrontendAssets::fieldGroups( array( 'fields' => array( array( 'type' => 'text', 'key' => 'a' ) ) ) );
 		$this->assertNotContains( 'mask', $without );
 	}
+
+	public function test_a_masked_number_is_stored_as_the_visitor_typed_it(): void {
+		$form = $this->publish(
+			array(
+				array( 'id' => 'n', 'key' => 'ext', 'type' => 'number', 'label' => 'Extension', 'inputMask' => 'custom', 'maskPattern' => '99-99' ),
+				array( 'id' => 'm', 'key' => 'ext2', 'type' => 'number', 'label' => 'Digits', 'inputMask' => 'custom', 'maskPattern' => '99-99', 'maskStore' => 'digits' ),
+			)
+		);
+		$result = $this->submit( $form, array( 'ext' => '12-34', 'ext2' => '12-34' ) );
+		$this->assertSame( 200, $result['status'], wp_json_encode( $result['data'] ) );
+		$stored = $this->storedPayload( $form );
+		$this->assertSame( '12-34', $stored['ext'] );
+		$this->assertEquals( '1234', $stored['ext2'] );
+	}
 }

@@ -317,4 +317,16 @@ final class InputMaskTest extends TestCase {
 		$js = (string) file_get_contents( dirname( __DIR__, 2 ) . '/resources/frontend/components/fields/lazyFields.jsx' );
 		$this->assertMatchesRegularExpression( '/mask: \(\) => import\(\/\* webpackChunkName: "field-mask" \*\//', $js );
 	}
+
+	public function test_digits_only_storage_round_trips_when_the_pattern_has_literal_digits(): void {
+		$field = array( 'inputMask' => 'custom', 'maskPattern' => '1-999', 'maskStore' => 'digits' );
+		$this->assertSame( '123', $this->stored( $field, '1-123' ) );
+		$this->assertSame( '123', $this->stored( $field, '123' ) );
+		$this->assertNull( $this->error( $field, '123' ) );
+		$this->assertNull( $this->error( $field, '1-123' ) );
+		$this->assertNotNull( $this->error( $field, '12' ) );
+		$letters = array( 'inputMask' => 'custom', 'maskPattern' => 'x-AA99', 'maskStore' => 'digits' );
+		$this->assertSame( 'AB12', $this->stored( $letters, 'x-AB12' ) );
+		$this->assertNull( $this->error( $letters, 'AB12' ) );
+	}
 }
