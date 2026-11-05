@@ -409,7 +409,7 @@ final class Importer {
 				$like[] = '%' . $wpdb->esc_like( '"ref":' . wp_json_encode( $ref ) ) . '%';
 			}
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Lookup by a value inside entry meta.
-			$metas = $wpdb->get_col( $wpdb->prepare( 'SELECT meta FROM %i WHERE form_id = %d AND ( meta LIKE %s OR meta LIKE %s OR meta LIKE %s OR meta LIKE %s OR meta LIKE %s OR meta LIKE %s OR meta LIKE %s OR meta LIKE %s OR meta LIKE %s OR meta LIKE %s )', $table, $formId, ...$like ) );
+			$metas = $wpdb->get_col( $wpdb->prepare( 'SELECT meta FROM %i WHERE form_id = %d AND ( meta LIKE %s OR meta LIKE %s OR meta LIKE %s OR meta LIKE %s OR meta LIKE %s OR meta LIKE %s OR meta LIKE %s OR meta LIKE %s OR meta LIKE %s OR meta LIKE %s )', $table, $formId, $like[0], $like[1], $like[2], $like[3], $like[4], $like[5], $like[6], $like[7], $like[8], $like[9] ) );
 			foreach ( (array) $metas as $meta ) {
 				$decoded = json_decode( (string) $meta, true );
 				$ref     = is_array( $decoded ) ? (string) ( $decoded['import']['ref'] ?? '' ) : '';
