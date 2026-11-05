@@ -18,6 +18,19 @@ const BADGES = {
  * @param {Object} props
  * @param {string} props.status connected, error or none.
  */
+
+const connectedText = (name, email) => {
+  if (!name) {
+    return __('Connected.', 'subtleforms');
+  }
+  if (!email) {
+    /* translators: %s: account name */
+    return sprintf(__('Connected to %s.', 'subtleforms'), name);
+  }
+  /* translators: 1: account name, 2: account email */
+  return sprintf(__('Connected to %1$s (%2$s).', 'subtleforms'), name, email);
+};
+
 export function StatusBadge({ status }) {
   const badge = BADGES[status] || BADGES.none;
   return <span className={`sf-em-badge sf-em-badge--${badge.tone}`}>{badge.label}</span>;
@@ -60,14 +73,7 @@ export default function ServiceConnection({ service, label, state, onState }) {
       apply(next);
       setResult({
         tone: 'ok',
-        text: next.account_name
-          ? sprintf(
-              /* translators: 1: account name, 2: account email */
-              __('Connected to %1$s (%2$s).', 'subtleforms'),
-              next.account_name,
-              next.account_email
-            )
-          : __('Connected.', 'subtleforms'),
+        text: connectedText(next.account_name, next.account_email),
       });
     } catch (e) {
       setResult({ tone: 'error', text: e?.message || __('The connection failed.', 'subtleforms') });
@@ -105,15 +111,8 @@ export default function ServiceConnection({ service, label, state, onState }) {
     __('Add your %s API key to connect this site to your account.', 'subtleforms'),
     label
   );
-  if (state.status === 'connected' && state.account_name) {
-    summary = sprintf(
-      /* translators: 1: account name, 2: account email */
-      __('Connected to %1$s (%2$s).', 'subtleforms'),
-      state.account_name,
-      state.account_email
-    );
-  } else if (state.status === 'connected') {
-    summary = __('Connected.', 'subtleforms');
+  if (state.status === 'connected') {
+    summary = connectedText(state.account_name, state.account_email);
   } else if (state.status === 'error') {
     summary =
       state.error ||
