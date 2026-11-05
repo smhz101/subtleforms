@@ -372,6 +372,7 @@ final class NinjaMapper {
 				return array( $this->withLogic( $built, $key ) );
 
 			case 'hidden':
+				$this->entryMap[ $id ] = $entry;
 				return array( $this->build->field( 'hidden', $key, '' !== $label ? $label : $key, false, array( 'value' => $this->defaultValue( $value, $label ) ) ) );
 
 			case 'number':

@@ -279,4 +279,21 @@ final class ImportWPFormsTest extends ImportTestCase {
 		$payload = WPFormsMapper::payload( $mapped['entry_map'], array( '1' => array( 'value' => 'x', 'address1' => '1 High St', 'city' => 'Leeds', 'postal' => 'LS1', 'country' => 'GB' ) ) );
 		$this->assertSame( array( 'street_address' => '1 High St', 'city' => 'Leeds', 'postal_code' => 'LS1', 'country' => 'GB' ), $payload['where'] );
 	}
+
+	public function test_hidden_answers_are_copied_and_choice_ids_resolve_for_fields_defined_later(): void {
+		$form = array(
+			'id'       => '1',
+			'title'    => 'T',
+			'fields'   => array(
+				'1' => array( 'id' => '1', 'type' => 'text', 'label' => 'Notes', 'conditional_logic' => '1', 'conditional_type' => 'show', 'conditionals' => array( array( array( 'field' => '2', 'operator' => '==', 'value' => '1' ) ) ) ),
+				'2' => array( 'id' => '2', 'type' => 'select', 'label' => 'Topic', 'choices' => array( '1' => array( 'label' => 'Support' ), '2' => array( 'label' => 'Sales' ) ) ),
+				'3' => array( 'id' => '3', 'type' => 'hidden', 'label' => 'Referral', 'default_value' => '' ),
+			),
+			'settings' => array(),
+		);
+		$mapped = WPFormsMapper::map( $form, self::CONTEXT );
+		$this->assertSame( 'Support', self::byKey( $mapped['schema']['fields'] )['notes']['logic']['groups'][0]['rules'][0]['value'] );
+		$payload = WPFormsMapper::payload( $mapped['entry_map'], array( '3' => array( 'value' => 'summer-sale' ) ) );
+		$this->assertSame( array( 'referral' => 'summer-sale' ), $payload );
+	}
 }

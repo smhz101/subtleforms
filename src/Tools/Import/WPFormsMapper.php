@@ -138,9 +138,12 @@ final class WPFormsMapper {
 			}
 		}
 
-		// Keys first, so logic and merge tags can point at any field.
+		// Keys and choice values first, so logic and merge tags can point at any field.
 		foreach ( $this->all as $id => $field ) {
 			$this->reserveKey( (string) $id, $field );
+			foreach ( self::choices( $field ) as $choice ) {
+				$this->choiceValues[ (string) $id ][ $choice['id'] ] = $choice['value'];
+			}
 		}
 
 		$items  = array();
@@ -426,6 +429,7 @@ final class WPFormsMapper {
 				break;
 
 			case 'hidden':
+				$this->entryMap[ $id ] = $entry;
 				return array( $this->build->field( 'hidden', $key, '' !== $label ? $label : $key, false, array( 'value' => $this->defaultValue( $value, $label ) ) ) );
 
 			case 'number':

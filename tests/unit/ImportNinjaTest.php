@@ -183,6 +183,13 @@ final class ImportNinjaTest extends ImportTestCase {
 		$this->assertSame( 1, $files );
 	}
 
+	public function test_hidden_answers_are_copied(): void {
+		$form             = self::form();
+		$form['fields'][] = array( 'id' => 40, 'type' => 'hidden', 'label' => 'Referral', 'key' => 'referral', 'order' => 40 );
+		$mapped           = NinjaMapper::map( $form, self::CONTEXT );
+		$this->assertSame( array( 'referral' => 'summer-sale' ), NinjaMapper::payload( $mapped['entry_map'], array( '40' => 'summer-sale' ) ) );
+	}
+
 	public function test_the_export_file_reads_in_every_common_format(): void {
 		$json  = (string) file_get_contents( dirname( __DIR__ ) . '/fixtures/import/ninja-export.nff' );
 		$plain = NinjaExport::decode( $json );

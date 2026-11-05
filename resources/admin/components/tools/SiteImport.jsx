@@ -241,9 +241,12 @@ export default function SiteImport() {
       if ( result.ok && Array.isArray( result.body?.data ) ) {
         for ( const item of result.body.data ) {
           const row = { ...item, source: sourceId };
-          if ( withEntries && item.status === 'imported' && item.entries > 0 ) {
+          // A form imported before takes its entries into the form you already have;
+          // entries already copied are skipped, so this is also how to finish an interrupted run.
+          const target = item.status === 'imported' ? item.form_id : item.existing?.[ 0 ]?.id;
+          if ( withEntries && ( item.status === 'imported' || item.status === 'exists' ) && target && item.entries > 0 ) {
             setEntryProgress( { done: copied, total: wanted } );
-            row.entriesResult = await copyEntries( item, copied, wanted );
+            row.entriesResult = await copyEntries( { ...item, form_id: target }, copied, wanted );
             copied += item.entries;
           }
           collected.push( row );
@@ -455,6 +458,28 @@ export default function SiteImport() {
   );
 }
 
+function EntriesReport( { result } ) {
+  if ( ! result ) {
+    return null;
+  }
+  return (
+    <p className='sf-import__entries'>
+      { entriesSummary( result ) }
+      { result.files > 0 && ' ' + sprintf(
+        /* translators: %s: number of files */
+        _n(
+          '%s uploaded file was not copied. Its address is kept in the answer.',
+          '%s uploaded files were not copied. Their addresses are kept in the answers.',
+          result.files,
+          'subtleforms'
+        ),
+        result.files.toLocaleString()
+      ) }
+      { result.stopped && ' ' + result.stopped }
+    </p>
+  );
+}
+
 function ResultCard( { item, busy, onCopy, onDismiss, canCopy } ) {
   if ( item.status === 'imported' ) {
     const notes = item.notes || [];
@@ -468,22 +493,7 @@ function ResultCard( { item, busy, onCopy, onDismiss, canCopy } ) {
             <span className='screen-reader-text'>{ `: ${ item.title }` }</span>
           </a>
         </div>
-        { item.entriesResult && (
-          <p className='sf-import__entries'>
-            { entriesSummary( item.entriesResult ) }
-            { item.entriesResult.files > 0 && ' ' + sprintf(
-              /* translators: %s: number of files */
-              _n(
-                '%s uploaded file was not copied. Its address is kept in the answer.',
-                '%s uploaded files were not copied. Their addresses are kept in the answers.',
-                item.entriesResult.files,
-                'subtleforms'
-              ),
-              item.entriesResult.files.toLocaleString()
-            ) }
-            { item.entriesResult.stopped && ' ' + item.entriesResult.stopped }
-          </p>
-        ) }
+        <EntriesReport result={ item.entriesResult } />
         { notes.length > 0 && (
           <details className='sf-import__report'>
             <summary>{ __( 'Show the report', 'subtleforms' ) }</summary>
@@ -512,6 +522,7 @@ function ResultCard( { item, busy, onCopy, onDismiss, canCopy } ) {
             { __( 'Import again as a copy?', 'subtleforms' ) }
           </span>
         </div>
+        <EntriesReport result={ item.entriesResult } />
         <div className='sf-import__actions'>
           <Button variant='secondary' size='compact' disabled={ busy || ! canCopy } onClick={ onCopy }>
             { __( 'Import a copy', 'subtleforms' ) }

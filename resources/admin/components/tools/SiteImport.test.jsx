@@ -364,6 +364,25 @@ describe('entries and consent', () => {
     unmount();
   });
 
+  test('a form imported before takes its entries into the form you already have', async () => {
+    apiGet.mockImplementation((path) => Promise.resolve(ok(path === '/tools/migrate/sources'
+      ? WP_SOURCES
+      : [ { ...WP_FORMS[0], imported: [ { id: 77, title: 'Contact request', status: 'draft', edit_url: '/edit?form_id=77' } ] } ])));
+    apiPost.mockImplementation((path) => (path.endsWith('/import')
+      ? Promise.resolve(ok([ { source_id: '101', title: 'Contact request', status: 'exists', existing: [ { id: 77, title: 'Contact request', edit_url: '/edit?form_id=77' } ], entries: 450, notes: [] } ]))
+      : Promise.resolve(ok({ imported: 12, skipped: 438, failed: 0, files: 0, next: 450, done: true, error: '' }))));
+    const { container, unmount } = await mount();
+    tick(container.querySelectorAll('.sf-import__list input')[0]);
+    tick(container.querySelector('.sf-import__consent input'));
+    click([ ...container.querySelectorAll('button') ].find((b) => b.textContent === 'Import 1 form'));
+    await flush();
+    await flush();
+    const entryCall = apiPost.mock.calls.find(([ path ]) => path.endsWith('/entries'));
+    expect(entryCall[1]).toEqual({ id: '101', form_id: 77, after: 0, consent: true });
+    expect(container.querySelector('.sf-import__result.is-exists .sf-import__entries').textContent).toContain('12 entries copied, 438 already there and skipped.');
+    unmount();
+  });
+
   test('the sentences', () => {
     expect(consentLabel(1)).toContain('Also import 1 entry.');
     expect(entriesSummary({ imported: 1, skipped: 0, failed: 2, files: 0 })).toBe('1 entry copied, 2 could not be copied.');
