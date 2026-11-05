@@ -659,33 +659,15 @@ class AdminMenu {
 	/**
 	 * The integrations the Settings screen lists.
 	 *
-	 * Webhooks are part of this plugin. Any other integration comes from an
-	 * add-on, which adds its entry through the filter below.
+	 * Webhooks and Mailchimp are part of this plugin. Any other integration
+	 * comes from an add-on, which adds its entry through the
+	 * `subtleforms/admin/integrations` filter (see Integrations\Registry).
 	 *
 	 * @return array<string, array> Map of slug to { slug, label, description,
 	 *                              available, enabled, configured }.
 	 */
 	private function buildExtensionsData(): array {
-		$result = array(
-			'webhooks' => array(
-				'slug'        => 'webhooks',
-				'label'       => __( 'Webhooks', 'subtleforms' ),
-				'description' => __( 'Send each entry as JSON to any URL, with retries and signed requests.', 'subtleforms' ),
-				'available'   => true,
-				'enabled'     => true,
-				'configured'  => true,
-			),
-		);
-
-		/**
-		 * Integrations an add-on lists in Settings.
-		 *
-		 * @param array<string, array> $integrations Map of slug to integration data.
-		 * @since 2.8.0
-		 */
-		$result = apply_filters( 'subtleforms/admin/integrations', $result );
-
-		return is_array( $result ) ? $result : array();
+		return \SubtleForms\Integrations\Registry::all();
 	}
 
 	private function is_builder_screen( string $hook ): bool {

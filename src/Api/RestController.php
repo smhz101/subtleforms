@@ -141,6 +141,7 @@ final class RestController {
 		}
 
 		( new WebhooksApi() )->registerRoutes();
+		( new MailchimpApi() )->registerRoutes();
 
 		$dashboardApi = new DashboardApi(
 			$this->formsRepo,

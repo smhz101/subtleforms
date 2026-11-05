@@ -147,6 +147,40 @@ public static function dispatchEmail( array $payload ): bool {
 	}
 
 	/**
+	 * Queue a Mailchimp job for an entry.
+	 *
+	 * The job carries the entry ID, never the answers: they are read back
+	 * from the entry when the job runs.
+	 *
+	 * @param array $job   { submission_id, form_id, retry_count, feeds }.
+	 * @param int   $delay Seconds until it runs.
+	 * @return bool True if the job was scheduled.
+	 */
+	public static function dispatchMailchimp( array $job, int $delay = 0 ): bool {
+		if ( empty( $job['submission_id'] ) ) {
+			self::log( 'Mailchimp dispatch failed: missing entry' );
+			return false;
+		}
+		$job['dispatch_id'] = self::dispatchId();
+		$scheduled          = wp_schedule_single_event( time() + max( 0, $delay ), 'subtleforms_async_mailchimp', array( $job ) );
+		if ( false === $scheduled ) {
+			self::log( 'Failed to schedule Mailchimp job', array( 'submission_id' => $job['submission_id'] ) );
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Execute a Mailchimp job (called by WP Cron).
+	 *
+	 * @param array $job Job from dispatchMailchimp().
+	 * @return void
+	 */
+	public static function executeMailchimp( array $job ): void {
+		\SubtleForms\Integrations\Mailchimp\Sender::run( $job );
+	}
+
+	/**
 	 * Execute async email job (called by WP Cron)
 	 * 
 	 * @param array $job Email job payload
