@@ -156,6 +156,15 @@ final class ToolsApi {
 		);
 		register_rest_route(
 			self::NAMESPACE,
+			'/tools/migrate/sources/(?P<source>[a-z0-9_-]+)/entries',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'importEntries' ),
+				'permission_callback' => $write,
+			)
+		);
+		register_rest_route(
+			self::NAMESPACE,
 			'/tools/logs',
 			array(
 				'methods'             => 'GET',
@@ -250,8 +259,8 @@ final class ToolsApi {
 		}
 		$detected = FormMigration::detect( $body['package'] );
 		$source   = $body['source'] !== '' ? $body['source'] : $detected;
-		if ( ! in_array( $source, array( 'gravity', 'fluent' ), true ) ) {
-			return ApiResponse::validation_error( __( 'This file is not a Gravity Forms or Fluent Forms export.', 'subtleforms' ) );
+		if ( ! in_array( $source, array( 'gravity', 'fluent', 'wpforms', 'ninja' ), true ) ) {
+			return ApiResponse::validation_error( __( 'This file is not a Gravity Forms, Fluent Forms, WPForms or Ninja Forms export.', 'subtleforms' ) );
 		}
 		$preview = FormMigration::preview( $source, $body['package'] );
 		$preview['source'] = $source;
@@ -271,8 +280,8 @@ final class ToolsApi {
 			return $body;
 		}
 		$source = $body['source'] !== '' ? $body['source'] : FormMigration::detect( $body['package'] );
-		if ( ! in_array( $source, array( 'gravity', 'fluent' ), true ) ) {
-			return ApiResponse::validation_error( __( 'This file is not a Gravity Forms or Fluent Forms export.', 'subtleforms' ) );
+		if ( ! in_array( $source, array( 'gravity', 'fluent', 'wpforms', 'ninja' ), true ) ) {
+			return ApiResponse::validation_error( __( 'This file is not a Gravity Forms, Fluent Forms, WPForms or Ninja Forms export.', 'subtleforms' ) );
 		}
 		$result = $this->transfer->importMigrated( $source, $body['package'] );
 		if ( $result['error'] !== '' && ! $result['created'] ) {
@@ -357,6 +366,32 @@ final class ToolsApi {
 	}
 
 	/**
+	 * Copy one batch of entries into a form made by an earlier import. Only
+	 * called after the owner ticked the consent box on the screen.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response
+	 */
+	public function importEntries( WP_REST_Request $request ): WP_REST_Response {
+		$source = $this->importer()->source( sanitize_key( (string) $request->get_param( 'source' ) ) );
+		if ( ! $source ) {
+			return ApiResponse::not_found( __( 'That form plugin is not supported.', 'subtleforms' ) );
+		}
+		$body   = $request->get_json_params();
+		$body   = is_array( $body ) ? $body : array();
+		$id     = (string) ( $body['id'] ?? '' );
+		$formId = (int) ( $body['form_id'] ?? 0 );
+		if ( ! preg_match( '/^[A-Za-z0-9_-]{1,64}$/', $id ) || $formId <= 0 || empty( $body['consent'] ) ) {
+			return ApiResponse::validation_error( __( 'Tick the box to copy entries first.', 'subtleforms' ) );
+		}
+		$result = $this->importer()->importEntries( $source, $id, $formId, max( 0, (int) ( $body['after'] ?? 0 ) ) );
+		if ( '' !== $result['error'] ) {
+			return ApiResponse::validation_error( $result['error'] );
+		}
+		return ApiResponse::success( $result );
+	}
+
+	/**
 	 * @param WP_REST_Request $request Request.
 	 * @return WP_REST_Response
 	 */
@@ -398,12 +433,19 @@ final class ToolsApi {
 		$body    = $request->get_json_params();
 		$body    = is_array( $body ) ? $body : array();
 		$package = $body['package'] ?? $body;
+		// A Ninja Forms .nff file may not be JSON; the screen sends its text.
+		if ( isset( $body['raw'] ) && is_string( $body['raw'] ) ) {
+			$package = \SubtleForms\Tools\Import\NinjaExport::decode( $body['raw'] );
+			if ( ! is_array( $package ) ) {
+				return ApiResponse::validation_error( __( 'This file is not a Ninja Forms export that SubtleForms can read. Export the form again from Ninja Forms, or use the import from this site.', 'subtleforms' ) );
+			}
+		}
 		if ( ! is_array( $package ) ) {
 			return ApiResponse::validation_error( __( 'The file could not be read.', 'subtleforms' ) );
 		}
 		$source = (string) ( $body['source'] ?? '' );
-		if ( ! in_array( $source, array( '', 'gravity', 'fluent' ), true ) ) {
-			return ApiResponse::validation_error( __( 'Choose Gravity Forms or Fluent Forms.', 'subtleforms' ) );
+		if ( ! in_array( $source, array( '', 'gravity', 'fluent', 'wpforms', 'ninja' ), true ) ) {
+			return ApiResponse::validation_error( __( 'Choose a form plugin from the list.', 'subtleforms' ) );
 		}
 		return array(
 			'source'  => $source,

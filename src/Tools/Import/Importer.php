@@ -3,9 +3,10 @@
  * One-click import of forms from other form plugins on this site.
  *
  * Finds the forms each source left in the database, maps them, and saves
- * them as SubtleForms drafts. The original forms are only ever read. Entries
- * and payment settings are not imported and no email is sent: the form is
- * saved, not submitted.
+ * them as SubtleForms drafts. The original forms are only ever read. Payment
+ * settings are not imported and no email is sent: the form is saved, not
+ * submitted. Entries are copied only when the owner asks, in batches, by
+ * importEntries().
  *
  * @package SubtleForms\Tools\Import
  * @since   2.6.0
@@ -21,13 +22,17 @@ use SubtleForms\Repositories\FormsRepository;
 use SubtleForms\Tools\TransferService;
 
 /**
- * Detect, list and import forms from Contact Form 7, Gravity Forms and
- * Fluent Forms (and any source added with `subtleforms/import/sources`).
+ * Detect, list and import forms from Contact Form 7, Gravity Forms, Fluent
+ * Forms, WPForms and Ninja Forms (and any source added with
+ * `subtleforms/import/sources`).
  */
 final class Importer {
 
 	/** Forms imported in one request. The screen sends one at a time. */
 	public const MAX_PER_REQUEST = 20;
+
+	/** Entries copied in one request. */
+	public const ENTRY_BATCH = 200;
 
 	/** @var FormsRepository */
 	private $forms;
@@ -54,7 +59,7 @@ final class Importer {
 	 * @return Source[]
 	 */
 	public static function defaultSources(): array {
-		$sources = array( new Cf7Source(), new GravitySource(), new FluentSource() );
+		$sources = array( new Cf7Source(), new GravitySource(), new FluentSource(), new WPFormsSource(), new NinjaSource() );
 		/**
 		 * Filter the plugins SubtleForms can import forms from.
 		 *
@@ -113,7 +118,9 @@ final class Importer {
 			$id     = (string) $row['id'];
 			$fields = 0;
 			$notes  = 0;
+			$count  = 0;
 			try {
+				$count = $source instanceof EntrySource ? $source->entryCount( $id ) : 0;
 				$raw = $source->read( $id );
 				if ( $raw ) {
 					$mapped = $source->map( $raw, $context );
@@ -128,6 +135,7 @@ final class Importer {
 				'title'    => '' !== trim( (string) $row['title'] ) ? (string) $row['title'] : __( '(no title)', 'subtleforms' ),
 				'fields'   => $fields,
 				'notes'    => $notes,
+				'entries'  => $count,
 				'imported' => $this->existing( self::ref( $source->id(), $id ) ),
 			);
 		}
@@ -172,6 +180,7 @@ final class Importer {
 			'fields'    => 0,
 			'notes'     => array(),
 			'existing'  => array(),
+			'entries'   => 0,
 			'error'     => '',
 		);
 		$raw = $source->read( $id );
@@ -235,6 +244,11 @@ final class Importer {
 		$result['edit_url'] = admin_url( 'admin.php?page=subtleforms-new-form&form_id=' . $formId );
 		$result['fields'] = SchemaBuilder::countFields( (array) ( $schema['fields'] ?? array() ) );
 		$result['notes']  = $notes instanceof ImportNotes ? $notes->all() : array();
+		try {
+			$result['entries'] = $source instanceof EntrySource ? $source->entryCount( $id ) : 0;
+		} catch ( \Throwable $e ) {
+			$result['entries'] = 0;
+		}
 
 		/**
 		 * A form was imported from another plugin.
@@ -247,6 +261,164 @@ final class Importer {
 		 */
 		do_action( 'subtleforms/import/imported', $formId, $source->id(), $id );
 		return $result;
+	}
+
+	/**
+	 * Copy one batch of entries into a form made by an earlier import.
+	 *
+	 * The caller asks for entries only after the owner agreed. Entries keep
+	 * their date, are marked read, and carry where they came from, so a second
+	 * run skips the ones already copied. Uploaded files are not copied: their
+	 * address is kept as text.
+	 *
+	 * @param Source $source       Source.
+	 * @param string $id           Form id in the other plugin.
+	 * @param int    $targetFormId SubtleForms form made from it.
+	 * @param int    $after        Last source entry id handled; 0 to start.
+	 * @param int    $limit        Entries in this batch.
+	 * @return array{imported: int, skipped: int, failed: int, files: int, next: int, done: bool, error: string}
+	 */
+	public function importEntries( Source $source, string $id, int $targetFormId, int $after = 0, int $limit = self::ENTRY_BATCH ): array {
+		$result = array(
+			'imported' => 0,
+			'skipped'  => 0,
+			'failed'   => 0,
+			'files'    => 0,
+			'next'     => $after,
+			'done'     => true,
+			'error'    => '',
+		);
+		if ( ! $source instanceof EntrySource ) {
+			$result['error'] = __( 'This plugin has no entries to import.', 'subtleforms' );
+			return $result;
+		}
+		$limit = max( 1, min( self::ENTRY_BATCH, $limit ) );
+		$ref   = self::ref( $source->id(), $id );
+		$own   = false;
+		foreach ( $this->existing( $ref ) as $form ) {
+			if ( (int) $form['id'] === $targetFormId ) {
+				$own = true;
+			}
+		}
+		if ( ! $own ) {
+			$result['error'] = __( 'Entries can only be copied into a form imported from this one.', 'subtleforms' );
+			return $result;
+		}
+		$raw = $source->read( $id );
+		if ( ! $raw ) {
+			$result['error'] = __( 'This form is no longer there.', 'subtleforms' );
+			return $result;
+		}
+		try {
+			$mapped = $source->map( $raw, self::context() );
+		} catch ( \Throwable $e ) {
+			$result['error'] = __( 'This form could not be read.', 'subtleforms' );
+			return $result;
+		}
+		$entryMap = (array) ( $mapped['entry_map'] ?? array() );
+		$loaded   = $this->forms->loadSchemaVersion( $targetFormId );
+		$schema   = is_array( $loaded ) && is_array( $loaded['schema'] ?? null ) ? $loaded['schema'] : ( $this->forms->getDraftSchema( $targetFormId ) ?? array() );
+		$known    = array();
+		foreach ( \SubtleForms\Support\SchemaFields::flat( $schema ) as $field ) {
+			if ( ! empty( $field['key'] ) ) {
+				$known[ (string) $field['key'] ] = true;
+			}
+		}
+
+		$rows = $source->entries( $id, $after, $limit );
+		if ( ! $rows ) {
+			return $result;
+		}
+		$refs = array();
+		foreach ( $rows as $row ) {
+			$refs[] = self::entryRef( $source->id(), $id, (int) $row['id'] );
+		}
+		$have        = $this->importedEntryRefs( $targetFormId, $refs );
+		$submissions = new \SubtleForms\Repositories\SubmissionsRepository();
+		foreach ( $rows as $row ) {
+			$result['next'] = (int) $row['id'];
+			$entryRef       = self::entryRef( $source->id(), $id, (int) $row['id'] );
+			if ( isset( $have[ $entryRef ] ) ) {
+				++$result['skipped'];
+				continue;
+			}
+			try {
+				$files   = 0;
+				$payload = array_intersect_key( $source->payload( $entryMap, $row, $files ), $known );
+				$payload = TransferService::cleanPayload( $payload, $schema );
+				$created = $submissions->create(
+					array(
+						'form_id'    => $targetFormId,
+						'payload'    => $payload,
+						'ip_address' => (string) ( $row['ip'] ?? '' ),
+						'user_agent' => (string) ( $row['user_agent'] ?? '' ),
+						'meta'       => array(
+							'import' => array(
+								'ref'              => $entryRef,
+								'imported_from'    => $source->id(),
+								'original_form_id' => $id,
+								'original_id'      => (string) $row['id'],
+							),
+						),
+					)
+				);
+				$submissions->update( $created, array( 'is_read' => 1 ) );
+				if ( '' !== (string) $row['created_at'] ) {
+					$submissions->setCreatedAt( $created, (string) $row['created_at'] );
+				}
+				$result['files'] += $files;
+				++$result['imported'];
+				/** This action is documented in src/Tools/TransferService.php. */
+				do_action( 'subtleforms/submission/imported', $created, $targetFormId, 'unread', (string) $row['created_at'] );
+			} catch ( \Throwable $e ) {
+				++$result['failed'];
+			}
+		}
+		$result['done'] = count( $rows ) < $limit;
+		return $result;
+	}
+
+	/**
+	 * The reference stored on an imported entry.
+	 *
+	 * @param string $source Source id.
+	 * @param string $form   Form id in the other plugin.
+	 * @param int    $entry  Entry id in the other plugin.
+	 * @return string
+	 */
+	public static function entryRef( string $source, string $form, int $entry ): string {
+		return $source . ':' . $form . ':' . $entry;
+	}
+
+	/**
+	 * Which of these entry references are already in the form.
+	 *
+	 * @param int      $formId SubtleForms form.
+	 * @param string[] $refs   References from entryRef().
+	 * @return array<string, true>
+	 */
+	private function importedEntryRefs( int $formId, array $refs ): array {
+		global $wpdb;
+		$table = $wpdb->prefix . 'subtleforms_submissions';
+		$found = array();
+		foreach ( array_chunk( $refs, 50 ) as $chunk ) {
+			$likes = array();
+			$args  = array( $table, $formId );
+			foreach ( $chunk as $ref ) {
+				$likes[] = 'meta LIKE %s';
+				$args[]  = '%' . $wpdb->esc_like( '"ref":' . wp_json_encode( $ref ) ) . '%';
+			}
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Placeholders only; lookup by a value inside entry meta.
+			$metas = $wpdb->get_col( $wpdb->prepare( 'SELECT meta FROM %i WHERE form_id = %d AND ( ' . implode( ' OR ', $likes ) . ' )', $args ) );
+			foreach ( (array) $metas as $meta ) {
+				$decoded = json_decode( (string) $meta, true );
+				$ref     = is_array( $decoded ) ? (string) ( $decoded['import']['ref'] ?? '' ) : '';
+				if ( '' !== $ref ) {
+					$found[ $ref ] = true;
+				}
+			}
+		}
+		return $found;
 	}
 
 	/**
