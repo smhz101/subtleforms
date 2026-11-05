@@ -438,6 +438,13 @@ $pipe-status-colors: (
 		font-family: 'SFMono-Regular', Consolas, monospace;
 	}
 
+	&__summary {
+		font-size: var(--sf-text-sm);
+		color: var(--sf-slate-700);
+		min-width: 0;
+		overflow-wrap: anywhere;
+	}
+
 	&__time {
 		font-size: var(--sf-text-2xs);
 		color: var(--sf-gray-400);

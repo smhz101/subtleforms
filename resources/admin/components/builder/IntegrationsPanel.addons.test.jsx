@@ -8,6 +8,15 @@ import IntegrationsPanel from './IntegrationsPanel';
 import { registerFormIntegration } from '../../../shared/extend';
 
 jest.mock('../settings/extensions/extensions.scss', () => ({}));
+jest.mock('../integrations/mailchimp/mailchimp.scss', () => ({}));
+jest.mock('../integrations/mailchimp/api', () => ({
+  ...jest.requireActual('../integrations/mailchimp/api'),
+  mailchimpApi: {
+    state: () => new Promise(() => {}),
+    audiences: () => new Promise(() => {}),
+    fields: () => new Promise(() => {}),
+  },
+}));
 
 global.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -77,3 +86,18 @@ test('with no add-on integration the panel says what the plugin does have (RFUN-
   unmount();
 });
 
+
+test('Mailchimp is drawn first while this plugin owns it, and the empty note goes away', () => {
+  window.subtleformsAdmin = { extensions: { mailchimp: { builtin: true } } };
+  const { container, unmount } = mount({ schema: { fields: [], metadata: {} }, onChange: jest.fn() });
+  expect(container.textContent).toContain('Add people who submit this form to Mailchimp');
+  expect(container.textContent).not.toContain('Send entries to other services with webhooks');
+  unmount();
+});
+
+test('an add-on that lists its own Mailchimp takes the built-in panel away', () => {
+  window.subtleformsAdmin = { extensions: { mailchimp: { slug: 'mailchimp' } } };
+  const { container, unmount } = mount({ schema: { fields: [], metadata: {} }, onChange: jest.fn() });
+  expect(container.textContent).not.toContain('Add people who submit this form to Mailchimp');
+  unmount();
+});

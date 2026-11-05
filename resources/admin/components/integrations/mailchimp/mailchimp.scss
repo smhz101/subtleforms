@@ -1,0 +1,219 @@
+// Mailchimp connection card, form panel and mapping table (2.8.0).
+// Flat colours from the --sf-* tokens, no gradients.
+
+.sf-mc-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 2px 10px;
+	border-radius: 999px;
+	border: 1px solid var(--sf-border-subtle);
+	background: var(--sf-bg-subtle);
+	color: var(--sf-text-secondary);
+	font-size: 12px;
+	font-weight: var(--sf-weight-semibold);
+	line-height: 20px;
+	white-space: nowrap;
+
+	&::before {
+		content: '';
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--sf-gray-300, #ccc);
+	}
+
+	&--ok::before { background: var(--sf-success); }
+	&--warn::before { background: var(--sf-warning); }
+}
+
+.sf-mc-card {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	max-width: 640px;
+
+	&__head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+	}
+
+	&__title {
+		margin: 0;
+		font-size: var(--sf-text-md);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
+	}
+
+	&__summary {
+		margin: 0;
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text-secondary);
+	}
+
+	&__key {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+
+		.components-base-control { margin-bottom: 0; }
+	}
+
+	&__actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 4px 8px;
+	}
+
+	&__masked {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 4px 12px;
+		margin: 0;
+	}
+
+	&__masked-label {
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text-secondary);
+	}
+
+	&__masked-value {
+		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+		font-size: 13px;
+		letter-spacing: 1px;
+		color: var(--sf-text);
+	}
+
+	&__result {
+		display: flex;
+		align-items: flex-start;
+		gap: 6px;
+		margin: 0;
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text-secondary);
+
+		svg { flex-shrink: 0; margin-top: 2px; fill: none; }
+		&--ok svg { color: var(--sf-success); }
+		&--error { color: var(--sf-danger, #cc1818); }
+	}
+
+	&__error { color: var(--sf-danger, #cc1818); }
+
+	&__loading {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin: 0;
+		color: var(--sf-text-secondary);
+	}
+}
+
+.sf-mc-form {
+	&__head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+	}
+
+	&__notice {
+		margin: 4px 0 12px;
+		padding: 10px 12px;
+		border-radius: var(--sf-radius-md);
+		background: var(--sf-bg-subtle);
+		font-size: 12px;
+		color: var(--sf-text-secondary);
+
+		a { color: inherit; }
+	}
+
+	&__body {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		margin-top: 8px;
+
+		.components-base-control { margin-bottom: 0; }
+	}
+}
+
+.sf-mc-map {
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--sf-border-subtle);
+	border-radius: var(--sf-radius-md);
+	overflow: hidden;
+
+	&__head,
+	&__row {
+		display: grid;
+		grid-template-columns: minmax(120px, 1fr) minmax(0, 1.6fr);
+		align-items: center;
+		gap: 12px;
+		padding: 8px 12px;
+	}
+
+	&__head {
+		background: var(--sf-bg-subtle);
+		font-size: 12px;
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text-secondary);
+	}
+
+	&__row {
+		border-top: 1px solid var(--sf-border-subtle);
+
+		.components-base-control,
+		.components-base-control__field { margin-bottom: 0; }
+	}
+
+	&__target {
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text);
+
+		em {
+			margin-left: 4px;
+			font-size: 11px;
+			font-style: normal;
+			color: var(--sf-text-muted);
+		}
+
+		code {
+			padding: 0 4px;
+			border-radius: 3px;
+			background: var(--sf-bg-subtle);
+			font-size: 11px;
+		}
+	}
+
+	&__orphan-control {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+
+		.components-base-control { flex: 1; min-width: 0; }
+	}
+
+	&__note {
+		margin: 0;
+		padding: 8px 12px;
+		border-top: 1px solid var(--sf-border-subtle);
+		font-size: 12px;
+		color: var(--sf-text-muted);
+
+		&--error { color: var(--sf-danger, #cc1818); }
+	}
+
+	@media (max-width: 600px) {
+		&__head { display: none; }
+
+		&__row {
+			grid-template-columns: 1fr;
+			gap: 4px;
+		}
+	}
+}

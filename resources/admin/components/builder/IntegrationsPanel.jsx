@@ -3,12 +3,13 @@ import { TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { getSlotItems } from '../../../shared/extend';
 import { integrationFieldOptions } from './utils/integrationFields';
+import { MailchimpFormPanel, isBuiltInMailchimp } from '../integrations/mailchimp';
 import '../settings/extensions/extensions.scss';
 
 /**
  * Form builder > Settings > Integrations (2.1).
  *
- * Add-ons add their own sections in the `form.integrations` slot
+ * Mailchimp is built in. Add-ons add their own sections in the `form.integrations` slot
  * (registerSlotItem or registerFormIntegration) and keep their settings in
  * metadata.integrations.{slug}. The legacy per-form webhook URL is shown here
  * while a form still has one.
@@ -24,7 +25,9 @@ export default function IntegrationsPanel({ schema, onChange, isReadOnly = false
 
   const fieldOptions = useMemo(() => integrationFieldOptions(schema?.fields), [schema?.fields]);
 
-  if (slotItems.length === 0 && !legacyWebhookUrl) {
+  const hasMailchimp = isBuiltInMailchimp();
+
+  if (slotItems.length === 0 && !legacyWebhookUrl && !hasMailchimp) {
     return (
       <p className='sf-form-settings__intro'>
         {__('Send entries to other services with webhooks. Add a Webhook action under Notifications. Defaults for every webhook are under Settings > Integrations.', 'subtleforms')}
@@ -48,6 +51,17 @@ export default function IntegrationsPanel({ schema, onChange, isReadOnly = false
 
   return (
     <>
+      {/* Mailchimp is part of this plugin; an add-on that lists its own takes it over. */}
+      {hasMailchimp && (
+        <MailchimpFormPanel
+          schema={schema}
+          integrations={integrations}
+          patch={patch}
+          isReadOnly={isReadOnly}
+          fieldOptions={fieldOptions}
+        />
+      )}
+
       {/* Panels and switches from add-ons (form.integrations slot) */}
       {slotItems.map((item) => {
         const Slot = item.component;
