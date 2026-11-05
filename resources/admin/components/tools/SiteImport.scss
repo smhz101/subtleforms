@@ -161,6 +161,32 @@
 	font-variant-numeric: tabular-nums;
 }
 
+.sf-import__consent {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin-top: 12px;
+	padding: 10px 12px;
+	font-size: var(--sf-text-sm);
+	line-height: 1.5;
+	color: var(--sf-text);
+	background: var(--sf-bg-subtle);
+	border: 1px solid var(--sf-border);
+	border-radius: var(--sf-radius-md);
+	cursor: pointer;
+
+	input {
+		flex-shrink: 0;
+		margin-top: 3px;
+	}
+}
+
+.sf-import__entries {
+	margin: 6px 0 0;
+	font-size: var(--sf-text-sm);
+	color: var(--sf-text-secondary);
+}
+
 .sf-import__status {
 	display: flex;
 	align-items: center;

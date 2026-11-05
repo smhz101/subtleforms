@@ -71,7 +71,7 @@ export default function ImportOfferModal() {
       </ul>
       <p className='sf-import-offer-modal__note'>
         {__(
-          'Import is available for Contact Form 7, Gravity Forms and Fluent Forms. Other plugins are listed when their forms are found.',
+          'Import is available for Contact Form 7, Gravity Forms, Fluent Forms, WPForms and Ninja Forms. Other plugins are listed when their forms are found. Entries are only copied if you choose to.',
           'subtleforms'
         )}
       </p>
