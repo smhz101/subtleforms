@@ -12,7 +12,7 @@ import { debug } from '../../shared/debug';
 import { cloneElement, useContext, useEffect } from '@wordpress/element';
 import ChoiceSelect from './fields/ChoiceSelect';
 import { FormContext } from './fields/contexts';
-import { lazyField } from './fields/lazyFields';
+import { lazyField, fieldHasMask } from './fields/lazyFields';
 import { getFieldType, getFieldOverride } from '../../shared/extend';
 import { effectiveFieldType } from '../../shared/fieldFallback';
 import { fieldConfig } from '../../shared/fieldConfig';
@@ -29,6 +29,7 @@ const DateTimeField = lazyField('date');
 const FileUpload = lazyField('upload');
 const RepeaterField = lazyField('repeater');
 const RichTextInput = lazyField('richText');
+const MaskedInput = lazyField('mask', 'MaskedInput');
 import {
   fieldAppearanceStyle,
   fieldAppearanceClasses,
@@ -614,6 +615,25 @@ function renderInput(
             readOnly={config.readOnly === true}
             showFlags={appearance.showFlags !== false}
             flagImages={flagsOn(config.showFlags)}
+          />
+        );
+      }
+      // An input mask formats the answer as it is typed (2.8.0).
+      if (fieldHasMask(field)) {
+        return (
+          <MaskedInput
+            id={inputId}
+            name={name}
+            config={config}
+            value={value ?? ''}
+            onChange={onChange}
+            describedBy={describedBy}
+            placeholder={placeholder}
+            required={required || undefined}
+            aria-required={required}
+            aria-invalid={!!error}
+            autoComplete={config.autocomplete || AUTOCOMPLETE_TOKENS[field.type]}
+            readOnly={config.readOnly === true}
           />
         );
       }

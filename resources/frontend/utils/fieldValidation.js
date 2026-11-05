@@ -18,6 +18,7 @@ import { getFieldType } from '../../shared/extend';
 import { hasParts, missingParts } from '../../shared/compositeParts';
 import { chainedSelectLevels, firstUnansweredChainedLevel } from '../../shared/chainedOptions';
 import { isValidInternational } from '../../shared/phoneDial';
+import { loadedGroup } from '../components/fields/lazyFields';
 
 export const COMPOSITE_FIELD_TYPES = new Set(['name_group', 'address_group', 'address']);
 
@@ -266,6 +267,13 @@ function rawValidateField(field, value, defaults = {}) {
     return __('Invalid URL.', 'subtleforms');
   }
 
+  // An input mask replaces the format check of its type (2.8.0). Its code is
+  // downloaded with the form; the server checks the same rule.
+  if (['text', 'number', 'phone', 'tel'].includes(type) && config.inputMask) {
+    const maskMessage = loadedGroup('mask')?.maskError?.(config, value);
+    if (maskMessage) return maskMessage;
+  }
+
   // A type from an add-on may check its own answers (registerFieldType `validate`).
   const addonDef = getFieldType(type);
   if (addonDef && typeof addonDef.validate === 'function') {
@@ -308,7 +316,9 @@ function rawValidateField(field, value, defaults = {}) {
     }
   }
 
-  if (type === 'number') {
+  // A masked number such as "12-34" is not numeric; the mask is its rule.
+  const maskedNumber = type === 'number' && !!config.inputMask && Number.isNaN(Number(value));
+  if (type === 'number' && !maskedNumber) {
     const n = Number(value);
     if (Number.isNaN(n)) return __('Please enter a number.', 'subtleforms');
     const min = num(config.min);

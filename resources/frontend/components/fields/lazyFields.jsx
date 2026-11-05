@@ -27,6 +27,7 @@ const LOADERS = {
   repeater: () => import(/* webpackChunkName: "field-repeater" */ './RepeaterField'),
   chained: () => import(/* webpackChunkName: "field-chained-select" */ './ChainedSelect'),
   richText: () => import(/* webpackChunkName: "field-rich-text" */ './RichTextInput'),
+  mask: () => import(/* webpackChunkName: "field-mask" */ './maskField'),
   conversational: () =>
     import(/* webpackChunkName: "form-conversational" */ '../ConversationalFormRenderer'),
 };
@@ -69,6 +70,25 @@ export function fieldGroup(field) {
 }
 
 /**
+ * Whether a field asks for an input mask (Text, Phone and Number fields).
+ * A Phone field with the country picker handles the phone mask itself.
+ *
+ * @param {Object} field Schema field.
+ * @return {boolean}
+ */
+export function fieldHasMask(field) {
+  if (!field || typeof field !== 'object' || !['text', 'number', 'phone', 'tel'].includes(field.type)) {
+    return false;
+  }
+  const config = fieldConfig(field);
+  const key = typeof config.inputMask === 'string' ? config.inputMask : '';
+  if (!key) {
+    return false;
+  }
+  return !(['phone', 'tel'].includes(field.type) && config.enableCountryCode);
+}
+
+/**
  * Every group a schema needs, nested fields included.
  *
  * @param {Object} schema Form schema.
@@ -95,6 +115,9 @@ export function fieldGroups(schema) {
     const group = fieldGroup(node);
     if (group) {
       groups.add(group);
+    }
+    if (fieldHasMask(node)) {
+      groups.add('mask');
     }
     if ((group === 'geo' && (node.type === 'country' || fieldConfig(node).enableCountryCode)) && flagsOn(fieldConfig(node).showFlags)) {
       groups.add('flags');
@@ -135,6 +158,16 @@ export function loadGroup(name) {
     );
   }
   return pending[name];
+}
+
+/**
+ * A group's module when it has been downloaded, else null.
+ *
+ * @param {string} name Group name.
+ * @return {Object|null}
+ */
+export function loadedGroup(name) {
+  return modules[name] || null;
 }
 
 /**
