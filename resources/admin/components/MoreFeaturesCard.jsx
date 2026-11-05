@@ -53,7 +53,7 @@ export default function MoreFeaturesCard({ data }) {
         <ul className='sf-more-features__list'>
           <li>{__('Signature, Calculation and Picture choice fields, and several files per upload field', 'subtleforms')}</li>
           <li>{__('Stripe payments, coupons and WooCommerce checkout', 'subtleforms')}</li>
-          <li>{__('Mailchimp, Brevo, Kit, HubSpot and Zapier', 'subtleforms')}</li>
+          <li>{__('HubSpot, Salesforce, Pipedrive, Zapier and more email marketing options', 'subtleforms')}</li>
           <li>{__('More conditional logic options, form analytics, entry PDFs and translation with WPML or Polylang', 'subtleforms')}</li>
         </ul>
         <a className='sf-more-features__link' href={card.url} target='_blank' rel='noopener noreferrer'>

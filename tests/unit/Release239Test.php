@@ -252,6 +252,20 @@ class Release239Test extends PHPUnit\Framework\TestCase {
 		$this->assertNotContains( 'subtleforms_pro_daily_license_check', $GLOBALS['sf_test_cleared'] );
 	}
 
+	/** 2.8.0: the Mailchimp connection and its cached lists go with the data, and stay when it is kept. */
+	public function test_uninstall_removes_the_mailchimp_connection(): void {
+		$GLOBALS['wpdb']->option_names = array( 'subtleforms_mailchimp_connection', '_transient_subtleforms_mc_abc', '_transient_timeout_subtleforms_mc_abc', 'subtleforms_pro_state' );
+		Uninstaller::clean_site();
+		$this->assertContains( 'subtleforms_mailchimp_connection', $GLOBALS['wpdb']->deleted );
+		$this->assertContains( '_transient_subtleforms_mc_abc', $GLOBALS['wpdb']->deleted );
+		$this->assertNotContains( 'subtleforms_pro_state', $GLOBALS['wpdb']->deleted );
+
+		$GLOBALS['wpdb']->deleted = array();
+		$GLOBALS['sf_test_options']['subtleforms_settings'] = array( 'keep_data_on_uninstall' => true );
+		Uninstaller::clean_site();
+		$this->assertSame( array(), $GLOBALS['wpdb']->deleted );
+	}
+
 	/** 2.8.0: Keep my data is a real setting: off by default and accepted by every layer that saves. */
 	public function test_keep_data_on_uninstall_can_be_saved(): void {
 		$this->assertFalse( Settings::DEFAULTS['keep_data_on_uninstall'] );

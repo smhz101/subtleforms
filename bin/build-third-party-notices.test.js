@@ -38,6 +38,8 @@ test('writes the licence text of each bundled package, the flags and vendor pack
   expect(text).toContain('Copyright (c) Author B');
   expect(text).toContain('Flag licence text');
   expect(text).toContain('Composer licence text');
+  expect(text).toContain('simple-icons');
+  expect(text).toContain('CC0-1.0');
   expect(text).not.toContain('unused');
 });
 

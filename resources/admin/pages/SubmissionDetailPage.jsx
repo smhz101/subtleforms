@@ -27,6 +27,9 @@ const ACTION_META = {
   email:   { iconName: 'Mail',     label: 'Send Email' },
   webhook: { iconName: 'Zap',      label: 'Call Webhook' },
   email_marketing: { iconName: 'Mail',     label: 'Email Marketing' },
+  mailchimp: { iconName: 'Mail',     label: 'Mailchimp' },
+  brevo:     { iconName: 'Mail',     label: 'Brevo' },
+  kit:       { iconName: 'Mail',     label: 'Kit' },
   crm:     { iconName: 'Users',    label: 'CRM' },
   pdf:     { iconName: 'FileText', label: 'Entry PDF' },
 };
@@ -86,7 +89,7 @@ const PipelineStepCard = ( { step } ) => {
   const asyncEntries = step.entries.filter( ( e ) => e.status.startsWith( 'async_' ) );
   const mainEntry    = mainEntries[ mainEntries.length - 1 ] || step.entries[ 0 ];
   const status       = stepStatus( step.entries );
-  const hasData      = mainEntry && Object.keys( mainEntry.data ).length > 0;
+  const hasData      = mainEntry && Object.keys( mainEntry.data ).some( ( k ) => k !== 'summary' );
   const hasAsync     = asyncEntries.length > 0;
 
   return (
@@ -102,6 +105,9 @@ const PipelineStepCard = ( { step } ) => {
         <span className='sf-pipe-step__icon' aria-hidden='true'><StepIcon size={ 14 } strokeWidth={ 2 } /></span>
         <span className='sf-pipe-step__label'>{ label }</span>
         <span className='sf-pipe-step__stepid'>{ step.stepId }</span>
+        { mainEntry?.data?.summary && (
+          <span className='sf-pipe-step__summary'>{ String( mainEntry.data.summary ) }</span>
+        ) }
         <span className={ `sf-pipe-status sf-pipe-status--${ status }` }>
           { STATUS_LABEL[ status ] || status }
         </span>
@@ -124,7 +130,7 @@ const PipelineStepCard = ( { step } ) => {
                 { __( 'Action details', 'subtleforms' ) }
               </div>
               <dl className='sf-pipe-data'>
-                { Object.entries( mainEntry.data ).map( ( [ k, v ] ) => (
+                { Object.entries( mainEntry.data ).filter( ( [ k ] ) => k !== 'summary' ).map( ( [ k, v ] ) => (
                   <div key={ k } className='sf-pipe-data__row'>
                     <dt className='sf-pipe-data__key'>{ k.replace( /_/g, ' ' ) }</dt>
                     <dd className='sf-pipe-data__val'>

@@ -3,12 +3,13 @@ import { TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { getSlotItems } from '../../../shared/extend';
 import { integrationFieldOptions } from './utils/integrationFields';
+import { EmailMarketingFormPanel, isBuiltInEmailMarketing } from '../integrations/emailMarketing';
 import '../settings/extensions/extensions.scss';
 
 /**
  * Form builder > Settings > Integrations (2.1).
  *
- * Add-ons add their own sections in the `form.integrations` slot
+ * Email marketing (Mailchimp, Brevo and Kit) is built in. Add-ons add their own sections in the `form.integrations` slot
  * (registerSlotItem or registerFormIntegration) and keep their settings in
  * metadata.integrations.{slug}. The legacy per-form webhook URL is shown here
  * while a form still has one.
@@ -24,7 +25,9 @@ export default function IntegrationsPanel({ schema, onChange, isReadOnly = false
 
   const fieldOptions = useMemo(() => integrationFieldOptions(schema?.fields), [schema?.fields]);
 
-  if (slotItems.length === 0 && !legacyWebhookUrl) {
+  const hasEmailMarketing = isBuiltInEmailMarketing();
+
+  if (slotItems.length === 0 && !legacyWebhookUrl && !hasEmailMarketing) {
     return (
       <p className='sf-form-settings__intro'>
         {__('Send entries to other services with webhooks. Add a Webhook action under Notifications. Defaults for every webhook are under Settings > Integrations.', 'subtleforms')}
@@ -48,6 +51,17 @@ export default function IntegrationsPanel({ schema, onChange, isReadOnly = false
 
   return (
     <>
+      {/* Email marketing is part of this plugin; an add-on that lists its own takes it over. */}
+      {hasEmailMarketing && (
+        <EmailMarketingFormPanel
+          schema={schema}
+          integrations={integrations}
+          patch={patch}
+          isReadOnly={isReadOnly}
+          fieldOptions={fieldOptions}
+        />
+      )}
+
       {/* Panels and switches from add-ons (form.integrations slot) */}
       {slotItems.map((item) => {
         const Slot = item.component;

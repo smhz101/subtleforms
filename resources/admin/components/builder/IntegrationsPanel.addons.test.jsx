@@ -8,6 +8,15 @@ import IntegrationsPanel from './IntegrationsPanel';
 import { registerFormIntegration } from '../../../shared/extend';
 
 jest.mock('../settings/extensions/extensions.scss', () => ({}));
+jest.mock('../integrations/emailMarketing/emailMarketing.scss', () => ({}));
+jest.mock('../integrations/emailMarketing/api', () => ({
+  ...jest.requireActual('../integrations/emailMarketing/api'),
+  emailMarketingApi: {
+    all: () => new Promise(() => {}),
+    lists: () => new Promise(() => {}),
+    fields: () => new Promise(() => {}),
+  },
+}));
 
 global.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -77,3 +86,19 @@ test('with no add-on integration the panel says what the plugin does have (RFUN-
   unmount();
 });
 
+
+test('Email marketing is drawn first while this plugin owns it, and the empty note goes away', () => {
+  window.subtleformsAdmin = { extensions: { email_marketing: { builtin: true } }, emailMarketing: { services: {}, extras: [], banner: { show: false } } };
+  const { container, unmount } = mount({ schema: { fields: [], metadata: {} }, onChange: jest.fn() });
+  expect(container.textContent).toContain('Email marketing');
+  expect(container.textContent).toContain('No email marketing service is switched on');
+  expect(container.textContent).not.toContain('Send entries to other services with webhooks');
+  unmount();
+});
+
+test('an add-on that lists its own Email marketing takes the built-in panel away', () => {
+  window.subtleformsAdmin = { extensions: { email_marketing: { slug: 'email_marketing' } } };
+  const { container, unmount } = mount({ schema: { fields: [], metadata: {} }, onChange: jest.fn() });
+  expect(container.textContent).not.toContain('No email marketing service is switched on');
+  unmount();
+});
