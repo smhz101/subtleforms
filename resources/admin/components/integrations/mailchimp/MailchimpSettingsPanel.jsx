@@ -25,8 +25,10 @@ export default function MailchimpSettingsPanel() {
         </p>
       </div>
       <div className='sf-ext-panel__body'>
-        <ConnectionCard onChange={setConnection} />
-        <ExtensionSlot name='integration.mailchimp.settings' connection={connection} />
+        <div className='sf-mc-settings'>
+          <ConnectionCard onChange={setConnection} />
+          <ExtensionSlot name='integration.mailchimp.settings' connection={connection} />
+        </div>
       </div>
     </div>
   );

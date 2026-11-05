@@ -147,7 +147,7 @@ export default function ConnectionCard({ onChange }) {
         </h3>
         <StatusBadge status={state.status} />
       </header>
-      <p className='sf-mc-card__summary'>{summary}</p>
+      {!(result.text && result.tone === 'ok') && <p className='sf-mc-card__summary'>{summary}</p>}
 
       {showField ? (
         <div className='sf-mc-card__key'>

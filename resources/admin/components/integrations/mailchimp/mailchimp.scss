@@ -27,6 +27,12 @@
 	&--warn::before { background: var(--sf-warning); }
 }
 
+.sf-mc-settings {
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+}
+
 .sf-mc-card {
 	display: flex;
 	flex-direction: column;

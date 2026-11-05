@@ -5,5 +5,8 @@
 	"config": {
 		"WP_DEBUG": true,
 		"WP_ENVIRONMENT_TYPE": "local"
+	},
+	"mappings": {
+		"wp-content/mu-plugins/subtleforms-mailchimp-mock.php": "./tests/browser/fixtures/mailchimp-mock-mu.php"
 	}
 }
