@@ -559,7 +559,10 @@
 			th:not(.sf-data-table__check-cell):not(.sf-data-table__th--sortable) {
 				position: absolute;
 				width: 1px !important;
+				min-width: 0 !important;
 				height: 1px;
+				padding: 0 !important;
+				border: 0 !important;
 				overflow: hidden;
 				clip: rect(0 0 0 0);
 				clip-path: inset(50%);

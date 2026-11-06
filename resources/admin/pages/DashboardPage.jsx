@@ -13,6 +13,7 @@ import ExtensionSlot from '../components/ExtensionSlot';
 import { getSlotItems } from '../../shared/extend';
 import './DashboardPage.scss';
 import TrendChart from '../components/TrendChart';
+import SpamBlockedCard from '../components/SpamBlockedCard';
 import SpamProtectionNotice from '../components/SpamProtectionNotice';
 import MoreFeaturesCard from '../components/MoreFeaturesCard';
 
@@ -166,6 +167,9 @@ export default function Dashboard() {
           <RecentEntries entries={recentSubmissions} />
           <TopForms forms={topForms} />
         </div>
+
+        {/* Spam blocked in the last 30 days, per day and by reason */}
+        <SpamBlockedCard />
 
         {/* System */}
         <section className='sf-panel sf-dash__health'>

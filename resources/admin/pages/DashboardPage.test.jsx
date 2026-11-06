@@ -19,6 +19,7 @@ jest.mock('../components/AdminShell', () => function AdminShellMock({ children, 
   );
 });
 jest.mock('../components/SpamProtectionNotice', () => () => null);
+jest.mock('../components/SpamBlockedCard', () => () => <section className='sf-spam-card' />);
 jest.mock('../components/MoreFeaturesCard', () => () => null);
 jest.mock('../data', () => ({ useDashboardStats: jest.fn() }));
 

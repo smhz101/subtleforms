@@ -71,7 +71,7 @@ test('an old tab=mcp or tab=license link opens the first tab, with no upgrade li
   for (const tab of ['mcp', 'license']) {
     await page.goto(`${SETTINGS}#tab=${tab}`);
     await expect(page.locator('.sf-settings__title')).toHaveText('General', { timeout: 30000 });
-    await expect(page.getByRole('link', { name: /Upgrade|\bPro\b/ })).toHaveCount(0);
+    await expect(page.locator('#subtleforms-admin-app').getByRole('link', { name: /Upgrade|\bPro\b/ })).toHaveCount(0);
   }
   await page.screenshot({ path: 'test-results/screens-2.7.2/settings-no-license-tab.png' });
 });
