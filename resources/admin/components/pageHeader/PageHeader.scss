@@ -27,7 +27,8 @@
 		min-width: 0;
 	}
 
-	&__title {
+	// Two classes: the frame's own h1 rules are more specific than one.
+	.sf-page-header__title {
 		margin: 0;
 		padding: 0;
 		font-family: var(--sf-font-heading);

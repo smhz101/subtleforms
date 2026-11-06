@@ -6,7 +6,7 @@
 	display: flex;
 	flex-direction: column;
 	gap: 24px;
-	padding: 0 var(--sf-gutter) var(--sf-gutter);
+	padding: 20px var(--sf-gutter) var(--sf-gutter);
 
 	&__row {
 		display: grid;
