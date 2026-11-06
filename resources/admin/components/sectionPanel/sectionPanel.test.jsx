@@ -163,3 +163,22 @@ describe('public extension object', () => {
     expect(target.SectionHeader).toBe(SectionHeader);
   });
 });
+
+test('follows a change of the address while the panel is open', async () => {
+  window.location.hash = '#tab=logs&section=one';
+  await mount(<SectionPanel sections={SECTIONS} />);
+  expect(container.querySelector('.body-one')).not.toBeNull();
+
+  await act(async () => {
+    window.history.replaceState(null, '', '#tab=logs&section=three');
+    window.dispatchEvent(new Event('hashchange'));
+  });
+  expect(container.querySelector('.body-three')).not.toBeNull();
+  expect(container.querySelector('.body-one')).toBeNull();
+
+  await act(async () => {
+    window.history.replaceState(null, '', '#tab=logs&section=two');
+    window.dispatchEvent(new Event('popstate'));
+  });
+  expect(container.querySelector('.body-two')).not.toBeNull();
+});

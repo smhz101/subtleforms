@@ -103,6 +103,19 @@ export default function SectionPanel({
   const wanted = current !== undefined ? current : own;
   const activeId = known(wanted) ? wanted : ordered[0]?.id;
 
+  // A link to another section of the same panel, the browser's Back and
+  // Forward buttons, or a hash edited by hand: follow the address.
+  useEffect(() => {
+    if (current !== undefined) return undefined;
+    const sync = () => setOwn(readHashParam(urlParam));
+    window.addEventListener('hashchange', sync);
+    window.addEventListener('popstate', sync);
+    return () => {
+      window.removeEventListener('hashchange', sync);
+      window.removeEventListener('popstate', sync);
+    };
+  }, [current, urlParam]);
+
   // Keep the address in step when the chosen section is the first one by default.
   useEffect(() => {
     if (current === undefined && own !== activeId && activeId) {
