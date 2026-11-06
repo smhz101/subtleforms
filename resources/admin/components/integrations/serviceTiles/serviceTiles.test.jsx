@@ -9,6 +9,7 @@ import path from 'path';
 import { createRoot } from '@wordpress/element';
 import { act } from 'react';
 import { ServiceTileGrid, ServiceDetailHeader, logoClass } from './index';
+import { columnCounts } from './ServiceTileGrid';
 import { exposeServiceTiles } from './expose';
 
 jest.mock('./serviceTiles.scss', () => ({}));
@@ -65,6 +66,32 @@ describe('the logo look in the style sheet', () => {
   test('the change takes 150ms and none for people who ask for less motion', () => {
     expect(scss).toMatch(/transition:\s*filter 150ms ease, opacity 150ms ease/);
     expect(scss).toMatch(/prefers-reduced-motion: reduce\)\s*\{\s*\.sf-svc-logo \{ transition: none; \}/);
+  });
+});
+
+describe('ServiceTileGrid columns', () => {
+  const make = (n) => Array.from({ length: n }, (_, i) => ({ slug: `s${i}`, label: `S${i}`, enabled: false }));
+
+  it('counts min(tiles, 4) wide and min(tiles, 2) on a tablet', () => {
+    expect(columnCounts(2)).toEqual({ wide: 2, medium: 2 });
+    expect(columnCounts(3)).toEqual({ wide: 3, medium: 2 });
+    expect(columnCounts(4)).toEqual({ wide: 4, medium: 2 });
+    expect(columnCounts(7)).toEqual({ wide: 4, medium: 2 });
+    expect(columnCounts(1)).toEqual({ wide: 1, medium: 1 });
+  });
+
+  it.each([2, 3, 4])('puts the count of %i tiles on the grid, so no cell is left empty', async (n) => {
+    await mount(<ServiceTileGrid services={make(n)} />);
+    const grid = container.querySelector('.sf-svc-grid');
+    expect(grid.classList.contains(`sf-svc-grid--cols-${n}`)).toBe(true);
+    expect(grid.style.getPropertyValue('--sf-svc-cols')).toBe(String(n));
+    expect(grid.style.getPropertyValue('--sf-svc-cols-medium')).toBe(String(Math.min(n, 2)));
+  });
+
+  it('reads its columns from those variables in the style sheet', () => {
+    const css = fs.readFileSync(path.join(__dirname, 'serviceTiles.scss'), 'utf8');
+    expect(css).toContain('repeat(var(--sf-svc-cols, 4)');
+    expect(css).toContain('repeat(var(--sf-svc-cols-medium, 2)');
   });
 });
 

@@ -115,9 +115,9 @@ describe('the grid', () => {
   test('the layout has no gap and one line between tiles: 4, 2 and 1 columns by the width of the screen, 120px tall', () => {
     const scss = fs.readFileSync(path.join(__dirname, '../serviceTiles/serviceTiles.scss'), 'utf8');
     const grid = scss.slice(scss.indexOf('.sf-svc-grid {'), scss.indexOf('.sf-svc-tile {'));
-    expect(grid).toMatch(/grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/);
+    expect(grid).toMatch(/grid-template-columns:\s*repeat\(var\(--sf-svc-cols, 4\), minmax\(0, 1fr\)\)/);
     expect(grid).toMatch(/gap:\s*0;/);
-    expect(grid).toMatch(/@container sf-svc \(max-width: 719px\)[\s\S]*repeat\(2, /);
+    expect(grid).toMatch(/@container sf-svc \(max-width: 719px\)[\s\S]*repeat\(var\(--sf-svc-cols-medium, 2\), /);
     expect(grid).toMatch(/@container sf-svc \(max-width: 399px\)[\s\S]*grid-template-columns:\s*1fr/);
     expect(scss).toMatch(/\.sf-svc-grid-wrap \{[^}]*container-type:\s*inline-size/);
     const tileRule = scss.slice(scss.indexOf('.sf-svc-tile {'), scss.indexOf('&__open'));
