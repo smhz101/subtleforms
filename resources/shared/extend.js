@@ -267,6 +267,7 @@ export function getLogicEditor() {
  *                        sets the dot in the section list.
  *   settings.logs        A section of Settings > Logs: { component, order, label, title, description }.
  *                        The id is the section id; Settings draws the section header.
+ *   settings.tools       A section of Settings > Tools, same shape as settings.logs.
  *   form.settings.sections  Builder > Form settings, a section of its own:
  *                           { component, title, order, icon }. `component` receives
  *                           { schema, onChange, onMetadata, isReadOnly, fields }.

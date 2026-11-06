@@ -61,6 +61,22 @@ export const queryKeys = {
     status: () => ['importOffer', 'status'],
   },
 
+  // Email marketing services and their connection state
+  emailMarketing: {
+    root: ['emailMarketing'],
+    all: () => ['emailMarketing', 'all'],
+    state: (service) => ['emailMarketing', 'state', service],
+    lists: (service) => ['emailMarketing', 'lists', service],
+    fields: (service, listId) => ['emailMarketing', 'fields', service, listId || ''],
+    templates: () => ['emailMarketing', 'templates'],
+  },
+
+  // Settings > Tools and Settings > Logs
+  logs: {
+    all: ['logs'],
+    list: (kind, filters) => ['logs', kind, filters],
+  },
+
   // Extensions
   extensions: {
     all: ['extensions'],

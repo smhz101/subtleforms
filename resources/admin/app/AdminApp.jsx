@@ -20,7 +20,8 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import { __, sprintf } from '@wordpress/i18n';
 import { getBranding } from '../utils/branding';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '../data/queryClient';
 import {
 	MemoryRouter,
 	Routes,
@@ -36,21 +37,6 @@ import PageErrorBoundary from '../components/PageErrorBoundary';
 import { RouteLoadingFallback } from '../components/RouteTransition';
 import { CreateFormModal } from '../modals';
 import useWpAdminSync from './useWpAdminSync';
-
-// ─── Query Client ─────────────────────────────────────────────────────────────
-
-const queryClient = new QueryClient({
-	defaultOptions: {
-		queries: {
-			refetchOnWindowFocus: false,
-			retry: 1,
-			staleTime: 30 * 1000,
-		},
-		mutations: {
-			retry: 1,
-		},
-	},
-});
 
 // ─── Code-split pages ─────────────────────────────────────────────────────────
 
