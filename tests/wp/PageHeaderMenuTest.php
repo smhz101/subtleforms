@@ -306,4 +306,10 @@ final class PageHeaderMenuTest extends TestCase {
 			'UTC'           => array( 'UTC' ),
 		);
 	}
+
+	public function test_report_summaries_cover_the_canonical_choice_and_slider_types(): void {
+		$this->assertSame( 'choice', \SubtleForms\Tools\ReportQueries::summaryKind( array( 'type' => 'multiple_choice' ) ) );
+		$this->assertSame( 'rating', \SubtleForms\Tools\ReportQueries::summaryKind( array( 'type' => 'range_slider' ) ) );
+		$this->assertNull( \SubtleForms\Tools\ReportQueries::summaryKind( array( 'type' => 'text' ) ) );
+	}
 }

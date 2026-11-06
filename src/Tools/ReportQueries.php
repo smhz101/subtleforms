@@ -308,10 +308,10 @@ final class ReportQueries {
 	 */
 	public static function summaryKind( array $field ): ?string {
 		$type = (string) ( $field['type'] ?? '' );
-		if ( in_array( $type, array( 'select', 'radio', 'checkbox', 'checkboxes', 'multiselect', 'multi_select', 'dropdown', 'choice', 'picture_choice', 'image_choice' ), true ) ) {
+		if ( in_array( $type, array( 'select', 'radio', 'checkbox', 'checkboxes', 'multiselect', 'multi_select', 'dropdown', 'choice', 'multiple_choice', 'picture_choice', 'image_choice' ), true ) ) {
 			return 'choice';
 		}
-		if ( in_array( $type, array( 'rating', 'nps', 'scale', 'opinion_scale', 'star_rating', 'slider' ), true ) ) {
+		if ( in_array( $type, array( 'rating', 'nps', 'scale', 'opinion_scale', 'star_rating', 'slider', 'range_slider' ), true ) ) {
 			return 'rating';
 		}
 		return null;

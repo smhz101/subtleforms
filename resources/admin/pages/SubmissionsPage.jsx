@@ -358,7 +358,26 @@ export default function SubmissionsPage({ formId }) {
     fieldValue ||
     processingStatus;
 
+  // A date range a link set stays in the address until the person changes or
+  // clears it, so opening an entry does not bring it back.
+  const dropLinkedParams = (...keys) => {
+    if (!keys.some((key) => searchParams.has(key))) {
+      return;
+    }
+    setSearchParams((current) => {
+      const params = new URLSearchParams(current);
+      keys.forEach((key) => params.delete(key));
+      return params;
+    }, { replace: true });
+  };
+
+  const changeDateRange = (value) => {
+    setDateRange(value);
+    dropLinkedParams('range');
+  };
+
   const clearFilters = () => {
+    dropLinkedParams('range', 'tab');
     setSearch('');
     setStatusFilter('all');
     setSelectedFormId(formId || 'all');
@@ -590,7 +609,7 @@ export default function SubmissionsPage({ formId }) {
             label={__('Date Range', 'subtleforms')}
             value={dateRange}
             options={dateRangeOptions}
-            onChange={setDateRange}
+            onChange={changeDateRange}
             className='sf-filter-control'
             style={{ minWidth: '200px' }}
           />
