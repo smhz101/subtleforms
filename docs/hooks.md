@@ -137,14 +137,14 @@ Use the exact path string the script requests, query included. A preloaded answe
 
 This plugin adds people to Mailchimp, Brevo or Kit after an entry is saved, for forms where the site owner turned a service on (Form settings > Integrations > Email marketing, stored in `metadata.integrations.mailchimp`, `.brevo` and `.kit`). There is one Email marketing entry in Settings > Integrations; the three services live inside it. Each service has its own connection in the non-autoloaded option `subtleforms_<slug>_connection`, with the API key, a switch and the service's own settings. Switching a service off keeps its key and settings. The job runs in the background (`subtleforms_async_email_marketing`, one per service) and writes "Mailchimp: subscribed", "pending (double opt-in)", "skipped (...)" or "failed: ..." to the entry's activity log, with the service name in front. Everything works without an add-on.
 
-Settings of a form, for every service: `enabled`, `list_id`, `fields` (`email`, `first_name`, `last_name`), `merge_fields` (`[ { field, target } ]`), `tags` (comma separated), `double_optin`, `update_existing`, `consent_field`. Mailchimp needs a list (audience); Brevo and Kit do not, and Kit's list is one of its forms. Brevo adds people with `updateEnabled`, and Kit with `POST /v4/subscribers`; both create or update by email, so a repeat is an update.
+Settings of a form, for every service: `enabled`, `list_id`, `fields` (`email`, `first_name`, `last_name`), `merge_fields` (`[ { field, target } ]`), `tags` (comma separated), `double_optin`, `update_existing`, `consent_field`. MailPoet is a plugin on the same site and is reached through its PHP API, so it has no key to connect: its tile shows whether MailPoet is installed, active and set up, and `send_confirmation_email` and `schedule_welcome_email` replace the double opt-in switch. Mailchimp needs a list (audience); Brevo and Kit do not, and Kit's list is one of its forms. Brevo adds people with `updateEnabled`, and Kit with `POST /v4/subscribers`; both create or update by email, so a repeat is an update.
 
 ### Taking over
 
 An add-on takes over in one of two ways:
 
 - Listing its own `email_marketing` entry in `subtleforms/admin/integrations`, without `builtin => true`, takes over the whole integration. This plugin then sends nothing to any service (a job that was already queued also steps aside) and draws neither the settings nor the form panel; the add-on draws its own through the `settings.extensions` slot (item id `email_marketing`) and `registerFormIntegration`. Removing the entry has the same effect. SubtleForms Pro 2.8.0 works this way.
-- Listing a service slug (`mailchimp`, `brevo`, `kit`) in `subtleforms/email/marketing/services`, without `builtin => true`, takes over only that service. A new slug adds a tile, and the add-on draws its screens with `registerEmailMarketingService`.
+- Listing a service slug (`mailchimp`, `mailpoet`, `brevo`, `kit`) in `subtleforms/email/marketing/services`, without `builtin => true`, takes over only that service. A new slug adds a tile, and the add-on draws its screens with `registerEmailMarketingService`.
 
 No other entry has this effect.
 
@@ -160,6 +160,7 @@ An add-on that leaves the entry alone adds to it through the filter, the slots a
 | `subtleforms/email/marketing/skip_reason` | filter `( ?string $reason, array $feed, array $context, string $service )` | Return a short plain reason to skip a feed for this entry ("the rule did not match"); the log says "Mailchimp: skipped (reason)". Return null to send. |
 | `subtleforms/email/marketing/subscriber` | filter `( Subscriber $subscriber, array $feed, array $context, string $service )` | Change who is sent: tags (`$subscriber->tags`), fields (`->fields`), list (`->listId`). Return the object. |
 | `subtleforms/email/marketing/request_body` | filter `( array $body, Subscriber $subscriber, array $feed, array $context, string $service )` | Change the body of the add-or-update request, for example Mailchimp `interests` or `marketing_permissions`. Return the array. |
+| `subtleforms/email/marketing/skipped` | action `( string $message, string $reason, array $feed, array $context, string $service )` | A person was left out on purpose, not because of an error. For MailPoet: `previously_unsubscribed` or `bounced`. The log says "Skipped: previously unsubscribed in MailPoet" or "Skipped: email bounced in MailPoet". |
 | `subtleforms/email/marketing/delivered` | action `( array $result, array $feed, array $context, string $service )` | A person was added or updated (`service`, `list`, `email`, `status`, `tags`, `member`). |
 | `subtleforms/email/marketing/failed` | action `( string $message, array $feed, array $context, bool $willRetry, string $service )` | A request failed. A transport error, a rate limit or a server error is tried again by this plugin up to twice (after 2 and 15 minutes); `$willRetry` says so. |
 
@@ -179,7 +180,7 @@ The hooks `subtleforms/mailchimp/*` were never released and are gone. An add-on 
 
 Picture choice, several files per upload field, advanced conditional logic and form analytics are provided by an add-on. This plugin holds no code for them and shows no placeholders, badges or upgrade links for them. It keeps the extension points below and a plain fallback for forms that already use them.
 
-`SubtleForms\Support\ExtensionPoints` names the four points (`picture_choice`, `multi_file_uploads`, `advanced_logic`, `analytics`) and its `LEVEL` constant (2) is the contract version. Level 2 adds the logic, upload and add-on feature hooks of 2.7.0 and the `FeatureGate` setters. An add-on checks `ExtensionPoints::has( $name )` before it registers, so it never registers twice against an older plugin that still ships the feature. It reports what it runs through:
+`SubtleForms\Support\ExtensionPoints` names the four points (`picture_choice`, `multi_file_uploads`, `advanced_logic`, `analytics`) and its `LEVEL` constant (4) is the contract version. Level 4 puts the shared service tile grid and service header on `window.SubtleFormsExtend` (`ServiceTileGrid`, `ServiceDetailHeader`) and adds the `subtleforms/email/marketing/skipped` action. Level 2 adds the logic, upload and add-on feature hooks of 2.7.0 and the `FeatureGate` setters. An add-on checks `ExtensionPoints::has( $name )` before it registers, so it never registers twice against an older plugin that still ships the feature. It reports what it runs through:
 
 | Hook | Type | Use |
 | --- | --- | --- |
