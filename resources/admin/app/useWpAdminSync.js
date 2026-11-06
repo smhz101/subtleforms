@@ -57,6 +57,13 @@ export function routeToAdminQuery(pathname, search = '') {
 		if (search) {
 			params.search = search;
 		}
+		if (query.get('unread') === '1') {
+			params.unread = '1';
+		}
+		const range = query.get('range');
+		if (range) {
+			params.range = range;
+		}
 		return { page: 'subtleforms-submissions', params };
 	}
 
@@ -66,6 +73,10 @@ export function routeToAdminQuery(pathname, search = '') {
 
 	if (pathname === '/reports') {
 		return { page: 'subtleforms-reports', params };
+	}
+
+	if (pathname === '/upgrade') {
+		return { page: 'subtleforms-upgrade', params };
 	}
 
 	// A page an add-on registered (registerAdminPage) keeps its own address.

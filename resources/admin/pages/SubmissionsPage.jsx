@@ -33,6 +33,9 @@ function readInboxView() {
   };
 }
 
+/** Date ranges a link can ask for (the Date Range filter's values). */
+const DATE_RANGES = ['today', '7days', '30days', '3months'];
+
 export default function SubmissionsPage({ formId }) {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -40,6 +43,9 @@ export default function SubmissionsPage({ formId }) {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedFormId, setSelectedFormId] = useState(formId || 'all');
   const [dateRange, setDateRange] = useState('all');
+  // Unread entries only. A link sets it (?unread=1); All lists unread entries
+  // too, each with its own mark, so this is a filter, not a tab.
+  const [unreadOnly, setUnreadOnly] = useState(false);
   const [fieldValue, setFieldValue] = useState('');
   const [debouncedFieldValue, setDebouncedFieldValue] = useState('');
   const fieldValueTimerRef = useRef(null);
@@ -87,6 +93,17 @@ export default function SubmissionsPage({ formId }) {
       }, { replace: true });
     }
     const q = searchParams.get('search') || '';
+    // Filters a link can set: unread only and a date range (Dashboard tiles,
+    // the admin bar).
+    if (searchParams.get('unread') === '1') {
+      setUnreadOnly(true);
+      setShowFilters(true);
+    }
+    const linkedRange = searchParams.get('range');
+    if (DATE_RANGES.includes(linkedRange)) {
+      setDateRange(linkedRange);
+      setShowFilters(true);
+    }
     setStatusFilter(tab);
     setSearch(q);
     setDebouncedSearch(q);
@@ -344,6 +361,7 @@ export default function SubmissionsPage({ formId }) {
     statusFilter !== 'all' ||
     selectedFormId !== 'all' ||
     dateRange !== 'all' ||
+    unreadOnly ||
     fieldValue ||
     processingStatus;
 
@@ -352,6 +370,7 @@ export default function SubmissionsPage({ formId }) {
     setStatusFilter('all');
     setSelectedFormId(formId || 'all');
     setDateRange('all');
+    setUnreadOnly(false);
     setFieldValue('');
     setDebouncedFieldValue('');
     setProcessingStatus('');
@@ -608,6 +627,17 @@ export default function SubmissionsPage({ formId }) {
             style={{ minWidth: '200px' }}
           />
           <SelectControl
+            label={__('Read state', 'subtleforms')}
+            value={unreadOnly ? 'unread' : 'all'}
+            options={[
+              { label: __('All entries', 'subtleforms'), value: 'all' },
+              { label: __('Unread only', 'subtleforms'), value: 'unread' },
+            ]}
+            onChange={(value) => setUnreadOnly(value === 'unread')}
+            className='sf-filter-control'
+            style={{ minWidth: '160px' }}
+          />
+          <SelectControl
             label={__('Result', 'subtleforms')}
             value={processingStatus}
             options={[
@@ -656,7 +686,7 @@ export default function SubmissionsPage({ formId }) {
             formId={selectedFormId !== 'all' ? parseInt(selectedFormId) : formId}
             showFormColumn={!formId && selectedFormId === 'all'}
             searchTerm={debouncedSearch}
-            statusFilter={statusFilter}
+            statusFilter={unreadOnly && statusFilter === 'all' ? 'unread' : statusFilter}
             dateRange={dateRange}
             fieldValue={debouncedFieldValue}
             processingStatus={processingStatus}

@@ -4,6 +4,7 @@ namespace SubtleForms\Api;
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
+use SubtleForms\Admin\OverviewData;
 use SubtleForms\Api\ApiResponse;
 use SubtleForms\Repositories\FormsRepository;
 use SubtleForms\Tools\ReportSeries;
@@ -82,174 +83,26 @@ class DashboardApi {
 		}
 
 		try {
-			$data = array(
-				'stats'              => $this->getStats(),
-				'recent_submissions' => $this->getRecentSubmissions(),
-				'recent_forms'       => $this->getRecentForms(),
-				'trend'              => $this->getSubmissionTrend( 14 ),
-				'system_health'      => $this->getSystemHealth(),
-			);
+			// One call, one cache: the figures, the chart (90 days, the page
+			// shows 7, 30 or 90), what needs attention, recent entries, top
+			// forms and the Getting started list.
+			$data                 = OverviewData::snapshot( $this->formsRepo, $this->submissionsRepo );
+			$data['recent_forms'] = $this->getRecentForms();
+			$data['system_health'] = $this->getSystemHealth();
+
+			/**
+			 * Filter the dashboard figures before they are sent. Add-ons add
+			 * their own keys (for example `attention` rows) for their slots.
+			 *
+			 * @param array $data Dashboard data.
+			 * @since 2.7.5
+			 */
+			$data = (array) apply_filters( 'subtleforms/dashboard/data', $data );
 
 			return ApiResponse::success( $data );
 		} catch ( \Exception $e ) {
 			return ApiResponse::server_error( $e->getMessage() );
 		}
-	}
-
-	/**
-	 * Get dashboard statistics
-	 *
-	 * @return array
-	 */
-	private function getStats() {
-		// v1.7.0: Cache dashboard stats for 5 minutes to reduce DB load
-		$cache_key = 'subtleforms_dashboard_stats_v2';
-		$cached    = get_transient( $cache_key );
-
-		if ( false !== $cached && is_array( $cached ) ) {
-			return $cached;
-		}
-
-		global $wpdb;
-		$formsTable       = $wpdb->prefix . 'subtleforms_forms';
-		$submissionsTable = $wpdb->prefix . 'subtleforms_submissions';
-
-		// Get form counts
-		$totalForms     = $this->formsRepo->count();
-		$publishedForms = $this->formsRepo->count( array( 'status' => 'published' ) );
-		$draftForms     = $this->formsRepo->count( array( 'status' => 'draft' ) );
-
-		// Get submission counts
-		$totalSubmissions = $this->submissionsRepo->count();
-
-		// Submissions today
-		$zone             = \SubtleForms\Tools\ReportSeries::siteZone();
-		$todayStart       = \SubtleForms\Tools\ReportSeries::start( 1, null, $zone );
-		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled.
-		$submissionsToday = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$submissionsTable} WHERE created_at >= %s AND ( status IS NULL OR status NOT IN ( 'trash', 'preview' ) )",
-				$todayStart
-			)
-		);
-		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-
-		// Submissions this week (last 7 days)
-		$weekStart           = ReportSeries::start( 7, null, $zone );
-		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled.
-		$submissionsThisWeek = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$submissionsTable} WHERE created_at >= %s AND ( status IS NULL OR status NOT IN ( 'trash', 'preview' ) )",
-				$weekStart
-			)
-		);
-		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-
-		// Average submissions per form
-		$avgSubmissionsPerForm = $publishedForms > 0
-			? round( $totalSubmissions / $publishedForms, 1 )
-			: 0;
-
-		$stats = array(
-			'total_forms'              => $totalForms,
-			'published_forms'          => $publishedForms,
-			'draft_forms'              => $draftForms,
-			'total_submissions'        => $totalSubmissions,
-			'submissions_today'        => $submissionsToday,
-			'submissions_this_week'    => $submissionsThisWeek,
-			'avg_submissions_per_form' => $avgSubmissionsPerForm,
-			'unread_submissions'       => $this->submissionsRepo->count( array( 'is_read' => 0 ) ),
-		);
-
-		// Short cache: the dashboard refetches every minute, and nothing
-		// invalidates this key on new submissions.
-		set_transient( $cache_key, $stats, MINUTE_IN_SECONDS );
-
-		return $stats;
-	}
-
-	/**
-	 * Daily submission counts for the last N days, oldest first.
-	 *
-	 * Days without submissions are included with a count of 0 so the chart
-	 * always has one bar per day.
-	 *
-	 * @param int $days Number of days, including today.
-	 * @return array<int, array{date: string, count: int}>
-	 */
-	private function getSubmissionTrend( int $days = 14 ): array {
-		global $wpdb;
-		$days             = max( 1, min( 90, $days ) );
-		$submissionsTable = $wpdb->prefix . 'subtleforms_submissions';
-		$zone             = ReportSeries::siteZone();
-		$start = ReportSeries::start( $days, null, $zone );
-
-		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled.
-		$rows = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT created_at FROM {$submissionsTable} WHERE created_at >= %s AND ( status IS NULL OR status NOT IN ( 'trash', 'preview' ) )",
-				$start
-			)
-		);
-		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-
-		$grouped = ReportSeries::countByLocalDay( (array) $rows, $zone );
-		$today   = ReportSeries::today( $zone );
-		$counts  = array();
-		foreach ( ReportSeries::fillDays( array(), $days, $today ) as $bucket ) {
-			$counts[ $bucket['date'] ] = (int) ( $grouped[ $bucket['date'] ] ?? 0 );
-		}
-
-		$trend = array();
-		foreach ( $counts as $date => $count ) {
-			$trend[] = array(
-				'date'  => $date,
-				'count' => $count,
-			);
-		}
-
-		return $trend;
-	}
-
-	/**
-	 * Get recent submissions
-	 *
-	 * @return array
-	 */
-	private function getRecentSubmissions() {
-		global $wpdb;
-		$submissionsTable = $wpdb->prefix . 'subtleforms_submissions';
-		$formsTable       = $wpdb->prefix . 'subtleforms_forms';
-
-		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table names are $wpdb->prefix controlled.
-		$results = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT s.id, s.form_id, s.status, s.is_read, s.created_at, f.title as form_title
-             FROM {$submissionsTable} s
-             LEFT JOIN {$formsTable} f ON s.form_id = f.id
-             WHERE ( s.status IS NULL OR s.status NOT IN ( 'trash', 'preview' ) )
-             ORDER BY s.created_at DESC
-             LIMIT %d",
-				10
-			),
-			ARRAY_A
-		);
-		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-
-		return array_map(
-			function ( $row ) {
-				return array(
-					'id'         => (int) $row['id'],
-					'form_id'    => (int) $row['form_id'],
-					'form_title' => $row['form_title'] ?? __( 'Unknown Form', 'subtleforms' ),
-					'status'     => $row['status'],
-					'is_read'    => ! empty( $row['is_read'] ),
-					'created_at' => $row['created_at'],
-					'time_ago'   => $this->timeAgo( $row['created_at'] ),
-				);
-			},
-			$results
-		);
 	}
 
 	/**
@@ -477,5 +330,6 @@ class DashboardApi {
 	public static function clearStatsCache() {
 		delete_transient( 'subtleforms_dashboard_stats' );
 		delete_transient( 'subtleforms_dashboard_stats_v2' );
+		delete_transient( OverviewData::cacheKey( 'snapshot' ) );
 	}
 }

@@ -43,7 +43,8 @@ final class AdminPreload {
 	 * Settings asks for the settings and for the state of the email marketing
 	 * services as it opens (`useSettings`, `useEmailMarketingServices`); both
 	 * are sent with the page and put in the query cache, so Settings opens with
-	 * no spinner. Keep them in step with `resources/admin/data/seeds.js`.
+	 * no spinner. The Dashboard asks for `/dashboard`, which carries every figure
+	 * it shows, and gets it the same way. Keep them in step with `resources/admin/data/seeds.js`.
 	 *
 	 * @param string $screen Screen slug (the `page` query value).
 	 * @return string[]
@@ -51,6 +52,10 @@ final class AdminPreload {
 	public static function defaultPaths( string $screen ): array {
 		if ( 'subtleforms-forms' === $screen ) {
 			return array( '/subtleforms/v1/forms?orderby=created_at&order=desc&page=1&per_page=100' );
+		}
+		if ( 'subtleforms' === $screen ) {
+			// The Dashboard asks for this one request (`useDashboardStats`).
+			return array( '/subtleforms/v1/dashboard' );
 		}
 		if ( 'subtleforms-settings' === $screen ) {
 			return array(

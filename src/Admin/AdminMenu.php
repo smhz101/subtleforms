@@ -70,6 +70,7 @@ class AdminMenu {
 		add_filter( 'parent_file', array( $this, 'fix_parent_file' ) );
 		add_filter( 'submenu_file', array( $this, 'fix_submenu_file' ) );
 
+		add_action( 'admin_menu', array( $this, 'pin_menu_order' ), 99 );
 		add_action(
 			'admin_menu',
 			function () {
@@ -202,6 +203,14 @@ class AdminMenu {
 		if ( 0 !== strpos( self::menu_icon(), 'data:' ) ) {
 			$css .= $row . ' .wp-menu-image img{width:16px;height:16px;padding:9px 0 0;opacity:1;object-fit:contain;}';
 		}
+		// Upgrade to Pro: brand-coloured text with a small star, like a menu
+		// item. The dark admin schemes get a lighter tint of the brand colour so
+		// the label keeps its contrast; the Light scheme uses the brand colour.
+		$css .= '#adminmenu .sf-menu-upgrade{color:#8fa3ff;font-weight:600;}'
+			. '#adminmenu .sf-menu-upgrade::before{content:"\\f155";font:normal 13px/1 dashicons;margin-inline-end:5px;vertical-align:-1px;}'
+			. '#adminmenu a:hover .sf-menu-upgrade,#adminmenu a:focus .sf-menu-upgrade{color:#fff;}'
+			. 'body.admin-color-light #adminmenu .sf-menu-upgrade{color:#3858e9;}'
+			. 'body.admin-color-light #adminmenu a:hover .sf-menu-upgrade,body.admin-color-light #adminmenu a:focus .sf-menu-upgrade{color:#2145d6;}';
 		wp_register_style( 'subtleforms-menu-icon', false, array(), SUBTLEFORMS_VERSION );
 		wp_enqueue_style( 'subtleforms-menu-icon' );
 		wp_add_inline_style( 'subtleforms-menu-icon', $css );
@@ -352,7 +361,15 @@ class AdminMenu {
 			array( $this, 'render_reports' )
 		);
 
-		// Settings
+		/**
+		 * Add-ons add their own submenu pages here. They land between Reports
+		 * and Settings, in the order the add-on adds them.
+		 *
+		 * @param Capabilities $caps Capabilities of this plugin.
+		 */
+		do_action( 'subtleforms/admin_menu', $this->caps );
+
+		// Settings is the last working page.
 		add_submenu_page(
 			'subtleforms',
 			__( 'Settings', 'subtleforms' ),
@@ -362,8 +379,100 @@ class AdminMenu {
 			array( $this, 'render_settings' )
 		);
 
-		// Allow extensions to add their own pages
-		do_action( 'subtleforms/admin_menu', $this->caps );
+		// Upgrade to Pro, after Settings, until an add-on is installed.
+		if ( self::show_upgrade_item() ) {
+			add_submenu_page(
+				'subtleforms',
+				__( 'Upgrade to Pro', 'subtleforms' ),
+				self::upgrade_menu_title(),
+				$this->caps->manage_cap(),
+				self::UPGRADE_SLUG,
+				array( $this, 'render_upgrade' )
+			);
+		}
+	}
+
+	/** Menu slug of the Upgrade page. */
+	public const UPGRADE_SLUG = 'subtleforms-upgrade';
+
+	/**
+	 * Whether the Upgrade to Pro item is in the menu.
+	 *
+	 * It is there while no add-on is installed. An add-on that adds the
+	 * features the page lists returns false from
+	 * `subtleforms/admin/upgrade_menu_item`.
+	 *
+	 * @return bool
+	 */
+	public static function show_upgrade_item(): bool {
+		/**
+		 * Whether SubtleForms > Upgrade to Pro is in the menu.
+		 *
+		 * @param bool $show True unless the add-on from the SubtleForms team is active.
+		 * @since 2.7.5
+		 */
+		return (bool) apply_filters( 'subtleforms/admin/upgrade_menu_item', ! self::companion_active() );
+	}
+
+	/**
+	 * Menu label of the Upgrade item: a plain label in the brand colour with
+	 * a small star, drawn by menu_icon_styles(). It reads as a menu item, not
+	 * as a banner.
+	 *
+	 * @return string HTML.
+	 */
+	public static function upgrade_menu_title(): string {
+		return '<span class="sf-menu-upgrade">' . esc_html__( 'Upgrade to Pro', 'subtleforms' ) . '</span>';
+	}
+
+	/**
+	 * Address of the Pro page on subtleforms.com, tagged with where the click came from.
+	 *
+	 * @param string $medium Where the link is shown.
+	 * @return string
+	 */
+	public static function upgrade_url( string $medium = 'menu' ): string {
+		return add_query_arg(
+			array(
+				'utm_source' => 'wp-admin',
+				'utm_medium' => sanitize_key( $medium ),
+			),
+			self::MORE_FEATURES_URL
+		);
+	}
+
+	/**
+	 * Keep Settings and the Upgrade item at the end of the submenu, whoever
+	 * added items and whenever they did it. An add-on that hooks `admin_menu`
+	 * itself, after this class, still lands before Settings.
+	 */
+	public function pin_menu_order(): void {
+		global $submenu;
+		if ( empty( $submenu['subtleforms'] ) || ! is_array( $submenu['subtleforms'] ) ) {
+			return;
+		}
+		$pinned = array( 'subtleforms-settings', self::UPGRADE_SLUG );
+		$head   = array();
+		$tail   = array();
+		foreach ( $submenu['subtleforms'] as $item ) {
+			if ( isset( $item[2] ) && in_array( $item[2], $pinned, true ) ) {
+				$tail[ array_search( $item[2], $pinned, true ) ] = $item;
+				continue;
+			}
+			$head[] = $item;
+		}
+		ksort( $tail );
+		$submenu['subtleforms'] = array_merge( $head, array_values( $tail ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Reorders this plugin's own submenu.
+	}
+
+	/**
+	 * Render the Upgrade to Pro page.
+	 */
+	public function render_upgrade(): void {
+		if ( ! current_user_can( $this->caps->manage_cap() ) ) {
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'subtleforms' ) );
+		}
+		$this->get_template( 'upgrade' );
 	}
 
 	/**
@@ -451,6 +560,8 @@ class AdminMenu {
 			'addonFeatures'  => \SubtleForms\Support\ExtensionPoints::provided(),
 			// The More features card on the Dashboard (see more_features()).
 			'moreFeatures'   => self::more_features(),
+			// The Pro page on subtleforms.com, for the Upgrade page.
+			'upgradeUrl'     => self::upgrade_url( 'menu' ),
 			'extensions'     => $this->buildExtensionsData(),
 			// Email marketing: the services, who adds extras to them and the Pro note.
 			'emailMarketing' => self::email_marketing_data(),
