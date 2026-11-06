@@ -16,6 +16,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 use SubtleForms\Repositories\FormsRepository;
 use SubtleForms\Repositories\SubmissionsRepository;
 use SubtleForms\Support\FeatureGate;
+use SubtleForms\Tools\ReportData;
+use SubtleForms\Tools\ReportQueries;
 use SubtleForms\Tools\ReportSeries;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -69,6 +71,74 @@ final class ReportsApi {
 				'permission_callback' => array( $this, 'check_read_permission' ),
 			)
 		);
+		register_rest_route(
+			self::NAMESPACE,
+			'/reports',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'report' ),
+				'permission_callback' => array( $this, 'check_read_permission' ),
+				'args'                => array(
+					'from'    => array(
+						'type'     => 'string',
+						'required' => false,
+					),
+					'to'      => array(
+						'type'     => 'string',
+						'required' => false,
+					),
+					'form_id' => array(
+						'type'     => 'integer',
+						'required' => false,
+						'minimum'  => 0,
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Entries per day for a date range with the range before it, a breakdown
+	 * per form and, for one form, how its choice and rating fields were
+	 * answered. Kept for a minute per set of arguments; a new entry ends the
+	 * wait.
+	 *
+	 * @param WP_REST_Request $request Request: from, to (Y-m-d, site zone), form_id.
+	 * @return WP_REST_Response
+	 */
+	public function report( WP_REST_Request $request ): WP_REST_Response {
+		$zone  = ReportSeries::siteZone();
+		$today = ReportSeries::today( $zone );
+		$from  = $request->get_param( 'from' );
+		$to    = $request->get_param( 'to' );
+		$to    = null === $to || '' === $to ? $today : $to;
+		$from  = null === $from || '' === $from ? ReportQueries::addDays( (string) $to, -29 ) : $from;
+
+		if ( ! ReportData::validDate( $from ) || ! ReportData::validDate( $to ) ) {
+			return ApiResponse::validation_error( __( 'Dates must look like 2026-10-31.', 'subtleforms' ), array( 'from' => 'invalid' ) );
+		}
+		if ( $from > $to ) {
+			return ApiResponse::validation_error( __( 'The start date must not be after the end date.', 'subtleforms' ), array( 'from' => 'after_to' ) );
+		}
+		if ( ReportData::dayCount( $from, $to ) > ReportData::MAX_DAYS ) {
+			return ApiResponse::validation_error(
+				/* translators: %d: most days */
+				sprintf( __( 'A report covers at most %d days.', 'subtleforms' ), ReportData::MAX_DAYS ),
+				array( 'to' => 'too_long' )
+			);
+		}
+		$form_id = max( 0, (int) $request->get_param( 'form_id' ) );
+		if ( $form_id > 0 && ! $this->forms->find( $form_id ) ) {
+			return ApiResponse::not_found( __( 'Form not found', 'subtleforms' ) );
+		}
+
+		$key  = \SubtleForms\Admin\OverviewData::cacheKey( 'report_' . md5( $from . '|' . $to . '|' . $form_id . '|' . $today ) );
+		$data = get_transient( $key );
+		if ( ! is_array( $data ) ) {
+			$data = ReportData::build( $from, $to, $form_id, $this->forms );
+			set_transient( $key, $data, ReportData::TTL );
+		}
+		return ApiResponse::success( $data );
 	}
 
 	/**

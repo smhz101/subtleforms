@@ -752,3 +752,51 @@
 		}
 	}
 }
+
+// Comparison line over the bars (Reports).
+.sf-trend__previous {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+	pointer-events: none;
+
+	polyline {
+		fill: none;
+		stroke: var(--sf-text-muted);
+		stroke-width: 1.5;
+		stroke-linejoin: round;
+	}
+}
+
+.sf-trend__legend {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin: 8px 0 0;
+	font-size: var(--sf-text-xs);
+	color: var(--sf-text-muted);
+}
+
+.sf-trend__key {
+	display: inline-block;
+	margin-inline-start: 8px;
+
+	&:first-child {
+		margin-inline-start: 0;
+	}
+
+	&--bar {
+		width: 10px;
+		height: 10px;
+		border-radius: 2px;
+		background: var(--sf-brand);
+	}
+
+	&--line {
+		width: 14px;
+		height: 0;
+		border-top: 1.5px solid var(--sf-text-muted);
+	}
+}

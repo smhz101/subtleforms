@@ -241,6 +241,26 @@ final class SpamStats {
 	}
 
 	/**
+	 * Blocked messages per form between two days.
+	 *
+	 * @param string $fromDay First day, Y-m-d (UTC).
+	 * @param string $toDay   Last day, Y-m-d (UTC), inclusive.
+	 * @return array<int,int> Form id to blocked messages.
+	 */
+	public static function blockedByForm( string $fromDay, string $toDay ): array {
+		self::maybeInstall();
+		global $wpdb;
+		$table = self::table();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Fixed table name; prepared values; counts change every request.
+		$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT form_id, SUM(blocked) AS total FROM {$table} WHERE day >= %s AND day <= %s GROUP BY form_id", $fromDay, $toDay ), ARRAY_A );
+		$out  = array();
+		foreach ( $rows as $row ) {
+			$out[ (int) $row['form_id'] ] = (int) $row['total'];
+		}
+		return $out;
+	}
+
+	/**
 	 * Delete rows older than RETENTION_DAYS.
 	 *
 	 * @param int|null $now Unix time. Defaults to now.

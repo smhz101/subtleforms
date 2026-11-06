@@ -1,0 +1,146 @@
+// Reports.
+
+.sf-report-range {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+
+	.components-base-control {
+		margin: 0;
+	}
+
+	input[type='date'] {
+		min-height: 32px;
+	}
+}
+
+.sf-report-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px var(--sf-gutter);
+
+	.components-base-control {
+		min-width: 220px;
+	}
+
+	@media (max-width: 599px) {
+		padding-inline: 16px;
+
+		.components-base-control {
+			min-width: 0;
+			width: 100%;
+		}
+	}
+}
+
+.sf-reports {
+	&.is-refreshing {
+		opacity: 0.7;
+		transition: opacity 120ms ease;
+	}
+
+	&__heading {
+		margin: 0 0 12px;
+		font-size: var(--sf-text-base);
+		font-weight: var(--sf-weight-semibold);
+	}
+
+	&__fieldgrid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 16px;
+
+		@media (max-width: 1100px) {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+
+	&__note {
+		margin: 12px 0 0;
+		font-size: var(--sf-text-xs);
+		color: var(--sf-text-muted);
+	}
+}
+
+.sf-report-form {
+	padding: 0;
+	border: 0;
+	background: none;
+	font: inherit;
+	color: var(--sf-text);
+	text-align: start;
+	cursor: pointer;
+
+	&:hover {
+		color: var(--sf-brand);
+	}
+
+	&:focus-visible {
+		outline: none;
+		box-shadow: var(--sf-shadow-focus);
+	}
+}
+
+.sf-spark {
+	display: block;
+
+	polyline {
+		fill: none;
+		stroke: var(--sf-brand);
+		stroke-width: 1.5;
+		stroke-linejoin: round;
+		stroke-linecap: round;
+	}
+
+	&--empty {
+		color: var(--sf-text-muted);
+	}
+}
+
+// How people answered a field.
+.sf-dist {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+	&__row {
+		display: grid;
+		grid-template-columns: minmax(80px, 1fr) minmax(60px, 2fr) auto;
+		align-items: center;
+		gap: 12px;
+		margin: 0;
+		padding: 6px 0;
+		font-size: var(--sf-text-sm);
+	}
+
+	&__label {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	&__track {
+		height: 8px;
+		border-radius: 4px;
+		background: var(--sf-bg-muted);
+		overflow: hidden;
+	}
+
+	&__bar {
+		display: block;
+		height: 100%;
+		border-radius: 4px;
+		background: var(--sf-brand);
+	}
+
+	&__count {
+		font-variant-numeric: tabular-nums;
+		text-align: end;
+	}
+
+	&__pct {
+		color: var(--sf-text-muted);
+	}
+}
