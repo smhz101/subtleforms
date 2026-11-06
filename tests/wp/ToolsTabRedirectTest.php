@@ -22,7 +22,7 @@ final class ToolsTabRedirectTest extends TestCase {
 	}
 
 	protected function tearDown(): void {
-		unset( $_GET['page'] );
+		unset( $_GET['page'], $_GET['section'] );
 		remove_all_filters( 'wp_redirect' );
 		wp_set_current_user( (int) $this->previousUser );
 		parent::tearDown();
@@ -60,6 +60,33 @@ final class ToolsTabRedirectTest extends TestCase {
 	public function test_the_old_tools_url_opens_the_tools_tab_for_an_admin(): void {
 		$this->admin();
 		$this->assertSame( AdminMenu::tools_tab_url(), $this->redirectFor( 'subtleforms-tools' ) );
+	}
+
+	public function test_a_link_to_one_of_the_logs_opens_that_section_of_the_logs_tab(): void {
+		$this->admin();
+		foreach ( array( 'activity', 'webhooks', 'api' ) as $section ) {
+			$_GET['section'] = $section;
+			$this->assertSame(
+				admin_url( 'admin.php?page=subtleforms-settings#tab=logs&section=' . $section ),
+				$this->redirectFor( 'subtleforms-tools' )
+			);
+		}
+	}
+
+	public function test_a_link_to_a_section_that_stayed_in_tools_keeps_it(): void {
+		$this->admin();
+		$_GET['section'] = 'migrate';
+		$this->assertSame(
+			admin_url( 'admin.php?page=subtleforms-settings#tab=tools&section=migrate' ),
+			$this->redirectFor( 'subtleforms-tools' )
+		);
+	}
+
+	public function test_an_unknown_section_opens_tools(): void {
+		$this->admin();
+		$_GET['section'] = 'nonsense';
+		$this->assertSame( AdminMenu::tools_tab_url(), $this->redirectFor( 'subtleforms-tools' ) );
+		$this->assertSame( admin_url( 'admin.php?page=subtleforms-settings#tab=tools' ), AdminMenu::tools_tab_url( 'nonsense' ) );
 	}
 
 	public function test_other_pages_are_left_alone(): void {

@@ -75,3 +75,16 @@ describe('WebhooksPanel test request', () => {
     unmount();
   });
 });
+
+describe('WebhooksPanel header', () => {
+  test('has the standard header, one description, and no second explanation in the body', () => {
+    const { container, unmount } = mount();
+    const header = container.querySelector('.sf-section-header');
+    expect(header.querySelector('h2').textContent).toBe('Webhooks');
+    expect(header.querySelectorAll('p')).toHaveLength(1);
+    expect(header.querySelector('.sf-section-header__text svg')).toBeNull();
+    expect(container.querySelector('.sf-ext-panel__info')).toBeNull();
+    expect(container.querySelector('.sf-ext-panel__body').textContent).toContain('The default body contains the form and entry IDs');
+    unmount();
+  });
+});

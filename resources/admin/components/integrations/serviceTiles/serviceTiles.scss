@@ -40,7 +40,8 @@
 // The wrapper clips the right and bottom line of the last cells, so a shared
 // edge is one line and the outer edge is the card's own border. The column
 // count follows the width of the screen the grid sits in, not the window:
-// four across, two on a tablet, one on a phone.
+// min(tiles, 4) across, min(tiles, 2) on a tablet, one on a phone, so a grid
+// of three has three equal columns and no empty cell.
 .sf-svc-grid-wrap {
 	overflow: hidden;
 	container-type: inline-size;
@@ -49,14 +50,14 @@
 
 .sf-svc-grid {
 	display: grid;
-	grid-template-columns: repeat(4, minmax(0, 1fr));
+	grid-template-columns: repeat(var(--sf-svc-cols, 4), minmax(0, 1fr));
 	gap: 0;
 	margin: 0 -1px -1px 0;
 	padding: 0;
 	list-style: none;
 
 	@container sf-svc (max-width: 719px) {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-template-columns: repeat(var(--sf-svc-cols-medium, 2), minmax(0, 1fr));
 	}
 
 	@container sf-svc (max-width: 399px) {

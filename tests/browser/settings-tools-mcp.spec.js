@@ -22,8 +22,12 @@ test('Settings lists Tools, no License or MCP tab, and Tools keeps its sections'
   await nav(page).getByRole('button', { name: /^Tools/ }).click();
   await expect(page.locator('.sf-settings__title')).toHaveText('Tools');
   const sections = page.getByRole('navigation', { name: 'Tools' });
-  for (const name of ['Transfer', 'Migrate', 'Activity', 'Webhooks', 'API']) {
+  for (const name of ['Transfer', 'Migrate']) {
     await expect(sections.getByRole('button', { name })).toBeVisible();
+  }
+  // The three logs have their own Logs tab.
+  for (const name of ['Activity', 'Webhooks', 'API']) {
+    await expect(sections.getByRole('button', { name, exact: true })).toHaveCount(0);
   }
   await expect(page.getByRole('button', { name: 'Import forms', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: /Export/ }).first()).toBeVisible();
@@ -32,6 +36,15 @@ test('Settings lists Tools, no License or MCP tab, and Tools keeps its sections'
   // Tools has its own controls: no Save button on the tab.
   await expect(page.getByRole('button', { name: 'Save', exact: true })).toHaveCount(0);
   await page.screenshot({ path: 'test-results/screens-2.5.1/settings-tools-tab.png' });
+});
+
+test('a Tools link to a log opens that section of the Logs tab', async ({ page }) => {
+  await loginPage(page);
+  await page.goto(`${SETTINGS}#tab=tools&section=webhooks`);
+  await expect(page.locator('.sf-settings__title')).toHaveText('Logs', { timeout: 30000 });
+  await expect(page).toHaveURL(/#tab=logs&section=webhooks/);
+  await expect(page.locator('.sf-section-panel__item--active')).toContainText('Webhooks');
+  await expect(page.locator('.sf-section-header h2')).toHaveText('Webhooks');
 });
 
 test('the old Tools URL opens the Tools tab of Settings', async ({ page }) => {

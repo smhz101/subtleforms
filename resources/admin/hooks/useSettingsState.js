@@ -14,6 +14,7 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { validateSettings, validateField } from '../utils/validation';
 import { confirmDialog } from '../utils/confirmDialog';
+import { applySettingsRedirects } from '../utils/settingsRedirects';
 
 /**
  * Normalize boolean fields coming from the REST API.
@@ -67,6 +68,8 @@ export default function useSettingsState() {
 	// Initialise from URL hash (e.g. #tab=extensions) so page reloads can
 	// land on a specific tab.
 	const initialTab = ( () => {
+		// A tab that moved (the logs left Tools) is looked up under its new address.
+		applySettingsRedirects();
 		const match = window.location.hash.match( /[#&]tab=([\w-]+)/ );
 		return match ? match[ 1 ] : 'general';
 	} )();

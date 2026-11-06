@@ -35,6 +35,7 @@ store.fieldIcons = store.fieldIcons || {};
 store.fieldCategories = store.fieldCategories || {};
 store.payloadGroups = store.payloadGroups || {};
 store.emailMarketing = store.emailMarketing || {};
+store.settingsRedirects = store.settingsRedirects || [];
 
 /**
  * Register a public field renderer.
@@ -159,6 +160,32 @@ export function settingsTabs() {
 }
 
 /**
+ * Send an old Settings address to its new place. Settings reads the address
+ * (`#tab=ecommerce`) when it opens and whenever it changes, and rewrites it
+ * before it picks a tab, so a bookmark or a link from another screen still
+ * lands on the right section after a screen moved.
+ *
+ * Every key in `from` must match the address (a string, or an array of
+ * accepted strings). The parameters of the old address that `to` does not set
+ * are kept, so `#tab=tools&section=api` can become `#tab=logs&section=api`.
+ *
+ * @param {Object} from Old address as parameters, for example { tab: 'tools', section: ['activity', 'api'] }.
+ * @param {Object} to   Parameters to set, for example { tab: 'logs' }.
+ */
+export function registerSettingsRedirect(from, to) {
+  if (!from || !to || typeof from.tab !== 'string' || typeof to.tab !== 'string') return;
+  const key = JSON.stringify([from, to]);
+  if (!store.settingsRedirects.some((r) => r.key === key)) {
+    store.settingsRedirects.push({ key, from, to });
+  }
+}
+
+/** Every registered Settings redirect as { from, to }. */
+export function settingsRedirects() {
+  return store.settingsRedirects.map(({ from, to }) => ({ from, to }));
+}
+
+/**
  * Replace how a built-in field type is drawn on the public form when a
  * condition holds. An add-on can use this to draw an upload field that
  * takes several files. The built-in renderer stays the fallback, so a form
@@ -234,7 +261,12 @@ export function getLogicEditor() {
  *   reports.panels       Reports screen, below the totals. { component, order }
  *   dashboard.panels     Dashboard, below the totals.
  *   forms.list.column    Forms list, extra cell: { component, header, order }
- *   settings.extensions  Extension switches: { component, title, order }
+ *   settings.extensions  The panel of an integration: { component, order, label, title, description, status }.
+ *                        With a `title` Settings draws the standard section header above the
+ *                        panel; `status` ('on', 'warn' or 'off', or a function returning one)
+ *                        sets the dot in the section list.
+ *   settings.logs        A section of Settings > Logs: { component, order, label, title, description }.
+ *                        The id is the section id; Settings draws the section header.
  *   form.settings.sections  Builder > Form settings, a section of its own:
  *                           { component, title, order, icon }. `component` receives
  *                           { schema, onChange, onMetadata, isReadOnly, fields }.
@@ -491,6 +523,7 @@ root.SubtleFormsExtend = Object.assign(root.SubtleFormsExtend || {}, {
   registerInspectorControl,
   registerCanvasPreview,
   registerSettingsTab,
+  registerSettingsRedirect,
   registerFieldOverride,
   registerLogicExtension,
   registerLogicEditor,

@@ -134,32 +134,6 @@
 	max-width: 420px;
 }
 
-// Level and form filters of Activity and Webhooks: one line at every width.
-// The two selects share the room and shrink rather than wrap, and the header
-// puts them under the title when both do not fit side by side, so they still
-// fit on a 390px phone.
-.sf-tools__filters {
-	display: flex;
-	flex-wrap: nowrap;
-	gap: 8px;
-	min-width: 0;
-	max-width: 100%;
-
-	.components-base-control {
-		flex: 1 1 160px;
-		min-width: 0;
-		margin: 0;
-	}
-}
-
-.sf-panel__header:has(> .sf-tools__filters) {
-	flex-wrap: wrap;
-
-	> div:first-child {
-		flex: 1 1 240px;
-		min-width: 0;
-	}
-}
 
 .sf-tools__file {
 	position: relative;
@@ -177,47 +151,6 @@
 	display: flex;
 	justify-content: center;
 	padding: 32px;
-}
-
-.sf-tools__table-wrap {
-	overflow-x: auto;
-}
-
-.sf-tools__table {
-	width: 100%;
-	border-collapse: collapse;
-	font-size: var(--sf-text-sm);
-
-	th {
-		padding: 10px 16px;
-		border-bottom: 1px solid var(--sf-border);
-		font-size: 12px;
-		font-weight: var(--sf-weight-medium);
-		text-align: start;
-		color: var(--sf-text-muted);
-		white-space: nowrap;
-	}
-
-	td {
-		padding: 12px 16px;
-		border-bottom: 1px solid var(--sf-border-subtle);
-		vertical-align: top;
-		color: var(--sf-text);
-	}
-
-	tbody tr:last-child td { border-bottom: 0; }
-	tbody tr:hover td { background: var(--sf-bg-subtle); }
-}
-
-.sf-tools__when {
-	white-space: nowrap;
-	font-variant-numeric: tabular-nums;
-	color: var(--sf-text-muted);
-}
-
-.sf-tools__page {
-	font-size: var(--sf-text-sm);
-	color: var(--sf-text-muted);
 }
 
 .sf-tools__preview {

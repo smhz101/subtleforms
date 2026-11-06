@@ -8,6 +8,8 @@ import FrontendSettings from '../components/settings/FrontendSettings';
 import EmailSettings from '../components/settings/EmailSettings';
 import AdvancedSettings from '../components/settings/AdvancedSettings';
 import ExtensionsSettings from '../components/settings/ExtensionsSettings';
+import LogsPanel from '../components/logs/LogsPanel';
+import { applySettingsRedirects } from '../utils/settingsRedirects';
 import lazyWithRetry from '../utils/lazyWithRetry';
 import { settingsTabs, getSettingsTab } from '../../shared/extend';
 import Icon from '../ui/Icon';
@@ -55,10 +57,16 @@ const GROUPS = [
         description: __('Webhook defaults and other connections.', 'subtleforms'),
       },
       {
+        name: 'logs',
+        icon: Icon.ListChecks,
+        title: __('Logs', 'subtleforms'),
+        description: __('What happened after each entry was sent, which webhooks were called and which API calls were made.', 'subtleforms'),
+      },
+      {
         name: 'tools',
         icon: Icon.Wrench,
         title: __('Tools', 'subtleforms'),
-        description: __('Move forms and entries, bring a form across from another plugin, and read what the site has been doing.', 'subtleforms'),
+        description: __('Move forms and entries between sites, and bring a form across from another plugin.', 'subtleforms'),
       },
     ],
   },
@@ -111,7 +119,7 @@ export function resolveTab(name, tabs = getGroups().flatMap((g) => g.tabs)) {
 
 // Tabs with nothing to save (they manage their own state).
 // Tabs from add-ons look after their own data too.
-const READ_ONLY_TABS = ['tools'];
+const READ_ONLY_TABS = ['tools', 'logs'];
 const isReadOnly = (name) => READ_ONLY_TABS.includes(name) || !BUILT_IN.includes(name);
 
 /** Body of a tab an add-on registered. */
@@ -146,13 +154,24 @@ export default function Settings() {
     const params = new URLSearchParams(hash);
     if (params.get('tab') !== current.name) {
       params.set('tab', current.name);
-      if (current.name !== 'extensions') {
-        params.delete('ext');
-        params.delete('service');
-      }
+      // What the old tab kept in the address (a section, a screen inside it) means nothing to the next.
+      [...params.keys()].forEach((key) => {
+        if (key !== 'tab') params.delete(key);
+      });
       window.history.replaceState(null, '', `#${params.toString()}`);
     }
   }, [current.name]);
+
+  // A link to an old address while Settings is open (the logs used to be in Tools).
+  useEffect(() => {
+    const onHash = () => {
+      applySettingsRedirects();
+      const match = window.location.hash.match(/[#&]tab=([\w-]+)/);
+      if (match && match[1] !== current.name) setActiveTab(match[1]);
+    };
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, [current.name, setActiveTab]);
 
   // Ctrl/Cmd+S saves.
   useEffect(() => {
@@ -269,6 +288,7 @@ export default function Settings() {
             {current.name === 'extensions' && (
               <ExtensionsSettings settings={settings} updateSetting={updateSetting} fieldErrors={fieldErrors} />
             )}
+            {current.name === 'logs' && <LogsPanel />}
             {current.name === 'tools' && (
               <Suspense fallback={<p role='status'>{__('Loading…', 'subtleforms')}</p>}>
                 <ToolsPanel embedded />

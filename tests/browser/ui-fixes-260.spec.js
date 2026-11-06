@@ -11,7 +11,7 @@
  * - Tools is the last Settings tab without an add-on.
  * - Submissions: in the split inbox the pagination footer sits on the bottom
  *   edge of the list pane with one entry and with many.
- * - Settings > Tools > Activity: the two filters stay on one line and fit at
+ * - Settings > Logs > Activity: the two filters stay on one line and fit at
  *   390px.
  */
 const fs = require('fs');
@@ -190,7 +190,7 @@ test.describe('Reports and dashboard cards fit without scrollbars', () => {
   });
 });
 
-test('Tools is the last Settings tab without an add-on', async ({ page }) => {
+test('Tools is the last Settings tab without an add-on, and Logs comes right before it', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await loginPage(page);
   await page.goto(SETTINGS);
@@ -200,6 +200,8 @@ test('Tools is the last Settings tab without an add-on', async ({ page }) => {
   // Nothing follows Tools: no MCP placeholder and no License tab.
   const next = tools.locator('xpath=ancestor::li[1]/following-sibling::li[1]//button');
   await expect(next).toHaveCount(0);
+  const before = tools.locator('xpath=ancestor::li[1]/preceding-sibling::li[1]//button');
+  await expect(before).toContainText('Logs');
   await page.screenshot({ path: path.join(SHOTS, 'settings-tab-order.png') });
 });
 
@@ -305,15 +307,12 @@ test.describe('Submissions: the footer sits on the bottom edge of the list pane'
   });
 });
 
-test('Tools filters stay on one line and fit at 390px', async ({ page }) => {
+test('Logs filters stay on one line and fit at 390px', async ({ page }) => {
   await loginPage(page);
   for (const width of [1280, 782, 390]) {
     await page.setViewportSize({ width, height: 900 });
-    await page.goto(`${SETTINGS}&r=${width}#tab=tools`);
-    const sections = page.getByRole('navigation', { name: 'Tools' });
-    await expect(sections).toBeVisible({ timeout: 30000 });
-    await sections.getByRole('button', { name: 'Activity' }).click();
-    const filters = page.locator('.sf-tools__filters');
+    await page.goto(`${SETTINGS}&r=${width}#tab=logs&section=activity`);
+    const filters = page.locator('.sf-logs__filters');
     await expect(filters).toBeVisible();
     const box = await filters.evaluate((el) => {
       const s = getComputedStyle(el);
@@ -332,6 +331,6 @@ test('Tools filters stay on one line and fit at 390px', async ({ page }) => {
     expect(box.oneLine).toBe(true);
     expect(box.fits).toBe(true);
     expect(box.pageScrollsX).toBe(false);
-    await page.screenshot({ path: path.join(SHOTS, `tools-filters-${width}.png`) });
+    await page.screenshot({ path: path.join(SHOTS, `logs-filters-${width}.png`) });
   }
 });

@@ -1,0 +1,92 @@
+// Settings > Logs: the tables under a section header.
+
+.sf-logs__table-wrap { overflow-x: auto; }
+
+.sf-logs__table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: var(--sf-text-sm);
+
+	// On a phone the table scrolls sideways inside its card instead of squeezing the message.
+	@media (max-width: 600px) { min-width: 560px; }
+
+	th {
+		padding: 10px 16px;
+		border-bottom: 1px solid var(--sf-border);
+		font-size: 12px;
+		font-weight: var(--sf-weight-medium);
+		text-align: start;
+		color: var(--sf-text-muted);
+		white-space: nowrap;
+	}
+
+	td {
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--sf-border-subtle);
+		vertical-align: top;
+		color: var(--sf-text);
+	}
+
+	tbody tr:last-child td { border-bottom: 0; }
+	tbody tr:hover td { background: var(--sf-bg-subtle); }
+}
+
+.sf-logs__when {
+	white-space: nowrap;
+	font-variant-numeric: tabular-nums;
+	color: var(--sf-text-muted);
+}
+
+.sf-logs__meta {
+	margin-top: 4px;
+	color: var(--sf-text-muted);
+	font-size: var(--sf-text-sm);
+	overflow-wrap: anywhere;
+}
+
+.sf-logs__page {
+	font-size: var(--sf-text-sm);
+	color: var(--sf-text-muted);
+}
+
+.sf-logs__loading {
+	display: flex;
+	justify-content: center;
+	padding: 32px;
+}
+
+// Level and form filters on the right of the header: one line at every width.
+// The two selects share the room and shrink rather than wrap; when both do
+// not fit beside the title the header puts them under it.
+.sf-logs__filters {
+	display: flex;
+	flex-wrap: nowrap;
+	gap: 8px;
+	min-width: 0;
+	max-width: 100%;
+
+	.components-base-control {
+		flex: 1 1 160px;
+		min-width: 0;
+		margin: 0;
+	}
+}
+
+.sf-section-header:has(.sf-logs__filters) {
+	flex-wrap: wrap;
+
+	.sf-section-header__text { flex: 1 1 240px; }
+
+	.sf-section-header__actions {
+		flex: 0 1 360px;
+		min-width: 0;
+	}
+
+	@media (max-width: 600px) {
+		.sf-section-header__actions { flex: 1 1 100%; }
+	}
+}
+
+.sf-logs__pager {
+	border-top: 1px solid var(--sf-border-subtle);
+}

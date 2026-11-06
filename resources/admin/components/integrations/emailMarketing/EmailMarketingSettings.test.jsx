@@ -115,9 +115,9 @@ describe('the grid', () => {
   test('the layout has no gap and one line between tiles: 4, 2 and 1 columns by the width of the screen, 120px tall', () => {
     const scss = fs.readFileSync(path.join(__dirname, '../serviceTiles/serviceTiles.scss'), 'utf8');
     const grid = scss.slice(scss.indexOf('.sf-svc-grid {'), scss.indexOf('.sf-svc-tile {'));
-    expect(grid).toMatch(/grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/);
+    expect(grid).toMatch(/grid-template-columns:\s*repeat\(var\(--sf-svc-cols, 4\), minmax\(0, 1fr\)\)/);
     expect(grid).toMatch(/gap:\s*0;/);
-    expect(grid).toMatch(/@container sf-svc \(max-width: 719px\)[\s\S]*repeat\(2, /);
+    expect(grid).toMatch(/@container sf-svc \(max-width: 719px\)[\s\S]*repeat\(var\(--sf-svc-cols-medium, 2\), /);
     expect(grid).toMatch(/@container sf-svc \(max-width: 399px\)[\s\S]*grid-template-columns:\s*1fr/);
     expect(scss).toMatch(/\.sf-svc-grid-wrap \{[^}]*container-type:\s*inline-size/);
     const tileRule = scss.slice(scss.indexOf('.sf-svc-tile {'), scss.indexOf('&__open'));
@@ -399,5 +399,17 @@ describe('the note about Pro', () => {
     registerSlotItem('email_marketing.service.settings', 'anything', { component: () => null });
     await mount();
     expect(container.querySelector('.sf-em-pro')).toBeNull();
+  });
+});
+
+describe('section header', () => {
+  test('the grid has the standard header: a title, one description and no icon, and nothing explains itself in the body', async () => {
+    await mount();
+    const header = container.querySelector('.sf-section-header');
+    expect(header.querySelector('h2').textContent).toBe('Email marketing');
+    expect(header.querySelectorAll('p')).toHaveLength(1);
+    expect(header.querySelector('.sf-section-header__text svg')).toBeNull();
+    expect(container.querySelector('.sf-ext-panel__header')).toBeNull();
+    expect(container.querySelectorAll('.sf-section-header')).toHaveLength(1);
   });
 });

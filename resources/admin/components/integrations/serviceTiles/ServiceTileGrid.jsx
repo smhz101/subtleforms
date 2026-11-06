@@ -28,6 +28,9 @@ export function enableLabel(label) {
  *
  * Public: add-ons reach it as `window.SubtleFormsExtend.ServiceTileGrid`.
  *
+ * The column count is min(tiles, 4) on a wide screen and min(tiles, 2) on a tablet, so a grid
+ * of three has three equal columns and never leaves an empty cell.
+ *
  * @param {Object}   props
  * @param {Array}    props.services    [{ slug, label, logo, brandColor, enabled, statusLabel }].
  *                                     `logo` is a component receiving { size } or an element; without
@@ -38,10 +41,16 @@ export function enableLabel(label) {
  * @param {Object}   props.busy        Map of slug to true while its switch is being saved.
  * @param {Function} props.toggleLabel Optional (label) => accessible name of a switch.
  */
+export function columnCounts(count) {
+  const n = Math.max(1, Number(count) || 1);
+  return { wide: Math.min(n, 4), medium: Math.min(n, 2) };
+}
+
 export default function ServiceTileGrid({ services = [], onOpen, onToggle, busy = {}, toggleLabel = enableLabel }) {
+  const { wide, medium } = columnCounts(services.length);
   return (
     <div className='sf-svc-grid-wrap'>
-      <ul className='sf-svc-grid'>
+      <ul className={`sf-svc-grid sf-svc-grid--cols-${wide}`} style={{ '--sf-svc-cols': wide, '--sf-svc-cols-medium': medium }}>
         {services.map((service) => {
           const on = !!service.enabled;
           return (

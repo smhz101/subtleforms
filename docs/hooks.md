@@ -70,7 +70,29 @@ A `[a-z0-9-]+` name with a title adds a tab to the Add-ons group, or with `group
 
 `window.SubtleFormsExtend.getSettingsTab( name )` returns the definition registered under a name, or `null`. An add-on uses it to see whether another script already registered a tab before registering its own. The Settings screen lists tabs through the same registry.
 
-The tab opens at `admin.php?page=subtleforms-settings#tab=<name>`. The body looks after its own data and saving, so Settings shows no Save button or save bar for it. Tools is part of Settings now: `admin.php?page=subtleforms-tools` redirects to `#tab=tools`.
+The tab opens at `admin.php?page=subtleforms-settings#tab=<name>`. The body looks after its own data and saving, so Settings shows no Save button or save bar for it. Tools is part of Settings now: `admin.php?page=subtleforms-tools` redirects to `#tab=tools`. The activity, webhook and API logs have their own tab, Logs, between Integrations and Tools: `admin.php?page=subtleforms-tools&section=activity` and `#tab=tools&section=api` (also `webhooks`) open the same section of `#tab=logs`.
+
+### Section panel and section header (JavaScript)
+
+Settings > Integrations and Settings > Logs are built with a section panel: a card with a list of sections on the left, each with a status dot, and the chosen section on the right. Since 2.7.5 `window.SubtleFormsExtend` carries both pieces, so an add-on can draw a screen of its own the same way (check `typeof SubtleFormsExtend.SectionPanel === 'function'` first; the extension level stays 3).
+
+```js
+const { SectionPanel, SectionHeader } = window.SubtleFormsExtend;
+
+<SectionPanel
+	sections={ [
+		{ id: 'one', label: 'One', status: 'on', order: 10, render: () => <>
+			<SectionHeader title="One" description="What it does." actions={ <Badge /> } />
+			<Body />
+		</> },
+	] }
+	urlParam="section"
+/>
+```
+
+`SectionPanel` props: `sections` (`{ id, label, status: 'on' | 'off' | 'warn' | null, order, render() }`), `current` (leave out to follow the address), `onChange( id )`, `urlParam` (the address parameter that keeps the choice, default `section`), `keepParams` (parameters kept when another section is chosen, default `['tab']`) and `label`. `SectionHeader` props: `title`, `description` (one line, no icon) and `actions` (an optional node on the right). A section's header is its title and one line; put detail in a help text under the control it explains, not above the content.
+
+`window.SubtleFormsExtend.registerSettingsRedirect( from, to )` sends an old Settings address to a new one before Settings picks a tab, for example `registerSettingsRedirect( { tab: 'ecommerce' }, { tab: 'extensions', ext: 'woocommerce' } )`. Every key of `from` must match (a string or an array of accepted strings); the other parameters of the old address are kept.
 
 ## Form integration panels (JavaScript)
 
@@ -90,7 +112,8 @@ Screen slots for `registerSlotItem( slot, id, { component, order } )` that the a
 | `form.settings.sections` | A section in a form's settings (`title`, `description`, `icon`, `appliesTo( schema )` decide whether and how it is listed) | the section's own props |
 | `form.confirmations` | Conditional confirmations in a form's settings | `{ schema, onMetadata, isReadOnly }` |
 | `form.integrations` | A form's Integrations tab (see `registerFormIntegration`) | see above |
-| `settings.extensions` | The panel of an integration listed through `subtleforms/admin/integrations`; the slot item id is the integration slug | none |
+| `settings.extensions` | The panel of an integration listed through `subtleforms/admin/integrations`; the slot item id is the integration slug. Optional keys on the item: `title` and `description` (Settings then draws the standard section header above the panel, and the panel must not draw its own), `label` (the name in the section list) and `status` (`'on'`, `'warn'` or `'off'`, or a function returning one, for the dot in the list; default: from the integration's `enabled` and `configured`). | none |
+| `settings.logs` | A section of Settings > Logs, after Activity, Webhooks and API. The slot item id is the section id; give `label` (name in the list), `title` and `description` (Settings draws the header) and `order` | none |
 | `email_marketing.service.settings` | More controls below a service's connection in Settings > Integrations > Email marketing. An add-on that registers anything here counts as adding extras, so this plugin hides its note about SubtleForms Pro | `{ service, connected }` (`service` is the slug, `connected` is true once the service accepted its key) |
 | `email_marketing.service.form` | More controls at the end of a service's block in a form's Email marketing panel (Form settings > Integrations). They keep their values in the form's `metadata.integrations`, under a key of the add-on's own | `{ service, connected, schema, config, patch( values ), isReadOnly, fieldOptions }` (`config` is the service's settings of the form, `patch` merges values into them) |
 | `dashboard.panels` | Panels on the Dashboard | `{ forms }` |
@@ -180,7 +203,7 @@ The hooks `subtleforms/mailchimp/*` were never released and are gone. An add-on 
 
 Picture choice, several files per upload field, advanced conditional logic and form analytics are provided by an add-on. This plugin holds no code for them and shows no placeholders, badges or upgrade links for them. It keeps the extension points below and a plain fallback for forms that already use them.
 
-`SubtleForms\Support\ExtensionPoints` names the four points (`picture_choice`, `multi_file_uploads`, `advanced_logic`, `analytics`) and its `LEVEL` constant (3) is the contract version. The level changes only when an existing hook changes or is removed, because a released add-on refuses a level above the highest it knows. Additions are detected instead: since 2.7.5 `window.SubtleFormsExtend` has `ServiceTileGrid` and `ServiceDetailHeader` (check `typeof SubtleFormsExtend.ServiceTileGrid === 'function'`), and the `subtleforms/email/marketing/skipped` action is available. Level 2 adds the logic, upload and add-on feature hooks of 2.7.0 and the `FeatureGate` setters. An add-on checks `ExtensionPoints::has( $name )` before it registers, so it never registers twice against an older plugin that still ships the feature. It reports what it runs through:
+`SubtleForms\Support\ExtensionPoints` names the four points (`picture_choice`, `multi_file_uploads`, `advanced_logic`, `analytics`) and its `LEVEL` constant (3) is the contract version. The level changes only when an existing hook changes or is removed, because a released add-on refuses a level above the highest it knows. Additions are detected instead: since 2.7.5 `window.SubtleFormsExtend` has `ServiceTileGrid`, `ServiceDetailHeader`, `SectionPanel` and `SectionHeader` (check `typeof SubtleFormsExtend.ServiceTileGrid === 'function'`), and the `subtleforms/email/marketing/skipped` action is available. Level 2 adds the logic, upload and add-on feature hooks of 2.7.0 and the `FeatureGate` setters. An add-on checks `ExtensionPoints::has( $name )` before it registers, so it never registers twice against an older plugin that still ships the feature. It reports what it runs through:
 
 | Hook | Type | Use |
 | --- | --- | --- |
@@ -228,11 +251,13 @@ Counts already stored in the `subtleforms_stats` and `subtleforms_funnel` tables
 | `registerLogicExtension( { supports, passes, evaluateCondition } )` | Browser side of the logic hooks. Functions get a helpers object: `toText`, `listOf`, `norm`, `isNumeric`, `isEmptyValue`, `textEquals`, `countryEquals`, `readValue`, `today`, `evaluateCondition`. |
 | `registerLogicEditor( Component )` | Replace the builder logic editor. It gets the editor props (`logic`, `availableFields`, `onChange`, `scope`, `disabled`, ...) plus `countries` (the country list for country rules) and `Fallback`, the free editor. |
 | `registerSlotItem( slot, id, { component, order } )` | Add an item to a screen slot. |
+| `registerSettingsRedirect( from, to )` | Send an old Settings address (`#tab=...`) to its new place. |
+| `SectionPanel`, `SectionHeader` | Components for a list of sections with a header each (see "Section panel and section header"). |
 | `registerEmailMarketingService( slug, { label, icon, settingsComponent, formComponent } )` | Add a tile to Settings > Integrations > Email marketing, or replace the one of the same slug. `icon` is a component, `settingsComponent` draws the service's screen and `formComponent` its block in a form's panel. |
 | `registerFormMountHook( fn )` | `fn( { container, formId, config } )` runs when a form mounts on a page (view beacon, funnel tracker). |
 | `registerFieldType`, `registerInspectorControl`, `registerCanvasPreview` | Existing. |
 
-Slots: `reports.panels` and `dashboard.panels` (props: `forms`), `forms.list.column` (`{ component( form ), header, order }`), `footer.meta` (props: `version`), `settings.extensions` (id is the extension slug), `form.integrations` (props: `schema`, `integrations`, `patch`, `isReadOnly`, `fieldOptions`), `form.confirmations` (props: `schema`, `onMetadata`, `isReadOnly`), `form.settings.sections` (`{ component, title, description, icon, order, appliesTo( schema ) }`; props: `schema`, `onChange`, `onMetadata`, `isReadOnly`, `fields`), `builder.canvas.notes` (props: `schema`), `submission.panels` (props: `submission`, `meta`), `submission.actions` (props: `submission`), `email_marketing.service.settings` (props: `service`, `connected`) and `email_marketing.service.form` (props: `service`, `connected`, `schema`, `config`, `patch`, `isReadOnly`, `fieldOptions`).
+Slots: `reports.panels` and `dashboard.panels` (props: `forms`), `forms.list.column` (`{ component( form ), header, order }`), `footer.meta` (props: `version`), `settings.extensions` (id is the extension slug), `settings.logs` (id is the section id), `form.integrations` (props: `schema`, `integrations`, `patch`, `isReadOnly`, `fieldOptions`), `form.confirmations` (props: `schema`, `onMetadata`, `isReadOnly`), `form.settings.sections` (`{ component, title, description, icon, order, appliesTo( schema ) }`; props: `schema`, `onChange`, `onMetadata`, `isReadOnly`, `fields`), `builder.canvas.notes` (props: `schema`), `submission.panels` (props: `submission`, `meta`), `submission.actions` (props: `submission`), `email_marketing.service.settings` (props: `service`, `connected`) and `email_marketing.service.form` (props: `service`, `connected`, `schema`, `config`, `patch`, `isReadOnly`, `fieldOptions`).
 
 The front end dispatches the `subtleforms:submitted` event on `document` with `detail.formId` after a successful send. Field wrappers carry `data-sf-key` and steps carry `data-sf-step`, which Pro reads for the funnel.
 
