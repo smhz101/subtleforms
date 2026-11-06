@@ -2,6 +2,8 @@ import { useEffect, useReducer, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import WebhooksPanel from './extensions/WebhooksPanel';
 import EmailMarketingSettings from '../integrations/emailMarketing/EmailMarketingSettings';
+import SectionPanel from '../sectionPanel/SectionPanel';
+import SectionHeader from '../sectionPanel/SectionHeader';
 import { getSlotItems } from '../../../shared/extend';
 
 // Panels add-ons bring are registered in the `settings.extensions` slot with
@@ -69,16 +71,42 @@ export function extensionStatus(slug, ext) {
 }
 
 /**
- * Extension status dot
+ * The slot item an add-on registered for an integration, or null.
+ *
+ * @param {string} slug Integration slug.
+ * @return {Object|null} { component, order, title, description, status }.
  */
-function StatusDot({ enabled, configured }) {
-  if (enabled && configured) return <span className='sf-ext-status sf-ext-status--active' title={__('Active', 'subtleforms')} />;
-  if (enabled) return <span className='sf-ext-status sf-ext-status--warning' title={__('Enabled, needs configuration', 'subtleforms')} />;
-  return <span className='sf-ext-status sf-ext-status--inactive' title={__('Disabled', 'subtleforms')} />;
+function slotItemFor(slug) {
+  return getSlotItems('settings.extensions').find((item) => item.id === slug) ?? null;
 }
 
 /**
- * ExtensionsSettings, two-panel layout for the Settings > Extensions tab.
+ * The dot of an integration in the section list: 'on', 'warn' or 'off'.
+ *
+ * An add-on can set it itself with a `status` on its slot item (a string, or a
+ * function returning one); otherwise it follows the integration's entry in the
+ * list (enabled and set up is on, enabled only is warn, anything else is off).
+ *
+ * @param {string}      slug Integration slug.
+ * @param {Object|null} ext  The integration's entry in the list.
+ * @return {string} 'on', 'warn' or 'off'.
+ */
+export function dotFor(slug, ext) {
+  const item = slotItemFor(slug);
+  const set = typeof item?.status === 'function' ? item.status() : item?.status;
+  if (set === 'on' || set === 'warn' || set === 'off') return set;
+  const { enabled, configured } = extensionStatus(slug, ext);
+  if (enabled && configured) return 'on';
+  return enabled ? 'warn' : 'off';
+}
+
+/**
+ * ExtensionsSettings, the Integrations tab of Settings: a section panel with
+ * Webhooks, Email marketing and whatever an add-on lists.
+ *
+ * An add-on that registers its panel with `title` (and `description`) on the
+ * `settings.extensions` slot item gets the standard section header drawn above
+ * it. Without a `title` the panel draws its own heading, as before.
  *
  * @param {Object}   props
  * @param {Object}   props.settings      - Full settings object from useSettingsState
@@ -101,51 +129,31 @@ export default function ExtensionsSettings({ settings, updateSetting, fieldError
     return () => window.removeEventListener('subtleforms:extension-status', refreshStatus);
   }, []);
 
-  const ActivePanel = panelFor(activeSlug, extensions[activeSlug]);
+  const sections = listed.map((slug, index) => {
+    const ext = extensions[slug];
+    const Panel = panelFor(slug, ext);
+    const item = slotItemFor(slug);
+    return {
+      id: slug,
+      label: item?.label || ext.label,
+      status: dotFor(slug, ext),
+      order: index,
+      render: () => (
+        <>
+          {item?.title ? <SectionHeader title={item.title} description={item.description || ext.description} /> : null}
+          {Panel ? <Panel settings={settings} updateSetting={updateSetting} fieldErrors={fieldErrors} /> : null}
+        </>
+      ),
+    };
+  });
 
   return (
-    <div className='sf-ext-settings'>
-      {/* Sidebar */}
-      <nav className='sf-ext-settings__sidebar'>
-        <ul className='sf-ext-settings__list'>
-          {listed.map((slug) => {
-            const ext = extensions[slug];
-            return (
-              <li key={slug}>
-                <button
-                  type='button'
-                  className={`sf-ext-settings__item ${
-                    activeSlug === slug ? 'sf-ext-settings__item--active' : ''
-                  }`}
-                  aria-current={activeSlug === slug ? 'true' : undefined}
-                  onClick={() => {
-                    setActiveSlug(slug);
-                    const params = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-                    params.set('ext', slug);
-                    params.delete('service');
-                    window.history.replaceState(null, '', `#${params.toString()}`);
-                  }}>
-                  <span className='sf-ext-settings__item-label'>{ext.label}</span>
-                  <StatusDot {...extensionStatus(slug, ext)} />
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-
-      {/* Content */}
-      <div className='sf-ext-settings__content'>
-        {ActivePanel && listed.includes(activeSlug) && (
-          <div className='sf-ext-settings__panel-wrap'>
-            <ActivePanel
-              settings={settings}
-              updateSetting={updateSetting}
-              fieldErrors={fieldErrors}
-            />
-          </div>
-        )}
-      </div>
-    </div>
+    <SectionPanel
+      sections={sections}
+      current={listed.includes(activeSlug) ? activeSlug : undefined}
+      onChange={setActiveSlug}
+      urlParam='ext'
+      label={__('Integrations', 'subtleforms')}
+    />
   );
 }

@@ -3,6 +3,7 @@ import { TextControl, SelectControl, Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import FieldError from '../FieldError';
 import ConnectionTest from './ConnectionTest';
+import SectionHeader from '../../sectionPanel/SectionHeader';
 import { normalizeWebhookUrl } from '../../../utils/webhookUrl';
 
 const RETRIES = [0, 1, 2, 3, 4, 5].map((n) => ({
@@ -43,15 +44,13 @@ export default function WebhooksPanel({ settings, updateSetting, fieldErrors = {
 
   return (
     <div className='sf-ext-panel'>
-      <div className='sf-ext-panel__header'>
-        <h2 className='sf-ext-panel__title'>{__('Webhooks', 'subtleforms')}</h2>
-        <p className='sf-ext-panel__description'>
-          {__(
-            'Send each entry as JSON to any URL. Add a webhook to a form under Form settings > Notifications; the settings below apply to every webhook action.',
-            'subtleforms'
-          )}
-        </p>
-      </div>
+      <SectionHeader
+        title={__('Webhooks', 'subtleforms')}
+        description={__(
+          'Send each entry as JSON to any URL. Add a webhook to a form under Form settings > Notifications; the settings below apply to every webhook action.',
+          'subtleforms'
+        )}
+      />
 
       <div className='sf-ext-panel__body'>
         <div className='sf-settings-field'>
@@ -100,7 +99,10 @@ export default function WebhooksPanel({ settings, updateSetting, fieldErrors = {
               onChange={setTestUrl}
               onBlur={() => setTestUrl(normalizeWebhookUrl(testUrl))}
               placeholder='https://example.com/webhook'
-              help={__('Sends a sample entry to this URL and shows the response. Nothing is saved.', 'subtleforms')}
+              help={__(
+                'Sends a sample entry to this URL and shows the response. Nothing is saved. The default body contains the form and entry IDs, every answer keyed by field and with its label, and a link to the entry; choose a custom JSON body, method, headers and signing on each webhook action.',
+                'subtleforms'
+              )}
             />
             <SelectControl
               label={__('Method', 'subtleforms')}
@@ -118,15 +120,6 @@ export default function WebhooksPanel({ settings, updateSetting, fieldErrors = {
               getBody={() => ({ url: normalizeWebhookUrl(testUrl), method: testMethod, sign: true })}
             />
           </div>
-        </div>
-
-        <div className='sf-ext-panel__info'>
-          <p className='sf-ext-panel__info-text'>
-            {__(
-              'The default body contains the form and entry IDs, every answer keyed by field and with its label, and a link to the entry. Choose a custom JSON body, method, headers and signing on each webhook action.',
-              'subtleforms'
-            )}
-          </p>
         </div>
 
         {/* An add-on's delivery log, when it provides one (2.3.0). */}

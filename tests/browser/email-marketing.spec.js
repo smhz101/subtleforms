@@ -55,7 +55,7 @@ async function shot(page, name, locator) {
   await target.screenshot({ path: path.join(SHOTS, `${name}.png`) });
 }
 
-const content = (page) => page.locator('.sf-ext-settings__content');
+const content = (page) => page.locator('.sf-section-panel__content');
 const tile = (page, slug) => page.locator(`.sf-svc-tile[data-service="${slug}"]`);
 
 test.beforeAll(async () => {
@@ -86,7 +86,7 @@ test('Grid: one Email marketing entry, four tiles, all off, and one plain note a
   await loginPage(page);
   await page.goto(SETTINGS);
 
-  const nav = page.locator('.sf-ext-settings__sidebar');
+  const nav = page.locator('.sf-section-panel__sidebar');
   await expect(nav.getByText('Email marketing', { exact: true })).toBeVisible({ timeout: 30000 });
   await expect(nav.getByText('Webhooks', { exact: true })).toBeVisible();
   await expect(nav.getByText('Mailchimp', { exact: true })).toHaveCount(0);

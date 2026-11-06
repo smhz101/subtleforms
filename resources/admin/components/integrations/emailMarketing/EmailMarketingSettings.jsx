@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import SectionHeader from '../../sectionPanel/SectionHeader';
 import ProBanner from './ProBanner';
 import ServiceDetail from './ServiceDetail';
 import ServiceGrid from './ServiceGrid';
@@ -113,12 +114,13 @@ export default function EmailMarketingSettings() {
         />
       ) : (
         <>
-          <div className='sf-ext-panel__header'>
-            <h2 className='sf-ext-panel__title'>{__('Email marketing', 'subtleforms')}</h2>
-            <p className='sf-ext-panel__description'>
-              {__('Add people who fill in a form to your email list. Switch a service on, connect your account, then turn it on for each form under Form settings > Integrations.', 'subtleforms')}
-            </p>
-          </div>
+          <SectionHeader
+            title={__('Email marketing', 'subtleforms')}
+            description={__(
+              'Add people who fill in a form to your email list. Switch a service on, connect your account, then turn it on for each form under Form settings > Integrations.',
+              'subtleforms'
+            )}
+          />
           {error && (
             <p role='alert' className='sf-em-detail__error'>
               {error}

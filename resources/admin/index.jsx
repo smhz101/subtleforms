@@ -6,6 +6,7 @@ import AdminApp from './app/AdminApp';
 import '../shared/extend';
 // The shared service tile grid and header, for add-ons (since 2.7.5, add-ons feature-detect it).
 import './components/integrations/serviceTiles/expose';
+import './components/sectionPanel/expose';
 
 // Import aggregated admin styles
 import './styles/admin.scss';

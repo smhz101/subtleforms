@@ -1,0 +1,123 @@
+// The section panel: a card with a list of sections on the left and the
+// chosen section on the right. Used by Settings > Integrations and Settings >
+// Logs, and by add-ons through `window.SubtleFormsExtend.SectionPanel`.
+// Flat colours from the --sf-* tokens, no gradients.
+
+.sf-section-panel {
+	display: grid;
+	grid-template-columns: 220px minmax(0, 1fr);
+	overflow: hidden;
+	border: 1px solid var(--sf-border);
+	border-radius: var(--sf-radius-lg);
+	background: var(--sf-bg-surface);
+
+	@media (max-width: 900px) { grid-template-columns: 1fr; }
+
+	&__sidebar {
+		padding: 8px;
+		border-inline-end: 1px solid var(--sf-border-subtle);
+		background: var(--sf-bg-subtle);
+
+		@media (max-width: 900px) {
+			border-inline-end: 0;
+			border-bottom: 1px solid var(--sf-border-subtle);
+		}
+	}
+
+	&__list {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+
+		li { margin: 0; }
+	}
+
+	&__item {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		width: 100%;
+		height: 36px;
+		padding: 0 10px;
+		border: 0;
+		border-radius: var(--sf-radius-control);
+		background: transparent;
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text-secondary);
+		text-align: start;
+		cursor: pointer;
+
+		&:hover {
+			background: var(--sf-bg-muted);
+			color: var(--sf-text);
+		}
+
+		&--active {
+			background: var(--sf-bg-surface);
+			box-shadow: 0 0 0 1px var(--sf-border);
+			color: var(--sf-text);
+			font-weight: var(--sf-weight-medium);
+		}
+
+		&:focus-visible {
+			outline: none;
+			box-shadow: var(--sf-shadow-focus);
+		}
+	}
+
+	&__content { min-width: 0; }
+
+	&__body { position: relative; }
+}
+
+.sf-ext-status {
+	flex-shrink: 0;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--sf-gray-300, #ccc);
+
+	&--active { background: var(--sf-success); }
+	&--warning { background: var(--sf-warning); }
+}
+
+// The top of a section: title and one line, no icon.
+.sf-section-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 20px 24px;
+	border-bottom: 1px solid var(--sf-border-subtle);
+
+	&__text { min-width: 0; }
+
+	&__title {
+		margin: 0;
+		font-size: var(--sf-text-md);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
+	}
+
+	&__description {
+		margin: 4px 0 0;
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text-muted);
+	}
+
+	&__actions {
+		display: flex;
+		flex-shrink: 0;
+		align-items: center;
+		gap: 8px;
+	}
+
+	@media (max-width: 600px) {
+		flex-wrap: wrap;
+		padding: 16px;
+	}
+}

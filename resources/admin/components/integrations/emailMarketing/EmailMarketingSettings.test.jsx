@@ -401,3 +401,15 @@ describe('the note about Pro', () => {
     expect(container.querySelector('.sf-em-pro')).toBeNull();
   });
 });
+
+describe('section header', () => {
+  test('the grid has the standard header: a title, one description and no icon, and nothing explains itself in the body', async () => {
+    await mount();
+    const header = container.querySelector('.sf-section-header');
+    expect(header.querySelector('h2').textContent).toBe('Email marketing');
+    expect(header.querySelectorAll('p')).toHaveLength(1);
+    expect(header.querySelector('.sf-section-header__text svg')).toBeNull();
+    expect(container.querySelector('.sf-ext-panel__header')).toBeNull();
+    expect(container.querySelectorAll('.sf-section-header')).toHaveLength(1);
+  });
+});
