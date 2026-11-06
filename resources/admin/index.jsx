@@ -4,7 +4,7 @@ import { render } from '@wordpress/element';
 import AdminApp from './app/AdminApp';
 // Add-on registry (window.SubtleFormsExtend) must exist before add-on scripts run.
 import '../shared/extend';
-// The shared service tile grid and header, for add-ons (extension point level 4).
+// The shared service tile grid and header, for add-ons (since 2.7.5, add-ons feature-detect it).
 import './components/integrations/serviceTiles/expose';
 
 // Import aggregated admin styles

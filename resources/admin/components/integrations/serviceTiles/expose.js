@@ -5,7 +5,7 @@ import ServiceDetailHeader from './ServiceDetailHeader';
 /**
  * Put the shared tile grid and service header on the public extension object
  * (`window.SubtleFormsExtend`), so an add-on draws the same screens (SubtleForms
- * Pro does it for CRM). Extension point level 4.
+ * Pro does it for CRM). Available since 2.7.5; add-ons check for it.
  *
  * @param {Object} target The object to add them to; defaults to `window.SubtleFormsExtend`.
  * @return {Object} The object.
