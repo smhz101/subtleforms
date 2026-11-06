@@ -9,7 +9,7 @@
  * - Dirty tracking
  */
 
-import { useState, useEffect, useCallback } from '@wordpress/element';
+import { useState, useEffect, useCallback, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useQueryClient } from '@tanstack/react-query';
@@ -83,6 +83,9 @@ export default function useSettingsState() {
 	const [ saving, setSaving ] = useState( false );
 	const [ message, setMessage ] = useState( null );
 	const [ hasChanges, setHasChanges ] = useState( false );
+	// Read inside the refresh below, which started before the edit did.
+	const hasChangesRef = useRef( false );
+	hasChangesRef.current = hasChanges;
 	const [ fieldErrors, setFieldErrors ] = useState( {} );
 	// Initialise from URL hash (e.g. #tab=extensions) so page reloads can
 	// land on a specific tab.
@@ -111,7 +114,9 @@ export default function useSettingsState() {
 				staleTime: force ? 0 : SETTINGS_STALE_TIME,
 			} );
 
-			if ( response.success ) {
+			// A background refresh of cached settings must not wipe an edit made
+			// while it ran; Discard (force) always takes what the server has.
+			if ( response.success && ( force || ! hasChangesRef.current ) ) {
 				setSettings( normalizeSettings( response.data ) );
 			}
 		} catch ( error ) {

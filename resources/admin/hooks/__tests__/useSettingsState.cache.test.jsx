@@ -91,3 +91,19 @@ test('saving stores the saved settings and invalidates every settings query', as
   expect(invalidate).toHaveBeenCalledWith({ queryKey: queryKeys.settings.all });
   expect(client.getQueryState(queryKeys.settings.general()).isInvalidated).toBe(true);
 });
+
+test('a background refresh of cached settings does not replace an edit made while it ran', async () => {
+  let release;
+  apiClient.get.mockImplementation(() => new Promise((resolve) => { release = () => resolve({ success: true, data: { ...SETTINGS, sender_email: 'server@example.com' } }); }));
+  const client = testClient({ queries: { staleTime: 0 } });
+  // Cached, but older than the minute the screen trusts: it shows at once and refreshes.
+  client.setQueryData(queryKeys.settings.general(), { success: true, data: SETTINGS }, { updatedAt: Date.now() - 5 * 60 * 1000 });
+  await mount(client);
+  expect(container.querySelector('.out').textContent).toBe('loaded:a@example.com');
+  expect(apiClient.get).toHaveBeenCalledTimes(1);
+
+  await act(async () => api.updateSetting('sender_email', 'typed@example.com'));
+  expect(api.hasChanges).toBe(true);
+  await act(async () => release());
+  expect(container.querySelector('.out').textContent).toBe('loaded:typed@example.com');
+});
