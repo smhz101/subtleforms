@@ -171,9 +171,15 @@ final class MailPoetStatus {
 	 * WordPress's own activation link for MailPoet, with the core nonce.
 	 */
 	public static function activateUrl(): string {
-		return wp_nonce_url(
-			self_admin_url( 'plugins.php?action=activate&plugin=' . rawurlencode( self::PLUGIN ) ),
-			'activate-plugin_' . self::PLUGIN
+		// Built with add_query_arg so the separators stay plain `&`: wp_nonce_url()
+		// HTML-escapes them, and a React href would then carry `&amp;`.
+		return add_query_arg(
+			array(
+				'action'   => 'activate',
+				'plugin'   => self::PLUGIN,
+				'_wpnonce' => wp_create_nonce( 'activate-plugin_' . self::PLUGIN ),
+			),
+			self_admin_url( 'plugins.php' )
 		);
 	}
 

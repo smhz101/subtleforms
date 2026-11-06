@@ -186,7 +186,9 @@ final class MailPoetTest extends TestCase {
 		$this->assertSame( 'inactive', MailPoetStatus::state() );
 		$url = MailPoetStatus::describe()['activate_url'];
 		$this->assertNotSame( '', $url );
-		$parts = wp_parse_url( html_entity_decode( $url ) );
+		// The client puts this in an href as is, so it must not hold HTML entities.
+		$this->assertStringNotContainsString( '&amp;', $url );
+		$parts = wp_parse_url( $url );
 		parse_str( $parts['query'], $query );
 		$this->assertStringEndsWith( '/wp-admin/plugins.php', $parts['path'] );
 		$this->assertSame( 'activate', $query['action'] );
