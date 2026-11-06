@@ -115,7 +115,7 @@ const { PageHeader, DataTable, RowActions } = window.SubtleFormsExtend;
 
 Props: `title`, `description`, `actions`, `meta` (after the title), `breadcrumb` (above it). Put the primary action rightmost and give it `variant="primary"`; keep it to one primary per page. Add-on pages drawn with `registerAdminPage` sit inside the frame that already shows the header, so they put their buttons in it with `<PageHeaderActions>...</PageHeaderActions>` (it renders into the header's actions area, or inline where there is no header). Below 600px the header stacks and the actions wrap.
 
-`DataTable` is the table All Forms uses (columns, sorting, selection, pagination, empty state, cards on phones). `RowActions` renders `[{ key, label, icon, onClick, href, external, isDestructive, inMenu, hidden, disabled }]` as the hover and focus row actions of that table (always visible on touch).
+`DataTable` is the table All Forms uses (a memoized component, so check `SubtleFormsExtend.DataTable` exists rather than its `typeof`; columns, sorting, selection, pagination, empty state, cards on phones). `RowActions` renders `[{ key, label, icon, onClick, href, external, isDestructive, inMenu, hidden, disabled }]` as the hover and focus row actions of that table (always visible on touch).
 
 ### Menu order (PHP)
 

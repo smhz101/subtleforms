@@ -244,7 +244,7 @@ final class OverviewData {
 		if ( $forms >= 1 ) {
 			$like_a = '%' . $wpdb->esc_like( '[subtleforms' ) . '%';
 			$like_b = '%' . $wpdb->esc_like( 'wp:subtleforms/form' ) . '%';
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Core table name.
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Core table name; the result is kept with the dashboard snapshot.
 			$placed = (bool) $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_status = 'publish' AND ( post_content LIKE %s OR post_content LIKE %s ) LIMIT 1", $like_a, $like_b ) );
 		}
 		$email = (string) ( new Settings() )->get( 'admin_email', '' );

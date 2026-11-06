@@ -98,7 +98,7 @@ final class ReportQueries {
 			$args[] = $formId;
 		}
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Fixed table name; conditions are built here; every value is a placeholder.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Fixed table name; conditions are built here; every value is a placeholder.
 		if ( self::wholeHourZone( $zone ) ) {
 			$rows = (array) $wpdb->get_results(
 				$wpdb->prepare(
@@ -147,7 +147,7 @@ final class ReportQueries {
 			$form   = ' AND form_id = %d';
 			$args[] = $formId;
 		}
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Fixed table name; every value is a placeholder.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Fixed table name; every value is a placeholder.
 		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE created_at >= %s AND created_at < %s AND {$cond}{$form}", $args ) );
 	}
 
@@ -167,7 +167,7 @@ final class ReportQueries {
 		$args                  = array_merge( array( $fromUtc, $toUtc ), $values );
 		$out                   = array();
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Fixed table name; conditions are built here; every value is a placeholder.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Fixed table name; conditions are built here; every value is a placeholder.
 		$totals = (array) $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT form_id, COUNT(*) AS entries, SUM( CASE WHEN is_read = 0 THEN 1 ELSE 0 END ) AS unread FROM {$table} WHERE created_at >= %s AND created_at < %s AND {$cond} GROUP BY form_id",
@@ -236,7 +236,7 @@ final class ReportQueries {
 		$sub                   = str_replace( array( 'status' ), array( 's.status' ), $cond );
 		$args                  = array_merge( array( $sinceUtc ), $values );
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Fixed table names; conditions are built here; every value is a placeholder.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Fixed table names; conditions are built here; every value is a placeholder.
 		$from  = "FROM {$forms} f WHERE f.status = 'published' AND NOT EXISTS ( SELECT 1 FROM {$table} s WHERE s.form_id = f.id AND s.created_at >= %s AND {$sub} )";
 		$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) {$from}", $args ) );
 		$rows  = array();

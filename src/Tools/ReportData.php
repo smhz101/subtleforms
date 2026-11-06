@@ -258,7 +258,7 @@ final class ReportData {
 		$counted = ReportSeries::COUNTED_STATUSES;
 		$in      = implode( ',', array_fill( 0, count( $counted ), '%s' ) );
 		$args    = array_merge( array( $formId, $fromUtc, $toUtc ), $counted, array( self::FIELD_SAMPLE ) );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Fixed table name; every value is a placeholder.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Fixed table name; every value is a placeholder.
 		$payloads = (array) $wpdb->get_col( $wpdb->prepare( "SELECT payload FROM {$table} WHERE form_id = %d AND created_at >= %s AND created_at < %s AND ( status IS NULL OR status IN ({$in}) ) ORDER BY id DESC LIMIT %d", $args ) );
 		$rows     = array();
 		foreach ( $payloads as $json ) {
