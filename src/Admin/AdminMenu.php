@@ -890,12 +890,21 @@ class AdminMenu {
 	 *
 	 * Tools is a tab of Settings now. The old URL, admin.php?page=subtleforms-tools,
 	 * still works: it opens Settings on that tab, so bookmarks and links from
-	 * add-ons keep working.
+	 * add-ons keep working. The three logs (activity, webhooks and API) moved
+	 * on to the Logs tab, so a link to one of them opens that section there.
 	 *
-	 * @return string Admin URL of the Tools tab.
+	 * @param string $section Section named in the old link, if any.
+	 * @return string Admin URL of the Settings tab that now holds it.
 	 */
-	public static function tools_tab_url(): string {
-		return admin_url( 'admin.php?page=subtleforms-settings#tab=tools' );
+	public static function tools_tab_url( string $section = '' ): string {
+		$base = admin_url( 'admin.php?page=subtleforms-settings' );
+		if ( in_array( $section, array( 'activity', 'webhooks', 'api' ), true ) ) {
+			return $base . '#tab=logs&section=' . $section;
+		}
+		if ( in_array( $section, array( 'transfer', 'migrate' ), true ) ) {
+			return $base . '#tab=tools&section=' . $section;
+		}
+		return $base . '#tab=tools';
 	}
 
 	/**
@@ -907,7 +916,9 @@ class AdminMenu {
 		if ( 'subtleforms-tools' !== $page || ! current_user_can( $this->caps->manage_cap() ) ) {
 			return;
 		}
-		wp_safe_redirect( self::tools_tab_url() );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading the section of a navigation request.
+		$section = isset( $_GET['section'] ) ? sanitize_key( wp_unslash( $_GET['section'] ) ) : '';
+		wp_safe_redirect( self::tools_tab_url( $section ) );
 		exit;
 	}
 

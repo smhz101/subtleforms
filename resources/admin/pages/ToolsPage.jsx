@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
-import { Button, Notice, SearchControl, SelectControl, Spinner } from '@wordpress/components';
+import { Button, Notice, SearchControl, SelectControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import clsx from 'clsx';
@@ -13,9 +13,6 @@ import './ToolsPage.scss';
 const SECTIONS = [
   { id: 'transfer', label: __( 'Transfer', 'subtleforms' ), icon: Icon.Package, description: __( 'Move SubtleForms forms and submissions between sites.', 'subtleforms' ) },
   { id: 'migrate', label: __( 'Migrate', 'subtleforms' ), icon: Icon.FileUp, description: __( 'Bring forms across from Contact Form 7, Gravity Forms, Fluent Forms, WPForms or Ninja Forms.', 'subtleforms' ) },
-  { id: 'activity', label: __( 'Activity', 'subtleforms' ), icon: Icon.Activity, description: __( 'What happened after each entry was sent.', 'subtleforms' ) },
-  { id: 'webhooks', label: __( 'Webhooks', 'subtleforms' ), icon: Icon.Webhook, description: __( 'Calls this site made to another address.', 'subtleforms' ) },
-  { id: 'api', label: __( 'API', 'subtleforms' ), icon: Icon.Code, description: __( 'SubtleForms REST calls from the last 30 days.', 'subtleforms' ) },
 ];
 
 function downloadJson( filename, data ) {
@@ -41,7 +38,8 @@ function messageFrom( result ) {
 
 
 /**
- * Tools body: transfer, migration and the activity logs. It is the Tools tab
+ * Tools body: transfer and migration. The logs have their own Settings tab
+ * (Logs). It is the Tools tab
  * of Settings, so it has no page frame of its own.
  *
  * @param {Object}  props
@@ -70,7 +68,6 @@ export default function ToolsPanel( { embedded = false } ) {
   const [ forms, setForms ] = useState( [] );
   const [ notice, setNotice ] = useState( null );
   const [ busy, setBusy ] = useState( false );
-  const current = SECTIONS.find( ( item ) => item.id === section ) || SECTIONS[ 0 ];
 
   useEffect( () => {
     let cancelled = false;
@@ -120,9 +117,6 @@ export default function ToolsPanel( { embedded = false } ) {
         { section === 'migrate' && (
           <Migrate busy={ busy } setBusy={ setBusy } tell={ tell } />
         ) }
-        { section === 'activity' && <LogList kind='activity' forms={ forms } description={ current.description } /> }
-        { section === 'webhooks' && <LogList kind='webhook' forms={ forms } description={ current.description } /> }
-        { section === 'api' && <ApiList description={ current.description } /> }
       </div>
     </div>
   );
@@ -465,192 +459,5 @@ function Migrate( { busy, setBusy, tell } ) {
         ) }
       </footer>
     </section>
-  );
-}
-
-function LogList( { kind, forms, description } ) {
-  const [ page, setPage ] = useState( 1 );
-  const [ level, setLevel ] = useState( '' );
-  const [ formId, setFormId ] = useState( '' );
-  const [ data, setData ] = useState( null );
-  const [ loading, setLoading ] = useState( true );
-
-  useEffect( () => {
-    let cancelled = false;
-    setLoading( true );
-    const params = new URLSearchParams( { kind, page: String( page ), per_page: '20' } );
-    if ( level ) {
-      params.set( 'level', level );
-    }
-    if ( formId ) {
-      params.set( 'form_id', formId );
-    }
-    apiGet( `/tools/logs?${ params.toString() }` ).then( ( result ) => {
-      if ( ! cancelled ) {
-        setData( result.ok ? result.body.data : { rows: [], total: 0 } );
-        setLoading( false );
-      }
-    } );
-    return () => {
-      cancelled = true;
-    };
-  }, [ kind, page, level, formId ] );
-
-  const rows = data?.rows || [];
-  const pages = Math.max( 1, Math.ceil( ( data?.total || 0 ) / 20 ) );
-
-  return (
-    <section className='sf-panel'>
-      <header className='sf-panel__header'>
-        <div>
-          <h2 className='sf-panel__title'>{ kind === 'webhook' ? __( 'Webhooks', 'subtleforms' ) : __( 'Activity', 'subtleforms' ) }</h2>
-          <p className='sf-panel__subtitle'>{ description }</p>
-        </div>
-        <div className='sf-tools__filters'>
-          <SelectControl
-            label={ __( 'Level', 'subtleforms' ) }
-            hideLabelFromVision
-            value={ level }
-            options={ [
-              { label: __( 'Any level', 'subtleforms' ), value: '' },
-              { label: __( 'Info', 'subtleforms' ), value: 'info' },
-              { label: __( 'Warning', 'subtleforms' ), value: 'warning' },
-              { label: __( 'Error', 'subtleforms' ), value: 'error' },
-            ] }
-            onChange={ ( value ) => { setPage( 1 ); setLevel( value ); } }
-            __nextHasNoMarginBottom
-          />
-          <SelectControl
-            label={ __( 'Form', 'subtleforms' ) }
-            hideLabelFromVision
-            value={ formId }
-            options={ [
-              { label: __( 'Any form', 'subtleforms' ), value: '' },
-              ...forms.map( ( form ) => ( { label: formOptionLabel( form ), value: String( form.id ) } ) ),
-            ] }
-            onChange={ ( value ) => { setPage( 1 ); setFormId( value ); } }
-            __nextHasNoMarginBottom
-          />
-        </div>
-      </header>
-      <div className='sf-panel__body sf-panel__body--flush'>
-        { loading ? <div className='sf-tools__loading'><Spinner /></div> : (
-          <div className='sf-tools__table-wrap'>
-            <table className='sf-tools__table'>
-              <thead>
-                <tr>
-                  <th>{ __( 'When', 'subtleforms' ) }</th>
-                  <th>{ __( 'Level', 'subtleforms' ) }</th>
-                  <th>{ __( 'Form', 'subtleforms' ) }</th>
-                  <th>{ __( 'What happened', 'subtleforms' ) }</th>
-                </tr>
-              </thead>
-              <tbody>
-                { rows.length === 0 && (
-                  <tr><td colSpan='4'>{ __( 'Nothing here yet.', 'subtleforms' ) }</td></tr>
-                ) }
-                { rows.map( ( row ) => (
-                  <tr key={ row.id }>
-                    <td className='sf-tools__when'>{ row.created_at }</td>
-                    <td><span className={ clsx( 'sf-pill', 'sf-pill--dot', row.level === 'error' ? 'sf-pill--danger' : row.level === 'warning' ? 'sf-pill--warning' : 'sf-pill--info' ) }>{ row.level }</span></td>
-                    <td>{ row.form_title || ( row.form_id ? `#${ row.form_id }` : '-' ) }</td>
-                    <td>
-                      { row.message }
-                      { row.url && <div className='sf-tools__meta'>{ row.method } { row.url }{ row.http_status ? ` · ${ row.http_status }` : '' }</div> }
-                      { row.error && <div className='sf-tools__meta'>{ row.error }</div> }
-                      { row.response && <div className='sf-tools__meta'>{ row.response }</div> }
-                    </td>
-                  </tr>
-                ) ) }
-              </tbody>
-            </table>
-          </div>
-        ) }
-      </div>
-      <Pager page={ page } pages={ pages } setPage={ setPage } />
-    </section>
-  );
-}
-
-function ApiList( { description } ) {
-  const [ page, setPage ] = useState( 1 );
-  const [ data, setData ] = useState( null );
-  const [ loading, setLoading ] = useState( true );
-
-  useEffect( () => {
-    let cancelled = false;
-    setLoading( true );
-    apiGet( `/tools/api-logs?page=${ page }&per_page=20` ).then( ( result ) => {
-      if ( ! cancelled ) {
-        setData( result.ok ? result.body.data : { rows: [], total: 0 } );
-        setLoading( false );
-      }
-    } );
-    return () => {
-      cancelled = true;
-    };
-  }, [ page ] );
-
-  const rows = data?.rows || [];
-  const pages = Math.max( 1, Math.ceil( ( data?.total || 0 ) / 20 ) );
-
-  return (
-    <section className='sf-panel'>
-      <header className='sf-panel__header'>
-        <div>
-          <h2 className='sf-panel__title'>{ __( 'API', 'subtleforms' ) }</h2>
-          <p className='sf-panel__subtitle'>{ description } { __( 'The address and the result are stored. The request itself is not.', 'subtleforms' ) }</p>
-        </div>
-      </header>
-      <div className='sf-panel__body sf-panel__body--flush'>
-        { loading ? <div className='sf-tools__loading'><Spinner /></div> : (
-          <div className='sf-tools__table-wrap'>
-            <table className='sf-tools__table'>
-              <thead>
-                <tr>
-                  <th>{ __( 'When', 'subtleforms' ) }</th>
-                  <th>{ __( 'Method', 'subtleforms' ) }</th>
-                  <th>{ __( 'Route', 'subtleforms' ) }</th>
-                  <th>{ __( 'Status', 'subtleforms' ) }</th>
-                  <th>{ __( 'User', 'subtleforms' ) }</th>
-                  <th>{ __( 'Time', 'subtleforms' ) }</th>
-                </tr>
-              </thead>
-              <tbody>
-                { rows.length === 0 && (
-                  <tr><td colSpan='6'>{ __( 'Nothing here yet.', 'subtleforms' ) }</td></tr>
-                ) }
-                { rows.map( ( row ) => (
-                  <tr key={ row.id }>
-                    <td className='sf-tools__when'>{ row.created_at }</td>
-                    <td>{ row.method }</td>
-                    <td>{ row.route }</td>
-                    <td>{ row.status }</td>
-                    <td>{ row.user_id ? `#${ row.user_id }` : '-' }</td>
-                    <td>{ row.duration_ms } ms</td>
-                  </tr>
-                ) ) }
-              </tbody>
-            </table>
-          </div>
-        ) }
-      </div>
-      <Pager page={ page } pages={ pages } setPage={ setPage } />
-    </section>
-  );
-}
-
-function Pager( { page, pages, setPage } ) {
-  return (
-    <footer className='sf-panel__footer'>
-      <Button variant='secondary' disabled={ page <= 1 } onClick={ () => setPage( ( n ) => n - 1 ) }>{ __( 'Previous', 'subtleforms' ) }</Button>
-      <span className='sf-tools__page'>{ sprintf(
-        /* translators: 1: current page, 2: page count */
-        __( 'Page %1$d of %2$d', 'subtleforms' ),
-        page,
-        pages
-      ) }</span>
-      <Button variant='secondary' disabled={ page >= pages } onClick={ () => setPage( ( n ) => n + 1 ) }>{ __( 'Next', 'subtleforms' ) }</Button>
-    </footer>
   );
 }
