@@ -152,7 +152,9 @@ final class Connection {
 	/**
 	 * What the browser may see. Never the key.
 	 *
-	 * @return array{status:string,enabled:bool,has_key:bool,last4:string,account_name:string,account_email:string,error:string,checked_at:int,settings:array}
+	 * `connected` is true when a key is saved and its last check did not fail.
+	 *
+	 * @return array{status:string,enabled:bool,has_key:bool,connected:bool,last4:string,account_name:string,account_email:string,error:string,checked_at:int,settings:array}
 	 */
 	public function state(): array {
 		$record = $this->record();
@@ -160,6 +162,7 @@ final class Connection {
 			'status'        => $this->status(),
 			'enabled'       => $record['enabled'],
 			'has_key'       => '' !== $record['api_key'],
+			'connected'     => '' !== $record['api_key'] && self::STATUS_ERROR !== $record['status'],
 			'last4'         => self::lastFour( $record['api_key'] ),
 			'account_name'  => $record['account_name'],
 			'account_email' => $record['account_email'],

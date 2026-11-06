@@ -32,8 +32,12 @@ final class ExtensionPoints {
 	 *    webhook group, request key, public route and no-answer type filters;
 	 *    the JavaScript form wrapper, option attribute and payload group
 	 *    registries. Free no longer exports `contexts` or `pricing`.
+	 * 4: the shared service tile grid and service header on
+	 *    `window.SubtleFormsExtend` (`ServiceTileGrid`, `ServiceDetailHeader`);
+	 *    the `subtleforms/email/marketing/skipped` action; services that live
+	 *    on the same site (MailPoet) in the email marketing services list.
 	 */
-	public const LEVEL = 3;
+	public const LEVEL = 4;
 
 	/** Field types that an add-on registers with its own renderer, controls and checks. */
 	public const PICTURE_CHOICE = 'picture_choice';

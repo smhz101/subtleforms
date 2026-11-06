@@ -76,7 +76,7 @@ final class Registry {
 			$connection = new Connection( $slug );
 			if ( $connection->isEnabled() ) {
 				$enabled = true;
-				if ( Connection::STATUS_CONNECTED === $connection->status() ) {
+				if ( Connection::STATUS_CONNECTED === Services::status( $slug ) ) {
 					$configured = true;
 				}
 			}
@@ -84,7 +84,7 @@ final class Registry {
 		return array(
 			'slug'        => Services::INTEGRATION,
 			'label'       => __( 'Email marketing', 'subtleforms' ),
-			'description' => __( 'Add people who fill in a form to Mailchimp, Brevo or Kit.', 'subtleforms' ),
+			'description' => __( 'Add people who fill in a form to Mailchimp, Brevo, Kit or MailPoet.', 'subtleforms' ),
 			'available'   => true,
 			'enabled'     => $enabled,
 			'configured'  => $configured,

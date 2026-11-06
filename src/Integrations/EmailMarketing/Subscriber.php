@@ -51,19 +51,29 @@ final class Subscriber {
 	/** @var bool Existing members get their merge fields updated. */
 	public bool $updateExisting = true;
 
+	/** @var bool MailPoet sends its confirmation email to a new person. */
+	public bool $sendConfirmation = true;
+
+	/** @var bool MailPoet schedules the welcome email of the list. */
+	public bool $welcomeEmail = false;
+
 	/**
 	 * Settings of a form (metadata.integrations.{service}), cleaned.
 	 *
 	 * Keys: enabled, list_id, fields { email, first_name, last_name },
 	 * merge_fields [ { field, target } ], tags (comma separated), double_optin,
-	 * update_existing, consent_field.
+	 * update_existing, consent_field. MailPoet adds send_confirmation_email
+	 * (default on) and schedule_welcome_email (default off); it has no double
+	 * opt-in switch of its own and always adds people it already knows to the
+	 * list, so update_existing is always on for it.
 	 *
 	 * @param mixed  $config  Stored settings.
 	 * @param string $service Service slug, which decides how a target is written.
 	 * @return array<string,mixed>
 	 */
 	public static function normalize( $config, string $service = 'mailchimp' ): array {
-		$upper  = 'kit' !== $service;
+		$def    = Services::definitions()[ $service ] ?? array();
+		$upper  = 'keep' !== ( $def['case'] ?? 'upper' );
 		$config = is_array( $config ) ? $config : array();
 		$fields = is_array( $config['fields'] ?? null ) ? $config['fields'] : array();
 		$rows   = array();
@@ -86,8 +96,10 @@ final class Subscriber {
 			'merge_fields'    => $rows,
 			'tags'            => is_array( $config['tags'] ?? null ) ? implode( ', ', array_map( 'strval', $config['tags'] ) ) : (string) ( $config['tags'] ?? '' ),
 			'double_optin'    => ! empty( $config['double_optin'] ),
-			'update_existing' => array_key_exists( 'update_existing', $config ) ? ! empty( $config['update_existing'] ) : true,
+			'update_existing' => ! empty( $def['local'] ) || ( array_key_exists( 'update_existing', $config ) ? ! empty( $config['update_existing'] ) : true ),
 			'consent_field'   => trim( (string) ( $config['consent_field'] ?? '' ) ),
+			'send_confirmation_email' => array_key_exists( 'send_confirmation_email', $config ) ? ! empty( $config['send_confirmation_email'] ) : true,
+			'schedule_welcome_email'  => ! empty( $config['schedule_welcome_email'] ),
 		);
 	}
 
@@ -155,6 +167,8 @@ final class Subscriber {
 		$sub->listId         = $config['list_id'];
 		$sub->doubleOptIn    = $config['double_optin'];
 		$sub->updateExisting = $config['update_existing'];
+		$sub->sendConfirmation = $config['send_confirmation_email'];
+		$sub->welcomeEmail     = $config['schedule_welcome_email'];
 
 		return array(
 			'subscriber' => $sub,
