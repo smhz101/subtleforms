@@ -515,7 +515,7 @@ final class SubmissionsRepository {
 
 		if ( $args['after'] ) {
 			$where[]  = 'created_at >= %s';
-			$params[] = sanitize_text_field( $args['after'] ) . ' 00:00:00';
+			$params[] = self::afterBound( (string) $args['after'] );
 		}
 
 		$this->applyStarAndIds( $where, $params, $args );
@@ -614,7 +614,7 @@ final class SubmissionsRepository {
 
 		if ( $args['after'] ) {
 			$where[]  = 'created_at >= %s';
-			$params[] = sanitize_text_field( $args['after'] ) . ' 00:00:00';
+			$params[] = self::afterBound( (string) $args['after'] );
 		}
 
 		$this->applyStarAndIds( $where, $params, $args );
@@ -1083,4 +1083,15 @@ $cutoff_date
 		return false !== $updated;
 	}
 
+
+	/**
+	 * The lower bound for `after`: a date (from midnight UTC, as before) or a
+	 * full UTC datetime (a range resolved in the site timezone).
+	 *
+	 * @param string $after Y-m-d or Y-m-d H:i:s.
+	 */
+	private static function afterBound( string $after ): string {
+		$after = sanitize_text_field( $after );
+		return preg_match( '/^\d{4}-\d{2}-\d{2}$/', $after ) ? $after . ' 00:00:00' : $after;
+	}
 }

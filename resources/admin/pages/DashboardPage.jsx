@@ -139,7 +139,7 @@ export default function Dashboard() {
                 : __('Inbox zero', 'subtleforms')
             }
             accent={unread > 0}
-            to='/submissions?unread=1'
+            to='/submissions?tab=unread'
           />
           <Kpi
             label={__('Spam blocked, last 7 days', 'subtleforms')}
@@ -388,7 +388,7 @@ export function AttentionPanel({ attention = {}, data }) {
           <ul className='sf-attn'>
             {unread > 0 && (
               <li>
-                <NavLink to='/submissions?unread=1' className='sf-attn__row'>
+                <NavLink to='/submissions?tab=unread' className='sf-attn__row'>
                   <span className='sf-attn__count'>{formatNumber(unread)}</span>
                   <span className='sf-attn__text'>
                     {_n('unread entry', 'unread entries', unread, 'subtleforms')}

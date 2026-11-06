@@ -77,7 +77,7 @@ final class AdminBar {
 			array(
 				'id'    => self::NODE,
 				'title' => $title,
-				'href'  => $unread > 0 ? add_query_arg( 'unread', '1', $submissions ) : $submissions,
+				'href'  => $unread > 0 ? add_query_arg( 'tab', 'unread', $submissions ) : $submissions,
 				'meta'  => array( 'class' => 'sf-admin-bar' ),
 			)
 		);

@@ -39,6 +39,30 @@ final class ReportQueries {
 	}
 
 	/**
+	 * Start of a Submissions date range, as a UTC datetime, counted in calendar
+	 * days of the site timezone: today is from local midnight, 7days is today
+	 * and the six days before it (the same seven days as the Dashboard tile and
+	 * the WP dashboard widget), 30days and 3months are 30 and 90 days.
+	 *
+	 * @param string $range today, 7days, 30days or 3months.
+	 * @return string|null Y-m-d H:i:s in UTC, or null for any other value.
+	 */
+	public static function rangeStartUtc( string $range ): ?string {
+		$back = array(
+			'today'   => 0,
+			'7days'   => 6,
+			'30days'  => 29,
+			'3months' => 89,
+		);
+		if ( ! isset( $back[ $range ] ) ) {
+			return null;
+		}
+		$zone  = ReportSeries::siteZone();
+		$today = ReportSeries::today( $zone );
+		return self::dayStartUtc( self::addDays( $today, -$back[ $range ] ), $zone );
+	}
+
+	/**
 	 * Local date n days after (or before, when negative) another local date.
 	 *
 	 * @param string $date Y-m-d.

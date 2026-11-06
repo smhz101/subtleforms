@@ -103,7 +103,8 @@ final class PageHeaderMenuTest extends TestCase {
 			$this->assertArrayHasKey( $key, $data );
 		}
 		$this->assertCount( 90, $data['trend'] );
-		$this->assertCount( 8, array_slice( $data['recent_submissions'], 0, 8 ) );
+		$this->assertLessThanOrEqual( 8, count( $data['recent_submissions'] ) );
+		$this->assertNotEmpty( $data['recent_submissions'] );
 		$this->assertArrayHasKey( 'spam_blocked_week', $data['stats'] );
 		$this->assertArrayHasKey( 'unread', $data['attention'] );
 	}
@@ -167,7 +168,7 @@ final class PageHeaderMenuTest extends TestCase {
 		$this->assertStringContainsString( '<polyline', $html );
 		$this->assertStringContainsString( 'View submissions', $html );
 		$this->assertStringContainsString( 'Add new form', $html );
-		$this->assertStringContainsString( 'unread=1', $html );
+		$this->assertStringContainsString( 'tab=unread', $html );
 	}
 
 	public function test_widget_cache_ends_with_a_new_entry(): void {
@@ -214,7 +215,7 @@ final class PageHeaderMenuTest extends TestCase {
 		$this->assertNotNull( $node );
 		$this->assertStringContainsString( 'ab-icon', $node->title );
 		$this->assertStringContainsString( 'awaiting-mod', $node->title );
-		$this->assertStringContainsString( 'unread=1', $node->href );
+		$this->assertStringContainsString( 'tab=unread', $node->href );
 		foreach ( array( 'submissions', 'forms', 'new' ) as $child ) {
 			$this->assertSame( 'subtleforms', $bar->get_node( 'subtleforms-' . $child )->parent );
 		}
@@ -254,5 +255,55 @@ final class PageHeaderMenuTest extends TestCase {
 
 	private function countMatching( \WP_Admin_Bar $bar ): int {
 		return substr_count( $bar->get_node( 'subtleforms' )->title, 'pending-count' );
+	}
+
+	/**
+	 * Seven days means the same thing everywhere: local midnight six days ago,
+	 * in the site timezone. The Dashboard tile, the Submissions "Last 7 days"
+	 * list and the WP dashboard widget must count the same entries.
+	 *
+	 * @dataProvider zones
+	 */
+	public function test_seven_day_count_agrees_across_tile_list_and_widget( string $tz ): void {
+		global $wpdb;
+		update_option( 'timezone_string', $tz );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}subtleforms_submissions" );
+		$this->asAdmin();
+		$this->fresh();
+		$formId = $this->publish( array( array( 'id' => 'f1', 'key' => 'name', 'type' => 'text', 'label' => 'Name' ) ) );
+		$repo   = new SubmissionsRepository();
+
+		$zone  = new \DateTimeZone( $tz );
+		$start = new \DateTimeImmutable( 'today -6 days', $zone );
+		$utc   = static fn( \DateTimeImmutable $d ): string => $d->setTimezone( new \DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+		// One second before the window, its first second, a middle day and now.
+		$stamps = array(
+			'before' => $utc( $start->modify( '-1 second' ) ),
+			'first'  => $utc( $start ),
+			'middle' => $utc( $start->modify( '+3 days 12 hours' ) ),
+			'now'    => $utc( new \DateTimeImmutable( 'now', $zone ) ),
+		);
+		foreach ( $stamps as $when ) {
+			$id = $repo->create( array( 'form_id' => $formId, 'payload' => array( 'name' => 'x' ), 'status' => 'completed' ) );
+			$wpdb->update( $wpdb->prefix . 'subtleforms_submissions', array( 'created_at' => $when ), array( 'id' => $id ) );
+		}
+		$this->fresh();
+
+		$tile   = $this->get( '/dashboard' )['data']['data']['stats']['submissions_this_week'];
+		$list   = $this->get( '/submissions', array( 'range' => '7days', 'per_page' => 50 ) );
+		$widget = DashboardWidget::data()['week'];
+
+		$this->assertSame( 3, $tile, 'tile counts the first second and later, not the second before' );
+		$this->assertSame( $tile, (int) $list['data']['meta']['total'] );
+		$this->assertSame( $tile, $widget );
+		delete_option( 'timezone_string' );
+	}
+
+	public static function zones(): array {
+		return array(
+			'ahead of UTC'  => array( 'Pacific/Auckland' ),
+			'behind UTC'    => array( 'America/Los_Angeles' ),
+			'UTC'           => array( 'UTC' ),
+		);
 	}
 }

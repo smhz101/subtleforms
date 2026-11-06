@@ -58,7 +58,7 @@ export function routeToAdminQuery(pathname, search = '') {
 			params.search = search;
 		}
 		if (query.get('unread') === '1') {
-			params.unread = '1';
+			params.tab = 'unread';
 		}
 		const range = query.get('range');
 		if (range) {

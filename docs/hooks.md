@@ -141,7 +141,7 @@ The SubtleForms submenu is: Dashboard, All Forms, Add New, Submissions, Reports,
 
 ### Submissions links
 
-The Submissions screen reads `?unread=1` (unread entries only) and `?range=today|7days|30days|3months` from the address, so dashboard tiles and the admin bar can link to a filtered list.
+The Submissions screen reads `?tab=unread` (the Unread tab; `?unread=1` from older links opens it too) and `?range=today|7days|30days|3months` from the address, so dashboard tiles and the admin bar can link to a filtered list. The ranges count calendar days of the site timezone, from local midnight: `7days` is today and the six days before it, the same seven days as the Dashboard tile and the WP dashboard widget. The `/submissions` list and export take `range` for this; `after` (a date, from midnight UTC) still works.
 
 ### Reports endpoint
 

@@ -13,7 +13,7 @@ import { apiPost } from '../utils/api';
 import { useForms, useSettings } from '../data';
 import { deletesPermanently } from '../utils/deleteBehavior';
 import { tabsFor } from '../utils/tabCounts';
-import { normalizeInboxTab } from '../utils/inboxTabs';
+import { buildInboxTabs, tabFromParams } from '../utils/inboxTabs';
 import lazyWithRetry from '../utils/lazyWithRetry';
 import { noticeDialog } from '../utils/confirmDialog';
 import './SubmissionsPage.scss';
@@ -43,9 +43,6 @@ export default function SubmissionsPage({ formId }) {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedFormId, setSelectedFormId] = useState(formId || 'all');
   const [dateRange, setDateRange] = useState('all');
-  // Unread entries only. A link sets it (?unread=1); All lists unread entries
-  // too, each with its own mark, so this is a filter, not a tab.
-  const [unreadOnly, setUnreadOnly] = useState(false);
   const [fieldValue, setFieldValue] = useState('');
   const [debouncedFieldValue, setDebouncedFieldValue] = useState('');
   const fieldValueTimerRef = useRef(null);
@@ -77,13 +74,14 @@ export default function SubmissionsPage({ formId }) {
 
   // Tab and search live in the URL so a reload keeps the filtered list.
   useEffect(() => {
+    // ?unread=1 (a link from before the Unread tab) is the Unread tab; the
+    // old "new" tab is too.
     const rawTab = searchParams.get('tab') || 'all';
-    // The old "New" tab is gone (All lists those entries): an old link with
-    // tab=unread or tab=new opens All and drops the parameter.
-    const tab = normalizeInboxTab(rawTab);
-    if (tab !== rawTab) {
+    const tab = tabFromParams(searchParams);
+    if (tab !== rawTab || searchParams.has('unread')) {
       setSearchParams((current) => {
         const params = new URLSearchParams(current);
+        params.delete('unread');
         if (tab === 'all') {
           params.delete('tab');
         } else {
@@ -93,12 +91,7 @@ export default function SubmissionsPage({ formId }) {
       }, { replace: true });
     }
     const q = searchParams.get('search') || '';
-    // Filters a link can set: unread only and a date range (Dashboard tiles,
-    // the admin bar).
-    if (searchParams.get('unread') === '1') {
-      setUnreadOnly(true);
-      setShowFilters(true);
-    }
+    // A date range a link can set (Dashboard tiles).
     const linkedRange = searchParams.get('range');
     if (DATE_RANGES.includes(linkedRange)) {
       setDateRange(linkedRange);
@@ -325,15 +318,16 @@ export default function SubmissionsPage({ formId }) {
     ? __('Form submissions', 'subtleforms')
     : __('Submissions', 'subtleforms');
 
-  const tabCount = (key) => (counts[key] > 0 ? counts[key] : undefined);
-  const tabs = [
-    { key: 'all', label: __('All', 'subtleforms'), count: tabCount('all') },
-    { key: 'read', label: __('Read', 'subtleforms'), count: tabCount('read') },
-    { key: 'spam', label: __('Spam', 'subtleforms'), count: tabCount('spam') },
-    { key: 'starred', label: __('Starred', 'subtleforms'), count: tabCount('starred') },
-    { key: 'flagged', label: __('Flagged', 'subtleforms'), count: tabCount('flagged') },
-    { key: 'trash', label: __('Trash', 'subtleforms'), count: tabCount('trash') },
-  ];
+  const tabLabels = {
+    all: __('All', 'subtleforms'),
+    unread: __('Unread', 'subtleforms'),
+    read: __('Read', 'subtleforms'),
+    spam: __('Spam', 'subtleforms'),
+    starred: __('Starred', 'subtleforms'),
+    flagged: __('Flagged', 'subtleforms'),
+    trash: __('Trash', 'subtleforms'),
+  };
+  const tabs = buildInboxTabs(counts, (key) => tabLabels[key]);
 
   const dateRangeOptions = [
     { label: __('All time', 'subtleforms'), value: 'all' },
@@ -361,7 +355,6 @@ export default function SubmissionsPage({ formId }) {
     statusFilter !== 'all' ||
     selectedFormId !== 'all' ||
     dateRange !== 'all' ||
-    unreadOnly ||
     fieldValue ||
     processingStatus;
 
@@ -370,34 +363,9 @@ export default function SubmissionsPage({ formId }) {
     setStatusFilter('all');
     setSelectedFormId(formId || 'all');
     setDateRange('all');
-    setUnreadOnly(false);
     setFieldValue('');
     setDebouncedFieldValue('');
     setProcessingStatus('');
-  };
-
-  const getExportAfterDate = (range) => {
-    const now = new Date();
-    switch (range) {
-      case 'today':
-        return new Date(now.getFullYear(), now.getMonth(), now.getDate())
-          .toISOString()
-          .split('T')[0];
-      case '7days':
-        return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split('T')[0];
-      case '30days':
-        return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split('T')[0];
-      case '3months':
-        return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split('T')[0];
-      default:
-        return null;
-    }
   };
 
   const exportSubmissions = async () => {
@@ -411,7 +379,7 @@ export default function SubmissionsPage({ formId }) {
           form_id: selectedFormId !== 'all' ? parseInt(selectedFormId) : null,
           status: statusFilter !== 'all' ? statusFilter : null,
           search: search || null,
-          after: getExportAfterDate(dateRange),
+          range: dateRange !== 'all' ? dateRange : null,
         },
       });
 
@@ -627,17 +595,6 @@ export default function SubmissionsPage({ formId }) {
             style={{ minWidth: '200px' }}
           />
           <SelectControl
-            label={__('Read state', 'subtleforms')}
-            value={unreadOnly ? 'unread' : 'all'}
-            options={[
-              { label: __('All entries', 'subtleforms'), value: 'all' },
-              { label: __('Unread only', 'subtleforms'), value: 'unread' },
-            ]}
-            onChange={(value) => setUnreadOnly(value === 'unread')}
-            className='sf-filter-control'
-            style={{ minWidth: '160px' }}
-          />
-          <SelectControl
             label={__('Result', 'subtleforms')}
             value={processingStatus}
             options={[
@@ -686,7 +643,7 @@ export default function SubmissionsPage({ formId }) {
             formId={selectedFormId !== 'all' ? parseInt(selectedFormId) : formId}
             showFormColumn={!formId && selectedFormId === 'all'}
             searchTerm={debouncedSearch}
-            statusFilter={unreadOnly && statusFilter === 'all' ? 'unread' : statusFilter}
+            statusFilter={statusFilter}
             dateRange={dateRange}
             fieldValue={debouncedFieldValue}
             processingStatus={processingStatus}

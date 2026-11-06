@@ -90,7 +90,7 @@ test('four tiles, each linking to the filtered Submissions view', async () => {
   expect(hrefs()).toEqual([
     '/submissions?range=today',
     '/submissions?range=7days',
-    '/submissions?unread=1',
+    '/submissions?tab=unread',
     '/submissions?tab=spam',
   ]);
 });

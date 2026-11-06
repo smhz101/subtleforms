@@ -150,7 +150,7 @@ final class DashboardWidget {
 
 		echo '<p style="margin:12px 0 4px;">';
 		if ( $data['unread'] > 0 ) {
-			echo '<a href="' . esc_url( add_query_arg( 'unread', '1', $all ) ) . '">' . esc_html(
+			echo '<a href="' . esc_url( add_query_arg( 'tab', 'unread', $all ) ) . '">' . esc_html(
 				sprintf(
 					/* translators: %s: number of unread entries. */
 					_n( '%s unread entry', '%s unread entries', $data['unread'], 'subtleforms' ),

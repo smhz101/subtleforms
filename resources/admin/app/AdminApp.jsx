@@ -110,10 +110,10 @@ function getInitialPath() {
 			if (search) {
 				params.set('search', search);
 			}
-			// Filters a link can set: unread entries only, and a date range
-			// (the Dashboard tiles and the admin bar use them).
+			// A date range a link can set (the Dashboard tiles use it). An older
+			// link with unread=1 opens the Unread tab.
 			if (url.searchParams.get('unread') === '1') {
-				params.set('unread', '1');
+				params.set('tab', 'unread');
 			}
 			const range = url.searchParams.get('range');
 			if (range) {
