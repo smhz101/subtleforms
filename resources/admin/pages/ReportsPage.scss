@@ -107,7 +107,7 @@
 
 	&__row {
 		display: grid;
-		grid-template-columns: minmax(80px, 1fr) minmax(60px, 2fr) auto;
+		grid-template-columns: minmax(80px, 1fr) minmax(60px, 2fr) 72px;
 		align-items: center;
 		gap: 12px;
 		margin: 0;
