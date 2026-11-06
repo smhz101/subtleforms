@@ -57,7 +57,10 @@ final class Plugin {
 		if ( is_admin() ) {
 			$this->container->get( AdminMenu::class );
 			AdminNotices::register();
+			\SubtleForms\Admin\DashboardWidget::register();
 		}
+		// The admin bar shows on the front end too.
+		\SubtleForms\Admin\AdminBar::register();
 
 		// Register REST API
 		add_action(

@@ -31,6 +31,10 @@ const submissionsLabel = (day, date) =>
  * @param {string}   props.caption     Caption of the hidden table.
  * @param {string}   props.valueTitle  Column heading for the counts.
  * @param {boolean}  props.compact     Shorter plot, for a card.
+ * @param {string}   props.previousLabel Name of the comparison line.
+ *
+ * A day may carry `previous`, the count of the same day in the period before.
+ * They are drawn as a thin line over the bars.
  */
 export default function TrendChart({
   data = [],
@@ -38,6 +42,7 @@ export default function TrendChart({
   caption = __('Submissions per day, last 14 days', 'subtleforms'),
   valueTitle = __('Submissions', 'subtleforms'),
   compact = false,
+  previousLabel = __('Previous period', 'subtleforms'),
 }) {
   const [active, setActive] = useState(null);
 
@@ -45,7 +50,8 @@ export default function TrendChart({
     return null;
   }
 
-  const max = Math.max(1, ...data.map((d) => d.count));
+  const hasPrevious = data.some((d) => typeof d.previous === 'number');
+  const max = Math.max(1, ...data.map((d) => Math.max(d.count, hasPrevious ? d.previous || 0 : 0)));
   // A tidy axis maximum (1, 2, 5, 10, 20, 50…).
   const niceMax = (() => {
     const pow = 10 ** Math.floor(Math.log10(max));
@@ -73,6 +79,20 @@ export default function TrendChart({
               <li key={day.date}>{label(day, short(day))}</li>
             ))}
           </ul>
+          {hasPrevious && (
+            <svg
+              className='sf-trend__previous'
+              viewBox='0 0 100 100'
+              preserveAspectRatio='none'
+              aria-hidden='true'>
+              <polyline
+                vectorEffect='non-scaling-stroke'
+                points={data
+                  .map((d, i) => `${((i + 0.5) / data.length) * 100},${100 - ((d.previous || 0) / niceMax) * 100}`)
+                  .join(' ')}
+              />
+            </svg>
+          )}
           {data.map((day, index) => {
             const height = (day.count / niceMax) * 100;
             return (
@@ -94,6 +114,16 @@ export default function TrendChart({
                 {active === index && (
                   <span className='sf-trend__tip' role='tooltip'>
                     <strong>{formatNumber(day.count)}</strong>
+                    {hasPrevious && (
+                      <span>
+                        {sprintf(
+                          /* translators: 1: number of entries, 2: name of the comparison period */
+                          __('%1$s, %2$s', 'subtleforms'),
+                          formatNumber(day.previous || 0),
+                          previousLabel.toLowerCase()
+                        )}
+                      </span>
+                    )}
                     <span>
                       {formatDay(day.date, {
                         weekday: 'short',
@@ -108,6 +138,14 @@ export default function TrendChart({
           })}
         </div>
       </div>
+      {hasPrevious && (
+        <p className='sf-trend__legend' aria-hidden='true'>
+          <span className='sf-trend__key sf-trend__key--bar' />
+          {valueTitle}
+          <span className='sf-trend__key sf-trend__key--line' />
+          {previousLabel}
+        </p>
+      )}
       <div className='sf-trend__axis' aria-hidden='true'>
         <span>{short(data[0])}</span>
         <span>{short(data[Math.floor(lastIndex / 2)])}</span>
@@ -119,6 +157,7 @@ export default function TrendChart({
           <tr>
             <th scope='col'>{__('Date', 'subtleforms')}</th>
             <th scope='col'>{valueTitle}</th>
+            {hasPrevious && <th scope='col'>{previousLabel}</th>}
           </tr>
         </thead>
         <tbody>
@@ -126,6 +165,7 @@ export default function TrendChart({
             <tr key={day.date}>
               <td>{day.date}</td>
               <td>{day.count}</td>
+              {hasPrevious && <td>{day.previous || 0}</td>}
             </tr>
           ))}
         </tbody>

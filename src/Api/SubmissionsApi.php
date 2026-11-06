@@ -19,6 +19,7 @@ use SubtleForms\Support\Helpers;
 use SubtleForms\Support\FeatureGate;
 use SubtleForms\Repositories\FormsRepository;
 use SubtleForms\Repositories\SubmissionsRepository;
+use SubtleForms\Tools\ReportQueries;
 use SubtleForms\Validation\RequestValidator;
 use SubtleForms\Validation\ValidationException;
 use SubtleForms\Validation\Schemas;
@@ -146,6 +147,11 @@ final class SubmissionsApi {
 					),
 					'after'      => array(
 						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'range'      => array(
+						'type'              => 'string',
+						'enum'              => array( 'today', '7days', '30days', '3months' ),
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 					'field_key'  => array(
@@ -369,6 +375,11 @@ final class SubmissionsApi {
 						'type'              => 'string',
 						'sanitize_callback' => 'sanitize_text_field',
 					),
+					'range'   => array(
+						'type'              => 'string',
+						'enum'              => array( 'today', '7days', '30days', '3months' ),
+						'sanitize_callback' => 'sanitize_text_field',
+					),
 				),
 			)
 		);
@@ -454,7 +465,7 @@ final class SubmissionsApi {
 			'is_read'     => $is_read_arg,
 			'starred'     => $starred_arg,
 			'search'      => $request->get_param( 'search' ),
-			'after'       => $request->get_param( 'after' ),
+			'after'       => ReportQueries::rangeStartUtc( (string) $request->get_param( 'range' ) ) ?? $request->get_param( 'after' ),
 			'field_key'   => $request->get_param( 'field_key' ),
 			'field_value' => $request->get_param( 'field_value' ),
 			'limit'       => $pagination['per_page'],
@@ -1008,7 +1019,7 @@ final class SubmissionsApi {
 			'form_id' => ! empty( $params['form_id'] ) ? intval( $params['form_id'] ) : null,
 			'status'  => isset( $params['status'] ) ? Helpers::safe_sanitize_text( $params['status'] ) : null,
 			'search'  => isset( $params['search'] ) ? Helpers::safe_sanitize_text( $params['search'] ) : null,
-			'after'   => isset( $params['after'] ) ? Helpers::safe_sanitize_text( $params['after'] ) : null,
+			'after'   => ReportQueries::rangeStartUtc( (string) ( $params['range'] ?? '' ) ) ?? ( isset( $params['after'] ) ? Helpers::safe_sanitize_text( $params['after'] ) : null ),
 			// Export selected (2.3.0).
 			'ids'     => isset( $params['ids'] ) && is_array( $params['ids'] ) ? array_map( 'absint', $params['ids'] ) : null,
 			'orderby' => 'created_at',

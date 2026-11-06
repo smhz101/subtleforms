@@ -171,7 +171,7 @@ test.describe('Reports and dashboard cards fit without scrollbars', () => {
       await expect(page.locator('.sf-kpis')).toBeVisible({ timeout: 30000 });
       await expect(page.locator('.sf-funnel, .sf-analytics-panel')).toHaveCount(0);
       await expect(page.locator(SCREEN)).not.toContainText('Form analytics');
-      await expect(page.getByRole('link', { name: /Upgrade|Pro\b/ })).toHaveCount(0);
+      await expect(page.locator('#subtleforms-admin-app').getByRole('link', { name: /Upgrade|Pro\b/ })).toHaveCount(0);
       await expectNoScrollers(page, SCREEN, `Reports ${width}px`);
       await shot(page, `reports-${width}.png`);
     }

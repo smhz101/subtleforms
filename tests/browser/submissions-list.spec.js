@@ -152,23 +152,22 @@ test('counts follow every action without a reload', async ({ page }) => {
   expect(server.body.data.counts.unread).toBe(8);
 });
 
-test('there is no New tab, an old New link opens All, and the unread count is still kept', async ({ page }) => {
+test('Unread is a tab after All, an old New link opens it, and the unread count is kept', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 800 });
   await loginPage(page);
   for (const old of ['unread', 'new']) {
     await page.goto(`${listUrl()}&tab=${old}`);
     await expect(rows(page).first()).toBeVisible({ timeout: 30000 });
-    await expect(page.getByRole('tab', { name: /^All/ })).toHaveAttribute('aria-selected', 'true');
-    await expect(page).not.toHaveURL(/tab=/);
+    await expect(page.getByRole('tab', { name: /^Unread/ })).toHaveAttribute('aria-selected', 'true');
+    // Every row on the tab is unread.
+    await expect(page.locator('.sf-submissions-table__row--unread').first()).toBeVisible();
   }
   await expect(page.getByRole('tab', { name: /^New/ })).toHaveCount(0);
-  await expect(page.getByRole('tab')).toHaveText([/^All/, /^Read/, /^Spam/, /^Starred/, /^Flagged/, /^Trash/]);
-  // Unread entries are in All, and the menu badge still counts them.
-  await expect(page.locator('.sf-submissions-table__row--unread').first()).toBeVisible();
+  await expect(page.getByRole('tab')).toHaveText([/^All/, /^Unread/, /^Read/, /^Spam/, /^Starred/, /^Flagged/, /^Trash/]);
   await expect(page.locator('.sf-appnav__count').first()).toBeVisible();
   const server = await client.call('GET', `/submissions/unread-count?form_id=${form.id}`);
   expect(server.body.data.counts.unread).toBeGreaterThan(0);
-  await page.screenshot({ path: 'test-results/screens-2.5.1/tabs-without-new.png' });
+  await page.screenshot({ path: 'test-results/screens-2.5.1/tabs-with-unread.png' });
 });
 
 test('actions in the entry pane update the counts too', async ({ page }) => {

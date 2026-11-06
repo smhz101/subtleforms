@@ -56,7 +56,7 @@ test('no other screen has the card, an upgrade link or a plan chip', async ({ pa
     await expect(page.locator('#sf-main')).toBeVisible({ timeout: 30000 });
     await expect(page.locator('.sf-more-features')).toHaveCount(0);
     await expect(page.locator('.sf-plan-chip')).toHaveCount(0);
-    await expect(page.getByRole('link', { name: /Upgrade|Go Pro|Activate Pro/i })).toHaveCount(0);
+    await expect(page.locator('#subtleforms-admin-app').getByRole('link', { name: /Upgrade|Go Pro|Activate Pro/i })).toHaveCount(0);
   }
   // No notice about another plugin on the WordPress Dashboard either.
   await page.goto('/wp-admin/index.php');

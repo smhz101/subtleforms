@@ -52,6 +52,7 @@ const SubmissionsPage    = lazyWithRetry(() => import(/* webpackChunkName: "page
 const SubmissionDetailPage = lazyWithRetry(() => import(/* webpackChunkName: "page-submission-detail" */ '../pages/SubmissionDetailPage'));
 const BuilderPage        = lazyWithRetry(() => import(/* webpackChunkName: "page-builder" */        '../pages/BuilderPage'));
 const ReportsPage        = lazyWithRetry(() => import(/* webpackChunkName: "page-reports" */        '../pages/ReportsPage'));
+const UpgradePage        = lazyWithRetry(() => import(/* webpackChunkName: "page-upgrade" */        '../pages/UpgradePage'));
 const CreateFormPage     = lazyWithRetry(() => import(/* webpackChunkName: "page-create-form" */    '../pages/CreateFormPage'));
 
 /**
@@ -109,6 +110,15 @@ function getInitialPath() {
 			if (search) {
 				params.set('search', search);
 			}
+			// A date range a link can set (the Dashboard tiles use it). An older
+			// link with unread=1 opens the Unread tab.
+			if (url.searchParams.get('unread') === '1') {
+				params.set('tab', 'unread');
+			}
+			const range = url.searchParams.get('range');
+			if (range) {
+				params.set('range', range);
+			}
 			// A split inbox stays on the list and opens the entry in the pane.
 			// No split keeps the full entry page.
 			if (subId && pane !== 'off') {
@@ -135,6 +145,9 @@ function getInitialPath() {
 
 		case 'subtleforms-reports':
 			return '/reports';
+
+		case 'subtleforms-upgrade':
+			return '/upgrade';
 
 		default:
 			// A submenu page an add-on added (registerAdminPage).
@@ -193,6 +206,7 @@ function getPageNameFromPath(pathname) {
 		'/submissions': __('Submissions', 'subtleforms'),
 		'/settings': __('Settings', 'subtleforms'),
 		'/reports': __('Reports', 'subtleforms'),
+		'/upgrade': __('SubtleForms Pro', 'subtleforms'),
 	};
 	if (pathname.startsWith('/forms/') && pathname !== '/forms/new') {
 		return __('Form Builder', 'subtleforms');
@@ -383,6 +397,14 @@ function AppContent() {
 						element={
 							<PageErrorBoundary pageName='Reports'>
 								<ReportsPage />
+							</PageErrorBoundary>
+						}
+					/>
+					<Route
+						path='/upgrade'
+						element={
+							<PageErrorBoundary pageName='Upgrade'>
+								<UpgradePage />
 							</PageErrorBoundary>
 						}
 					/>

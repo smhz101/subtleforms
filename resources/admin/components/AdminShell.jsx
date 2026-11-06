@@ -10,6 +10,8 @@ import AdminFooter from './AdminFooter';
 import { ShellFooterProvider } from './ShellFooterContext';
 import ImportOfferNotice from './ImportOfferNotice';
 import ImportOfferModal from './ImportOfferModal';
+import PageHeader from './pageHeader/PageHeader';
+import { PageHeaderProvider } from './pageHeader/PageHeaderContext';
 import './AdminShell.scss';
 
 /**
@@ -45,6 +47,7 @@ export default function AdminShell({
   title,
   description,
   eyebrow,
+  meta,
   actions,
   actionBarLeft,
   actionBarRight,
@@ -68,6 +71,9 @@ export default function AdminShell({
   // The footer's page slot. Components such as the list tables draw their
   // pagination into it (see ShellFooterContext).
   const [footerSlot, setFooterSlot] = useState(null);
+  // The page header's actions area, for buttons a page draws from its body
+  // (PageHeaderActions).
+  const [actionsSlot, setActionsSlot] = useState(null);
   const hasToolbar = !!(actionBarLeft || actionBarRight);
   const hasPageHeader = !isEditor && !!(title || actions || description);
 
@@ -108,6 +114,7 @@ export default function AdminShell({
 
   return (
     <ShellFooterProvider value={isEditor ? undefined : footerSlot}>
+    <PageHeaderProvider value={isEditor ? undefined : actionsSlot}>
     <div
       className={clsx('subtleforms-admin', 'sf-app', `sf-app--${variant}`, {
         'sf-app--fixed': noScroll,
@@ -133,29 +140,14 @@ export default function AdminShell({
           </SiteNotices>
 
           {hasPageHeader && (
-            <div
-              className={clsx('sf-page-header', {
-                'sf-page-header--narrow': width === 'narrow',
-                'has-toolbar': hasToolbar,
-              })}>
-              <div className='sf-page-header__main'>
-                {eyebrow && (
-                  <div className='sf-page-header__eyebrow'>{eyebrow}</div>
-                )}
-                {title &&
-                  (typeof title === 'string' ? (
-                    <h1 className='sf-page-header__title'>{title}</h1>
-                  ) : (
-                    <div className='sf-page-header__title'>{title}</div>
-                  ))}
-                {description && (
-                  <p className='sf-page-header__description'>{description}</p>
-                )}
-              </div>
-              {actions && (
-                <div className='sf-page-header__actions'>{actions}</div>
-              )}
-            </div>
+            <PageHeader
+              title={title}
+              description={description}
+              actions={actions}
+              meta={meta}
+              breadcrumb={eyebrow}
+              actionsRef={setActionsSlot}
+            />
           )}
 
           {hasToolbar && (
@@ -181,6 +173,7 @@ export default function AdminShell({
         )}
       </div>
     </div>
+    </PageHeaderProvider>
     </ShellFooterProvider>
   );
 }

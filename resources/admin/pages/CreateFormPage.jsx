@@ -245,7 +245,7 @@ export default function CreateFormPage() {
           : __('Start from a blank canvas or a ready-made template.', 'subtleforms')
       }
       actions={
-        <Button variant='tertiary' onClick={() => navigate('/forms')}>
+        <Button variant='secondary' onClick={() => navigate('/forms')}>
           {__('Cancel', 'subtleforms')}
         </Button>
       }>

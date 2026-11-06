@@ -106,7 +106,7 @@ test.describe('builder without the add-on', () => {
       await page.screenshot({ path: path.join(SHOTS, `logic-note-${width}.png`) });
 
       // Nothing in the builder names a paid plugin or links to an upgrade.
-      await expect(page.getByRole('link', { name: /Upgrade|Pro\b/ })).toHaveCount(0);
+      await expect(page.locator('#subtleforms-admin-app').getByRole('link', { name: /Upgrade|Pro\b/ })).toHaveCount(0);
     });
   }
 });

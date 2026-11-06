@@ -148,34 +148,6 @@ const SubmissionsTable = forwardRef(
       }
     }, [currentPage, pagesLoaded, totalItems, perPage]);
 
-    const getDateRangeParams = (range) => {
-      const now = new Date();
-      let startDate = null;
-
-      switch (range) {
-        case 'today':
-          startDate = new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            now.getDate()
-          );
-          break;
-        case '7days':
-          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-          break;
-        case '30days':
-          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-          break;
-        case '3months':
-          startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-          break;
-        default:
-          return {};
-      }
-
-      return startDate ? { after: startDate.toISOString().split('T')[0] } : {};
-    };
-
     const buildFilterParams = () => {
       const params = new URLSearchParams({
         orderby: sortBy,
@@ -186,8 +158,9 @@ const SubmissionsTable = forwardRef(
       if (searchTerm) params.append('search', searchTerm);
       if (fieldValue) params.append('field_value', fieldValue);
       if (processingStatus) params.append('processing_status', processingStatus);
-      const dateParams = getDateRangeParams(dateRange);
-      if (dateParams.after) params.append('after', dateParams.after);
+      // The server turns the range into calendar days of the site timezone, so
+      // the list, the Dashboard tile and the WP widget count the same entries.
+      if (dateRange && dateRange !== 'all') params.append('range', dateRange);
       return params;
     };
 

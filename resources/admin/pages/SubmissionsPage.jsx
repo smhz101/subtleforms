@@ -13,7 +13,7 @@ import { apiPost } from '../utils/api';
 import { useForms, useSettings } from '../data';
 import { deletesPermanently } from '../utils/deleteBehavior';
 import { tabsFor } from '../utils/tabCounts';
-import { normalizeInboxTab } from '../utils/inboxTabs';
+import { buildInboxTabs, tabFromParams } from '../utils/inboxTabs';
 import lazyWithRetry from '../utils/lazyWithRetry';
 import { noticeDialog } from '../utils/confirmDialog';
 import './SubmissionsPage.scss';
@@ -32,6 +32,9 @@ function readInboxView() {
     site,
   };
 }
+
+/** Date ranges a link can ask for (the Date Range filter's values). */
+const DATE_RANGES = ['today', '7days', '30days', '3months'];
 
 export default function SubmissionsPage({ formId }) {
   const [search, setSearch] = useState('');
@@ -71,13 +74,14 @@ export default function SubmissionsPage({ formId }) {
 
   // Tab and search live in the URL so a reload keeps the filtered list.
   useEffect(() => {
+    // ?unread=1 (a link from before the Unread tab) is the Unread tab; the
+    // old "new" tab is too.
     const rawTab = searchParams.get('tab') || 'all';
-    // The old "New" tab is gone (All lists those entries): an old link with
-    // tab=unread or tab=new opens All and drops the parameter.
-    const tab = normalizeInboxTab(rawTab);
-    if (tab !== rawTab) {
+    const tab = tabFromParams(searchParams);
+    if (tab !== rawTab || searchParams.has('unread')) {
       setSearchParams((current) => {
         const params = new URLSearchParams(current);
+        params.delete('unread');
         if (tab === 'all') {
           params.delete('tab');
         } else {
@@ -87,6 +91,12 @@ export default function SubmissionsPage({ formId }) {
       }, { replace: true });
     }
     const q = searchParams.get('search') || '';
+    // A date range a link can set (Dashboard tiles).
+    const linkedRange = searchParams.get('range');
+    if (DATE_RANGES.includes(linkedRange)) {
+      setDateRange(linkedRange);
+      setShowFilters(true);
+    }
     setStatusFilter(tab);
     setSearch(q);
     setDebouncedSearch(q);
@@ -308,15 +318,16 @@ export default function SubmissionsPage({ formId }) {
     ? __('Form submissions', 'subtleforms')
     : __('Submissions', 'subtleforms');
 
-  const tabCount = (key) => (counts[key] > 0 ? counts[key] : undefined);
-  const tabs = [
-    { key: 'all', label: __('All', 'subtleforms'), count: tabCount('all') },
-    { key: 'read', label: __('Read', 'subtleforms'), count: tabCount('read') },
-    { key: 'spam', label: __('Spam', 'subtleforms'), count: tabCount('spam') },
-    { key: 'starred', label: __('Starred', 'subtleforms'), count: tabCount('starred') },
-    { key: 'flagged', label: __('Flagged', 'subtleforms'), count: tabCount('flagged') },
-    { key: 'trash', label: __('Trash', 'subtleforms'), count: tabCount('trash') },
-  ];
+  const tabLabels = {
+    all: __('All', 'subtleforms'),
+    unread: __('Unread', 'subtleforms'),
+    read: __('Read', 'subtleforms'),
+    spam: __('Spam', 'subtleforms'),
+    starred: __('Starred', 'subtleforms'),
+    flagged: __('Flagged', 'subtleforms'),
+    trash: __('Trash', 'subtleforms'),
+  };
+  const tabs = buildInboxTabs(counts, (key) => tabLabels[key]);
 
   const dateRangeOptions = [
     { label: __('All time', 'subtleforms'), value: 'all' },
@@ -347,7 +358,26 @@ export default function SubmissionsPage({ formId }) {
     fieldValue ||
     processingStatus;
 
+  // A date range a link set stays in the address until the person changes or
+  // clears it, so opening an entry does not bring it back.
+  const dropLinkedParams = (...keys) => {
+    if (!keys.some((key) => searchParams.has(key))) {
+      return;
+    }
+    setSearchParams((current) => {
+      const params = new URLSearchParams(current);
+      keys.forEach((key) => params.delete(key));
+      return params;
+    }, { replace: true });
+  };
+
+  const changeDateRange = (value) => {
+    setDateRange(value);
+    dropLinkedParams('range');
+  };
+
   const clearFilters = () => {
+    dropLinkedParams('range', 'tab');
     setSearch('');
     setStatusFilter('all');
     setSelectedFormId(formId || 'all');
@@ -355,30 +385,6 @@ export default function SubmissionsPage({ formId }) {
     setFieldValue('');
     setDebouncedFieldValue('');
     setProcessingStatus('');
-  };
-
-  const getExportAfterDate = (range) => {
-    const now = new Date();
-    switch (range) {
-      case 'today':
-        return new Date(now.getFullYear(), now.getMonth(), now.getDate())
-          .toISOString()
-          .split('T')[0];
-      case '7days':
-        return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split('T')[0];
-      case '30days':
-        return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split('T')[0];
-      case '3months':
-        return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split('T')[0];
-      default:
-        return null;
-    }
   };
 
   const exportSubmissions = async () => {
@@ -392,7 +398,7 @@ export default function SubmissionsPage({ formId }) {
           form_id: selectedFormId !== 'all' ? parseInt(selectedFormId) : null,
           status: statusFilter !== 'all' ? statusFilter : null,
           search: search || null,
-          after: getExportAfterDate(dateRange),
+          range: dateRange !== 'all' ? dateRange : null,
         },
       });
 
@@ -603,7 +609,7 @@ export default function SubmissionsPage({ formId }) {
             label={__('Date Range', 'subtleforms')}
             value={dateRange}
             options={dateRangeOptions}
-            onChange={setDateRange}
+            onChange={changeDateRange}
             className='sf-filter-control'
             style={{ minWidth: '200px' }}
           />

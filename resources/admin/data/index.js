@@ -30,6 +30,8 @@ export { useToolsForms, useLogList, useApiLog } from './queries/tools';
 
 export { useDashboardStats } from './queries/dashboard';
 
+export { useReport } from './queries/reports';
+
 export { useSpamStats, useSpamProtection } from './queries/spam';
 export { useSpamProtectionAction } from './mutations/spam';
 

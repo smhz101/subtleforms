@@ -81,7 +81,8 @@ final class AdminPreloadTest extends TestCase {
 		$this->assertArrayNotHasKey( self::FORMS, $settings['preloaded'] );
 
 		$dash = $this->load( 'subtleforms' );
-		$this->assertEmpty( $dash['preloaded'] );
+		$this->assertSame( array( '/subtleforms/v1/dashboard' ), array_keys( $dash['preloaded'] ), 'the dashboard preloads its one call' );
+		$this->assertArrayHasKey( 'stats', $dash['preloaded']['/subtleforms/v1/dashboard']['body']['data'] );
 	}
 
 	public function test_settings_preloads_the_settings_and_the_email_marketing_state() {
@@ -99,7 +100,7 @@ final class AdminPreloadTest extends TestCase {
 		$services = $loaded['preloaded']['/subtleforms/v1/integrations/email-marketing']['body'];
 		$this->assertArrayHasKey( 'data', $services );
 
-		$this->assertSame( array(), AdminPreload::defaultPaths( 'subtleforms' ), 'other screens keep their own lists' );
+		$this->assertSame( array(), AdminPreload::defaultPaths( 'subtleforms-reports' ), 'other screens keep their own lists' );
 	}
 
 	public function test_a_user_without_access_gets_nothing() {

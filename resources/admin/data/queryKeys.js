@@ -55,6 +55,12 @@ export const queryKeys = {
     protection: () => ['spam', 'protection'],
   },
 
+  // Reports
+  reports: {
+    all: ['reports'],
+    report: (from, to, formId) => ['reports', 'report', { from, to, formId }],
+  },
+
   // Fresh-install import offer (2.7.2)
   importOffer: {
     all: ['importOffer'],

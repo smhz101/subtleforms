@@ -6,7 +6,7 @@
 	display: flex;
 	flex-direction: column;
 	gap: 24px;
-	padding: 0 var(--sf-gutter) var(--sf-gutter);
+	padding: 20px var(--sf-gutter) var(--sf-gutter);
 
 	&__row {
 		display: grid;
@@ -521,5 +521,282 @@
 
 	@media (max-width: 960px) {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+// ── Dashboard, 2.7.5 ─────────────────────────────────────────────────────────
+
+.sf-kpi__meta {
+	&.is-up {
+		color: var(--sf-success, #1a7f37);
+	}
+
+	&.is-down {
+		color: var(--sf-danger, #b32d2e);
+	}
+}
+
+.sf-dash__empty-line {
+	margin: 0;
+	padding: 20px;
+	font-size: var(--sf-text-sm);
+	color: var(--sf-text-muted);
+}
+
+.sf-panel__body:not(.sf-panel__body--flush) > .sf-dash__empty-line {
+	padding: 4px 0;
+}
+
+// 7 / 30 / 90 day choice.
+.sf-range {
+	display: inline-flex;
+	flex-shrink: 0;
+	padding: 2px;
+	border: 1px solid var(--sf-border);
+	border-radius: var(--sf-radius-md);
+
+	&__option {
+		min-height: 28px;
+		padding: 0 10px;
+		border: 0;
+		border-radius: var(--sf-radius-sm);
+		background: transparent;
+		font-size: var(--sf-text-xs);
+		font-weight: var(--sf-weight-medium);
+		color: var(--sf-text-muted);
+		cursor: pointer;
+
+		&:hover {
+			color: var(--sf-text);
+		}
+
+		&:focus-visible {
+			outline: none;
+			box-shadow: var(--sf-shadow-focus);
+		}
+
+		&.is-active {
+			background: var(--sf-bg-muted);
+			color: var(--sf-text);
+		}
+	}
+}
+
+// Needs attention.
+.sf-attn {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+	> li {
+		margin: 0;
+
+		& + li {
+			border-top: 1px solid var(--sf-border-subtle);
+		}
+	}
+
+	&__row {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 12px 20px;
+		color: inherit;
+		text-decoration: none;
+
+		&:hover {
+			background: var(--sf-bg-hover);
+			color: inherit;
+		}
+
+		&:focus {
+			outline: none;
+			box-shadow: inset var(--sf-shadow-focus);
+		}
+	}
+
+	&__count {
+		min-width: 28px;
+		font-size: var(--sf-text-lg);
+		font-weight: var(--sf-weight-semibold);
+		font-variant-numeric: tabular-nums;
+		color: var(--sf-text);
+
+		&--warn {
+			color: var(--sf-danger, #b32d2e);
+		}
+	}
+
+	&__text {
+		flex: 1 1 auto;
+		min-width: 0;
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text);
+	}
+
+	&__sub {
+		display: block;
+		overflow: hidden;
+		font-size: var(--sf-text-xs);
+		color: var(--sf-text-muted);
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+}
+
+.sf-list__time {
+	flex-shrink: 0;
+	font-size: var(--sf-text-xs);
+	color: var(--sf-text-muted);
+	white-space: nowrap;
+}
+
+// Top forms.
+.sf-top {
+	width: 100%;
+	border-collapse: collapse;
+
+	td {
+		padding: 12px 20px;
+		border-top: 1px solid var(--sf-border-subtle);
+		font-size: var(--sf-text-sm);
+	}
+
+	tr:first-child td {
+		border-top: 0;
+	}
+
+	&__name {
+		max-width: 0;
+		width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+
+		a {
+			color: var(--sf-text);
+			text-decoration: none;
+
+			&:hover {
+				color: var(--sf-brand);
+			}
+		}
+	}
+
+	&__num {
+		text-align: end;
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+}
+
+// Getting started.
+.sf-start {
+	&__list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	&__item {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		margin: 0;
+		padding: 12px 20px;
+
+		& + & {
+			border-top: 1px solid var(--sf-border-subtle);
+		}
+
+		&.is-done .sf-start__link {
+			color: var(--sf-text-muted);
+			text-decoration: line-through;
+		}
+	}
+
+	&__mark {
+		display: inline-flex;
+		flex-shrink: 0;
+		align-items: center;
+		justify-content: center;
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+		box-shadow: inset 0 0 0 1.5px var(--sf-border);
+		color: #fff;
+
+		.is-done & {
+			background: var(--sf-brand);
+			box-shadow: none;
+		}
+	}
+
+	&__link {
+		padding: 0;
+		border: 0;
+		background: none;
+		font: inherit;
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text);
+		text-align: start;
+		cursor: pointer;
+
+		&:hover {
+			color: var(--sf-brand);
+		}
+
+		&:focus-visible {
+			outline: none;
+			box-shadow: var(--sf-shadow-focus);
+		}
+	}
+}
+
+// Comparison line over the bars (Reports).
+.sf-trend__previous {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+	pointer-events: none;
+
+	polyline {
+		fill: none;
+		stroke: var(--sf-text-muted);
+		stroke-width: 1.5;
+		stroke-linejoin: round;
+	}
+}
+
+.sf-trend__legend {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin: 8px 0 0;
+	font-size: var(--sf-text-xs);
+	color: var(--sf-text-muted);
+}
+
+.sf-trend__key {
+	display: inline-block;
+	margin-inline-start: 8px;
+
+	&:first-child {
+		margin-inline-start: 0;
+	}
+
+	&--bar {
+		width: 10px;
+		height: 10px;
+		border-radius: 2px;
+		background: var(--sf-brand);
+	}
+
+	&--line {
+		width: 14px;
+		height: 0;
+		border-top: 1.5px solid var(--sf-text-muted);
 	}
 }

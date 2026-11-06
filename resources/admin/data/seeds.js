@@ -12,9 +12,11 @@
 import { queryKeys } from './queryKeys';
 
 export const SETTINGS_PATH = '/subtleforms/v1/settings';
+export const DASHBOARD_PATH = '/subtleforms/v1/dashboard';
 export const EMAIL_MARKETING_PATH = '/subtleforms/v1/integrations/email-marketing';
 
 export const PRELOAD_SEEDS = [
 	{ path: SETTINGS_PATH, key: queryKeys.settings.general() },
 	{ path: EMAIL_MARKETING_PATH, key: queryKeys.emailMarketing.all() },
+	{ path: DASHBOARD_PATH, key: queryKeys.dashboard.stats() },
 ];

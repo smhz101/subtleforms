@@ -9,7 +9,7 @@
 	grid-template-columns: 220px minmax(0, 1fr);
 	align-items: start;
 	gap: 40px;
-	padding: 0 var(--sf-gutter) 96px;
+	padding: 20px var(--sf-gutter) 96px;
 
 	@media (max-width: 900px) {
 		grid-template-columns: 1fr;

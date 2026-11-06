@@ -1,6 +1,7 @@
-import { submissionStatus } from '../utils/submissionStatus';
+import { useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
+import { submissionStatus } from '../utils/submissionStatus';
 import { getBranding } from '../utils/branding';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
@@ -9,7 +10,7 @@ import { NavLink } from '../components/navigation';
 import Icon from '../ui/Icon';
 import AdminShell from '../components/AdminShell';
 import ExtensionSlot from '../components/ExtensionSlot';
-import { getFormTypeBadge, getFormStatusBadge } from '../utils/formMeta';
+import { getSlotItems } from '../../shared/extend';
 import './DashboardPage.scss';
 import TrendChart from '../components/TrendChart';
 import SpamBlockedCard from '../components/SpamBlockedCard';
@@ -18,8 +19,42 @@ import MoreFeaturesCard from '../components/MoreFeaturesCard';
 
 const formatNumber = (value) => Number(value || 0).toLocaleString();
 
+/** Days the chart can show. */
+export const TREND_RANGES = [7, 30, 90];
+
+/**
+ * Change between two periods as text for a tile: "+12%", "-4%", "No change",
+ * or "New" when the period before had nothing.
+ *
+ * @param {number} current  This period.
+ * @param {number} previous The period before.
+ * @return {{text: string, tone: 'up'|'down'|'flat'}}
+ */
+export function deltaText(current, previous) {
+  const now = Number(current || 0);
+  const before = Number(previous || 0);
+  if (before === 0) {
+    return now === 0
+      ? { text: __('No entries in either week', 'subtleforms'), tone: 'flat' }
+      : { text: __('New this week', 'subtleforms'), tone: 'up' };
+  }
+  const pct = Math.round(((now - before) / before) * 100);
+  if (pct === 0) {
+    return { text: __('No change from the week before', 'subtleforms'), tone: 'flat' };
+  }
+  return {
+    text: sprintf(
+      /* translators: %s: percentage change such as +12% */
+      __('%s from the week before', 'subtleforms'),
+      `${pct > 0 ? '+' : ''}${pct}%`
+    ),
+    tone: pct > 0 ? 'up' : 'down',
+  };
+}
+
 /**
  * Dashboard, what is happening across every form, at a glance.
+ * Every figure comes from one request (GET /dashboard, preloaded with the page).
  */
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -57,12 +92,16 @@ export default function Dashboard() {
     stats = {},
     recent_submissions: recentSubmissions = [],
     recent_forms: recentForms = [],
+    top_forms: topForms = [],
     system_health: health = {},
     trend = [],
+    attention = {},
+    checklist = { show: false, steps: [] },
   } = data;
 
   const unread =
     stats.unread_submissions ?? Number(window.subtleformsAdmin?.unreadCount || 0);
+  const delta = deltaText(stats.submissions_this_week, stats.submissions_prev_week);
 
   return (
     <AdminShell
@@ -73,23 +112,24 @@ export default function Dashboard() {
         {/* One-time offer to turn spam protection on (2.6.0) */}
         <SpamProtectionNotice />
 
-        {/* KPIs */}
+        {checklist.show && <GettingStarted steps={checklist.steps} />}
+
+        {/* Row 1: four tiles, each opens the matching Submissions view */}
         <section
           className='sf-kpis'
           aria-label={__('Key figures', 'subtleforms')}>
           <Kpi
-            label={__('Submissions', 'subtleforms')}
-            value={stats.total_submissions}
-            meta={
-              stats.published_forms > 0
-                ? sprintf(
-                    /* translators: %s: average submissions per published form */
-                    __('%s avg per published form', 'subtleforms'),
-                    stats.avg_submissions_per_form
-                  )
-                : __('No published forms yet', 'subtleforms')
-            }
-            to='/submissions'
+            label={__('Entries today', 'subtleforms')}
+            value={stats.submissions_today}
+            meta={__('Since midnight', 'subtleforms')}
+            to='/submissions?range=today'
+          />
+          <Kpi
+            label={__('Entries, last 7 days', 'subtleforms')}
+            value={stats.submissions_this_week}
+            meta={delta.text}
+            tone={delta.tone}
+            to='/submissions?range=7days'
           />
           <Kpi
             label={__('Unread', 'subtleforms')}
@@ -100,260 +140,36 @@ export default function Dashboard() {
                 : __('Inbox zero', 'subtleforms')
             }
             accent={unread > 0}
-            to='/submissions'
+            to='/submissions?tab=unread'
           />
           <Kpi
-            label={__('Today', 'subtleforms')}
-            value={stats.submissions_today}
-            meta={__('Since midnight', 'subtleforms')}
+            label={__('Spam blocked, last 7 days', 'subtleforms')}
+            value={stats.spam_blocked_week}
+            meta={__('Never reached your inbox', 'subtleforms')}
+            to='/submissions?tab=spam'
           />
-          <Kpi
-            label={__('Last 7 days', 'subtleforms')}
-            value={stats.submissions_this_week}
-            meta={sprintf(
-              /* translators: %s: number of forms */
-              _n('Across %s form', 'Across %s forms', stats.total_forms || 0, 'subtleforms'),
-              formatNumber(stats.total_forms)
-            )}
-          />
+          {/* Tiles add-ons bring. */}
+          <ExtensionSlot name='dashboard.tiles' data={data} />
         </section>
 
-        {/* Trend + quick actions */}
+        {/* Row 2: chart and what needs attention */}
         <div className='sf-dash__row sf-dash__row--wide'>
-          <section className='sf-panel'>
-            <header className='sf-panel__header'>
-              <div>
-                <h2 className='sf-panel__title'>
-                  {__('Submissions', 'subtleforms')}
-                </h2>
-                <p className='sf-panel__subtitle'>
-                  {__('Last 14 days', 'subtleforms')}
-                </p>
-              </div>
-              <div className='sf-dash__trend-total'>
-                <span className='sf-dash__trend-total-value'>
-                  {formatNumber(trend.reduce((sum, d) => sum + d.count, 0))}
-                </span>
-                <span className='sf-dash__trend-total-label'>
-                  {__('in period', 'subtleforms')}
-                </span>
-              </div>
-            </header>
-            <div className='sf-panel__body'>
-              <TrendChart data={trend} />
-            </div>
-          </section>
-
-          <section className='sf-panel'>
-            <header className='sf-panel__header'>
-              <h2 className='sf-panel__title'>
-                {__('Quick actions', 'subtleforms')}
-              </h2>
-            </header>
-            <div className='sf-panel__body sf-panel__body--flush'>
-              <ul className='sf-quick'>
-                <QuickAction
-                  icon={Icon.Plus}
-                  title={__('Create a form', 'subtleforms')}
-                  text={__('Start blank or from a template', 'subtleforms')}
-                  to='/forms/new'
-                />
-                <QuickAction
-                  icon={Icon.Inbox}
-                  title={__('Review submissions', 'subtleforms')}
-                  text={
-                    unread > 0
-                      ? sprintf(
-                          /* translators: %s: number of unread submissions */
-                          _n('%s unread entry', '%s unread entries', unread, 'subtleforms'),
-                          formatNumber(unread)
-                        )
-                      : __('You are all caught up', 'subtleforms')
-                  }
-                  to='/submissions'
-                />
-                <QuickAction
-                  icon={Icon.Mail}
-                  title={__('Email notifications', 'subtleforms')}
-                  text={__('Sender, recipients and templates', 'subtleforms')}
-                  to='/settings'
-                  hash='tab=email'
-                />
-                <QuickAction
-                  icon={Icon.Puzzle}
-                  title={__('Integrations', 'subtleforms')}
-                  text={__('Webhooks and the integrations your add-ons bring', 'subtleforms')}
-                  to='/settings'
-                  hash='tab=extensions'
-                />
-              </ul>
-            </div>
-          </section>
+          <TrendPanel trend={trend} />
+          <AttentionPanel attention={attention} data={data} />
         </div>
 
-        {/* Spam blocked in the last 30 days (2.6.0) */}
-        <SpamBlockedCard />
-
-        {/* Activity */}
         {/* Panels add-ons bring. */}
         <ExtensionSlot name='dashboard.panels' forms={recentForms} />
+        <ExtensionSlot name='dashboard.widgets' data={data} forms={recentForms} />
 
+        {/* Row 3: recent entries and top forms */}
         <div className='sf-dash__row'>
-          <section className='sf-panel'>
-            <header className='sf-panel__header'>
-              <h2 className='sf-panel__title'>
-                {__('Recent submissions', 'subtleforms')}
-              </h2>
-              {recentSubmissions.length > 0 && (
-                <NavLink to='/submissions' className='sf-panel__link'>
-                  {__('View all', 'subtleforms')}
-                  <Icon.ArrowRight size={14} aria-hidden='true' />
-                </NavLink>
-              )}
-            </header>
-            <div className='sf-panel__body sf-panel__body--flush'>
-              {recentSubmissions.length > 0 ? (
-                <ul className='sf-list'>
-                  {recentSubmissions.slice(0, 6).map((submission) => (
-                    <li key={submission.id}>
-                      <NavLink
-                        to={`/submissions/${submission.id}`}
-                        className='sf-list__row'>
-                        <span
-                          className={clsx('sf-list__marker', {
-                            'is-unread': submission.is_read === false || submission.status === 'unread',
-                          })}
-                          aria-hidden='true'
-                        />
-                        <span className='sf-list__main'>
-                          <span className='sf-list__title'>
-                            {submission.form_title}
-                          </span>
-                          <span className='sf-list__meta'>
-                            <span className='sf-list__id'>#{submission.id}</span>
-                            <span aria-hidden='true'>·</span>
-                            <span>{submission.time_ago}</span>
-                          </span>
-                        </span>
-                        <SubmissionStatus status={submission.status} />
-                        <Icon.ChevronRight
-                          size={16}
-                          className='sf-list__chevron'
-                          aria-hidden='true'
-                        />
-                      </NavLink>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className='sf-empty'>
-                  <span className='sf-empty__icon'>
-                    <Icon.Inbox size={20} />
-                  </span>
-                  <p className='sf-empty__title'>
-                    {__('No submissions yet', 'subtleforms')}
-                  </p>
-                  <p className='sf-empty__text'>
-                    {__(
-                      'Entries appear here as soon as someone submits one of your forms.',
-                      'subtleforms'
-                    )}
-                  </p>
-                </div>
-              )}
-            </div>
-          </section>
-
-          <section className='sf-panel'>
-            <header className='sf-panel__header'>
-              <h2 className='sf-panel__title'>
-                {__('Recently edited forms', 'subtleforms')}
-              </h2>
-              {recentForms.length > 0 && (
-                <NavLink to='/forms' className='sf-panel__link'>
-                  {__('All forms', 'subtleforms')}
-                  <Icon.ArrowRight size={14} aria-hidden='true' />
-                </NavLink>
-              )}
-            </header>
-            <div className='sf-panel__body sf-panel__body--flush'>
-              {recentForms.length > 0 ? (
-                <ul className='sf-list'>
-                  {recentForms.slice(0, 6).map((form) => {
-                    const type = getFormTypeBadge(form);
-                    const status = getFormStatusBadge(form);
-                    const TypeIcon = type.icon;
-                    return (
-                      <li key={form.id}>
-                        <NavLink
-                          to={`/forms/${form.id}`}
-                          className='sf-list__row'>
-                          <span className='sf-list__icon' aria-hidden='true'>
-                            <TypeIcon size={16} />
-                          </span>
-                          <span className='sf-list__main'>
-                            <span className='sf-list__title'>{form.title}</span>
-                            <span className='sf-list__meta'>
-                              <span>{type.label}</span>
-                              <span aria-hidden='true'>·</span>
-                              <span>
-                                {sprintf(
-                                  /* translators: %s: number of submissions */
-                                  _n('%s entry', '%s entries', form.submission_count || 0, 'subtleforms'),
-                                  formatNumber(form.submission_count)
-                                )}
-                              </span>
-                              <span aria-hidden='true'>·</span>
-                              <span>{form.time_ago}</span>
-                            </span>
-                          </span>
-                          <span
-                            className={clsx('sf-pill', 'sf-pill--dot', {
-                              'sf-pill--success': status.color === 'green',
-                              'sf-pill--warning':
-                                status.color === 'yellow' &&
-                                form.has_unpublished_changes,
-                            })}>
-                            {status.color === 'green' || form.has_unpublished_changes
-                              ? status.label
-                              : __('Draft', 'subtleforms')}
-                          </span>
-                          <Icon.ChevronRight
-                            size={16}
-                            className='sf-list__chevron'
-                            aria-hidden='true'
-                          />
-                        </NavLink>
-                      </li>
-                    );
-                  })}
-                </ul>
-              ) : (
-                <div className='sf-empty'>
-                  <span className='sf-empty__icon'>
-                    <Icon.FileText size={20} />
-                  </span>
-                  <p className='sf-empty__title'>
-                    {__('No forms yet', 'subtleforms')}
-                  </p>
-                  <p className='sf-empty__text'>
-                    {__(
-                      'Create your first form to start collecting entries.',
-                      'subtleforms'
-                    )}
-                  </p>
-                  <div className='sf-empty__actions'>
-                    <Button
-                      variant='primary'
-                      onClick={() => navigate('/forms/new')}>
-                      {__('Create form', 'subtleforms')}
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </section>
+          <RecentEntries entries={recentSubmissions} />
+          <TopForms forms={topForms} />
         </div>
+
+        {/* Spam blocked in the last 30 days, per day and by reason */}
+        <SpamBlockedCard />
 
         {/* System */}
         <section className='sf-panel sf-dash__health'>
@@ -398,10 +214,374 @@ export default function Dashboard() {
   );
 }
 
+/** Steps of the Getting started list, in order, with where each one is done. */
+function checklistItems() {
+  return {
+    create_form: { label: __('Create a form', 'subtleforms'), to: '/forms/new' },
+    add_to_page: {
+      label: __('Add it to a page with the SubtleForms block or the shortcode', 'subtleforms'),
+      to: '/forms',
+    },
+    notification_email: {
+      label: __('Choose where notification emails go', 'subtleforms'),
+      to: '/settings',
+      hash: 'tab=email',
+    },
+    spam_protection: {
+      label: __('Turn on spam protection', 'subtleforms'),
+      to: '/settings',
+      hash: 'tab=security',
+    },
+  };
+}
+
+/**
+ * Getting started: shown while the site has no form or no entry yet, then gone.
+ * It belongs to the site, so every administrator sees the same list.
+ */
+export function GettingStarted({ steps = [] }) {
+  const navigate = useNavigate();
+  const items = checklistItems();
+  const done = steps.filter((step) => step.done).length;
+  return (
+    <section className='sf-panel sf-start' aria-labelledby='sf-start-title'>
+      <header className='sf-panel__header'>
+        <div>
+          <h2 className='sf-panel__title' id='sf-start-title'>
+            {__('Getting started', 'subtleforms')}
+          </h2>
+          <p className='sf-panel__subtitle'>
+            {sprintf(
+              /* translators: 1: steps done, 2: number of steps */
+              __('%1$d of %2$d done', 'subtleforms'),
+              done,
+              steps.length
+            )}
+          </p>
+        </div>
+      </header>
+      <div className='sf-panel__body sf-panel__body--flush'>
+        <ol className='sf-start__list'>
+          {steps.map((step) => {
+            const item = items[step.id];
+            if (!item) {
+              return null;
+            }
+            return (
+              <li key={step.id} className={clsx('sf-start__item', { 'is-done': step.done })}>
+                <span className='sf-start__mark' aria-hidden='true'>
+                  {step.done ? <Icon.Check size={12} /> : null}
+                </span>
+                <button
+                  type='button'
+                  className='sf-start__link'
+                  onClick={() => {
+                    if (item.hash) {
+                      window.location.hash = item.hash;
+                    }
+                    navigate(item.to);
+                  }}>
+                  {item.label}
+                </button>
+                {step.done && <span className='screen-reader-text'>{__('Done', 'subtleforms')}</span>}
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+    </section>
+  );
+}
+
+/** Submissions per day with a 7, 30 or 90 day choice. */
+export function TrendPanel({ trend = [] }) {
+  const [days, setDays] = useState(30);
+  const shown = trend.slice(-days);
+  const total = shown.reduce((sum, d) => sum + d.count, 0);
+  return (
+    <section className='sf-panel'>
+      <header className='sf-panel__header'>
+        <div>
+          <h2 className='sf-panel__title'>
+            {sprintf(
+              /* translators: %d: number of days */
+              __('Submissions, last %d days', 'subtleforms'),
+              days
+            )}
+          </h2>
+          <p className='sf-panel__subtitle'>
+            {sprintf(
+              /* translators: %s: number of entries */
+              _n('%s entry in this period', '%s entries in this period', total, 'subtleforms'),
+              formatNumber(total)
+            )}
+          </p>
+        </div>
+        <div className='sf-range' role='group' aria-label={__('Period', 'subtleforms')}>
+          {TREND_RANGES.map((range) => (
+            <button
+              key={range}
+              type='button'
+              className={clsx('sf-range__option', { 'is-active': range === days })}
+              aria-pressed={range === days}
+              onClick={() => setDays(range)}>
+              {sprintf(
+                /* translators: %d: number of days */
+                __('%d days', 'subtleforms'),
+                range
+              )}
+            </button>
+          ))}
+        </div>
+      </header>
+      <div className='sf-panel__body'>
+        {total === 0 ? (
+          <p className='sf-dash__empty-line'>
+            {__('No entries in this period yet. They show here as soon as a form is submitted.', 'subtleforms')}
+          </p>
+        ) : (
+          <TrendChart
+            data={shown}
+            compact
+            caption={sprintf(
+              /* translators: %d: number of days */
+              __('Submissions per day, last %d days', 'subtleforms'),
+              days
+            )}
+          />
+        )}
+      </div>
+    </section>
+  );
+}
+
+/** A link to a Settings tab (the tab is kept in the address hash). */
+function HashLink({ hash, className, children }) {
+  const navigate = useNavigate();
+  return (
+    <a
+      href={`#${hash}`}
+      className={className}
+      onClick={(event) => {
+        event.preventDefault();
+        window.location.hash = hash;
+        navigate('/settings');
+      }}>
+      {children}
+    </a>
+  );
+}
+
+/** What needs a look: unread entries, quiet forms, add-on rows and failures. */
+export function AttentionPanel({ attention = {}, data }) {
+  const unread = Number(attention.unread || 0);
+  const idle = attention.idle_forms || { count: 0, forms: [] };
+  const failures = Number(attention.integration_failures || 0);
+  const addOnRows = getSlotItems('dashboard.attention');
+  const nothing = unread === 0 && idle.count === 0 && failures === 0 && addOnRows.length === 0;
+
+  return (
+    <section className='sf-panel'>
+      <header className='sf-panel__header'>
+        <h2 className='sf-panel__title'>{__('Needs attention', 'subtleforms')}</h2>
+      </header>
+      <div className='sf-panel__body sf-panel__body--flush'>
+        {nothing ? (
+          <p className='sf-dash__empty-line'>{__('Nothing needs attention.', 'subtleforms')}</p>
+        ) : (
+          <ul className='sf-attn'>
+            {unread > 0 && (
+              <li>
+                <NavLink to='/submissions?tab=unread' className='sf-attn__row'>
+                  <span className='sf-attn__count'>{formatNumber(unread)}</span>
+                  <span className='sf-attn__text'>
+                    {_n('unread entry', 'unread entries', unread, 'subtleforms')}
+                  </span>
+                  <Icon.ChevronRight size={16} className='sf-list__chevron' aria-hidden='true' />
+                </NavLink>
+              </li>
+            )}
+            {idle.count > 0 && (
+              <li>
+                <NavLink to='/forms' className='sf-attn__row'>
+                  <span className='sf-attn__count'>{formatNumber(idle.count)}</span>
+                  <span className='sf-attn__text'>
+                    {_n(
+                      'published form with no entries in 30 days',
+                      'published forms with no entries in 30 days',
+                      idle.count,
+                      'subtleforms'
+                    )}
+                    {idle.forms.length > 0 && (
+                      <span className='sf-attn__sub'>
+                        {idle.forms.map((form) => form.title).join(', ')}
+                      </span>
+                    )}
+                  </span>
+                  <Icon.ChevronRight size={16} className='sf-list__chevron' aria-hidden='true' />
+                </NavLink>
+              </li>
+            )}
+            {failures > 0 && (
+              <li>
+                <HashLink hash='tab=logs' className='sf-attn__row'>
+                  <span className='sf-attn__count sf-attn__count--warn'>{formatNumber(failures)}</span>
+                  <span className='sf-attn__text'>
+                    {_n(
+                      'integration failure in the last 7 days',
+                      'integration failures in the last 7 days',
+                      failures,
+                      'subtleforms'
+                    )}
+                  </span>
+                  <Icon.ChevronRight size={16} className='sf-list__chevron' aria-hidden='true' />
+                </HashLink>
+              </li>
+            )}
+            <ExtensionSlot name='dashboard.attention' data={data} />
+          </ul>
+        )}
+      </div>
+    </section>
+  );
+}
+
+/** The latest entries: form, who sent it, when, and an unread dot. */
+export function RecentEntries({ entries = [] }) {
+  return (
+    <section className='sf-panel'>
+      <header className='sf-panel__header'>
+        <h2 className='sf-panel__title'>{__('Recent entries', 'subtleforms')}</h2>
+        {entries.length > 0 && (
+          <NavLink to='/submissions' className='sf-panel__link'>
+            {__('View all', 'subtleforms')}
+            <Icon.ArrowRight size={14} aria-hidden='true' />
+          </NavLink>
+        )}
+      </header>
+      <div className='sf-panel__body sf-panel__body--flush'>
+        {entries.length > 0 ? (
+          <ul className='sf-list'>
+            {entries.slice(0, 8).map((entry) => {
+              const unreadEntry = entry.is_read === false;
+              const who = entry.name || entry.email;
+              return (
+                <li key={entry.id}>
+                  <NavLink to={`/submissions/${entry.id}`} className='sf-list__row'>
+                    <span
+                      className={clsx('sf-list__marker', { 'is-unread': unreadEntry })}
+                      aria-hidden='true'
+                    />
+                    {unreadEntry && <span className='screen-reader-text'>{__('Unread', 'subtleforms')}</span>}
+                    <span className='sf-list__main'>
+                      <span className='sf-list__title'>{entry.form_title}</span>
+                      <span className='sf-list__meta'>
+                        {who && <span>{who}</span>}
+                        {who && entry.name && entry.email && <span aria-hidden='true'>·</span>}
+                        {entry.name && entry.email && <span>{entry.email}</span>}
+                      </span>
+                    </span>
+                    {entry.status && !['completed', 'saved'].includes(entry.status) && (
+                      <span className={clsx('sf-pill', submissionStatus(entry.status).cls)}>
+                        {submissionStatus(entry.status).label}
+                      </span>
+                    )}
+                    <span className='sf-list__time'>
+                      {sprintf(
+                        /* translators: %s: time since the entry, such as "5 mins" */
+                        __('%s ago', 'subtleforms'),
+                        entry.time_ago
+                      )}
+                    </span>
+                  </NavLink>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <div className='sf-empty'>
+            <span className='sf-empty__icon'>
+              <Icon.Inbox size={20} />
+            </span>
+            <p className='sf-empty__title'>{__('No entries yet', 'subtleforms')}</p>
+            <p className='sf-empty__text'>
+              {__('Entries appear here as soon as someone submits one of your forms.', 'subtleforms')}
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+/** Forms ranked by entries in the last 30 days. Add-ons add columns. */
+export function TopForms({ forms = [] }) {
+  const columns = getSlotItems('dashboard.top_forms.column');
+  return (
+    <section className='sf-panel'>
+      <header className='sf-panel__header'>
+        <div>
+          <h2 className='sf-panel__title'>{__('Top forms', 'subtleforms')}</h2>
+          <p className='sf-panel__subtitle'>{__('Entries in the last 30 days', 'subtleforms')}</p>
+        </div>
+        {forms.length > 0 && (
+          <NavLink to='/forms' className='sf-panel__link'>
+            {__('All forms', 'subtleforms')}
+            <Icon.ArrowRight size={14} aria-hidden='true' />
+          </NavLink>
+        )}
+      </header>
+      <div className='sf-panel__body sf-panel__body--flush'>
+        {forms.length > 0 ? (
+          <table className='sf-top'>
+            <thead className='screen-reader-text'>
+              <tr>
+                <th scope='col'>{__('Form', 'subtleforms')}</th>
+                <th scope='col'>{__('Entries', 'subtleforms')}</th>
+                {columns.map((column) => (
+                  <th key={column.id} scope='col'>{column.header}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {forms.map((form) => (
+                <tr key={form.id}>
+                  <td className='sf-top__name'>
+                    <NavLink to={`/forms/${form.id}`}>{form.title}</NavLink>
+                  </td>
+                  <td className='sf-top__num'>{formatNumber(form.entries)}</td>
+                  {columns.map((column) => {
+                    const Cell = column.component;
+                    return (
+                      <td key={column.id} className='sf-top__num'>
+                        <Cell form={form} />
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className='sf-empty'>
+            <span className='sf-empty__icon'>
+              <Icon.FileText size={20} />
+            </span>
+            <p className='sf-empty__title'>{__('No entries in the last 30 days', 'subtleforms')}</p>
+            <p className='sf-empty__text'>
+              {__('The forms that receive the most entries are listed here.', 'subtleforms')}
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 /**
  * KPI tile. Linked tiles navigate inside the app.
  */
-function Kpi({ label, value, meta, to, accent = false }) {
+function Kpi({ label, value, meta, to, accent = false, tone }) {
   const body = (
     <>
       <span className='sf-kpi__label'>
@@ -409,7 +589,7 @@ function Kpi({ label, value, meta, to, accent = false }) {
         {label}
       </span>
       <span className='sf-kpi__value'>{formatNumber(value)}</span>
-      {meta && <span className='sf-kpi__meta'>{meta}</span>}
+      {meta && <span className={clsx('sf-kpi__meta', tone && `is-${tone}`)}>{meta}</span>}
     </>
   );
 
@@ -422,38 +602,6 @@ function Kpi({ label, value, meta, to, accent = false }) {
   }
 
   return <div className='sf-kpi'>{body}</div>;
-}
-
-function QuickAction({ icon: ActionIcon, title, text, to, hash }) {
-  const navigate = useNavigate();
-  return (
-    <li>
-      <a
-        href={`#${hash || ''}`}
-        className='sf-quick__item'
-        onClick={(event) => {
-          event.preventDefault();
-          if (hash) {
-            window.location.hash = hash;
-          }
-          navigate(to);
-        }}>
-        <span className='sf-quick__icon' aria-hidden='true'>
-          <ActionIcon size={16} />
-        </span>
-        <span className='sf-quick__text'>
-          <span className='sf-quick__title'>{title}</span>
-          <span className='sf-quick__desc'>{text}</span>
-        </span>
-        <Icon.ChevronRight size={16} className='sf-quick__chevron' aria-hidden='true' />
-      </a>
-    </li>
-  );
-}
-
-function SubmissionStatus({ status }) {
-  const config = submissionStatus(status);
-  return <span className={clsx('sf-pill', 'sf-pill--dot', config.cls)}>{config.label}</span>;
 }
 
 function HealthItem({ label, value }) {
