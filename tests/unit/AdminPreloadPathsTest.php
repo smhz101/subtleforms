@@ -46,7 +46,7 @@ final class AdminPreloadPathsTest extends TestCase {
 	public function test_the_forms_screen_has_a_default_path_and_others_none() {
 		$this->assertCount( 1, AdminPreload::defaultPaths( 'subtleforms-forms' ) );
 		$this->assertSame( array(), AdminPreload::defaultPaths( 'subtleforms-reports' ) );
-		$this->assertSame( array(), AdminPreload::defaultPaths( 'subtleforms' ) );
+		$this->assertSame( array( '/subtleforms/v1/dashboard' ), AdminPreload::defaultPaths( 'subtleforms' ) );
 	}
 
 	public function test_the_settings_screen_preloads_the_settings_and_the_email_marketing_state() {

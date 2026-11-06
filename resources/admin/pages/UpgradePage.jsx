@@ -65,7 +65,7 @@ function features() {
 }
 
 /**
- * SubtleForms > Upgrade to Pro: what the separate SubtleForms Pro plugin adds,
+ * The upgrade page: what the separate SubtleForms Pro plugin adds,
  * and one link to its page. Information only: nothing in this plugin depends
  * on it, and the menu item is left out once an add-on is installed.
  *
@@ -77,7 +77,7 @@ export default function UpgradePage({ url }) {
 
   return (
     <AdminShell
-      title={__('Upgrade to Pro', 'subtleforms')}
+      title={__('SubtleForms Pro', 'subtleforms')}
       description={__(
         'SubtleForms Pro is a separate plugin. Everything in SubtleForms keeps working without it.',
         'subtleforms'

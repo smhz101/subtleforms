@@ -206,7 +206,7 @@ function getPageNameFromPath(pathname) {
 		'/submissions': __('Submissions', 'subtleforms'),
 		'/settings': __('Settings', 'subtleforms'),
 		'/reports': __('Reports', 'subtleforms'),
-		'/upgrade': __('Upgrade to Pro', 'subtleforms'),
+		'/upgrade': __('SubtleForms Pro', 'subtleforms'),
 	};
 	if (pathname.startsWith('/forms/') && pathname !== '/forms/new') {
 		return __('Form Builder', 'subtleforms');

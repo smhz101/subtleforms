@@ -96,6 +96,61 @@ const { SectionPanel, SectionHeader } = window.SubtleFormsExtend;
 
 `window.SubtleFormsExtend.registerSettingsRedirect( from, to )` sends an old Settings address to a new one before Settings picks a tab, for example `registerSettingsRedirect( { tab: 'ecommerce' }, { tab: 'extensions', ext: 'woocommerce' } )`. Every key of `from` must match (a string or an array of accepted strings); the other parameters of the old address are kept.
 
+## Page header, menu order and screens (2.7.5)
+
+### Page header (JavaScript)
+
+Every Free admin page draws `PageHeader` (class `sf-page-header`): the title (20px) with an optional chip, the actions on the right, an optional one-line description and a bottom border. `window.SubtleFormsExtend` exports it so add-on pages look the same. Check `typeof SubtleFormsExtend.PageHeader === 'function'` and fall back to your own markup on older plugins.
+
+```jsx
+const { PageHeader, DataTable, RowActions } = window.SubtleFormsExtend;
+
+<PageHeader
+  title="Orders"
+  description="Payments received through your forms."
+  meta={<span className="sf-chip">12</span>}
+  actions={<Button variant="secondary" href="...">Payments settings</Button>}
+/>
+```
+
+Props: `title`, `description`, `actions`, `meta` (after the title), `breadcrumb` (above it). Put the primary action rightmost and give it `variant="primary"`; keep it to one primary per page. Add-on pages drawn with `registerAdminPage` sit inside the frame that already shows the header, so they put their buttons in it with `<PageHeaderActions>...</PageHeaderActions>` (it renders into the header's actions area, or inline where there is no header). Below 600px the header stacks and the actions wrap.
+
+`DataTable` is the table All Forms uses (columns, sorting, selection, pagination, empty state, cards on phones). `RowActions` renders `[{ key, label, icon, onClick, href, external, isDestructive, inMenu, hidden, disabled }]` as the hover and focus row actions of that table (always visible on touch).
+
+### Menu order (PHP)
+
+The SubtleForms submenu is: Dashboard, All Forms, Add New, Submissions, Reports, then whatever add-ons add, then Settings, then the upgrade item. Add-ons register on `subtleforms/admin_menu` (`do_action( 'subtleforms/admin_menu', $caps )`), which runs after Reports and before Settings; Settings and the upgrade item are moved to the end again at `admin_menu` priority 99, so an add-on that hooks `admin_menu` itself still lands before them.
+
+| Filter | Use |
+| --- | --- |
+| `subtleforms/admin/upgrade_menu_item` | `true` shows the upgrade item (page `subtleforms-upgrade`) after Settings. Default: shown when no add-on is active. An add-on returns `false`. |
+| `subtleforms/dashboard/data` | Filter the array the `/subtleforms/v1/dashboard` call returns (stats, trend, recent entries, top forms, attention, checklist). |
+| `subtleforms/reports/data` | Filter the array the `/subtleforms/v1/reports` call builds (range, series, totals, breakdown, field summary). |
+
+### Dashboard and Reports slots (JavaScript)
+
+| Slot | Where | Item props |
+| --- | --- | --- |
+| `dashboard.tiles` | After the four stat tiles. | `data` (the dashboard payload) |
+| `dashboard.widgets` | Between the chart row and "Recent entries". | `data`, `forms` |
+| `dashboard.panels` | Same place, for panels that need only the recent forms. | `forms` |
+| `dashboard.attention` | Inside "Needs attention" (pending payments). Render an `<li>`, or `null`. | `data` |
+| `dashboard.top_forms.column` | An extra column in "Top forms" (conversion). Register `{ id, header, component }`; the component gets `form` (`id`, `title`, `entries`). | `form` |
+| `reports.series` | Extra series for the chart (views, conversion). | `report`, `range`, `formId` |
+| `reports.panels` | Extra panels under the breakdown. | `forms` |
+
+### Submissions links
+
+The Submissions screen reads `?unread=1` (unread entries only) and `?range=today|7days|30days|3months` from the address, so dashboard tiles and the admin bar can link to a filtered list.
+
+### Reports endpoint
+
+`GET /subtleforms/v1/reports?from=YYYY-MM-DD&to=YYYY-MM-DD&form_id=N` (site time zone, at most 366 days) returns `series` (`date`, `count`, `previous`), `totals`, `breakdown` per form, `forms` and, for one form, `field_summary` (the first 10 choice, rating and scale fields). The answer is kept for 60 seconds and ends with the next change to an entry.
+
+### WordPress dashboard and admin bar
+
+The `subtleforms_overview` dashboard widget and the SubtleForms admin bar node show for people with the `manage_options` capability. The widget's figures are kept for 5 minutes and end with the next change to an entry. The bar's unread bubble comes from `AdminMenu::unread_count()`, one query per request.
+
 ## Shared data layer (JavaScript)
 
 The admin app keeps what it reads from the server in one TanStack Query cache. Since 2.7.5 `window.SubtleFormsExtend` hands that cache to add-ons, so an add-on screen is cached too and the add-on does not bundle a second copy of the library (two copies would be two caches). Check `typeof SubtleFormsExtend.useRestQuery === 'function'` first and fall back to `apiFetch` when it is missing (an older plugin).
@@ -293,6 +348,7 @@ Counts already stored in the `subtleforms_stats` and `subtleforms_funnel` tables
 | `registerSettingsRedirect( from, to )` | Send an old Settings address (`#tab=...`) to its new place. |
 | `registerAdminPage( slug, { component, title, description } )` | Draw an add-on submenu page inside the SubtleForms frame. |
 | `SectionPanel`, `SectionHeader` | Components for a list of sections with a header each (see "Section panel and section header"). |
+| `PageHeader`, `PageHeaderActions`, `DataTable`, `RowActions` | The page header every admin page uses, the table All Forms uses and its row actions (see "Page header, menu order and screens"). |
 | `queryClient`, `useQuery`, `useMutation`, `useQueryClient`, `QueryClientProvider`, `useRestQuery( { key, path, staleTime } )` | The admin app's TanStack Query client and hooks, so an add-on caches its REST reads in the same cache and bundles no copy of its own (see "Shared data layer"). |
 | `registerEmailMarketingService( slug, { label, icon, settingsComponent, formComponent } )` | Add a tile to Settings > Integrations > Email marketing, or replace the one of the same slug. `icon` is a component, `settingsComponent` draws the service's screen and `formComponent` its block in a form's panel. |
 | `registerFormMountHook( fn )` | `fn( { container, formId, config } )` runs when a form mounts on a page (view beacon, funnel tracker). |

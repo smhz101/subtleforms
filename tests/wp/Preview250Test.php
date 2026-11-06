@@ -42,7 +42,7 @@ final class Preview250Test extends TestCase {
 	private function fresh(): void {
 		delete_transient( 'subtleforms_dashboard_stats_v2' );
 		global $wpdb;
-		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '%subtleforms_counts%'" );
+		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '%subtleforms_counts%' OR option_name LIKE '%subtleforms_ov_%'" );
 		wp_cache_flush();
 	}
 

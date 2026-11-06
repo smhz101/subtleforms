@@ -1,6 +1,7 @@
 import { useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
+import { submissionStatus } from '../utils/submissionStatus';
 import { getBranding } from '../utils/branding';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
@@ -476,6 +477,11 @@ export function RecentEntries({ entries = [] }) {
                         {entry.name && entry.email && <span>{entry.email}</span>}
                       </span>
                     </span>
+                    {entry.status && !['completed', 'saved'].includes(entry.status) && (
+                      <span className={clsx('sf-pill', submissionStatus(entry.status).cls)}>
+                        {submissionStatus(entry.status).label}
+                      </span>
+                    )}
                     <span className='sf-list__time'>
                       {sprintf(
                         /* translators: %s: time since the entry, such as "5 mins" */

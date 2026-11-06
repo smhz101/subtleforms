@@ -124,18 +124,31 @@ class AdminMenu {
 	 * @return int
 	 */
 	public static function unread_count( ?SubmissionsRepository $repo = null ): int {
-		static $count = null;
-		if ( null !== $count && ! ( defined( 'SUBTLEFORMS_TESTING' ) && SUBTLEFORMS_TESTING ) ) {
-			return $count;
+		if ( null !== self::$unread ) {
+			return self::$unread;
 		}
 		try {
-			$repo  = $repo ?? new SubmissionsRepository();
-			$count = (int) $repo->count( array( 'is_read' => 0 ) );
-			return $count;
+			$repo         = $repo ?? new SubmissionsRepository();
+			self::$unread = (int) $repo->count( array( 'is_read' => 0 ) );
+			return self::$unread;
 		} catch ( \Throwable $e ) {
 			return 0;
 		}
 	}
+
+	/**
+	 * Forget the per-request unread count (after this request changed entries).
+	 */
+	public static function forget_unread_count(): void {
+		self::$unread = null;
+	}
+
+	/**
+	 * Unread entries as counted earlier in this request.
+	 *
+	 * @var int|null
+	 */
+	private static $unread = null;
 
 	/**
 	 * Unread count bubble for a menu label, styled like core's comment count.
@@ -215,7 +228,7 @@ class AdminMenu {
 		if ( 0 !== strpos( self::menu_icon(), 'data:' ) ) {
 			$css .= $row . ' .wp-menu-image img{width:16px;height:16px;padding:9px 0 0;opacity:1;object-fit:contain;}';
 		}
-		// Upgrade to Pro: brand-coloured text with a small star, like a menu
+		// The upgrade item: brand-coloured text with a small star, like a menu
 		// item. The dark admin schemes get a lighter tint of the brand colour so
 		// the label keeps its contrast; the Light scheme uses the brand colour.
 		$css .= '#adminmenu .sf-menu-upgrade{color:#8fa3ff;font-weight:600;}'
@@ -391,7 +404,7 @@ class AdminMenu {
 			array( $this, 'render_settings' )
 		);
 
-		// Upgrade to Pro, after Settings, until an add-on is installed.
+		// The upgrade item, after Settings, until an add-on is installed.
 		if ( self::show_upgrade_item() ) {
 			add_submenu_page(
 				'subtleforms',
@@ -408,7 +421,7 @@ class AdminMenu {
 	public const UPGRADE_SLUG = 'subtleforms-upgrade';
 
 	/**
-	 * Whether the Upgrade to Pro item is in the menu.
+	 * Whether the upgrade item is in the menu.
 	 *
 	 * It is there while no add-on is installed. An add-on that adds the
 	 * features the page lists returns false from
@@ -418,7 +431,7 @@ class AdminMenu {
 	 */
 	public static function show_upgrade_item(): bool {
 		/**
-		 * Whether SubtleForms > Upgrade to Pro is in the menu.
+		 * Whether the upgrade item is in the menu.
 		 *
 		 * @param bool $show True unless the add-on from the SubtleForms team is active.
 		 * @since 2.7.5
@@ -478,7 +491,7 @@ class AdminMenu {
 	}
 
 	/**
-	 * Render the Upgrade to Pro page.
+	 * Render the upgrade page.
 	 */
 	public function render_upgrade(): void {
 		if ( ! current_user_can( $this->caps->manage_cap() ) ) {

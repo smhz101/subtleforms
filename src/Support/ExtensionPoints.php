@@ -37,7 +37,12 @@ final class ExtensionPoints {
 	 * any level above the highest it knows. Add-ons detect them instead: since
 	 * 2.7.5 `window.SubtleFormsExtend` has `ServiceTileGrid` and
 	 * `ServiceDetailHeader`, and the `subtleforms/email/marketing/skipped`
-	 * action fires for services on the same site (MailPoet).
+	 * action fires for services on the same site (MailPoet). Also since 2.7.5:
+	 * `PageHeader`, `PageHeaderActions`, `DataTable` and `RowActions`; the
+	 * screen slots `dashboard.tiles`, `dashboard.widgets`, `dashboard.attention`,
+	 * `dashboard.top_forms.column` and `reports.series`; and the filters
+	 * `subtleforms/admin/upgrade_menu_item`, `subtleforms/dashboard/data` and
+	 * `subtleforms/reports/data`.
 	 */
 	public const LEVEL = 3;
 
