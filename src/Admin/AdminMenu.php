@@ -52,6 +52,8 @@ class AdminMenu {
 		$this->formsRepo     = $formsRepo ?? new FormsRepository();
 		$this->submissionsRepo = $submissionsRepo ?? new SubmissionsRepository();
 
+		// Add-on submenu pages can draw inside the SubtleForms frame (registerAdminPage).
+		add_filter( 'subtleforms/admin_pages_supported', '__return_true' );
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'menu_icon_styles' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );

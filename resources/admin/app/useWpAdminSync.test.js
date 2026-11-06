@@ -21,3 +21,14 @@ describe('adminUrlToRoute', () => {
     expect(path).toBe('/submissions?tab=unread&search=ada');
   });
 });
+
+describe('routeToAdminQuery for add-on pages', () => {
+  it('keeps the menu slug of a page an add-on registered', () => {
+    const util = require('util');
+    global.TextEncoder = global.TextEncoder || util.TextEncoder;
+    global.TextDecoder = global.TextDecoder || util.TextDecoder;
+    const { routeToAdminQuery } = require('./useWpAdminSync');
+    expect(routeToAdminQuery('/addon/subtleforms-pro-orders').page).toBe('subtleforms-pro-orders');
+    expect(routeToAdminQuery('/nowhere').page).toBe('subtleforms');
+  });
+});

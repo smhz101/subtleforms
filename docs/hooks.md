@@ -92,6 +92,8 @@ const { SectionPanel, SectionHeader } = window.SubtleFormsExtend;
 
 `SectionPanel` props: `sections` (`{ id, label, status: 'on' | 'off' | 'warn' | null, order, render() }`), `current` (leave out to follow the address), `onChange( id )`, `urlParam` (the address parameter that keeps the choice, default `section`), `keepParams` (parameters kept when another section is chosen, default `['tab']`) and `label`. `SectionHeader` props: `title`, `description` (one line, no icon) and `actions` (an optional node on the right). A section's header is its title and one line; put detail in a help text under the control it explains, not above the content.
 
+`window.SubtleFormsExtend.registerAdminPage( slug, { component, title, description } )` draws a submenu page an add-on added through `subtleforms/admin_menu` inside the SubtleForms frame (top bar, page header and stage). The menu callback prints `<div class="wrap subtleforms-admin"><div id="subtleforms-admin-app" data-page="addon"></div></div>` and the slug is the menu slug, which must start with `subtleforms-`. Print that mount point only when `apply_filters( 'subtleforms/admin_pages_supported', false )` is true; with an older SubtleForms the filter stays false, and the add-on draws its own mount point. The component takes no props.
+
 `window.SubtleFormsExtend.registerSettingsRedirect( from, to )` sends an old Settings address to a new one before Settings picks a tab, for example `registerSettingsRedirect( { tab: 'ecommerce' }, { tab: 'extensions', ext: 'woocommerce' } )`. Every key of `from` must match (a string or an array of accepted strings); the other parameters of the old address are kept.
 
 ## Shared data layer (JavaScript)
@@ -162,6 +164,7 @@ A SubtleForms admin screen can receive the answer of a few REST requests inside 
 
 | Hook | Kind and arguments | What it does |
 | --- | --- | --- |
+| `subtleforms/admin_pages_supported` | filter `( bool $supported )` | True when this plugin draws add-on submenu pages inside its frame (`registerAdminPage`). The plugin returns true; an add-on that finds it false prints its own mount point. Since 2.7.5. |
 | `subtleforms/admin/preload_paths` | filter `( string[] $paths, string $screen )` | REST paths to preload on a screen. `$screen` is the `page` value of the screen (`subtleforms`, `subtleforms-forms`, `subtleforms-submissions`, `subtleforms-reports`, `subtleforms-settings`). Only GET paths below `/subtleforms/v1/` are kept, at most 12 per screen; anything else is dropped. The plugin adds the first request of its own Forms list on `subtleforms-forms`, and the settings and the email marketing state on `subtleforms-settings` (Settings opens with no loading step). Since 2.7.4. |
 
 Use the exact path string the script requests, query included. A preloaded answer is used once: the first request for that path gets it and later requests (a refetch, another filter) go to the server as usual. The script can read the answer at once from `window.subtleformsAdmin.preloaded[ path ]` (`{ body, headers }`), for a first paint with no loading step.
@@ -288,6 +291,7 @@ Counts already stored in the `subtleforms_stats` and `subtleforms_funnel` tables
 | `registerLogicEditor( Component )` | Replace the builder logic editor. It gets the editor props (`logic`, `availableFields`, `onChange`, `scope`, `disabled`, ...) plus `countries` (the country list for country rules) and `Fallback`, the free editor. |
 | `registerSlotItem( slot, id, { component, order } )` | Add an item to a screen slot. |
 | `registerSettingsRedirect( from, to )` | Send an old Settings address (`#tab=...`) to its new place. |
+| `registerAdminPage( slug, { component, title, description } )` | Draw an add-on submenu page inside the SubtleForms frame. |
 | `SectionPanel`, `SectionHeader` | Components for a list of sections with a header each (see "Section panel and section header"). |
 | `queryClient`, `useQuery`, `useMutation`, `useQueryClient`, `QueryClientProvider`, `useRestQuery( { key, path, staleTime } )` | The admin app's TanStack Query client and hooks, so an add-on caches its REST reads in the same cache and bundles no copy of its own (see "Shared data layer"). |
 | `registerEmailMarketingService( slug, { label, icon, settingsComponent, formComponent } )` | Add a tile to Settings > Integrations > Email marketing, or replace the one of the same slug. `icon` is a component, `settingsComponent` draws the service's screen and `formComponent` its block in a form's panel. |
