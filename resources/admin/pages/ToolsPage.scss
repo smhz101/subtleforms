@@ -110,3 +110,19 @@
 	width: 220px;
 	margin: 0;
 }
+
+// Narrow screens: the card header stacks (the search takes the full width) and
+// the buttons wrap instead of running over each other.
+.sf-tools__body .sf-panel__footer {
+	flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+	.sf-tools__body .sf-panel__header {
+		flex-wrap: wrap;
+	}
+
+	.sf-tools__body .sf-panel__header .components-search-control {
+		width: 100%;
+	}
+}
