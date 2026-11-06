@@ -113,14 +113,26 @@ class AdminMenu {
 	 * @return int
 	 */
 	private function get_unread_count(): int {
+		return self::unread_count( $this->submissionsRepo );
+	}
+
+	/**
+	 * Number of unread entries, counted once per request. The menu badge, the
+	 * admin bar and the admin data all read it from here.
+	 *
+	 * @param SubmissionsRepository|null $repo Entries.
+	 * @return int
+	 */
+	public static function unread_count( ?SubmissionsRepository $repo = null ): int {
 		static $count = null;
 		if ( null !== $count && ! ( defined( 'SUBTLEFORMS_TESTING' ) && SUBTLEFORMS_TESTING ) ) {
 			return $count;
 		}
 		try {
-			$count = (int) $this->submissionsRepo->count( array( 'is_read' => 0 ) );
+			$repo  = $repo ?? new SubmissionsRepository();
+			$count = (int) $repo->count( array( 'is_read' => 0 ) );
 			return $count;
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			return 0;
 		}
 	}
@@ -560,6 +572,8 @@ class AdminMenu {
 			'addonFeatures'  => \SubtleForms\Support\ExtensionPoints::provided(),
 			// The More features card on the Dashboard (see more_features()).
 			'moreFeatures'   => self::more_features(),
+			// Today in the site's time zone (Y-m-d), the end of the Reports date range.
+			'siteToday'      => wp_date( 'Y-m-d' ),
 			// The Pro page on subtleforms.com, for the Upgrade page.
 			'upgradeUrl'     => self::upgrade_url( 'menu' ),
 			'extensions'     => $this->buildExtensionsData(),
