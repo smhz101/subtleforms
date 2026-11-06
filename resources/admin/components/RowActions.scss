@@ -1,0 +1,40 @@
+// Row actions drawn by RowActions. The hover/focus reveal and the touch rule
+// live with the table (DataTable.scss, `.subtleforms-row-actions`).
+
+.subtleforms-row-actions {
+	.sf-row-action-link.components-button {
+		height: auto;
+		padding: 4px 6px;
+		font-size: var(--sf-text-sm);
+		text-decoration: none;
+		white-space: nowrap;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+
+	.sf-row-action-btn.components-button {
+		width: 32px;
+		min-width: 32px;
+		height: 32px;
+		padding: 0;
+		color: var(--sf-text-secondary);
+
+		&:hover {
+			background: var(--sf-bg-muted);
+			color: var(--sf-text);
+		}
+
+		&.is-destructive:hover {
+			color: var(--sf-danger, #cc1818);
+		}
+	}
+
+	.sf-row-action-menu .components-button {
+		width: 32px;
+		min-width: 32px;
+		height: 32px;
+		padding: 0;
+	}
+}
