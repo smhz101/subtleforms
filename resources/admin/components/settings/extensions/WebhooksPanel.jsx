@@ -121,12 +121,6 @@ export default function WebhooksPanel({ settings, updateSetting, fieldErrors = {
             />
           </div>
         </div>
-
-        {/* An add-on's delivery log, when it provides one (2.3.0). */}
-        {window.SubtleFormsPro?.DeliveryLog && (() => {
-          const DeliveryLog = window.SubtleFormsPro.DeliveryLog;
-          return <DeliveryLog kind='webhook' />;
-        })()}
       </div>
     </div>
   );
