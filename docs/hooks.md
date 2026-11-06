@@ -136,7 +136,8 @@ The SubtleForms submenu is: Dashboard, All Forms, Add New, Submissions, Reports,
 | `dashboard.panels` | Same place, for panels that need only the recent forms. | `forms` |
 | `dashboard.attention` | Inside "Needs attention" (pending payments). Render an `<li>`, or `null`. | `data` |
 | `dashboard.top_forms.column` | An extra column in "Top forms" (conversion). Register `{ id, header, component }`; the component gets `form` (`id`, `title`, `entries`). | `form` |
-| `reports.series` | Extra series for the chart (views, conversion). | `report`, `range`, `formId` |
+| `reports.series` | A panel under the chart for extra series (views, conversion). | `report`, `range`, `formId` |
+| `reports.breakdown.column` | An extra column in "By form", before the trend. Register `{ id, header, component }`; the component gets `form` (a row of the breakdown) and `range` (`from`, `to`). | `form`, `range` |
 | `reports.panels` | Extra panels under the breakdown. | `forms` |
 
 ### Submissions links

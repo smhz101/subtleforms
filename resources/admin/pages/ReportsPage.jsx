@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import AdminShell from '../components/AdminShell';
 import DataTable from '../components/DataTable';
 import ExtensionSlot from '../components/ExtensionSlot';
+import { getSlotItems } from '../../shared/extend';
 import TrendChart from '../components/TrendChart';
 import Icon from '../ui/Icon';
 import { useReport } from '../data';
@@ -289,6 +290,15 @@ export default function ReportsPage() {
     { key: 'unread', title: __('Unread', 'subtleforms'), sortable: true, render: (v) => formatNumber(v) },
     { key: 'spam', title: __('Spam blocked', 'subtleforms'), sortable: true, render: (v) => formatNumber(v) },
     { key: 'share', title: __('Share', 'subtleforms'), sortable: true, render: (v) => `${v}%` },
+    // Columns add-ons bring (Pro adds Views and Conversion), before the trend.
+    ...getSlotItems('reports.breakdown.column').map((item) => ({
+      key: `ext-${item.id}`,
+      title: item.header,
+      render: (_, row) => {
+        const Cell = item.component;
+        return <Cell form={row} range={report?.range} />;
+      },
+    })),
     { key: 'days', title: __('Trend', 'subtleforms'), render: (days) => <Sparkline values={days} /> },
   ];
 

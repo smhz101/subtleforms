@@ -192,6 +192,18 @@ test('add-ons add series and panels', async () => {
   expect(container.querySelector('.pro-panel').textContent).toBe('2 forms');
 });
 
+test('add-ons add columns to the breakdown, before the trend', async () => {
+  registerSlotItem('reports.breakdown.column', 'views', {
+    header: 'Views',
+    component: ({ form, range }) => <span className='addon-cell'>{form.title}:{range.to}</span>,
+  });
+  await mount(report());
+  const heads = [...container.querySelectorAll('th')].map((th) => th.textContent.trim());
+  expect(heads.indexOf('Views')).toBeGreaterThan(heads.indexOf('Share'));
+  expect(heads.indexOf('Views')).toBeLessThan(heads.indexOf('Trend'));
+  expect(container.querySelectorAll('.addon-cell').length).toBeGreaterThan(0);
+});
+
 test('shows no upgrade link without an add-on', async () => {
   await mount(report());
   expect(container.textContent).not.toMatch(/\bPro\b|upgrade|licen/i);
