@@ -3,7 +3,8 @@ import { SelectControl, TextControl, ToggleControl, Button } from '@wordpress/co
 import { __ } from '@wordpress/i18n';
 import { consentFieldOptions, flattenFields } from '../../builder/utils/integrationFields';
 import MappingTable from './MappingTable';
-import { emailMarketingApi } from './api';
+import { useQueryClient } from '@tanstack/react-query';
+import { fetchFields, fetchLists } from './queries';
 import { uiFor } from './serviceUi';
 import './emailMarketing.scss';
 
@@ -29,6 +30,7 @@ import './emailMarketing.scss';
  */
 export default function ServiceFormPanel({ service, connected, connection, schema, config = {}, patch, fieldOptions = [], isReadOnly = false }) {
   const ui = uiFor(service);
+  const client = useQueryClient();
   const listId = config.list_id || '';
   const mappingKey = ui.upper && service === 'mailchimp' ? listId : '';
 
@@ -46,8 +48,7 @@ export default function ServiceFormPanel({ service, connected, connection, schem
   const loadLists = (refresh = false) => {
     setListBusy(true);
     setListError('');
-    return emailMarketingApi
-      .lists(service, refresh)
+    return fetchLists(client, service, refresh)
       .then((rows) => setLists(Array.isArray(rows) ? rows : []))
       .catch((e) => setListError(e?.message || ui.listError))
       .finally(() => setListBusy(false));
@@ -60,8 +61,7 @@ export default function ServiceFormPanel({ service, connected, connection, schem
       return Promise.resolve();
     }
     setFields((f) => ({ ...f, key: mappingKey, loading: true, error: '' }));
-    return emailMarketingApi
-      .fields(service, listId, refresh)
+    return fetchFields(client, service, listId, refresh)
       .then((items) => setFields({ key: mappingKey, items: Array.isArray(items) ? items : [], loading: false, error: '' }))
       .catch((e) => setFields({ key: mappingKey, items: [], loading: false, error: e?.message || ui.fieldsError }));
   };

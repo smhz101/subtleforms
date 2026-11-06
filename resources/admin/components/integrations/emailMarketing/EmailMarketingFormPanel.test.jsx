@@ -7,6 +7,7 @@ import { act } from 'react';
 import EmailMarketingFormPanel from './EmailMarketingFormPanel';
 import { emailMarketingApi } from './api';
 import { registerSlotItem } from '../../../../shared/extend';
+import { withClient } from '../../../../../tests/js/queryWrapper';
 
 jest.mock('./emailMarketing.scss', () => ({}));
 jest.mock('./api', () => ({
@@ -37,7 +38,7 @@ async function mount(integrations, services = { mailchimp: state(true), brevo: s
   document.body.appendChild(container);
   root = createRoot(container);
   await act(async () =>
-    root.render(<EmailMarketingFormPanel schema={SCHEMA} integrations={integrations} patch={patch} fieldOptions={FIELD_OPTIONS} />)
+    root.render(withClient(<EmailMarketingFormPanel schema={SCHEMA} integrations={integrations} patch={patch} fieldOptions={FIELD_OPTIONS} />))
   );
   return patch;
 }

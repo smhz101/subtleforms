@@ -26,6 +26,8 @@ export {
 
 export { useSettings } from './queries/settings';
 
+export { useToolsForms, useLogList, useApiLog } from './queries/tools';
+
 export { useDashboardStats } from './queries/dashboard';
 
 export { useSpamStats, useSpamProtection } from './queries/spam';

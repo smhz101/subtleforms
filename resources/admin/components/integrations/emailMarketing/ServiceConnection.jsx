@@ -2,7 +2,8 @@ import { useState } from '@wordpress/element';
 import { Button, TextControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import Icon from '../../../ui/Icon';
-import { emailMarketingApi, announceService } from './api';
+import { announceService } from './api';
+import { useConnectService, useDisconnectService, useTestService } from './queries';
 import { uiFor } from './serviceUi';
 import './emailMarketing.scss';
 
@@ -53,8 +54,11 @@ export default function ServiceConnection({ service, label, state, onState }) {
   const ui = uiFor(service);
   const [editing, setEditing] = useState(false);
   const [key, setKey] = useState('');
-  const [busy, setBusy] = useState('');
   const [result, setResult] = useState({ tone: '', text: '' });
+  const connectMutation = useConnectService(service);
+  const testMutation = useTestService(service);
+  const disconnectMutation = useDisconnectService(service);
+  const busy = connectMutation.isPending ? 'save' : testMutation.isPending ? 'test' : disconnectMutation.isPending ? 'disconnect' : '';
 
   const apply = (next) => {
     announceService(service, { status: next.status });
@@ -64,10 +68,9 @@ export default function ServiceConnection({ service, label, state, onState }) {
   const showField = !state.has_key || editing;
 
   const save = async () => {
-    setBusy('save');
     setResult({ tone: '', text: '' });
     try {
-      const next = await emailMarketingApi.connect(service, key.trim());
+      const next = await connectMutation.mutateAsync(key.trim());
       setKey('');
       setEditing(false);
       apply(next);
@@ -78,32 +81,27 @@ export default function ServiceConnection({ service, label, state, onState }) {
     } catch (e) {
       setResult({ tone: 'error', text: e?.message || __('The connection failed.', 'subtleforms') });
     }
-    setBusy('');
   };
 
   const test = async () => {
-    setBusy('test');
     setResult({ tone: '', text: '' });
     try {
-      const res = await emailMarketingApi.test(service);
+      const res = await testMutation.mutateAsync();
       if (res.state) apply(res.state);
       setResult({ tone: res.ok ? 'ok' : 'error', text: res.message || (res.ok ? __('Connected.', 'subtleforms') : __('The connection failed.', 'subtleforms')) });
     } catch (e) {
       setResult({ tone: 'error', text: e?.message || __('The connection failed.', 'subtleforms') });
     }
-    setBusy('');
   };
 
   const disconnect = async () => {
-    setBusy('disconnect');
     setResult({ tone: '', text: '' });
     try {
-      apply(await emailMarketingApi.disconnect(service));
+      apply(await disconnectMutation.mutateAsync());
       setEditing(false);
     } catch (e) {
       setResult({ tone: 'error', text: e?.message || __('Could not remove the key.', 'subtleforms') });
     }
-    setBusy('');
   };
 
   let summary = sprintf(

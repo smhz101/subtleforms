@@ -4,7 +4,8 @@ import SectionHeader from '../../sectionPanel/SectionHeader';
 import ProBanner from './ProBanner';
 import ServiceDetail from './ServiceDetail';
 import ServiceGrid from './ServiceGrid';
-import { emailMarketingApi, announceService, pageData } from './api';
+import { announceService, pageData } from './api';
+import { useSetServiceEnabled } from './queries';
 import { getEmailMarketingServices } from '../../../../shared/extend';
 import './registerBuiltins';
 import './emailMarketing.scss';
@@ -52,6 +53,7 @@ export default function EmailMarketingSettings() {
   });
   const [busy, setBusy] = useState({});
   const [error, setError] = useState('');
+  const setServiceEnabled = useSetServiceEnabled();
 
   const services = useMemo(() => {
     const server = pageData().services;
@@ -88,7 +90,7 @@ export default function EmailMarketingSettings() {
       setBusy((current) => ({ ...current, [slug]: true }));
       setSwitch(slug, value);
       try {
-        await emailMarketingApi.setEnabled(slug, value);
+        await setServiceEnabled.mutateAsync({ service: slug, enabled: value });
         announceService(slug, { enabled: value });
         if (value) open(slug);
       } catch (e) {
@@ -97,7 +99,7 @@ export default function EmailMarketingSettings() {
       }
       setBusy((current) => ({ ...current, [slug]: false }));
     },
-    [open, setSwitch]
+    [open, setSwitch, setServiceEnabled]
   );
 
   const current = active ? services.find((s) => s.slug === active) : null;

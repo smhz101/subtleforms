@@ -8,6 +8,7 @@ import { act } from 'react';
 import ServiceFormPanel from './ServiceFormPanel';
 import { setMergeRow } from './MappingTable';
 import { emailMarketingApi } from './api';
+import { withClient } from '../../../../../tests/js/queryWrapper';
 
 jest.mock('./emailMarketing.scss', () => ({}));
 jest.mock('../settings/extensions/extensions.scss', () => ({}), { virtual: true });
@@ -54,15 +55,17 @@ async function mount(config, props = {}) {
   root = createRoot(container);
   await act(async () =>
     root.render(
-      <ServiceFormPanel
-        service='mailchimp'
-        connected
-        schema={SCHEMA}
-        config={config}
-        patch={patch}
-        fieldOptions={FIELD_OPTIONS}
-        {...props}
-      />
+      withClient(
+        <ServiceFormPanel
+          service='mailchimp'
+          connected
+          schema={SCHEMA}
+          config={config}
+          patch={patch}
+          fieldOptions={FIELD_OPTIONS}
+          {...props}
+        />
+      )
     )
   );
   return patch;
@@ -203,7 +206,7 @@ describe('Brevo', () => {
     document.body.appendChild(container);
     root = createRoot(container);
     await act(async () =>
-      root.render(<ServiceFormPanel service='brevo' connected connection={connection} schema={SCHEMA} config={config} patch={patch} fieldOptions={FIELD_OPTIONS} />)
+      root.render(withClient(<ServiceFormPanel service='brevo' connected connection={connection} schema={SCHEMA} config={config} patch={patch} fieldOptions={FIELD_OPTIONS} />))
     );
     return patch;
   };
@@ -239,7 +242,7 @@ describe('Kit', () => {
     document.body.appendChild(container);
     root = createRoot(container);
     await act(async () =>
-      root.render(<ServiceFormPanel service='kit' connected connection={{ settings: {} }} schema={SCHEMA} config={config} patch={patch} fieldOptions={FIELD_OPTIONS} />)
+      root.render(withClient(<ServiceFormPanel service='kit' connected connection={{ settings: {} }} schema={SCHEMA} config={config} patch={patch} fieldOptions={FIELD_OPTIONS} />))
     );
     return patch;
   };

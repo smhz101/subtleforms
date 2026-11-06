@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from '@wordpress/element';
+import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { apiGet } from '../../utils/api';
+import { useToolsForms } from '../../data/queries/tools';
 import { getSlotItems } from '../../../shared/extend';
 import SectionPanel from '../sectionPanel/SectionPanel';
 import SectionHeader from '../sectionPanel/SectionHeader';
@@ -49,19 +49,7 @@ export function logSectionIds() {
  * Each section has the standard header, then its table.
  */
 export default function LogsPanel() {
-  const [forms, setForms] = useState([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    apiGet('/forms?per_page=100&orderby=title&order=ASC').then((result) => {
-      if (!cancelled && result.ok) {
-        setForms(Array.isArray(result.body?.data) ? result.body.data : []);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const { data: forms = [] } = useToolsForms();
 
   const addOns = getSlotItems('settings.logs');
 

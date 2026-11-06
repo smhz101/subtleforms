@@ -7,6 +7,7 @@ import { createRoot } from '@wordpress/element';
 import { act } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import WebhooksPanel from './WebhooksPanel';
+import { withClient } from '../../../../../tests/js/queryWrapper';
 
 jest.mock('@wordpress/api-fetch', () => jest.fn());
 jest.mock('./extensions.scss', () => ({}));
@@ -20,7 +21,7 @@ function mount() {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
-  act(() => root.render(<WebhooksPanel settings={{}} updateSetting={() => {}} />));
+  act(() => root.render(withClient(<WebhooksPanel settings={{}} updateSetting={() => {}} />)));
   return { container, unmount: () => act(() => root.unmount()) };
 }
 

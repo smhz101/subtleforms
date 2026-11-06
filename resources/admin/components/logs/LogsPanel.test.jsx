@@ -10,9 +10,11 @@ import '../../../shared/extend';
 
 jest.mock('./logs.scss', () => ({}));
 jest.mock('../sectionPanel/sectionPanel.scss', () => ({}));
-jest.mock('../../utils/api', () => ({ apiGet: jest.fn() }));
+jest.mock('../../data/apiClient', () => ({ apiClient: { get: jest.fn() } }));
 
-import { apiGet } from '../../utils/api';
+import { apiClient } from '../../data/apiClient';
+const apiGet = apiClient.get;
+import { withClient } from '../../../../tests/js/queryWrapper';
 
 global.IS_REACT_ACT_ENVIRONMENT = true;
 window.matchMedia =
@@ -26,7 +28,7 @@ async function mount() {
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
-  await act(async () => root.render(<LogsPanel />));
+  await act(async () => root.render(withClient(<LogsPanel />)));
 }
 
 const click = (label) =>
@@ -37,14 +39,11 @@ const click = (label) =>
 beforeEach(() => {
   apiGet.mockReset();
   apiGet.mockImplementation((path) => {
-    if (path.startsWith('/forms')) return Promise.resolve({ ok: true, body: { data: [{ id: 3, title: 'Contact' }] } });
+    if (path.startsWith('/forms')) return Promise.resolve([{ id: 3, title: 'Contact' }]);
     if (path.startsWith('/tools/api-logs')) {
-      return Promise.resolve({ ok: true, body: { data: { total: 1, rows: [{ id: 1, created_at: '2026-11-01 10:00', method: 'GET', route: '/forms', status: 200, user_id: 1, duration_ms: 12 }] } } });
+      return Promise.resolve({ total: 1, rows: [{ id: 1, created_at: '2026-11-01 10:00', method: 'GET', route: '/forms', status: 200, user_id: 1, duration_ms: 12 }] });
     }
-    return Promise.resolve({
-      ok: true,
-      body: { data: { total: 1, rows: [{ id: 9, created_at: '2026-11-01 10:00', level: 'info', form_id: 3, form_title: 'Contact', message: 'Row message' }] } },
-    });
+    return Promise.resolve({ total: 1, rows: [{ id: 9, created_at: '2026-11-01 10:00', level: 'info', form_id: 3, form_title: 'Contact', message: 'Row message' }] });
   });
 });
 
