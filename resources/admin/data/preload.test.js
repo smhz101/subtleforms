@@ -1,5 +1,8 @@
 import realApiFetch from '@wordpress/api-fetch';
-import { registerPreloaded, takePreloaded } from './preload';
+import { QueryClient } from '@tanstack/react-query';
+import { registerPreloaded, takePreloaded, seedQueryClient } from './preload';
+import { PRELOAD_SEEDS, SETTINGS_PATH, EMAIL_MARKETING_PATH } from './seeds';
+import { queryKeys } from './queryKeys';
 
 const PATH = '/subtleforms/v1/forms?orderby=created_at&order=desc&page=1&per_page=100';
 const entry = () => ( { body: { data: [ { id: 1 } ], meta: { total: 1 } }, headers: {} } );
@@ -48,5 +51,34 @@ describe( 'takePreloaded', () => {
 	it( 'returns null for a path that was not preloaded', () => {
 		registerPreloaded( { [ PATH ]: entry() }, fakeApi() );
 		expect( takePreloaded( '/subtleforms/v1/forms?status=draft' ) ).toBeNull();
+	} );
+} );
+
+describe( 'seedQueryClient', () => {
+	it( 'puts a preloaded answer in the cache without its envelope, once', () => {
+		registerPreloaded( {
+			[ SETTINGS_PATH ]: { body: { data: { success: true, data: { debug_mode: false } } }, headers: {} },
+		}, fakeApi() );
+		const client = new QueryClient();
+		expect( seedQueryClient( client, PRELOAD_SEEDS ) ).toBe( 1 );
+		expect( client.getQueryData( queryKeys.settings.general() ) ).toEqual( { success: true, data: { debug_mode: false } } );
+		// Taken: a second seeding finds nothing, and the email marketing query stays empty.
+		expect( seedQueryClient( client, PRELOAD_SEEDS ) ).toBe( 0 );
+		expect( client.getQueryData( queryKeys.emailMarketing.all() ) ).toBeUndefined();
+	} );
+
+	it( 'seeds Settings and the email marketing state, the two paths the server preloads for Settings', () => {
+		registerPreloaded( {
+			[ SETTINGS_PATH ]: { body: { data: { success: true, data: {} } }, headers: {} },
+			[ EMAIL_MARKETING_PATH ]: { body: { data: { services: { kit: { status: 'none' } } } }, headers: {} },
+		}, fakeApi() );
+		const client = new QueryClient();
+		expect( seedQueryClient( client, PRELOAD_SEEDS ) ).toBe( 2 );
+		expect( client.getQueryData( queryKeys.emailMarketing.all() ).services.kit.status ).toBe( 'none' );
+	} );
+
+	it( 'does nothing without a client or seeds', () => {
+		expect( seedQueryClient( null, PRELOAD_SEEDS ) ).toBe( 0 );
+		expect( seedQueryClient( new QueryClient(), null ) ).toBe( 0 );
 	} );
 } );

@@ -40,12 +40,23 @@ final class AdminPreload {
 	 * as it mounts; this is that request, so the list is in the first paint.
 	 * Keep it in step with the request built in FormsList.jsx.
 	 *
+	 * Settings asks for the settings and for the state of the email marketing
+	 * services as it opens (`useSettings`, `useEmailMarketingServices`); both
+	 * are sent with the page and put in the query cache, so Settings opens with
+	 * no spinner. Keep them in step with `resources/admin/data/seeds.js`.
+	 *
 	 * @param string $screen Screen slug (the `page` query value).
 	 * @return string[]
 	 */
 	public static function defaultPaths( string $screen ): array {
 		if ( 'subtleforms-forms' === $screen ) {
 			return array( '/subtleforms/v1/forms?orderby=created_at&order=desc&page=1&per_page=100' );
+		}
+		if ( 'subtleforms-settings' === $screen ) {
+			return array(
+				'/subtleforms/v1/settings',
+				'/subtleforms/v1/integrations/email-marketing',
+			);
 		}
 		return array();
 	}

@@ -7,6 +7,8 @@ import '../shared/extend';
 // The shared service tile grid and header, for add-ons (since 2.7.5, add-ons feature-detect it).
 import './components/integrations/serviceTiles/expose';
 import './components/sectionPanel/expose';
+// The shared query client and hooks, for add-ons (since 2.8.0, add-ons feature-detect it).
+import './data/expose';
 
 // Import aggregated admin styles
 import './styles/admin.scss';

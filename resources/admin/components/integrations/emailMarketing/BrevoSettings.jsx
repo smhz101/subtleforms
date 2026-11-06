@@ -1,7 +1,8 @@
 import { useEffect, useState } from '@wordpress/element';
 import { Button, SelectControl, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { emailMarketingApi } from './api';
+import { useQueryClient } from '@tanstack/react-query';
+import { fetchBrevoTemplates, useSaveServiceSettings } from './queries';
 import './emailMarketing.scss';
 
 /**
@@ -20,25 +21,26 @@ export default function BrevoSettings({ connection, onState }) {
   const [templates, setTemplates] = useState(null);
   const [note, setNote] = useState({ tone: '', text: '' });
   const [busy, setBusy] = useState(false);
+  const client = useQueryClient();
+  const saveSettings = useSaveServiceSettings('brevo');
   const connected = connection.has_key && connection.status !== 'error';
 
   useEffect(() => {
     if (!connected) return undefined;
     let cancelled = false;
-    emailMarketingApi
-      .brevoTemplates()
+    fetchBrevoTemplates(client)
       .then((rows) => !cancelled && setTemplates(Array.isArray(rows) ? rows : []))
       .catch(() => !cancelled && setTemplates([]));
     return () => {
       cancelled = true;
     };
-  }, [connected]);
+  }, [connected, client]);
 
   const save = async () => {
     setBusy(true);
     setNote({ tone: '', text: '' });
     try {
-      const next = await emailMarketingApi.saveSettings('brevo', { doi_template_id: Number(template) || 0, doi_redirect_url: redirect.trim() });
+      const next = await saveSettings.mutateAsync({ doi_template_id: Number(template) || 0, doi_redirect_url: redirect.trim() });
       onState(next);
       setRedirect(next.settings?.doi_redirect_url || '');
       setNote({ tone: 'ok', text: __('Saved.', 'subtleforms') });

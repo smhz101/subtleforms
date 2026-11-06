@@ -84,6 +84,24 @@ final class AdminPreloadTest extends TestCase {
 		$this->assertEmpty( $dash['preloaded'] );
 	}
 
+	public function test_settings_preloads_the_settings_and_the_email_marketing_state() {
+		$this->asAdmin();
+		$expected = array( '/subtleforms/v1/settings', '/subtleforms/v1/integrations/email-marketing' );
+		$this->assertSame( $expected, AdminPreload::defaultPaths( 'subtleforms-settings' ) );
+
+		$loaded = $this->load( 'subtleforms-settings' );
+		$this->assertSame( $expected, array_keys( $loaded['preloaded'] ) );
+
+		// The answers are the ones a request would get: settings arrive as { success, data } inside the envelope.
+		$settings = $loaded['preloaded']['/subtleforms/v1/settings']['body'];
+		$this->assertTrue( $settings['data']['success'] );
+		$this->assertArrayHasKey( 'autosave_enabled', $settings['data']['data'] );
+		$services = $loaded['preloaded']['/subtleforms/v1/integrations/email-marketing']['body'];
+		$this->assertArrayHasKey( 'data', $services );
+
+		$this->assertSame( array(), AdminPreload::defaultPaths( 'subtleforms' ), 'other screens keep their own lists' );
+	}
+
 	public function test_a_user_without_access_gets_nothing() {
 		$this->assertSame( array(), AdminPreload::collect( 'subtleforms-forms' ), 'logged out' );
 		wp_set_current_user( self::factory_user( 'subscriber' ) );

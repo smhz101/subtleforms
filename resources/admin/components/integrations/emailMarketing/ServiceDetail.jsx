@@ -1,10 +1,11 @@
-import { useEffect, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { Spinner } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import ServiceDetailHeader from '../serviceTiles/ServiceDetailHeader';
 import ExtensionSlot from '../../ExtensionSlot';
 import ProBanner from './ProBanner';
-import { emailMarketingApi, announceService, isConnected } from './api';
+import { announceService, isConnected } from './api';
+import { useServiceState, useSetServiceEnabled, useStoreServiceState } from './queries';
 import './emailMarketing.scss';
 
 /**
@@ -22,36 +23,26 @@ import './emailMarketing.scss';
  * @param {boolean}  props.enabled  The switch, as the grid last knew it.
  */
 export default function ServiceDetail({ service, onBack, onToggle, enabled }) {
-  const [connection, setConnection] = useState(null);
-  const [loadError, setLoadError] = useState('');
-  const [busy, setBusy] = useState(false);
+  const { data: connection, error: queryError } = useServiceState(service.slug);
+  const storeState = useStoreServiceState();
+  const setEnabled = useSetServiceEnabled();
   const [error, setError] = useState('');
+  const loadError = queryError && !connection ? queryError.message || __('Could not load the connection.', 'subtleforms') : '';
+  const busy = setEnabled.isPending;
   const Settings = service.settingsComponent;
   const toggleId = `sf-em-toggle-${service.slug}`;
-
-  useEffect(() => {
-    let cancelled = false;
-    emailMarketingApi
-      .state(service.slug)
-      .then((s) => !cancelled && setConnection(s))
-      .catch((e) => !cancelled && setLoadError(e?.message || __('Could not load the connection.', 'subtleforms')));
-    return () => {
-      cancelled = true;
-    };
-  }, [service.slug]);
+  const setConnection = (next) => storeState(service.slug, next);
 
   const toggle = async (next) => {
-    setBusy(true);
     setError('');
     try {
-      await emailMarketingApi.setEnabled(service.slug, next);
+      await setEnabled.mutateAsync({ service: service.slug, enabled: next });
       announceService(service.slug, { enabled: next });
       onToggle(service.slug, next);
       if (!next) onBack();
     } catch (e) {
       setError(e?.message || __('Could not change the switch.', 'subtleforms'));
     }
-    setBusy(false);
   };
 
   const connected = !!connection && isConnected(connection);

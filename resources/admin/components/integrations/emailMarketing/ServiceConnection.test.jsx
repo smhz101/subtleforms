@@ -6,6 +6,7 @@ import { createRoot, useState } from '@wordpress/element';
 import { act } from 'react';
 import ServiceConnection from './ServiceConnection';
 import { emailMarketingApi } from './api';
+import { withClient } from '../../../../../tests/js/queryWrapper';
 
 jest.mock('./emailMarketing.scss', () => ({}));
 jest.mock('./api', () => ({
@@ -37,7 +38,7 @@ async function mount(state, service = 'mailchimp', label = 'Mailchimp') {
     const [current, setCurrent] = useState(state);
     return <ServiceConnection service={service} label={label} state={current} onState={(next) => { states.push(next); setCurrent(next); }} />;
   };
-  await act(async () => root.render(<Host />));
+  await act(async () => root.render(withClient(<Host />)));
 }
 
 const button = (label) => [...container.querySelectorAll('button')].find((b) => b.textContent.trim() === label);

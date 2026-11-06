@@ -1,7 +1,7 @@
-import { useEffect, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { Spinner } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { apiGet } from '../../utils/api';
+import { useApiLog } from '../../data/queries/tools';
 import SectionHeader from '../sectionPanel/SectionHeader';
 import Pager from './Pager';
 
@@ -14,22 +14,8 @@ import Pager from './Pager';
  */
 export default function ApiLog({ title, description }) {
   const [page, setPage] = useState(1);
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    apiGet(`/tools/api-logs?page=${page}&per_page=20`).then((result) => {
-      if (!cancelled) {
-        setData(result.ok ? result.body.data : { rows: [], total: 0 });
-        setLoading(false);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [page]);
+  const { data, isPending } = useApiLog(page);
+  const loading = isPending;
 
   const rows = data?.rows || [];
   const pages = Math.max(1, Math.ceil((data?.total || 0) / 20));

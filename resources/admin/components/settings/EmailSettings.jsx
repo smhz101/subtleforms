@@ -7,6 +7,7 @@ import {
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import { useMutation } from '@tanstack/react-query';
 import FieldError from './FieldError';
 
 /**
@@ -40,17 +41,21 @@ export default function EmailSettings( {
 	const domainMismatch =
 		!! senderDomain && !! siteDomain && senderDomain !== siteDomain;
 
-	const [ sending, setSending ] = useState( false );
 	const [ testResult, setTestResult ] = useState( null ); // { ok, message }
+	// Sending a test email is an action, not a read: a mutation, never cached.
+	const testEmail = useMutation( {
+		mutationFn: () => apiFetch( {
+			path: '/subtleforms/v1/onboarding/send-test-email',
+			method: 'POST',
+		} ),
+		retry: false,
+	} );
+	const sending = testEmail.isPending;
 
 	const sendTestEmail = async () => {
-		setSending( true );
 		setTestResult( null );
 		try {
-			const res = await apiFetch( {
-				path: '/subtleforms/v1/onboarding/send-test-email',
-				method: 'POST',
-			} );
+			const res = await testEmail.mutateAsync();
 			if ( res && res.success === false ) {
 				setTestResult( {
 					ok: false,
@@ -80,8 +85,6 @@ export default function EmailSettings( {
 						'subtleforms'
 					),
 			} );
-		} finally {
-			setSending( false );
 		}
 	};
 

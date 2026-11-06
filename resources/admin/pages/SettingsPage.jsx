@@ -291,7 +291,7 @@ export default function Settings() {
             {current.name === 'logs' && <LogsPanel />}
             {current.name === 'tools' && (
               <Suspense fallback={<p role='status'>{__('Loading…', 'subtleforms')}</p>}>
-                <ToolsPanel embedded />
+                <ToolsPanel />
               </Suspense>
             )}
             {!BUILT_IN.includes(current.name) && <AddonTab name={current.name} />}

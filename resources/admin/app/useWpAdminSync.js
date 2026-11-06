@@ -68,6 +68,12 @@ export function routeToAdminQuery(pathname, search = '') {
 		return { page: 'subtleforms-reports', params };
 	}
 
+	// A page an add-on registered (registerAdminPage) keeps its own address.
+	const addon = pathname.match(/^\/addon\/([a-z0-9-]+)$/);
+	if (addon) {
+		return { page: addon[1], params };
+	}
+
 	return { page: 'subtleforms', params };
 }
 

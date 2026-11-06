@@ -1,8 +1,8 @@
-import { useEffect, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { SelectControl, Spinner } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
-import { apiGet } from '../../utils/api';
+import { useLogList } from '../../data/queries/tools';
 import { formOptionLabel } from '../../utils/toolLabels';
 import SectionHeader from '../sectionPanel/SectionHeader';
 import Pager from './Pager';
@@ -20,29 +20,8 @@ export default function LogList({ kind, forms, title, description }) {
   const [page, setPage] = useState(1);
   const [level, setLevel] = useState('');
   const [formId, setFormId] = useState('');
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    const params = new URLSearchParams({ kind, page: String(page), per_page: '20' });
-    if (level) {
-      params.set('level', level);
-    }
-    if (formId) {
-      params.set('form_id', formId);
-    }
-    apiGet(`/tools/logs?${params.toString()}`).then((result) => {
-      if (!cancelled) {
-        setData(result.ok ? result.body.data : { rows: [], total: 0 });
-        setLoading(false);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [kind, page, level, formId]);
+  const { data, isPending } = useLogList({ kind, page, level, formId });
+  const loading = isPending;
 
   const rows = data?.rows || [];
   const pages = Math.max(1, Math.ceil((data?.total || 0) / 20));

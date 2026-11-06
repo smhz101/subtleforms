@@ -36,6 +36,7 @@ store.fieldCategories = store.fieldCategories || {};
 store.payloadGroups = store.payloadGroups || {};
 store.emailMarketing = store.emailMarketing || {};
 store.settingsRedirects = store.settingsRedirects || [];
+store.adminPages = store.adminPages || {};
 
 /**
  * Register a public field renderer.
@@ -147,6 +148,29 @@ export function registerSettingsTab(name, def) {
   if (typeof name === 'string' && /^[a-z0-9-]+$/.test(name) && def && def.component) {
     store.settingsTabs[name] = { ...def };
   }
+}
+
+/**
+ * Register a page of an add-on inside the SubtleForms frame (top bar, header,
+ * stage), for a submenu page the add-on adds through `subtleforms/admin_menu`.
+ *
+ * The add-on's menu callback prints `<div id="subtleforms-admin-app" data-page="addon"></div>`
+ * inside `<div class="wrap subtleforms-admin">` when the filter
+ * `subtleforms/admin_pages_supported` returns true, and registers the page here
+ * under the same slug as its menu entry.
+ *
+ * @param {string} slug Menu slug of the page (`page=` in the URL): lowercase letters, numbers, dashes.
+ * @param {Object} def  { component, title, description }. `component` takes no props.
+ */
+export function registerAdminPage(slug, def) {
+  if (typeof slug === 'string' && /^[a-z0-9-]+$/.test(slug) && def && def.component) {
+    store.adminPages[slug] = { ...def };
+  }
+}
+
+/** The add-on page registered under a menu slug, or null. */
+export function getAdminPage(slug) {
+  return store.adminPages[slug] || null;
 }
 
 /** The tab registered under a name, or null. */
@@ -267,6 +291,7 @@ export function getLogicEditor() {
  *                        sets the dot in the section list.
  *   settings.logs        A section of Settings > Logs: { component, order, label, title, description }.
  *                        The id is the section id; Settings draws the section header.
+ *   settings.tools       A section of Settings > Tools, same shape as settings.logs.
  *   form.settings.sections  Builder > Form settings, a section of its own:
  *                           { component, title, order, icon }. `component` receives
  *                           { schema, onChange, onMetadata, isReadOnly, fields }.
@@ -524,6 +549,7 @@ root.SubtleFormsExtend = Object.assign(root.SubtleFormsExtend || {}, {
   registerCanvasPreview,
   registerSettingsTab,
   registerSettingsRedirect,
+  registerAdminPage,
   registerFieldOverride,
   registerLogicExtension,
   registerLogicEditor,

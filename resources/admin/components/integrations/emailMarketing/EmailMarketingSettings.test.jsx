@@ -9,6 +9,7 @@ import { act } from 'react';
 import EmailMarketingSettings from './EmailMarketingSettings';
 import { emailMarketingApi } from './api';
 import { registerSlotItem, registerEmailMarketingService } from '../../../../shared/extend';
+import { withClient } from '../../../../../tests/js/queryWrapper';
 
 jest.mock('./emailMarketing.scss', () => ({}));
 jest.mock('./api', () => ({
@@ -59,7 +60,7 @@ async function mount(data = pageData(), hash = '#tab=extensions&ext=email_market
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
-  await act(async () => root.render(<EmailMarketingSettings />));
+  await act(async () => root.render(withClient(<EmailMarketingSettings />)));
 }
 
 const tile = (slug) => container.querySelector(`.sf-svc-tile[data-service="${slug}"]`);

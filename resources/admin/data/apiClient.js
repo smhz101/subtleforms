@@ -15,6 +15,7 @@
  */
 
 import apiFetch from '@wordpress/api-fetch';
+import { unwrapResponse } from './unwrap';
 
 // WordPress apiFetch handles the /wp-json prefix automatically
 // We only need the namespace
@@ -72,28 +73,6 @@ if ( typeof window !== 'undefined' && ! window.wp?.apiFetch?.nonceMiddleware ) {
     });
   });
 }
-
-/**
- * Unwrap the standardized `{ data, meta }` response envelope.
- *
- * Legacy responses that do not use the envelope are passed through untouched.
- */
-const unwrapResponse = (response) => {
-  if (!response || typeof response !== 'object' || !('data' in response)) {
-    return response;
-  }
-
-  const { data, meta } = response;
-
-  if (meta?.pagination) {
-    if (Array.isArray(data)) {
-      return Object.assign(data, { _meta: meta, _pagination: meta.pagination });
-    }
-    return { ...data, _meta: meta, _pagination: meta.pagination };
-  }
-
-  return data;
-};
 
 /**
  * Turn an error body into a normalized Error with code/meta/status attached.

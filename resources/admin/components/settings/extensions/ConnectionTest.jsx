@@ -1,4 +1,5 @@
 import { useState } from '@wordpress/element';
+import { useMutation } from '@tanstack/react-query';
 import { Button, Spinner } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
@@ -41,11 +42,13 @@ export default function ConnectionTest({
   addonRoute = true,
 }) {
   const [state, setState] = useState({ status: 'idle', message: '' });
+  // A test is a one-off call: a mutation, so it is never cached or repeated by a refetch.
+  const test = useMutation({ mutationFn: (body) => callIntegration(path, body), retry: false });
 
   const run = async () => {
     setState({ status: 'busy', message: '' });
     try {
-      const raw = await callIntegration(path, getBody ? getBody() : {});
+      const raw = await test.mutateAsync(getBody ? getBody() : {});
       // This plugin's routes answer in the { data } envelope; add-on routes may answer flat.
       const res = raw && typeof raw === 'object' && !('ok' in raw) && raw.data && typeof raw.data === 'object' ? raw.data : raw;
       const ok = res?.ok !== false;

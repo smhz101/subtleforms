@@ -32,7 +32,7 @@ test('Settings lists Tools, no License or MCP tab, and Tools keeps its sections'
   await expect(page.getByRole('button', { name: 'Import forms', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: /Export/ }).first()).toBeVisible();
   await sections.getByRole('button', { name: 'Migrate' }).click();
-  await expect(page.locator('.sf-tools__main')).toBeVisible();
+  await expect(page.locator('.sf-tools__body')).toBeVisible();
   // Tools has its own controls: no Save button on the tab.
   await expect(page.getByRole('button', { name: 'Save', exact: true })).toHaveCount(0);
   await page.screenshot({ path: 'test-results/screens-2.5.1/settings-tools-tab.png' });

@@ -9,9 +9,12 @@
  * - Dirty tracking
  */
 
-import { useState, useEffect, useCallback } from '@wordpress/element';
+import { useState, useEffect, useCallback, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import { useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '../data/apiClient';
+import { queryKeys } from '../data/queryKeys';
 import { validateSettings, validateField } from '../utils/validation';
 import { confirmDialog } from '../utils/confirmDialog';
 import { applySettingsRedirects } from '../utils/settingsRedirects';
@@ -58,12 +61,31 @@ function normalizeSettings( data ) {
 	};
 }
 
+/** Seconds-old settings are shown again without a request. */
+export const SETTINGS_STALE_TIME = 60 * 1000;
+
+/**
+ * The settings the cache already holds (the page sent them, or Settings was
+ * open a moment ago), in the shape the screen edits; or null.
+ *
+ * @param {Object} client Query client.
+ * @return {?Object} Settings.
+ */
+function cachedSettings( client ) {
+	const cached = client.getQueryData( queryKeys.settings.general() );
+	return cached && cached.success && cached.data ? normalizeSettings( cached.data ) : null;
+}
+
 export default function useSettingsState() {
-	const [ settings, setSettings ] = useState( null );
-	const [ loading, setLoading ] = useState( true );
+	const queryClient = useQueryClient();
+	const [ settings, setSettings ] = useState( () => cachedSettings( queryClient ) );
+	const [ loading, setLoading ] = useState( () => cachedSettings( queryClient ) === null );
 	const [ saving, setSaving ] = useState( false );
 	const [ message, setMessage ] = useState( null );
 	const [ hasChanges, setHasChanges ] = useState( false );
+	// Read inside the refresh below, which started before the edit did.
+	const hasChangesRef = useRef( false );
+	hasChangesRef.current = hasChanges;
 	const [ fieldErrors, setFieldErrors ] = useState( {} );
 	// Initialise from URL hash (e.g. #tab=extensions) so page reloads can
 	// land on a specific tab.
@@ -77,15 +99,24 @@ export default function useSettingsState() {
 
 	// ── Load ─────────────────────────────────────────────────────────────
 
-	const loadSettings = useCallback( async () => {
+	// Settings come from the query cache while they are under a minute old
+	// (and from the page itself when Settings is the landing screen), so
+	// opening the screen again does not wait for the server. `force` asks the
+	// server (Discard).
+	const load = useCallback( async ( force ) => {
 		try {
-			setLoading( true );
-			const response = await apiFetch( {
-				path: '/subtleforms/v1/settings',
-				method: 'GET',
+			if ( force ) {
+				setLoading( true );
+			}
+			const response = await queryClient.fetchQuery( {
+				queryKey: queryKeys.settings.general(),
+				queryFn: () => apiClient.get( '/settings' ),
+				staleTime: force ? 0 : SETTINGS_STALE_TIME,
 			} );
 
-			if ( response.success ) {
+			// A background refresh of cached settings must not wipe an edit made
+			// while it ran; Discard (force) always takes what the server has.
+			if ( response.success && ( force || ! hasChangesRef.current ) ) {
 				setSettings( normalizeSettings( response.data ) );
 			}
 		} catch ( error ) {
@@ -100,11 +131,21 @@ export default function useSettingsState() {
 		} finally {
 			setLoading( false );
 		}
-	}, [] );
+	}, [ queryClient ] );
+
+	const loadSettings = useCallback( () => load( true ), [ load ] );
 
 	useEffect( () => {
-		loadSettings();
-	}, [ loadSettings ] );
+		// An unsaved edit stays; only an empty screen takes what the cache has.
+		load( false );
+	}, [ load ] );
+
+	// What was saved is the new truth for the cache, and every screen that read
+	// the old settings (the Forms list reads the inbox defaults) fetches again.
+	const storeSaved = useCallback( ( response ) => {
+		queryClient.setQueryData( queryKeys.settings.general(), { success: true, data: response.data } );
+		queryClient.invalidateQueries( { queryKey: queryKeys.settings.all } );
+	}, [ queryClient ] );
 
 	// ── Update single field ──────────────────────────────────────────────
 
@@ -186,6 +227,7 @@ export default function useSettingsState() {
 				setHasChanges( false );
 				setSettings( normalizeSettings( response.data ) );
 				publishInboxDefaults( response.data );
+				storeSaved( response );
 			}
 		} catch ( error ) {
 			console.error( 'Failed to save settings:', error );
@@ -201,7 +243,7 @@ export default function useSettingsState() {
 		} finally {
 			setSaving( false );
 		}
-	}, [ settings ] );
+	}, [ settings, storeSaved ] );
 
 	// ── Reset ────────────────────────────────────────────────────────────
 
@@ -241,6 +283,7 @@ export default function useSettingsState() {
 				setSettings( normalizeSettings( response.data ) );
 				publishInboxDefaults( response.data );
 				setHasChanges( false );
+				storeSaved( response );
 			}
 		} catch ( error ) {
 			console.error( 'Failed to reset settings:', error );
@@ -254,7 +297,7 @@ export default function useSettingsState() {
 		} finally {
 			setSaving( false );
 		}
-	}, [] );
+	}, [ storeSaved ] );
 
 	// ── Public API ───────────────────────────────────────────────────────
 

@@ -20,13 +20,17 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import { __, sprintf } from '@wordpress/i18n';
 import { getBranding } from '../utils/branding';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { getAdminPage } from '../../shared/extend';
+import AdminShell from '../components/AdminShell';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '../data/queryClient';
 import {
 	MemoryRouter,
 	Routes,
 	Route,
 	useNavigate,
 	useParams,
+	Navigate,
 	useSearchParams,
 	useLocation,
 } from 'react-router-dom';
@@ -36,21 +40,6 @@ import PageErrorBoundary from '../components/PageErrorBoundary';
 import { RouteLoadingFallback } from '../components/RouteTransition';
 import { CreateFormModal } from '../modals';
 import useWpAdminSync from './useWpAdminSync';
-
-// ─── Query Client ─────────────────────────────────────────────────────────────
-
-const queryClient = new QueryClient({
-	defaultOptions: {
-		queries: {
-			refetchOnWindowFocus: false,
-			retry: 1,
-			staleTime: 30 * 1000,
-		},
-		mutations: {
-			retry: 1,
-		},
-	},
-});
 
 // ─── Code-split pages ─────────────────────────────────────────────────────────
 
@@ -148,6 +137,10 @@ function getInitialPath() {
 			return '/reports';
 
 		default:
+			// A submenu page an add-on added (registerAdminPage).
+			if (/^subtleforms-[a-z0-9-]+$/.test(page)) {
+				return `/addon/${page}`;
+			}
 			return '/';
 	}
 }
@@ -208,6 +201,23 @@ function getPageNameFromPath(pathname) {
 		return __('Submission Detail', 'subtleforms');
 	}
 	return map[pathname] || getBranding().name;
+}
+
+/** A page an add-on registered with registerAdminPage, inside the frame. */
+function AddonPage() {
+	const { slug } = useParams();
+	const def = getAdminPage(slug);
+	if (!def) {
+		return <Navigate to='/' replace />;
+	}
+	const Component = def.component;
+	return (
+		<AdminShell title={def.title} description={def.description}>
+			<PageErrorBoundary pageName={def.title || slug}>
+				<Component />
+			</PageErrorBoundary>
+		</AdminShell>
+	);
 }
 
 function RouteAnnouncer() {
@@ -367,6 +377,7 @@ function AppContent() {
 						}
 					/>
 					<Route path='/tools' element={<ToolsRedirect />} />
+					<Route path='/addon/:slug' element={<AddonPage />} />
 					<Route
 						path='/reports'
 						element={

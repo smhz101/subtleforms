@@ -15,6 +15,7 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 import { normalizePath } from '@wordpress/url';
+import { unwrapResponse } from './unwrap';
 
 const PREFIX = '/subtleforms/v1/';
 
@@ -74,6 +75,34 @@ export function takePreloaded( path ) {
 		}
 	}
 	return entry;
+}
+
+/**
+ * Put preloaded answers into the query cache, so a screen that reads the
+ * query renders from the cache in its first paint, with no request.
+ *
+ * Each answer is stored the way the query function would return it (the
+ * `{ data, meta }` envelope removed). The answer is taken, so the apiFetch
+ * copy is dropped too and nothing is used twice.
+ *
+ * @param {Object}   client Query client.
+ * @param {Array}    seeds  [{ path, key }]: the preloaded REST path and the query key that asks for it.
+ * @param {Function} unwrap Envelope remover (a test can pass its own).
+ * @return {number} How many queries were filled.
+ */
+export function seedQueryClient( client, seeds, unwrap = unwrapResponse ) {
+	if ( ! client || ! Array.isArray( seeds ) ) {
+		return 0;
+	}
+	let filled = 0;
+	seeds.forEach( ( seed ) => {
+		const entry = takePreloaded( seed.path );
+		if ( entry ) {
+			client.setQueryData( seed.key, unwrap( entry.body ) );
+			filled++;
+		}
+	} );
+	return filled;
 }
 
 if ( typeof window !== 'undefined' ) {
