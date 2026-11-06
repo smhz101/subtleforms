@@ -280,152 +280,10 @@
 	}
 }
 
-// ── Service grid ────────────────────────────────────────────────────────────
-// The wrapper clips the right and bottom line of the last cells, so a shared
-// edge is one line and the outer edge is the card's own border.
-.sf-em-grid-wrap {
-	overflow: hidden;
-}
-
-.sf-em-grid {
-	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
-	gap: 0;
-	margin: 0 -1px -1px 0;
-	padding: 0;
-	list-style: none;
-
-	@media (max-width: 782px) {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-	}
-
-	@media (max-width: 480px) {
-		grid-template-columns: 1fr;
-	}
-}
-
-.sf-em-tile {
-	position: relative;
-	min-height: 120px;
-	border-right: 1px solid var(--sf-border-subtle);
-	border-bottom: 1px solid var(--sf-border-subtle);
-	background: var(--sf-bg-surface);
-	color: var(--sf-text-muted);
-
-	&:hover,
-	&:focus-within,
-	&.is-on {
-		color: var(--sf-em-brand, var(--sf-text));
-	}
-
-	&__open {
-		position: absolute;
-		inset: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 100%;
-		padding: 16px;
-		border: 0;
-		border-radius: 0;
-		background: transparent;
-		color: inherit;
-		cursor: pointer;
-
-		&:hover { background: var(--sf-bg-subtle); }
-
-		&:focus-visible {
-			outline: none;
-			box-shadow: inset 0 0 0 2px var(--sf-primary-500);
-		}
-	}
-
-	&__logo {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		color: inherit;
-		transition: color var(--sf-duration-fast, 120ms) var(--sf-ease, ease);
-
-		svg { display: block; }
-	}
-
-	&__wordmark {
-		font-size: 22px;
-		font-weight: var(--sf-weight-semibold);
-	}
-
-	&__toggle {
-		position: absolute;
-		top: 10px;
-		right: 12px;
-		z-index: 1;
-		display: inline-flex;
-		line-height: 0;
-	}
-}
-
 // ── Service screen ──────────────────────────────────────────────────────────
 .sf-em-detail {
 	display: flex;
 	flex-direction: column;
-
-	&__head {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		min-height: 64px;
-		padding: 16px 24px;
-		border-bottom: 1px solid var(--sf-border-subtle);
-	}
-
-	// A square icon button with the card's border and radius.
-	&__back.components-button {
-		flex-shrink: 0;
-		width: 32px;
-		height: 32px;
-		min-width: 32px;
-		min-height: 32px;
-		align-self: center;
-		padding: 0;
-		justify-content: center;
-		border: 1px solid var(--sf-border-subtle);
-		border-radius: var(--sf-radius-md);
-		background: var(--sf-bg-surface);
-		color: var(--sf-text);
-
-		&:hover:not(:disabled) { background: var(--sf-bg-subtle); }
-	}
-
-	&__logo {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		flex-shrink: 0;
-		width: 20px;
-		height: 20px;
-
-		svg { display: block; }
-	}
-
-	&__title {
-		margin: 0;
-		font-size: var(--sf-text-md);
-		font-weight: var(--sf-weight-semibold);
-		color: var(--sf-text);
-	}
-
-	&__switch {
-		display: inline-flex;
-		align-items: center;
-		gap: 8px;
-		margin-inline-start: auto;
-	}
-
-	&__switch-label {
-		font-size: var(--sf-text-sm);
-		color: var(--sf-text-secondary);
-	}
 
 	&__error {
 		margin: 0;
@@ -478,7 +336,6 @@
 }
 
 @media (max-width: 600px) {
-	.sf-em-detail__head,
 	.sf-em-detail__body,
 	.sf-em-pro {
 		padding-inline: 16px;

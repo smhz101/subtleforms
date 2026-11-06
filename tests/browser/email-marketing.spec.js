@@ -56,7 +56,7 @@ async function shot(page, name, locator) {
 }
 
 const content = (page) => page.locator('.sf-ext-settings__content');
-const tile = (page, slug) => page.locator(`.sf-em-tile[data-service="${slug}"]`);
+const tile = (page, slug) => page.locator(`.sf-svc-tile[data-service="${slug}"]`);
 
 test.beforeAll(async () => {
   mock('install');
@@ -82,7 +82,7 @@ test.describe.configure({ mode: 'serial' });
 // Tall enough for the whole form panel in screenshots.
 if (SHOTS) test.use({ viewport: { width: Number(process.env.SF_SHOT_WIDTH || 1280), height: 2000 } });
 
-test('Grid: one Email marketing entry, three tiles, all off, and one plain note about Pro', async ({ page }) => {
+test('Grid: one Email marketing entry, four tiles, all off, and one plain note about Pro', async ({ page }) => {
   await loginPage(page);
   await page.goto(SETTINGS);
 
@@ -91,8 +91,8 @@ test('Grid: one Email marketing entry, three tiles, all off, and one plain note 
   await expect(nav.getByText('Webhooks', { exact: true })).toBeVisible();
   await expect(nav.getByText('Mailchimp', { exact: true })).toHaveCount(0);
 
-  await expect(page.locator('.sf-em-tile')).toHaveCount(3);
-  for (const label of ['Mailchimp', 'Brevo', 'Kit']) {
+  await expect(page.locator('.sf-svc-tile')).toHaveCount(4);
+  for (const label of ['Mailchimp', 'Brevo', 'Kit', 'MailPoet']) {
     await expect(page.getByLabel(`Enable ${label}`)).not.toBeChecked();
   }
   // Names are text for screen readers only; the logos are the tiles.
@@ -150,7 +150,7 @@ test('The note shows at the bottom of a service, one dismissal hides it everywhe
 
   await page.getByRole('button', { name: 'Back to email marketing' }).click();
   await expect(page).not.toHaveURL(/service=/);
-  await expect(page.locator('.sf-em-tile')).toHaveCount(3);
+  await expect(page.locator('.sf-svc-tile')).toHaveCount(4);
   await expect(tile(page, 'mailchimp').locator('input[type="checkbox"]')).toBeChecked();
   await shot(page, 'free-grid-mailchimp-on', content(page));
 
@@ -158,11 +158,11 @@ test('The note shows at the bottom of a service, one dismissal hides it everywhe
   await page.goBack();
   await expect(page).toHaveURL(/service=mailchimp/);
   await page.goForward();
-  await expect(page.locator('.sf-em-tile')).toHaveCount(3);
+  await expect(page.locator('.sf-svc-tile')).toHaveCount(4);
 
   await page.locator('.sf-em-pro').getByRole('button', { name: 'Dismiss' }).click();
   await expect(page.locator('.sf-em-pro')).toHaveCount(0);
-  await tile(page, 'mailchimp').locator('.sf-em-tile__open').click();
+  await tile(page, 'mailchimp').locator('.sf-svc-tile__open').click();
   await expect(page.locator('.sf-em-detail')).toBeVisible();
   await expect(page.locator('.sf-em-pro')).toHaveCount(0);
   await page.reload();
@@ -173,7 +173,7 @@ test('The note shows at the bottom of a service, one dismissal hides it everywhe
 test('Switching a service off keeps its key; switching it on restores it', async ({ page }) => {
   await loginPage(page);
   await page.goto(`${SETTINGS}&service=mailchimp`);
-  await page.locator('.sf-em-detail__head').getByRole('checkbox').click();
+  await page.locator('.sf-svc-head').getByRole('checkbox').click();
   await expect(page).not.toHaveURL(/service=/);
   await expect(page.getByLabel('Enable Mailchimp')).not.toBeChecked();
 
@@ -197,13 +197,13 @@ test('Brevo and Kit connect the same way', async ({ page }) => {
     await expect(card.getByText('Connected to Acme Studio (owner@example.com).')).toHaveCount(1);
     expect(await page.content()).not.toContain(KEYS[slug]);
     // Switch it on from its header; the screen stays.
-    await page.locator('.sf-em-detail__head').getByRole('checkbox').click();
-    await expect(page.locator('.sf-em-detail__head').getByRole('checkbox')).toBeChecked();
+    await page.locator('.sf-svc-head').getByRole('checkbox').click();
+    await expect(page.locator('.sf-svc-head').getByRole('checkbox')).toBeChecked();
   }
   // Leave Kit on; switching Brevo off from its header returns to the grid.
   await page.goto(`${SETTINGS}&service=brevo`);
-  await page.locator('.sf-em-detail__head').getByRole('checkbox').click();
-  await expect(page.locator('.sf-em-tile')).toHaveCount(3);
+  await page.locator('.sf-svc-head').getByRole('checkbox').click();
+  await expect(page.locator('.sf-svc-tile')).toHaveCount(4);
   await expect(page.getByLabel('Enable Brevo')).not.toBeChecked();
   await expect(page.getByLabel('Enable Kit')).toBeChecked();
 });

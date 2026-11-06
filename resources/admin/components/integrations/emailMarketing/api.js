@@ -70,3 +70,17 @@ export function announceService(service, change = {}) {
   }
   window.dispatchEvent(new CustomEvent('subtleforms:extension-status'));
 }
+
+/**
+ * Whether a service can send: a key was accepted (or, for a service that
+ * lives on the same site such as MailPoet, it is installed and set up).
+ * The server says so in `connected`; the older fields are the fallback.
+ *
+ * @param {Object} state Connection state from the server.
+ * @return {boolean} True when the service is usable.
+ */
+export function isConnected(state) {
+  if (!state) return false;
+  if (typeof state.connected === 'boolean') return state.connected;
+  return state.has_key === true && state.status !== 'error';
+}

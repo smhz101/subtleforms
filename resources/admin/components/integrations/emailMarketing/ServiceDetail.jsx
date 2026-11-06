@@ -1,10 +1,10 @@
 import { useEffect, useState } from '@wordpress/element';
-import { Button, FormToggle, Spinner } from '@wordpress/components';
-import { __, sprintf } from '@wordpress/i18n';
-import Icon from '../../../ui/Icon';
+import { Spinner } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+import ServiceDetailHeader from '../serviceTiles/ServiceDetailHeader';
 import ExtensionSlot from '../../ExtensionSlot';
 import ProBanner from './ProBanner';
-import { emailMarketingApi, announceService } from './api';
+import { emailMarketingApi, announceService, isConnected } from './api';
 import './emailMarketing.scss';
 
 /**
@@ -26,7 +26,6 @@ export default function ServiceDetail({ service, onBack, onToggle, enabled }) {
   const [loadError, setLoadError] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const Logo = service.icon;
   const Settings = service.settingsComponent;
   const toggleId = `sf-em-toggle-${service.slug}`;
 
@@ -55,33 +54,21 @@ export default function ServiceDetail({ service, onBack, onToggle, enabled }) {
     setBusy(false);
   };
 
-  const connected = !!connection && connection.has_key === true && connection.status !== 'error';
+  const connected = !!connection && isConnected(connection);
 
   return (
     <div className='sf-em-detail' data-service={service.slug}>
-      <header className='sf-em-detail__head'>
-        <Button
-          className='sf-em-detail__back'
-          icon={<Icon.ArrowLeft size={16} aria-hidden='true' />}
-          label={__('Back to email marketing', 'subtleforms')}
-          onClick={onBack}
-        />
-        <span className='sf-em-detail__logo' style={service.brandColor ? { color: service.brandColor } : undefined}>
-          {Logo ? <Logo size={20} /> : null}
-        </span>
-        <h3 className='sf-em-detail__title'>{service.label}</h3>
-        <span className='sf-em-detail__switch'>
-          <label htmlFor={toggleId} className='sf-em-detail__switch-label'>
-            {enabled ? __('Enabled', 'subtleforms') : __('Disabled', 'subtleforms')}
-          </label>
-          <FormToggle
-            id={toggleId}
-            checked={!!enabled}
-            disabled={busy}
-            onChange={(e) => toggle(e.target.checked)}
-          />
-        </span>
-      </header>
+      <ServiceDetailHeader
+        id={toggleId}
+        label={service.label}
+        logo={service.icon}
+        brandColor={service.brandColor}
+        enabled={!!enabled}
+        busy={busy}
+        backLabel={__('Back to email marketing', 'subtleforms')}
+        onBack={onBack}
+        onToggle={toggle}
+      />
 
       {error && (
         <p role='alert' className='sf-em-detail__error'>
@@ -105,19 +92,5 @@ export default function ServiceDetail({ service, onBack, onToggle, enabled }) {
       </div>
       <ProBanner />
     </div>
-  );
-}
-
-/**
- * Hint text used by tests and the grid: the accessible name of a switch.
- *
- * @param {string} label Service name.
- * @return {string} "Enable Mailchimp".
- */
-export function enableLabel(label) {
-  return sprintf(
-    /* translators: %s: service name */
-    __('Enable %s', 'subtleforms'),
-    label
   );
 }

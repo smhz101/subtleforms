@@ -1,14 +1,28 @@
-import { FormToggle } from '@wordpress/components';
-import { enableLabel } from './ServiceDetail';
-import './emailMarketing.scss';
+import { __ } from '@wordpress/i18n';
+import ServiceTileGrid from '../serviceTiles/ServiceTileGrid';
+import { pageData } from './api';
 
 /**
- * The service tiles: one cell per service, no gap between cells, the logo in
- * the middle (grey; the brand colour while the service is on or the tile is
- * hovered or focused) and the switch in the top right corner.
+ * The line under a service's logo when it needs something before it can be
+ * used. Only services that live on the same site (MailPoet) have one.
  *
- * The tile is a button that opens the service; the switch is a separate
- * control, not inside the button, so it can be used on its own.
+ * @param {Object} entry The server's entry for the service.
+ * @return {string} Text, or '' for none.
+ */
+export function statusLabelFor(entry) {
+  switch (entry?.local_state) {
+    case 'not_installed':
+      return __('Not installed', 'subtleforms');
+    case 'inactive':
+      return __('Not active', 'subtleforms');
+    default:
+      return '';
+  }
+}
+
+/**
+ * The Email marketing tiles: the shared tile grid (the one an add-on gets as
+ * `ServiceTileGrid`) fed with the registered services.
  *
  * @param {Object}   props
  * @param {Array}    props.services Registered services to show.
@@ -18,36 +32,14 @@ import './emailMarketing.scss';
  * @param {Object}   props.busy     Map of slug to true while its switch is being saved.
  */
 export default function ServiceGrid({ services, enabled, onOpen, onToggle, busy = {} }) {
-  return (
-    <div className='sf-em-grid-wrap'>
-      <ul className='sf-em-grid'>
-        {services.map((service) => {
-          const Logo = service.icon;
-          const on = !!enabled[service.slug];
-          return (
-            <li
-              key={service.slug}
-              className={`sf-em-tile${on ? ' is-on' : ''}`}
-              data-service={service.slug}
-              style={service.brandColor ? { '--sf-em-brand': service.brandColor } : undefined}>
-              <button type='button' className='sf-em-tile__open' onClick={() => onOpen(service.slug)}>
-                <span className='sf-em-tile__logo' aria-hidden='true'>
-                  {Logo ? <Logo size={44} /> : <span className='sf-em-tile__wordmark'>{service.label}</span>}
-                </span>
-                <span className='sf-sr-only'>{service.label}</span>
-              </button>
-              <span className='sf-em-tile__toggle'>
-                <FormToggle
-                  checked={on}
-                  disabled={!!busy[service.slug]}
-                  aria-label={enableLabel(service.label)}
-                  onChange={(e) => onToggle(service.slug, e.target.checked)}
-                />
-              </span>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  );
+  const server = pageData().services;
+  const items = services.map((service) => ({
+    slug: service.slug,
+    label: service.label,
+    logo: service.icon,
+    brandColor: service.brandColor,
+    enabled: !!enabled[service.slug],
+    statusLabel: statusLabelFor(server[service.slug]),
+  }));
+  return <ServiceTileGrid services={items} busy={busy} onOpen={onOpen} onToggle={onToggle} />;
 }

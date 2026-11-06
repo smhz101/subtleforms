@@ -9,7 +9,7 @@ import '../settings/extensions/extensions.scss';
 /**
  * Form builder > Settings > Integrations (2.1).
  *
- * Email marketing (Mailchimp, Brevo and Kit) is built in. Add-ons add their own sections in the `form.integrations` slot
+ * Email marketing (Mailchimp, MailPoet, Brevo and Kit) is built in. Add-ons add their own sections in the `form.integrations` slot
  * (registerSlotItem or registerFormIntegration) and keep their settings in
  * metadata.integrations.{slug}. The legacy per-form webhook URL is shown here
  * while a form still has one.
