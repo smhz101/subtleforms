@@ -1,19 +1,44 @@
-import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
+import { useMemo, useRef, useState } from '@wordpress/element';
 import { Button, Notice, SearchControl, SelectControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import clsx from 'clsx';
-import Icon from '../ui/Icon';
 import { apiGet, apiPost } from '../utils/api';
 import { getBranding } from '../utils/branding';
 import { formOptionLabel } from '../utils/toolLabels';
 import SiteImport from '../components/tools/SiteImport';
+import SectionPanel from '../components/sectionPanel/SectionPanel';
+import SectionHeader from '../components/sectionPanel/SectionHeader';
+import { useToolsForms } from '../data/queries/tools';
+import { getSlotItems } from '../../shared/extend';
 import './ToolsPage.scss';
 
-const SECTIONS = [
-  { id: 'transfer', label: __( 'Transfer', 'subtleforms' ), icon: Icon.Package, description: __( 'Move SubtleForms forms and submissions between sites.', 'subtleforms' ) },
-  { id: 'migrate', label: __( 'Migrate', 'subtleforms' ), icon: Icon.FileUp, description: __( 'Bring forms across from Contact Form 7, Gravity Forms, Fluent Forms, WPForms or Ninja Forms.', 'subtleforms' ) },
+/**
+ * The sections this plugin ships. An add-on adds more in the `settings.tools`
+ * slot.
+ */
+export const BUILT_IN_TOOLS = [
+  {
+    id: 'transfer',
+    order: 10,
+    label: () => __( 'Transfer', 'subtleforms' ),
+    description: () => __( 'Move SubtleForms forms and submissions between sites.', 'subtleforms' ),
+  },
+  {
+    id: 'migrate',
+    order: 20,
+    label: () => __( 'Migrate', 'subtleforms' ),
+    description: () => __( 'Bring forms across from Contact Form 7, Gravity Forms, Fluent Forms, WPForms or Ninja Forms.', 'subtleforms' ),
+  },
 ];
+
+/**
+ * Section ids in list order, built in first, then the add-ons'.
+ *
+ * @return {string[]} Ids.
+ */
+export function toolSectionIds() {
+  return [ ...BUILT_IN_TOOLS.map( ( s ) => s.id ), ...getSlotItems( 'settings.tools' ).map( ( s ) => s.id ) ];
+}
 
 function downloadJson( filename, data ) {
   const blob = new Blob( [ JSON.stringify( data, null, 2 ) ], { type: 'application/json' } );
@@ -38,87 +63,79 @@ function messageFrom( result ) {
 
 
 /**
- * Tools body: transfer and migration. The logs have their own Settings tab
- * (Logs). It is the Tools tab
- * of Settings, so it has no page frame of its own.
+ * Settings > Tools: Transfer and Migrate, and the sections add-ons register in
+ * the `settings.tools` slot. A section panel like Integrations and Logs: the
+ * sections on the left, the chosen one on the right with its standard header.
+ * The chosen section is kept in the address (`#tab=tools&section=migrate`).
  *
- * @param {Object}  props
- * @param {boolean} props.embedded Laid out inside the Settings content column.
+ * Tools has nothing to save, so it has no page frame of its own.
  */
-/**
- * Initial Tools section from the URL hash (e.g. #tab=tools&section=migrate).
- *
- * @return {string}
- */
-function sectionFromHash() {
-  try {
-    const hash = window.location.hash.replace( /^#/, '' );
-    const section = new URLSearchParams( hash ).get( 'section' );
-    if ( section && SECTIONS.some( ( item ) => item.id === section ) ) {
-      return section;
-    }
-  } catch ( e ) {
-    // Fall through to the default.
-  }
-  return 'transfer';
-}
-
-export default function ToolsPanel( { embedded = false } ) {
-  const [ section, setSection ] = useState( sectionFromHash );
-  const [ forms, setForms ] = useState( [] );
+export default function ToolsPanel() {
+  const { data: forms = [] } = useToolsForms();
   const [ notice, setNotice ] = useState( null );
   const [ busy, setBusy ] = useState( false );
 
-  useEffect( () => {
-    let cancelled = false;
-    apiGet( '/forms?per_page=100&orderby=title&order=ASC' ).then( ( result ) => {
-      if ( ! cancelled && result.ok ) {
-        setForms( Array.isArray( result.body?.data ) ? result.body.data : [] );
-      }
-    } );
-    return () => {
-      cancelled = true;
-    };
-  }, [] );
-
   const tell = ( status, content ) => setNotice( { status, content } );
+  const addOns = getSlotItems( 'settings.tools' );
+
+  const noticeNode = notice && (
+    <Notice status={ notice.status } onRemove={ () => setNotice( null ) } isDismissible>
+      { notice.content }
+    </Notice>
+  );
+
+  const sections = [
+    ...BUILT_IN_TOOLS.map( ( item ) => ( {
+      id: item.id,
+      label: item.label(),
+      status: null,
+      order: item.order,
+      render: () => (
+        <>
+          <SectionHeader title={ item.label() } description={ item.description() } />
+          <div className='sf-tools__body'>
+            { noticeNode }
+            { item.id === 'transfer' && (
+              <Transfer forms={ forms } busy={ busy } setBusy={ setBusy } tell={ tell } />
+            ) }
+            { item.id === 'migrate' && (
+              <>
+                <SiteImport />
+                <Migrate busy={ busy } setBusy={ setBusy } tell={ tell } />
+              </>
+            ) }
+          </div>
+        </>
+      ),
+    } ) ),
+    ...addOns
+      .filter( ( item ) => ! BUILT_IN_TOOLS.some( ( b ) => b.id === item.id ) )
+      .map( ( item, index ) => {
+        const Body = item.component;
+        return {
+          id: item.id,
+          label: item.label || item.title || item.id,
+          status: null,
+          order: 100 + ( item.order ?? 100 ) + index / 100,
+          render: () => (
+            <>
+              <SectionHeader title={ item.title || item.label || item.id } description={ item.description } />
+              <div className='sf-tools__body'>
+                <Body />
+              </div>
+            </>
+          ),
+        };
+      } ),
+  ];
 
   return (
-    <div className={ clsx( 'sf-tools', { 'sf-tools--embedded': embedded } ) }>
-      <nav className='sf-tools__nav' aria-label={ __( 'Tools', 'subtleforms' ) }>
-        <ul>
-          { SECTIONS.map( ( item ) => {
-            const ItemIcon = item.icon;
-            return (
-              <li key={ item.id }>
-                <button
-                  type='button'
-                  className={ clsx( 'sf-tools__nav-item', { 'is-active': section === item.id } ) }
-                  aria-current={ section === item.id ? 'page' : undefined }
-                  onClick={ () => { setNotice( null ); setSection( item.id ); } }>
-                  <ItemIcon size={ 16 } aria-hidden='true' />
-                  { item.label }
-                </button>
-              </li>
-            );
-          } ) }
-        </ul>
-      </nav>
-      <div className='sf-tools__main'>
-        { notice && (
-          <Notice status={ notice.status } onRemove={ () => setNotice( null ) } isDismissible>
-            { notice.content }
-          </Notice>
-        ) }
-        { section === 'transfer' && (
-          <Transfer forms={ forms } busy={ busy } setBusy={ setBusy } tell={ tell } />
-        ) }
-        { section === 'migrate' && <SiteImport /> }
-        { section === 'migrate' && (
-          <Migrate busy={ busy } setBusy={ setBusy } tell={ tell } />
-        ) }
-      </div>
-    </div>
+    <SectionPanel
+      sections={ sections }
+      urlParam='section'
+      label={ __( 'Tools', 'subtleforms' ) }
+      onChange={ () => setNotice( null ) }
+    />
   );
 }
 
