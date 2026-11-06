@@ -3,7 +3,7 @@ import { ToggleControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import ExtensionSlot from '../../ExtensionSlot';
 import { StatusBadge } from './ServiceConnection';
-import { emailMarketingApi, pageData } from './api';
+import { emailMarketingApi, pageData, isConnected } from './api';
 import { uiFor } from './serviceUi';
 import { getEmailMarketingServices } from '../../../../shared/extend';
 import './registerBuiltins';
@@ -32,7 +32,7 @@ export default function EmailMarketingFormPanel({ schema, integrations = {}, pat
   const [states, setStates] = useState(() => {
     const map = {};
     Object.entries(pageData().services).forEach(([slug, entry]) => {
-      map[slug] = { enabled: !!entry?.enabled, status: entry?.configured ? 'connected' : 'none', has_key: !!entry?.configured, settings: {} };
+      map[slug] = { enabled: !!entry?.enabled, status: entry?.configured ? 'connected' : 'none', has_key: !!entry?.configured, connected: !!entry?.configured, settings: {} };
     });
     return map;
   });
@@ -77,7 +77,7 @@ export default function EmailMarketingFormPanel({ schema, integrations = {}, pat
 
       {on.map((service) => {
         const state = states[service.slug] || {};
-        const connected = state.has_key === true && state.status !== 'error';
+        const connected = isConnected(state);
         const config = integrations[service.slug] || {};
         const enabled = !!config.enabled;
         const Body = service.formComponent;
@@ -88,7 +88,7 @@ export default function EmailMarketingFormPanel({ schema, integrations = {}, pat
           <section className='sf-em-form__service' key={service.slug} data-service={service.slug} aria-label={service.label}>
             <div className='sf-em-form__head'>
               <h5 className='sf-em-form__name'>{service.label}</h5>
-              <StatusBadge status={state.has_key ? state.status : 'none'} />
+              <StatusBadge status={connected ? 'connected' : state.has_key ? state.status : 'none'} />
             </div>
             <ToggleControl
               label={ui.switchLabel || sprintf(
@@ -102,11 +102,12 @@ export default function EmailMarketingFormPanel({ schema, integrations = {}, pat
             />
             {enabled && !connected && (
               <p className="sf-em-form__note">
-                {sprintf(
-                  /* translators: %s: service name */
-                  __('%s is not connected yet. Entries are logged as skipped until it is.', 'subtleforms'),
-                  service.label
-                )}{' '}
+                {ui.notReady ||
+                  sprintf(
+                    /* translators: %s: service name */
+                    __('%s is not connected yet. Entries are logged as skipped until it is.', 'subtleforms'),
+                    service.label
+                  )}{' '}
                 <a href={`${SETTINGS_URL}&service=${service.slug}`}>{__('Open the settings', 'subtleforms')}</a>
               </p>
             )}

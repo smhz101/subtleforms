@@ -154,9 +154,17 @@ final class Sender {
 		if ( in_array( $entry['status'], self::NOT_SENT, true ) ) {
 			return array();
 		}
-		if ( ! $connection->hasKey() ) {
-			/* translators: %s: service name */
-			ActivityLog::record( $submissionId, $service, $service, 'skipped', sprintf( __( '%s: skipped (not connected, add an API key in Settings > Integrations > Email marketing)', 'subtleforms' ), $label ), array( 'reason' => 'not_connected' ) );
+		if ( ! Services::usable( $service ) ) {
+			if ( Services::isLocal( $service ) ) {
+				/* translators: 1: service name, 2: why it cannot take people, for example "MailPoet is not active on this site" */
+				$line   = sprintf( __( '%1$s: skipped (%2$s)', 'subtleforms' ), $label, MailPoetStatus::reason() );
+				$reason = 'not_ready';
+			} else {
+				/* translators: %s: service name */
+				$line   = sprintf( __( '%s: skipped (not connected, add an API key in Settings > Integrations > Email marketing)', 'subtleforms' ), $label );
+				$reason = 'not_connected';
+			}
+			ActivityLog::record( $submissionId, $service, $service, 'skipped', $line, array( 'reason' => $reason ) );
 			return array();
 		}
 
@@ -214,13 +222,13 @@ final class Sender {
 	/**
 	 * Send one feed. Returns true when a later attempt could succeed.
 	 *
-	 * @param AbstractClient $client     Client.
+	 * @param ClientInterface $client    Client.
 	 * @param string         $service    Service slug.
 	 * @param array          $feed       Feed.
 	 * @param array          $context    Entry context.
 	 * @param int            $retryCount Retries so far.
 	 */
-	private static function deliver( AbstractClient $client, string $service, array $feed, array $context, int $retryCount ): bool {
+	private static function deliver( ClientInterface $client, string $service, array $feed, array $context, int $retryCount ): bool {
 		$submissionId = (int) $context['submission_id'];
 		$step         = 'default' === $feed['id'] ? $service : $service . ':' . $feed['id'];
 		$label        = self::label( $service );
@@ -310,6 +318,23 @@ final class Sender {
 					return is_array( $changed ) ? $changed : $body;
 				}
 			);
+		} catch ( ServiceSkip $e ) {
+			// The service knows this person and they must not be subscribed again.
+			ActivityLog::record( $submissionId, $service, $step, 'skipped', $e->getMessage(), array( 'reason' => $e->reason() ) );
+
+			/**
+			 * A person was left out on purpose, for example someone who
+			 * unsubscribed in MailPoet.
+			 *
+			 * @param string $message Line written to the entry's activity log.
+			 * @param string $reason  Short reason: `previously_unsubscribed` or `bounced`.
+			 * @param array  $feed    Feed.
+			 * @param array  $context Entry context.
+			 * @param string $service Service slug.
+			 * @since 2.9.0
+			 */
+			do_action( 'subtleforms/email/marketing/skipped', $e->getMessage(), $e->reason(), $feed, $context, $service );
+			return false;
 		} catch ( ServiceException $e ) {
 			$willRetry = $e->isRetryable() && $retryCount < count( self::RETRY_DELAYS );
 			$line      = self::failedLine( $label, $e->getMessage() );

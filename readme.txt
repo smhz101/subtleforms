@@ -71,7 +71,7 @@ Entries arrive in an inbox with tabs, search, filters and a reading pane. Mark e
 
 = Email notifications and webhooks =
 
-Send an email after each entry to the people you choose, with merge tags such as {all_fields}, {field:email} and {entry_id}, in plain text or HTML. Set the reply-to address from a field. Add a webhook to send each entry as JSON to a URL you enter, and test it from the settings. After submit, show a confirmation message with the visitor's answers merged in and clickable links, or send them to another page.
+Send an email after each entry to the people you choose, with merge tags such as {all_fields}, {field:email} and {entry_id}, in plain text or HTML. Set the reply-to address from a field. Add a webhook to send each entry as JSON to a URL you enter, and test it from the settings. After submit, show a confirmation message with the visitor's answers merged in and clickable links, or send them to another page. When the MailPoet plugin is active on the same site, a form can also pass each entry's email address to a MailPoet list, with no outside service involved.
 
 = Looks like your site =
 

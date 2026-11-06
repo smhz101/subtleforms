@@ -13,7 +13,9 @@ import './emailMarketing.scss';
  * Settings live in `metadata.integrations.{service}`: enabled, list_id,
  * fields { email, first_name, last_name }, merge_fields [ { field, target } ],
  * tags, double_optin, update_existing, consent_field. The same shape for
- * Mailchimp, Brevo and Kit.
+ * Mailchimp, MailPoet, Brevo and Kit. MailPoet has no tags and no double opt-in switch;
+ * it has send_confirmation_email (default on) and schedule_welcome_email
+ * (default off) instead.
  *
  * @param {Object}   props
  * @param {string}   props.service       Service slug.
@@ -151,7 +153,25 @@ export default function ServiceFormPanel({ service, connected, connection, schem
         disabled={isReadOnly}
       />
 
-      {ui.doi !== 'none' ? (
+      {ui.doi === 'mailpoet' && (
+        <>
+          <ToggleControl
+            label={__('Send MailPoet\'s confirmation email', 'subtleforms')}
+            checked={config.send_confirmation_email === undefined ? true : !!config.send_confirmation_email}
+            onChange={(v) => set({ send_confirmation_email: v })}
+            help={ui.confirmationHelp}
+            disabled={isReadOnly}
+          />
+          <ToggleControl
+            label={__('Send the welcome email for this list', 'subtleforms')}
+            checked={!!config.schedule_welcome_email}
+            onChange={(v) => set({ schedule_welcome_email: v })}
+            help={ui.welcomeHelp}
+            disabled={isReadOnly}
+          />
+        </>
+      )}
+      {ui.doi !== 'none' && ui.doi !== 'mailpoet' && (
         <ToggleControl
           label={__('Double opt-in', 'subtleforms')}
           checked={!!config.double_optin}
@@ -159,9 +179,8 @@ export default function ServiceFormPanel({ service, connected, connection, schem
           help={ui.doiHelp}
           disabled={isReadOnly}
         />
-      ) : (
-        <p className='sf-em-form__note'>{ui.doiHelp}</p>
       )}
+      {ui.doi === 'none' && <p className='sf-em-form__note'>{ui.doiHelp}</p>}
       {ui.doi === 'brevo' && !!config.double_optin && connection && !doiTemplateSet && (
         <p className='sf-em-form__note sf-em-form__note--warn'>
           {__('Double opt-in needs a confirmation template and a page for after people confirm.', 'subtleforms')}{' '}
@@ -169,13 +188,15 @@ export default function ServiceFormPanel({ service, connected, connection, schem
         </p>
       )}
 
-      <ToggleControl
-        label={__('Update existing contacts', 'subtleforms')}
-        checked={config.update_existing === undefined ? true : !!config.update_existing}
-        onChange={(v) => set({ update_existing: v })}
-        help={ui.updateHelp}
-        disabled={isReadOnly}
-      />
+      {ui.updateExisting !== false && (
+        <ToggleControl
+          label={__('Update existing contacts', 'subtleforms')}
+          checked={config.update_existing === undefined ? true : !!config.update_existing}
+          onChange={(v) => set({ update_existing: v })}
+          help={ui.updateHelp}
+          disabled={isReadOnly}
+        />
+      )}
     </div>
   );
 }

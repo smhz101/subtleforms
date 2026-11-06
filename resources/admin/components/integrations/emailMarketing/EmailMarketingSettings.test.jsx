@@ -40,6 +40,7 @@ function pageData(overrides = {}) {
         mailchimp: { slug: 'mailchimp', label: 'Mailchimp', available: true, enabled: false, configured: false, builtin: true },
         brevo: { slug: 'brevo', label: 'Brevo', available: true, enabled: false, configured: false, builtin: true },
         kit: { slug: 'kit', label: 'Kit', available: true, enabled: false, configured: false, builtin: true },
+        mailpoet: { slug: 'mailpoet', label: 'MailPoet', available: true, enabled: false, configured: false, builtin: true, local: true, local_state: 'ready' },
       },
       extras: [],
       banner: { show: true, url: 'https://subtleforms.com/pro/' },
@@ -61,9 +62,9 @@ async function mount(data = pageData(), hash = '#tab=extensions&ext=email_market
   await act(async () => root.render(<EmailMarketingSettings />));
 }
 
-const tile = (slug) => container.querySelector(`.sf-em-tile[data-service="${slug}"]`);
+const tile = (slug) => container.querySelector(`.sf-svc-tile[data-service="${slug}"]`);
 const toggleOf = (slug) => tile(slug).querySelector('input[type="checkbox"]');
-const open = async (slug) => act(async () => tile(slug).querySelector('.sf-em-tile__open').click());
+const open = async (slug) => act(async () => tile(slug).querySelector('.sf-svc-tile__open').click());
 const back = () => container.querySelector('button[aria-label="Back to email marketing"]');
 
 afterEach(() => {
@@ -77,51 +78,84 @@ afterEach(() => {
 });
 
 describe('the grid', () => {
-  test('shows a tile for Mailchimp, Brevo and Kit in that order, each named for assistive technology only', async () => {
+  test('shows a tile for Mailchimp, Brevo, Kit and MailPoet in that order, each named for assistive technology only', async () => {
     await mount();
-    const tiles = [...container.querySelectorAll('.sf-em-tile')];
-    expect(tiles.map((t) => t.getAttribute('data-service'))).toEqual(['mailchimp', 'brevo', 'kit']);
+    const tiles = [...container.querySelectorAll('.sf-svc-tile')];
+    expect(tiles.map((t) => t.getAttribute('data-service'))).toEqual(['mailchimp', 'brevo', 'kit', 'mailpoet']);
+    const names = { mailchimp: 'Mailchimp', brevo: 'Brevo', kit: 'Kit', mailpoet: 'MailPoet' };
     tiles.forEach((t) => {
-      const button = t.querySelector('.sf-em-tile__open');
-      expect(button.textContent.trim()).toBe(t.getAttribute('data-service') === 'kit' ? 'Kit' : t.getAttribute('data-service') === 'brevo' ? 'Brevo' : 'Mailchimp');
+      const slug = t.getAttribute('data-service');
+      const button = t.querySelector('.sf-svc-tile__open');
+      expect(button.textContent.trim()).toBe(names[slug]);
       expect(button.querySelector('.sf-sr-only')).not.toBeNull();
-      expect(button.querySelector('svg path')).not.toBeNull();
-      expect(button.querySelector('svg').getAttribute('aria-hidden')).toBe('true');
+    });
+  });
+
+  test('a logo is drawn as one full-colour artwork; Brevo, with no official file, is its name in the brand green', async () => {
+    await mount();
+    ['mailchimp', 'brevo', 'kit', 'mailpoet'].forEach((slug) => {
+      const svg = tile(slug).querySelector('.sf-svc-logo svg');
+      expect(svg.getAttribute('aria-hidden')).toBe('true');
+      expect(svg.querySelector('path')).not.toBeNull();
+      // Colour is in the artwork itself: no currentColor, so the style sheet alone greys it.
+      expect(svg.innerHTML).not.toContain('currentColor');
+      expect([...svg.querySelectorAll('[fill]')].length).toBeGreaterThan(0);
     });
   });
 
   test('each tile has its own switch, labelled for the service, outside the tile button', async () => {
     await mount();
-    ['Mailchimp', 'Brevo', 'Kit'].forEach((label, i) => {
-      const slug = ['mailchimp', 'brevo', 'kit'][i];
+    ['Mailchimp', 'Brevo', 'Kit', 'MailPoet'].forEach((label, i) => {
+      const slug = ['mailchimp', 'brevo', 'kit', 'mailpoet'][i];
       expect(toggleOf(slug).getAttribute('aria-label')).toBe(`Enable ${label}`);
-      expect(tile(slug).querySelector('.sf-em-tile__open').contains(toggleOf(slug))).toBe(false);
+      expect(tile(slug).querySelector('.sf-svc-tile__open').contains(toggleOf(slug))).toBe(false);
     });
   });
 
-  test('the layout has no gap and one line between tiles: 3, 2 and 1 columns, 120px tall', () => {
-    const scss = fs.readFileSync(path.join(__dirname, 'emailMarketing.scss'), 'utf8');
-    const grid = scss.slice(scss.indexOf('.sf-em-grid {'), scss.indexOf('.sf-em-tile {'));
-    expect(grid).toMatch(/grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/);
+  test('the layout has no gap and one line between tiles: 4, 2 and 1 columns by the width of the screen, 120px tall', () => {
+    const scss = fs.readFileSync(path.join(__dirname, '../serviceTiles/serviceTiles.scss'), 'utf8');
+    const grid = scss.slice(scss.indexOf('.sf-svc-grid {'), scss.indexOf('.sf-svc-tile {'));
+    expect(grid).toMatch(/grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/);
     expect(grid).toMatch(/gap:\s*0;/);
-    expect(grid).toMatch(/max-width: 782px[\s\S]*repeat\(2, /);
-    expect(grid).toMatch(/max-width: 480px[\s\S]*grid-template-columns:\s*1fr/);
-    const tileRule = scss.slice(scss.indexOf('.sf-em-tile {'), scss.indexOf('&__open'));
+    expect(grid).toMatch(/@container sf-svc \(max-width: 719px\)[\s\S]*repeat\(2, /);
+    expect(grid).toMatch(/@container sf-svc \(max-width: 399px\)[\s\S]*grid-template-columns:\s*1fr/);
+    expect(scss).toMatch(/\.sf-svc-grid-wrap \{[^}]*container-type:\s*inline-size/);
+    const tileRule = scss.slice(scss.indexOf('.sf-svc-tile {'), scss.indexOf('&__open'));
     expect(tileRule).toMatch(/min-height:\s*120px/);
     expect(tileRule).toMatch(/border-right:\s*1px solid/);
     expect(tileRule).toMatch(/border-bottom:\s*1px solid/);
     expect(tileRule).not.toMatch(/border-left|border-top|margin/);
   });
 
-  test('an enabled service is marked so its logo takes the brand colour', async () => {
+  test('an enabled service is marked, and only its logo keeps full colour', async () => {
     const data = pageData();
     data.emailMarketing.services.brevo.enabled = true;
     await mount(data);
     expect(tile('brevo').classList.contains('is-on')).toBe(true);
     expect(tile('mailchimp').classList.contains('is-on')).toBe(false);
-    expect(tile('brevo').getAttribute('style')).toContain('--sf-em-brand: #0B996E');
+    expect(tile('brevo').querySelector('.sf-svc-logo').classList.contains('sf-svc-logo--colour')).toBe(true);
+    expect(tile('mailchimp').querySelector('.sf-svc-logo').classList.contains('sf-svc-logo--grey')).toBe(true);
     expect(toggleOf('brevo').checked).toBe(true);
   });
+
+  test('MailPoet says under its logo when it is not installed or not active, and nothing when it is ready', async () => {
+    const data = pageData();
+    data.emailMarketing.services.mailpoet.local_state = 'not_installed';
+    await mount(data);
+    expect(tile('mailpoet').querySelector('.sf-svc-tile__status').textContent).toBe('Not installed');
+    expect(tile('mailchimp').querySelector('.sf-svc-tile__status')).toBeNull();
+    act(() => root.unmount());
+    container.remove();
+    const inactive = pageData();
+    inactive.emailMarketing.services.mailpoet.local_state = 'inactive';
+    await mount(inactive);
+    expect(tile('mailpoet').querySelector('.sf-svc-tile__status').textContent).toBe('Not active');
+    act(() => root.unmount());
+    container.remove();
+    await mount(pageData());
+    expect(tile('mailpoet').querySelector('.sf-svc-tile__status')).toBeNull();
+  });
+
 
   test('clicking a tile opens that service and puts it in the address', async () => {
     await mount();
@@ -155,7 +189,7 @@ describe('the grid', () => {
     await act(async () => toggleOf('kit').click());
     expect(emailMarketingApi.setEnabled).toHaveBeenCalledWith('kit', false);
     expect(container.querySelector('.sf-em-detail')).toBeNull();
-    expect(container.querySelector('.sf-em-grid')).not.toBeNull();
+    expect(container.querySelector('.sf-svc-grid')).not.toBeNull();
     expect(window.location.hash).not.toContain('service=');
     expect(toggleOf('kit').checked).toBe(false);
   });
@@ -171,7 +205,7 @@ describe('the grid', () => {
 
   test('the keyboard works: the tile is a button, the switch a separate checkbox, Enter and Space act on each', async () => {
     await mount();
-    const button = tile('mailchimp').querySelector('.sf-em-tile__open');
+    const button = tile('mailchimp').querySelector('.sf-svc-tile__open');
     expect(button.tagName).toBe('BUTTON');
     expect(button.getAttribute('type')).toBe('button');
     expect(toggleOf('mailchimp').tagName).toBe('INPUT');
@@ -189,16 +223,16 @@ describe('a service screen', () => {
     data.emailMarketing.services.mailchimp.enabled = true;
     await mount(data);
     await open('mailchimp');
-    const head = container.querySelector('.sf-em-detail__head');
+    const head = container.querySelector('.sf-svc-head');
     expect(back().textContent.trim()).toBe('');
     expect(back().querySelector('svg')).not.toBeNull();
-    expect(head.querySelector('.sf-em-detail__logo svg')).not.toBeNull();
-    expect(head.querySelector('.sf-em-detail__logo').getAttribute('style')).toContain('color');
+    expect(head.querySelector('.sf-svc-head__logo svg')).not.toBeNull();
+    expect(head.querySelector('.sf-svc-head__logo .sf-svc-logo').classList.contains('sf-svc-logo--colour')).toBe(true);
     expect(head.querySelector('h3').textContent).toBe('Mailchimp');
     const toggle = head.querySelector('input[type="checkbox"]');
     expect(toggle.checked).toBe(true);
     expect(head.querySelector(`label[for="${toggle.id}"]`).textContent).toBe('Enabled');
-    expect(container.querySelector('.sf-em-grid')).toBeNull();
+    expect(container.querySelector('.sf-svc-grid')).toBeNull();
   });
 
   test('draws the connection of the service', async () => {
@@ -221,7 +255,7 @@ describe('a service screen', () => {
     await mount();
     await open('mailchimp');
     await act(async () => back().click());
-    expect(container.querySelector('.sf-em-grid')).not.toBeNull();
+    expect(container.querySelector('.sf-svc-grid')).not.toBeNull();
     expect(container.querySelector('.sf-em-detail')).toBeNull();
     expect(window.location.hash).not.toContain('service=');
   });
@@ -231,10 +265,10 @@ describe('a service screen', () => {
     data.emailMarketing.services.mailchimp.enabled = true;
     await mount(data);
     await open('mailchimp');
-    await act(async () => container.querySelector('.sf-em-detail__head input[type="checkbox"]').click());
+    await act(async () => container.querySelector('.sf-svc-head input[type="checkbox"]').click());
     expect(emailMarketingApi.setEnabled).toHaveBeenCalledWith('mailchimp', false);
     expect(emailMarketingApi.disconnect).not.toHaveBeenCalled();
-    expect(container.querySelector('.sf-em-grid')).not.toBeNull();
+    expect(container.querySelector('.sf-svc-grid')).not.toBeNull();
     expect(toggleOf('mailchimp').checked).toBe(false);
   });
 
@@ -251,12 +285,12 @@ describe('a service screen', () => {
       window.history.replaceState(null, '', '/wp-admin/admin.php#tab=extensions&ext=email_marketing');
       window.dispatchEvent(new PopStateEvent('popstate'));
     });
-    expect(container.querySelector('.sf-em-grid')).not.toBeNull();
+    expect(container.querySelector('.sf-svc-grid')).not.toBeNull();
   });
 
   test('an address that names an unknown service shows the grid', async () => {
     await mount(pageData(), '#tab=extensions&ext=email_marketing&service=nothing');
-    expect(container.querySelector('.sf-em-grid')).not.toBeNull();
+    expect(container.querySelector('.sf-svc-grid')).not.toBeNull();
   });
 
   test('an add-on draws extras in the email_marketing.service.settings slot, told the service and whether it is connected', async () => {
@@ -289,8 +323,8 @@ describe('the registry', () => {
     const data = pageData();
     data.emailMarketing.services.acme = { slug: 'acme', label: 'Acme Mail', available: true, enabled: false, configured: false };
     await mount(data);
-    expect([...container.querySelectorAll('.sf-em-tile')].map((t) => t.getAttribute('data-service'))).toEqual(['mailchimp', 'brevo', 'kit', 'acme']);
-    expect(tile('acme').querySelector('.sf-em-tile__wordmark').textContent).toBe('Acme Mail');
+    expect([...container.querySelectorAll('.sf-svc-tile')].map((t) => t.getAttribute('data-service'))).toEqual(['mailchimp', 'brevo', 'kit', 'mailpoet', 'acme']);
+    expect(tile('acme').querySelector('.sf-svc-logo__wordmark').textContent).toBe('Acme Mail');
     await open('acme');
     expect(container.querySelector('[data-testid="acme"]').textContent).toBe('Acme screen');
   });
@@ -321,7 +355,7 @@ describe('the note about Pro', () => {
   test('is shown under the grid and again at the bottom of a service screen', async () => {
     await mount();
     expect(container.querySelectorAll('.sf-em-pro')).toHaveLength(1);
-    expect(container.querySelector('.sf-em-grid-wrap').nextElementSibling.classList.contains('sf-em-pro')).toBe(true);
+    expect(container.querySelector('.sf-svc-grid-wrap').nextElementSibling.classList.contains('sf-em-pro')).toBe(true);
     await open('brevo');
     expect(container.querySelectorAll('.sf-em-pro')).toHaveLength(1);
     expect(container.querySelector('.sf-em-detail').lastElementChild.classList.contains('sf-em-pro')).toBe(true);

@@ -266,3 +266,45 @@ describe('Kit', () => {
     expect(container.textContent).toContain('custom field last_name');
   });
 });
+
+describe('MailPoet', () => {
+  const labelsOfSwitches = () => [...container.querySelectorAll('input[type="checkbox"]')].map((i) => container.querySelector(`label[for="${i.id}"]`)?.textContent.trim());
+
+  const mountMailPoet = (config) => mount(config, { service: 'mailpoet' });
+
+  test('lists come from MailPoet and the saved one is chosen', async () => {
+    await mountMailPoet({ enabled: true, list_id: 'abc123' });
+    expect(emailMarketingApi.lists).toHaveBeenCalledWith('mailpoet', false);
+    expect(container.textContent).toContain('Newsletter');
+  });
+
+  test('the two MailPoet emails replace the double opt-in switch', async () => {
+    await mountMailPoet({ enabled: true, list_id: 'abc123' });
+    const labels = labelsOfSwitches();
+    expect(labels).toContain("Send MailPoet's confirmation email");
+    expect(labels).toContain('Send the welcome email for this list');
+    expect(labels.some((l) => /double opt-in/i.test(l || ''))).toBe(false);
+  });
+
+  test('the confirmation email is on by default and the welcome email is off', async () => {
+    await mountMailPoet({ enabled: true, list_id: 'abc123' });
+    const boxes = [...container.querySelectorAll('input[type="checkbox"]')];
+    const byLabel = (text) => boxes.find((i) => container.querySelector(`label[for="${i.id}"]`)?.textContent.trim() === text);
+    expect(byLabel("Send MailPoet's confirmation email").checked).toBe(true);
+    expect(byLabel('Send the welcome email for this list').checked).toBe(false);
+  });
+
+  test('switching the welcome email on patches schedule_welcome_email', async () => {
+    const patch = await mountMailPoet({ enabled: true, list_id: 'abc123' });
+    const box = [...container.querySelectorAll('input[type="checkbox"]')].find(
+      (i) => container.querySelector(`label[for="${i.id}"]`)?.textContent.trim() === 'Send the welcome email for this list'
+    );
+    await act(async () => box.click());
+    expect(patch).toHaveBeenCalledWith({ schedule_welcome_email: true });
+  });
+
+  test('there is no tags field', async () => {
+    await mountMailPoet({ enabled: true, list_id: 'abc123' });
+    expect(container.textContent).not.toContain('Tags');
+  });
+});

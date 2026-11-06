@@ -32,6 +32,12 @@ final class ExtensionPoints {
 	 *    webhook group, request key, public route and no-answer type filters;
 	 *    the JavaScript form wrapper, option attribute and payload group
 	 *    registries. Free no longer exports `contexts` or `pricing`.
+	 *
+	 * Additive APIs do not raise the level, because a released add-on rejects
+	 * any level above the highest it knows. Add-ons detect them instead: since
+	 * 2.7.5 `window.SubtleFormsExtend` has `ServiceTileGrid` and
+	 * `ServiceDetailHeader`, and the `subtleforms/email/marketing/skipped`
+	 * action fires for services on the same site (MailPoet).
 	 */
 	public const LEVEL = 3;
 

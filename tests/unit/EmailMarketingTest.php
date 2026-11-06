@@ -307,8 +307,8 @@ final class EmailMarketingTest extends TestCase {
 
 	// ── Services ────────────────────────────────────────────────────
 
-	public function test_the_three_services_are_defined_and_only_mailchimp_needs_a_list(): void {
-		$this->assertSame( array( 'mailchimp', 'brevo', 'kit' ), Services::slugs() );
+	public function test_the_four_services_are_defined_and_only_mailchimp_needs_a_list(): void {
+		$this->assertSame( array( 'mailchimp', 'brevo', 'kit', 'mailpoet' ), Services::slugs() );
 		$defs = Services::definitions();
 		$this->assertTrue( $defs['mailchimp']['list_required'] );
 		$this->assertFalse( $defs['brevo']['list_required'] );

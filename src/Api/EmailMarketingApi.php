@@ -19,6 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use SubtleForms\Integrations\EmailMarketing\BrevoClient;
 use SubtleForms\Integrations\EmailMarketing\Connection;
+use SubtleForms\Integrations\EmailMarketing\MailPoetStatus;
 use SubtleForms\Integrations\EmailMarketing\ServiceException;
 use SubtleForms\Integrations\EmailMarketing\Services;
 use WP_Error;
@@ -202,7 +203,7 @@ final class EmailMarketingApi {
 	public function index(): WP_REST_Response {
 		$out = array();
 		foreach ( Services::slugs() as $slug ) {
-			$out[ $slug ] = ( new Connection( $slug ) )->state();
+			$out[ $slug ] = Services::state( $slug );
 		}
 		return ApiResponse::success( array( 'services' => $out ) );
 	}
@@ -214,7 +215,7 @@ final class EmailMarketingApi {
 	 * @return WP_REST_Response
 	 */
 	public function state( WP_REST_Request $request ): WP_REST_Response {
-		return ApiResponse::success( ( new Connection( $this->slug( $request ) ) )->state() );
+		return ApiResponse::success( Services::state( $this->slug( $request ) ) );
 	}
 
 	/**
@@ -226,7 +227,7 @@ final class EmailMarketingApi {
 	public function setEnabled( WP_REST_Request $request ): WP_REST_Response {
 		$connection = new Connection( $this->slug( $request ) );
 		$connection->setEnabled( (bool) rest_sanitize_boolean( $request->get_param( 'enabled' ) ) );
-		return ApiResponse::success( $connection->state() );
+		return ApiResponse::success( Services::state( $this->slug( $request ) ) );
 	}
 
 	/**
@@ -239,6 +240,9 @@ final class EmailMarketingApi {
 		$slug = $this->slug( $request );
 		$key  = trim( sanitize_text_field( (string) $request->get_param( 'api_key' ) ) );
 		$def  = Services::definitions()[ $slug ];
+		if ( Services::isLocal( $slug ) ) {
+			return $this->notForLocal( $slug );
+		}
 		if ( ! $def['client']::looksLikeKey( $key ) ) {
 			return ApiResponse::error( 'subtleforms_email_marketing_key', $def['client']::badKeyMessage(), 400 );
 		}
@@ -260,6 +264,9 @@ final class EmailMarketingApi {
 	 */
 	public function test( WP_REST_Request $request ): WP_REST_Response {
 		$slug       = $this->slug( $request );
+		if ( Services::isLocal( $slug ) ) {
+			return $this->notForLocal( $slug );
+		}
 		$connection = new Connection( $slug );
 		$typed      = trim( sanitize_text_field( (string) $request->get_param( 'api_key' ) ) );
 		$key        = '' !== $typed ? $typed : $connection->apiKey();
@@ -326,6 +333,9 @@ final class EmailMarketingApi {
 	 * @return WP_REST_Response
 	 */
 	public function disconnect( WP_REST_Request $request ): WP_REST_Response {
+		if ( Services::isLocal( $this->slug( $request ) ) ) {
+			return $this->notForLocal( $this->slug( $request ) );
+		}
 		$connection = new Connection( $this->slug( $request ) );
 		$connection->clear();
 		return ApiResponse::success( $connection->state() );
@@ -386,6 +396,21 @@ final class EmailMarketingApi {
 	}
 
 	/**
+	 * The answer for a key, a check or a disconnect on a service that has none.
+	 *
+	 * @param string $slug Service slug.
+	 * @return WP_REST_Response
+	 */
+	private function notForLocal( string $slug ): WP_REST_Response {
+		return ApiResponse::error(
+			'subtleforms_email_marketing_local',
+			/* translators: %s: service name */
+			sprintf( __( '%s is a plugin on this site and has no API key to connect.', 'subtleforms' ), Services::definitions()[ $slug ]['label'] ?? $slug ),
+			400
+		);
+	}
+
+	/**
 	 * Remember that this user dismissed the note about SubtleForms Pro in
 	 * Settings > Integrations > Email marketing. One dismissal hides it
 	 * everywhere it is shown.
@@ -411,6 +436,17 @@ final class EmailMarketingApi {
 	 * @return WP_REST_Response
 	 */
 	private function cached( string $slug, string $what, bool $refresh, callable $load ): WP_REST_Response {
+		if ( Services::isLocal( $slug ) ) {
+			// A service on this site answers at once: nothing to keep.
+			if ( ! Services::usable( $slug ) ) {
+				return ApiResponse::error( 'subtleforms_email_marketing_not_connected', MailPoetStatus::reason() . '.', 400 );
+			}
+			try {
+				return ApiResponse::success( $load( Services::client( $slug, '' ) ) );
+			} catch ( ServiceException $e ) {
+				return ApiResponse::error( 'subtleforms_email_marketing_failed', $e->getMessage(), 400 );
+			}
+		}
 		$connection = new Connection( $slug );
 		if ( ! $connection->hasKey() ) {
 			return ApiResponse::error(

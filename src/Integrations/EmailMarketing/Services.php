@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Mailchimp, Brevo and Kit are part of this plugin and complete without an
+ * Mailchimp, Brevo, Kit and MailPoet are part of this plugin and complete without an
  * add-on. An add-on lists more services, or takes one over, through the
  * `subtleforms/email/marketing/services` filter: an entry with the slug of a
  * service this plugin has, without `builtin => true`, takes that service
@@ -33,8 +33,10 @@ final class Services {
 	 * What this plugin knows about its own services.
 	 *
 	 * `case` is how a mapped field name is written in the service: Mailchimp
-	 * merge tags and Brevo attributes in capitals, Kit custom field keys as
-	 * the account has them.
+	 * merge tags and Brevo attributes in capitals, Kit custom field keys and
+	 * MailPoet field ids as the service has them. `local` marks a service that
+	 * is a plugin on this site (MailPoet): it has no API key, so its
+	 * connection is worked out from the site, not stored.
 	 *
 	 * @return array<string,array<string,mixed>>
 	 */
@@ -64,6 +66,15 @@ final class Services {
 				'tags'        => true,
 				'list_required' => false,
 			),
+			'mailpoet'  => array(
+				'label'       => 'MailPoet',
+				'client'      => MailPoetClient::class,
+				'description' => __( 'Add people who fill in a form to a list in the MailPoet plugin on this site.', 'subtleforms' ),
+				'case'        => 'keep',
+				'tags'        => false,
+				'list_required' => true,
+				'local'       => true,
+			),
 		);
 	}
 
@@ -86,6 +97,63 @@ final class Services {
 	}
 
 	/**
+	 * Whether a service is a plugin on this site, with no key and no stored
+	 * connection (MailPoet).
+	 *
+	 * @param string $slug Service slug.
+	 */
+	public static function isLocal( string $slug ): bool {
+		return ! empty( self::definitions()[ $slug ]['local'] );
+	}
+
+	/**
+	 * Connection status of a service: `connected`, `error` or `none`. For a
+	 * service on this site it is derived: connected while MailPoet is active
+	 * and set up.
+	 *
+	 * @param string $slug Service slug.
+	 */
+	public static function status( string $slug ): string {
+		if ( self::isLocal( $slug ) ) {
+			return MailPoetStatus::ready() ? Connection::STATUS_CONNECTED : Connection::STATUS_NONE;
+		}
+		return ( new Connection( $slug ) )->status();
+	}
+
+	/**
+	 * Whether a service can take people right now: a key is saved, or, for a
+	 * service on this site, it is ready.
+	 *
+	 * @param string $slug Service slug.
+	 */
+	public static function usable( string $slug ): bool {
+		if ( self::isLocal( $slug ) ) {
+			return MailPoetStatus::ready();
+		}
+		return ( new Connection( $slug ) )->hasKey();
+	}
+
+	/**
+	 * What the browser may know about one service's connection. Never a key.
+	 * A service on this site adds `local` (its state and the addresses of its
+	 * next step) and a derived status.
+	 *
+	 * @param string $slug Service slug.
+	 * @return array<string,mixed>
+	 */
+	public static function state( string $slug ): array {
+		$state = ( new Connection( $slug ) )->state();
+		if ( self::isLocal( $slug ) ) {
+			$ready              = MailPoetStatus::ready();
+			$state['status']    = $ready ? Connection::STATUS_CONNECTED : Connection::STATUS_NONE;
+			$state['has_key']   = false;
+			$state['connected'] = $ready;
+			$state['local']     = MailPoetStatus::describe();
+		}
+		return $state;
+	}
+
+	/**
 	 * The client of a service.
 	 *
 	 * @param string $slug    Service slug.
@@ -94,7 +162,7 @@ final class Services {
 	 * @param array  $settings The service's own settings.
 	 * @throws ServiceException For a slug this plugin has no client for.
 	 */
-	public static function client( string $slug, string $key, int $timeout = AbstractClient::ADMIN_TIMEOUT, array $settings = array() ): AbstractClient {
+	public static function client( string $slug, string $key, int $timeout = AbstractClient::ADMIN_TIMEOUT, array $settings = array() ): ClientInterface {
 		$def = self::definitions()[ $slug ] ?? null;
 		if ( null === $def ) {
 			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Messages are shown as JSON or in the entry log, never printed as HTML.
@@ -111,7 +179,7 @@ final class Services {
 	 * @param string $slug    Service slug.
 	 * @param int    $timeout Seconds.
 	 */
-	public static function clientFor( string $slug, int $timeout = AbstractClient::JOB_TIMEOUT ): AbstractClient {
+	public static function clientFor( string $slug, int $timeout = AbstractClient::JOB_TIMEOUT ): ClientInterface {
 		$connection = new Connection( $slug );
 		return self::client( $slug, $connection->apiKey(), $timeout, $connection->settings() );
 	}
@@ -126,7 +194,7 @@ final class Services {
 		$result = array();
 		foreach ( self::definitions() as $slug => $def ) {
 			$connection = new Connection( $slug );
-			$status     = $connection->status();
+			$status     = self::status( $slug );
 			$result[ $slug ] = array(
 				'slug'        => $slug,
 				'label'       => $def['label'],
@@ -137,6 +205,11 @@ final class Services {
 				'builtin'     => true,
 				'tags'        => (bool) $def['tags'],
 			);
+			if ( ! empty( $def['local'] ) ) {
+				// Only what the tile needs: the state, not the addresses.
+				$result[ $slug ]['local']       = true;
+				$result[ $slug ]['local_state'] = MailPoetStatus::state();
+			}
 		}
 
 		/**

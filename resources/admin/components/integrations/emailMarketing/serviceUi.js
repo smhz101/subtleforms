@@ -2,13 +2,17 @@ import { __ } from '@wordpress/i18n';
 
 /**
  * What differs between the services on the screens: names of things, help
- * text and which controls exist. The behaviour is the same for all three.
+ * text and which controls exist. The behaviour is the same for all of them.
  *
  * - `upper`: a mapped field name is written in capitals (Mailchimp merge
  *   tags, Brevo attributes); Kit custom field keys are kept as typed.
  * - `listRequired`: a form cannot send without a list.
  * - `doi`: `toggle` (a switch), `brevo` (a switch that needs the template set
- *   in Settings) or `none` (the service has no such option; a note is shown).
+ *   in Settings), `mailpoet` (MailPoet's confirmation and welcome emails, two
+ *   switches) or `none` (the service has no such option; a note is shown).
+ * - `updateExisting`: false when people already known to the service are always
+ *   added to the chosen list and nothing else about them is changed.
+ * - `notReady`: what the form panel says while the service cannot send.
  */
 export const SERVICE_UI = {
   mailchimp: {
@@ -77,6 +81,33 @@ export const SERVICE_UI = {
     updateHelp: __('People already in Kit keep their status and get their first name and custom fields updated. Off: people already in Kit are left alone.', 'subtleforms'),
     switchLabel: __('Add people who submit this form to Kit', 'subtleforms'),
   },
+  mailpoet: {
+    upper: false,
+    listRequired: true,
+    hasTags: false,
+    doi: 'mailpoet',
+    updateExisting: false,
+    listLabel: __('List', 'subtleforms'),
+    listChoose: __('Choose a list', 'subtleforms'),
+    listLoading: __('Loading lists…', 'subtleforms'),
+    listError: __('Could not load your MailPoet lists.', 'subtleforms'),
+    fieldsError: __('Could not load the subscriber fields.', 'subtleforms'),
+    fieldHeader: __('MailPoet field', 'subtleforms'),
+    noFields: __('MailPoet has no custom subscriber fields. Create them in MailPoet under Custom fields, then refresh.', 'subtleforms'),
+    lastNameNote: '',
+    keyPlaceholder: '',
+    keyHelp: '',
+    keyLink: '',
+    keyLinkText: '',
+    tagsHelp: '',
+    doiHelp: '',
+    updateHelp: '',
+    confirmationHelp: __('MailPoet emails new people to confirm, as its own signup confirmation setting says. People who are already subscribed are not asked again.', 'subtleforms'),
+    welcomeHelp: __('Sends the welcome email you set up in MailPoet for this list, if there is one.', 'subtleforms'),
+    switchLabel: __('Add people who submit this form to MailPoet', 'subtleforms'),
+    notReady: __('MailPoet is not active and set up yet. Entries are logged as skipped until it is.', 'subtleforms'),
+    notReadyLink: __('Open the settings', 'subtleforms'),
+  },
 };
 
 /**
@@ -108,6 +139,8 @@ export function uiFor(slug) {
       doiHelp: '',
       updateHelp: '',
       switchLabel: __('Add people who submit this form', 'subtleforms'),
+      updateExisting: true,
+      notReady: '',
     }
   );
 }

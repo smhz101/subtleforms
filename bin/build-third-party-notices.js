@@ -103,17 +103,19 @@ if (fs.existsSync(flagLicence)) {
   missing.push('flag-icons');
 }
 
-// Email marketing logos. The path data is copied into the admin source, so
-// no package is bundled and the section is written from here.
+// Email marketing logos. The artwork is copied into the admin source, so no
+// package is bundled and the section is written from here.
 sections.push(
   [
-    'simple-icons (Mailchimp, Brevo and Kit logo paths, resources/admin/components/integrations/emailMarketing/logos.js)',
-    'Licence: CC0-1.0',
-    'Source: https://github.com/simple-icons/simple-icons',
+    'Email marketing logos (resources/admin/components/integrations/emailMarketing/logos.js)',
     '',
-    'The icon path data is dedicated to the public domain under CC0 1.0 Universal',
-    '(https://creativecommons.org/publicdomain/zero/1.0/). The marks are trademarks',
-    'of their owners and are shown only to name the service.',
+    'Mailchimp: the Freddie mark from gilbarbara/logos (mailchimp-icon),',
+    'https://github.com/gilbarbara/logos, licence CC0-1.0.',
+    'MailPoet: logo-orange.svg from https://github.com/mailpoet/mailpoet.',
+    'Kit: logomark.svg from https://github.com/ConvertKit/convertkit-wordpress.',
+    'Brevo: the logo in https://github.com/getbrevo/brevo-cli (OAuth page template).',
+    '',
+    'The marks are trademarks of their owners and are shown only to name the service.',
   ].join('\n')
 );
 
