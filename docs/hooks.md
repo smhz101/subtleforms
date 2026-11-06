@@ -186,6 +186,7 @@ Use the exact path string the script requests, query included. A preloaded answe
 | `subtleforms/submission/completed` | action `( int $submissionId, int $formId, array $payload, array $submission, array $schema )` | An entry was stored and its steps finished. Not fired for previews. |
 | `subtleforms/submission/trashed` | action `( int $id, array $submission )` | An entry went to the Trash. |
 | `subtleforms/submission/untrashed` | action `( int $id, string $status, array $submission )` | An entry came back from the Trash. |
+| `subtleforms/submission/updated` | action `( int $id, array $submission )` | An entry's status, meta or payload changed. Add-ons use it to keep an index of the entry. |
 | `subtleforms/submission/deleted` | action `( int $id, array $submission )` | An entry was deleted for good. |
 | `subtleforms/email/attachments` | filter `( string[] $attachments, array $job )` | Files to attach to an email. |
 | `subtleforms/email/after_send` | action `( array $job, string[] $attachments )` | An email was sent. |

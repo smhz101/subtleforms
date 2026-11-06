@@ -288,6 +288,18 @@ final class SubmissionsRepository {
 			$this->invalidate_count_cache( $submission['form_id'] );
 		}
 
+		if ( $submission ) {
+			/**
+			 * Fires after an entry was changed (status, meta, payload), so
+			 * add-ons can keep an index of it, such as an orders list.
+			 *
+			 * @param int   $id         Entry ID.
+			 * @param array $submission The entry as stored now.
+			 * @since 2.5.0
+			 */
+			do_action( 'subtleforms/submission/updated', $id, $submission );
+		}
+
 		return true;
 	}
 
