@@ -2,9 +2,9 @@
 Contributors: subtleforms, smhz101
 Tags: form builder, contact form, multi-step form, conversational form, forms
 Requires at least: 6.6
-Tested up to: 7.1
+Tested up to: 7.2
 Requires PHP: 8.1
-Stable tag: 2.7.4
+Stable tag: 2.8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -225,6 +225,16 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 
 == Changelog ==
 
+= 2.8.0 - 2026-11-07 =
+* New: Email marketing is built in: connect Mailchimp, Brevo or Kit under Settings, Integrations, Email marketing, then switch it on for a form to add people to a list with field mapping, tags, double opt-in, a consent checkbox and a line in each entry's activity log.
+* New: Import forms from WPForms and Ninja Forms, from the site or from an export file, and copy their entries too if you tick the box that asks first.
+* New: Text, Number and Phone fields have an Input mask setting that formats the answer as the visitor types, with presets for phone numbers, dates, times and US ZIP codes and a custom pattern, and the server checks the same format.
+* New: MailPoet joins Mailchimp, Brevo and Kit under Email marketing, so people who fill a form can be added to a MailPoet list (never again if they unsubscribed or bounced), and each service now shows its own logo, in colour while it is on.
+* New: Every admin page now has one shared page header with its actions, the menu is ordered with Settings last and an Upgrade page, the Dashboard and Reports show more, and there is a WordPress dashboard widget and an admin bar item with the unread count. Submissions has an Unread tab again, and "last 7 days" means the same seven calendar days (site timezone) on the Dashboard, the Submissions list and the widget.
+* Change: Admin screens can receive their first data with the page, so lists appear without a loading step.
+* Change: Settings has a Logs tab between Integrations and Tools for the activity, webhook and API logs, every Settings screen now uses the same content width as Integrations, and add-ons can reuse the section list and header that Integrations is built with.
+* Change: Settings > Tools is a section panel like Integrations and Logs, add-ons share the admin app's data cache, and Settings opens with its data already loaded.
+
 = 2.7.4 - 2026-11-04 =
 * New: The SubtleForms menu and its Submissions item show the number of unread entries in a bubble, like the Comments menu, with counts above 9 shown as 9+.
 * Change: SubtleForms has a new logo: the admin menu icon, the header mark and the block icon now use it.
@@ -238,25 +248,15 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Security: Classic form result storage, admin action nonces and every REST nonce check now sanitize request input before use, and public REST route detection normalizes REQUEST_URI before parsing.
 * Security: The onboarding test email and the onboarding, tour and card dismiss routes now require the manage_options capability, the same as every SubtleForms screen.
 
-= 2.7.2 - 2026-10-24 =
-* Change: SubtleForms Pro builds older than 2.8.0 are not started by this version, to avoid errors. Update SubtleForms Pro to 2.8.0 or later.
-* Change: Payment, pricing and coupon features are provided only by the add-on. This plugin no longer includes the order engine, and an entry's order is shown by the add-on.
-* Change: A form that has a field no active plugin provides shows "This form is not available right now." and keeps its saved fields. Forms with only a leftover payments setting and no payment field keep working.
-* New: On an empty site, SubtleForms offers to import forms from Contact Form 7, Gravity Forms, Fluent Forms and other detected form plugins.
-* Change: Forms load without a loading flash, file uploads use a drop zone with a select button, repeater groups are labelled Entry N, and form settings let you choose the required-field mark and turn the validation summary on or off. Forms that have required fields show a short legend for the mark. Forms no longer paint a background by default, and inherit-from-theme keeps SubtleForms chrome for calendars and similar fields while using theme colours.
-* Fix: The Preview tab uses one scrollbar for the canvas and styling controls.
-* Change: Appearance presets no longer set form width; Layout / Form width stays a separate control so columns flex at full content width.
-* Fix: The date picker trigger matches other fields, and the calendar panel is easier to read.
-
 The full history is in changelog.txt in the plugin folder.
 
 == Upgrade Notice ==
+
+= 2.8.0 =
+Email marketing with Mailchimp, Brevo, Kit and MailPoet is built in, you can import forms from WPForms and Ninja Forms, and fields get an input mask.
 
 = 2.7.4 =
 SubtleForms has a new logo, and the admin menu shows how many entries are unread.
 
 = 2.7.3 =
 If you use the SubtleForms Pro add-on, update it to 2.8.0 or later. Freeform Custom CSS is removed; structured appearance settings are kept.
-
-= 2.7.2 =
-If you use the SubtleForms Pro add-on, update it to 2.8.0 or later: older builds are not started by this version, to avoid errors. Payment, pricing and coupon features are provided only by the add-on.

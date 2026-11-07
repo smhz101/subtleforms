@@ -4,6 +4,16 @@ This file keeps the full release history. readme.txt lists only the latest versi
 
 == Changelog ==
 
+= 2.8.0 - 2026-11-07 =
+* New: Email marketing is built in: connect Mailchimp, Brevo or Kit under Settings, Integrations, Email marketing, then switch it on for a form to add people to a list with field mapping, tags, double opt-in, a consent checkbox and a line in each entry's activity log.
+* New: Import forms from WPForms and Ninja Forms, from the site or from an export file, and copy their entries too if you tick the box that asks first.
+* New: Text, Number and Phone fields have an Input mask setting that formats the answer as the visitor types, with presets for phone numbers, dates, times and US ZIP codes and a custom pattern, and the server checks the same format.
+* New: MailPoet joins Mailchimp, Brevo and Kit under Email marketing, so people who fill a form can be added to a MailPoet list (never again if they unsubscribed or bounced), and each service now shows its own logo, in colour while it is on.
+* New: Every admin page now has one shared page header with its actions, the menu is ordered with Settings last and an Upgrade page, the Dashboard and Reports show more, and there is a WordPress dashboard widget and an admin bar item with the unread count. Submissions has an Unread tab again, and "last 7 days" means the same seven calendar days (site timezone) on the Dashboard, the Submissions list and the widget.
+* Change: Admin screens can receive their first data with the page, so lists appear without a loading step.
+* Change: Settings has a Logs tab between Integrations and Tools for the activity, webhook and API logs, every Settings screen now uses the same content width as Integrations, and add-ons can reuse the section list and header that Integrations is built with.
+* Change: Settings > Tools is a section panel like Integrations and Logs, add-ons share the admin app's data cache, and Settings opens with its data already loaded.
+
 = 2.7.4 - 2026-11-04 =
 * New: The SubtleForms menu and its Submissions item show the number of unread entries in a bubble, like the Comments menu, with counts above 9 shown as 9+.
 * Change: SubtleForms has a new logo: the admin menu icon, the header mark and the block icon now use it.
