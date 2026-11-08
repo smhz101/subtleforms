@@ -70,6 +70,18 @@ final class Plugin {
 			}
 		);
 
+		// A form post without AJAX goes to the page itself, not to REST, so its
+		// handler is hooked on every front-end request (2.8.1). It was hooked
+		// from the REST routes before, which a page request never reaches.
+		if ( ! is_admin() ) {
+			add_action(
+				'template_redirect',
+				function () {
+					$this->container->get( \SubtleForms\Api\PublicSubmitApi::class )->handleClassicPost();
+				}
+			);
+		}
+
 		// Register frontend shortcode
 		add_action(
 			'init',

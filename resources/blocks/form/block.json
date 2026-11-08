@@ -33,7 +33,7 @@
     },
     "ajax": {
       "type": "boolean",
-      "default": false
+      "default": true
     },
     "tabIndex": {
       "type": "number",

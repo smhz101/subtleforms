@@ -239,6 +239,16 @@ final class Container {
 			)
 		);
 		$this->singleton(
+			\SubtleForms\Api\PublicSubmitApi::class,
+			fn( $c ) => new \SubtleForms\Api\PublicSubmitApi(
+				$c->get( Pipeline::class ),
+				$c->get( FormsRepository::class ),
+				$c->get( SubmissionsRepository::class ),
+				$c->get( SchemaCompiler::class ),
+				$c->get( CaptchaManager::class )
+			)
+		);
+		$this->singleton(
 			RestController::class,
 			fn( $c ) => new RestController(
 				$c->get( Pipeline::class ),
@@ -248,7 +258,8 @@ final class Container {
 				$c->get( FieldRegistry::class ),
 				$c->get( SchemaCompiler::class ),
 				$c->get( Settings::class ),
-				$c->get( CaptchaManager::class )
+				$c->get( CaptchaManager::class ),
+				$c->get( \SubtleForms\Api\PublicSubmitApi::class )
 			)
 		);
 		// Frontend
