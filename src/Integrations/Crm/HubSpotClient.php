@@ -251,9 +251,10 @@ final class HubSpotClient {
 	 * filter; the email is always the contact's own.
 	 *
 	 * @param Contact $contact Contact.
+	 * @param array   $types   Property name => { type, fieldType } from HubSpot (see propertyTypes()). A property that is not listed is sent as text.
 	 * @return array<string,string>
 	 */
-	public static function propertiesFor( Contact $contact ): array {
+	public static function propertiesFor( Contact $contact, array $types = array() ): array {
 		$props = array( 'email' => $contact->email );
 		$known = array(
 			'firstname' => $contact->firstName,
@@ -269,10 +270,74 @@ final class HubSpotClient {
 		foreach ( $contact->properties as $name => $value ) {
 			$name = strtolower( trim( (string) $name ) );
 			if ( '' !== $name && 'email' !== $name && '' !== (string) $value ) {
-				$props[ $name ] = (string) $value;
+				$props[ $name ] = self::typed( (string) $value, $types[ $name ] ?? array() );
 			}
 		}
 		return $props;
+	}
+
+	/**
+	 * The answer in the form HubSpot wants for the property's type: `true` or
+	 * `false` for a single checkbox, digits for a number, and a semicolon list
+	 * for a multiple checkbox. Anything else is sent as the text it is.
+	 *
+	 * @param string $value Answer as text (several choices are joined by a comma).
+	 * @param array  $type  { type, fieldType } of the property.
+	 */
+	public static function typed( string $value, array $type ): string {
+		$kind  = (string) ( $type['type'] ?? '' );
+		$field = (string) ( $type['fieldType'] ?? '' );
+		if ( 'bool' === $kind ) {
+			return in_array( strtolower( trim( $value ) ), array( '1', 'true', 'yes', 'on', 'checked', 'y' ), true ) ? 'true' : 'false';
+		}
+		if ( 'number' === $kind ) {
+			$number = preg_replace( '/[^0-9.\-]/', '', str_replace( ',', '', $value ) );
+			return is_string( $number ) && '' !== $number ? $number : $value;
+		}
+		if ( 'enumeration' === $kind && 'checkbox' === $field ) {
+			$parts = array_filter( array_map( 'trim', explode( ',', $value ) ), 'strlen' );
+			return implode( ';', $parts );
+		}
+		return $value;
+	}
+
+	/**
+	 * Type and field type of every writable contact property, kept for an hour
+	 * so a send does not ask each time. An empty list when HubSpot cannot be
+	 * reached: the values are then sent as text and HubSpot says what it
+	 * thinks.
+	 *
+	 * @return array<string,array{type:string,fieldType:string}>
+	 */
+	public function propertyTypes(): array {
+		$key    = 'subtleforms_hs_types_' . md5( $this->token );
+		$cached = get_transient( $key );
+		if ( is_array( $cached ) ) {
+			return $cached;
+		}
+		try {
+			$res = $this->send(
+				array(
+					'method'  => 'GET',
+					'url'     => self::BASE . '/crm/v3/properties/contacts?archived=false',
+					'headers' => $this->headers(),
+				)
+			);
+		} catch ( ServiceException $e ) {
+			return array();
+		}
+		$out = array();
+		foreach ( (array) ( $res['body']['results'] ?? array() ) as $prop ) {
+			$name = (string) ( $prop['name'] ?? '' );
+			if ( '' !== $name ) {
+				$out[ $name ] = array(
+					'type'      => (string) ( $prop['type'] ?? '' ),
+					'fieldType' => (string) ( $prop['fieldType'] ?? '' ),
+				);
+			}
+		}
+		set_transient( $key, $out, HOUR_IN_SECONDS );
+		return $out;
 	}
 
 	/**
@@ -288,7 +353,7 @@ final class HubSpotClient {
 	 * @throws ServiceException When HubSpot refuses.
 	 */
 	public function saveContact( Contact $contact, ?callable $filter = null ): array {
-		$props = self::propertiesFor( $contact );
+		$props = self::propertiesFor( $contact, array() !== $contact->properties ? $this->propertyTypes() : array() );
 
 		if ( $contact->updateExisting ) {
 			$body = array(

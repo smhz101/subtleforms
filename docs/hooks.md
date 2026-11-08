@@ -296,7 +296,7 @@ The hooks `subtleforms/mailchimp/*` were never released and are gone. An add-on 
 
 This plugin sends people who fill a form to HubSpot after an entry is saved, for forms where the site owner turned it on (Form settings > Integrations > CRM, stored in `metadata.integrations.hubspot`). There is one CRM entry in Settings > Integrations, after Email marketing; HubSpot is the one tile in it. The connection is a HubSpot private app access token, kept in the non-autoloaded option `subtleforms_hubspot_connection` (the same store as the email marketing connections) with a switch. Switching HubSpot off keeps the token and the settings. One contact is created or updated per entry, by email address. The job runs in the background (`subtleforms_async_crm`), never blocks the submission, is tried once more after 2 minutes when HubSpot was busy or unreachable, and writes "HubSpot: contact created", "contact updated", "skipped (...)" or "failed: ..." to the entry's activity log. Everything works without an add-on. Since 2.8.1.
 
-Settings of a form: `enabled`, `fields` (`email`, `first_name`, `last_name`, `phone`, `company`), `properties` (`[ { field, property } ]`, any other contact property of the account), `update_existing` (default on) and `consent_field`.
+Settings of a form: `enabled`, `fields` (`email`, `first_name`, `last_name`, `phone`, `company`; an empty `phone` or `company` is not sent, an empty name is detected from the form), `properties` (`[ { field, property } ]`, any other contact property of the account; a value is written in the type of the HubSpot property: `true` or `false` for a single checkbox, digits for a number, a semicolon list for a multiple checkbox), `update_existing` (default on) and `consent_field`.
 
 ### Taking over
 

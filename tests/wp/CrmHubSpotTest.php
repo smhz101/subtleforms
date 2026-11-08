@@ -36,6 +36,8 @@ final class CrmHubSpotTest extends TestCase {
 
 	protected function setUp(): void {
 		parent::setUp();
+		// No property types known: values go out as text, as before. A test that wants types deletes this.
+		set_transient( 'subtleforms_hs_types_' . md5( $this->token() ), array(), HOUR_IN_SECONDS );
 		$this->http   = array();
 		$this->jobs   = array();
 		$this->answer = null;
@@ -312,6 +314,59 @@ final class CrmHubSpotTest extends TestCase {
 			$input['properties']
 		);
 		$this->assertSame( array( 'HubSpot: contact created' ), $this->lines( $id ) );
+	}
+
+	public function test_phone_and_company_left_as_not_sent_are_not_sent(): void {
+		$this->connect();
+		$formId = $this->hubspotForm( array( 'fields' => array( 'email' => 'email', 'first_name' => 'fname', 'phone' => '', 'company' => '' ) ) );
+		$this->submitAndRun( $formId, $this->answers() );
+		$upsert = array_values( array_filter( $this->http, static fn( $c ) => false !== strpos( $c['url'], '/batch/upsert' ) ) );
+		$this->assertCount( 1, $upsert );
+		$props = $upsert[0]['body']['inputs'][0]['properties'];
+		$this->assertArrayNotHasKey( 'phone', $props );
+		$this->assertArrayNotHasKey( 'company', $props );
+		$this->assertSame( 'Engineer', $props['jobtitle'] );
+	}
+
+	public function test_a_mapped_answer_is_written_in_the_type_of_the_hubspot_property(): void {
+		delete_transient( 'subtleforms_hs_types_' . md5( $this->token() ) );
+		$this->connect();
+		$this->answer = function ( $method, $url, $body ) {
+			if ( false !== strpos( $url, '/crm/v3/properties/contacts' ) ) {
+				return array( 200, array( 'results' => array(
+					array( 'name' => 'wants_news', 'label' => 'Wants news', 'type' => 'bool', 'fieldType' => 'booleancheckbox' ),
+					array( 'name' => 'topics', 'label' => 'Topics', 'type' => 'enumeration', 'fieldType' => 'checkbox' ),
+					array( 'name' => 'seats', 'label' => 'Seats', 'type' => 'number', 'fieldType' => 'number' ),
+					array( 'name' => 'jobtitle', 'label' => 'Job title', 'type' => 'string', 'fieldType' => 'text' ),
+				) ) );
+			}
+			return $this->defaultAnswer( $method, $url, $body );
+		};
+		$formId = $this->hubspotForm(
+			array(
+				'properties' => array(
+					array( 'field' => 'news', 'property' => 'wants_news' ),
+					array( 'field' => 'role', 'property' => 'jobtitle' ),
+					array( 'field' => 'tel', 'property' => 'seats' ),
+					array( 'field' => 'company', 'property' => 'topics' ),
+				),
+			)
+		);
+		$this->submitAndRun( $formId, array_merge( $this->answers(), array( 'tel' => '1,250 seats', 'company' => 'a, b' ) ) );
+		$upsert = array_values( array_filter( $this->http, static fn( $c ) => false !== strpos( $c['url'], '/batch/upsert' ) ) );
+		$props  = $upsert[0]['body']['inputs'][0]['properties'];
+		$this->assertSame( 'true', $props['wants_news'] );
+		$this->assertSame( 'Engineer', $props['jobtitle'] );
+		$this->assertSame( '1250', $props['seats'] );
+		$this->assertSame( 'a;b', $props['topics'] );
+	}
+
+	public function test_typed_values(): void {
+		$this->assertSame( 'true', \SubtleForms\Integrations\Crm\HubSpotClient::typed( 'Yes', array( 'type' => 'bool' ) ) );
+		$this->assertSame( 'false', \SubtleForms\Integrations\Crm\HubSpotClient::typed( 'No', array( 'type' => 'bool' ) ) );
+		$this->assertSame( '1250', \SubtleForms\Integrations\Crm\HubSpotClient::typed( '1,250 seats', array( 'type' => 'number' ) ) );
+		$this->assertSame( 'a;b', \SubtleForms\Integrations\Crm\HubSpotClient::typed( 'a, b', array( 'type' => 'enumeration', 'fieldType' => 'checkbox' ) ) );
+		$this->assertSame( 'Yes', \SubtleForms\Integrations\Crm\HubSpotClient::typed( 'Yes', array() ) );
 	}
 
 	public function test_an_existing_contact_is_updated_by_email(): void {

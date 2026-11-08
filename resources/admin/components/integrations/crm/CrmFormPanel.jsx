@@ -56,7 +56,7 @@ export default function CrmFormPanel({ schema, integrations = {}, patch, fieldOp
   );
 
   return (
-    <div className='sf-form-settings__integration sf-em-form sf-crm-form'>
+    <div className='sf-form-settings__integration sf-crm-form'>
       <h4 className='sf-form-settings__integration-title'>{__('CRM', 'subtleforms')}</h4>
 
       {on.length === 0 && (

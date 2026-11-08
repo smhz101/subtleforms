@@ -129,20 +129,10 @@ final class Contact {
 			list( $first, $last ) = FieldMapper::splitName( $first );
 		}
 
-		$phoneSource = $fields['phone'];
-		if ( '' === $phoneSource ) {
-			$phone       = FieldMapper::firstOfType( $schema, 'phone' );
-			$phoneSource = is_array( $phone ) ? (string) ( $phone['key'] ?? '' ) : '';
-		}
+		// Phone and company are sent only when the form maps them: the screen
+		// offers "Not sent" for an empty choice, and that has to mean it.
+		$phoneSource   = $fields['phone'];
 		$companySource = $fields['company'];
-		if ( '' === $companySource ) {
-			foreach ( FieldMapper::fields( $schema ) as $field ) {
-				if ( preg_match( '/^(company|company_name|organi[sz]ation|business)$/', strtolower( (string) $field['key'] ) ) ) {
-					$companySource = (string) $field['key'];
-					break;
-				}
-			}
-		}
 
 		$contact                 = new self();
 		$contact->service        = $service;
