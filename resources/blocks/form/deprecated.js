@@ -9,7 +9,10 @@
  */
 /**
  * Markup of blocks saved before 2.8.1, when AJAX was off unless chosen.
- * Blocks saved without an ajax attribute move to the new default (AJAX on)
+ * The server's block.json default (AJAX on) is merged into every parsed block,
+ * so the old markup always says off here; a block with an explicit setting
+ * validates against save.js and never reaches this. Blocks saved without an
+ * ajax attribute move to the new default (AJAX on)
  * the next time they are saved.
  */
 export default function save({ attributes }) {
@@ -20,7 +23,6 @@ export default function save({ attributes }) {
 	showTitle = true,
 	showDescription = true,
 	theme = 'default',
-	ajax = false,
 	tabIndex = 0,
 	fieldValues = '',
 	} = attributes;
@@ -40,7 +42,7 @@ export default function save({ attributes }) {
 		data-show-title={showTitle ? '1' : '0'}
 		data-show-description={showDescription ? '1' : '0'}
 		data-theme={theme}
-		data-ajax={ajax ? '1' : '0'}
+		data-ajax='0'
 		data-tabindex={tabIndex}
 		data-field-values={fieldValues}
 	/>
