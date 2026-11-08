@@ -1,16 +1,20 @@
-import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
-import { Spinner } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
-import SectionHeader from '../../sectionPanel/SectionHeader';
-import ServiceTileGrid from '../serviceTiles/ServiceTileGrid';
-import ServiceDetailHeader from '../serviceTiles/ServiceDetailHeader';
-import ExtensionSlot from '../../ExtensionSlot';
-import CrmProBanner from './CrmProBanner';
-import { announceService, isConnected, pageData } from './api';
-import { useServiceState, useSetServiceEnabled, useStoreServiceState } from './queries';
-import { getCrmServices } from '../../../../shared/extend';
-import './registerBuiltins';
-import '../emailMarketing/emailMarketing.scss';
+import { useCallback, useEffect, useMemo, useState } from "@wordpress/element";
+import { Spinner } from "@wordpress/components";
+import { __ } from "@wordpress/i18n";
+import SectionHeader from "../../sectionPanel/SectionHeader";
+import ServiceTileGrid from "../serviceTiles/ServiceTileGrid";
+import ServiceDetailHeader from "../serviceTiles/ServiceDetailHeader";
+import ExtensionSlot from "../../ExtensionSlot";
+import CrmProBanner from "./CrmProBanner";
+import { announceService, isConnected, pageData } from "./api";
+import {
+  useServiceState,
+  useSetServiceEnabled,
+  useStoreServiceState,
+} from "./queries";
+import { getCrmServices } from "../../../../shared/extend";
+import "./registerBuiltins";
+import "../emailMarketing/emailMarketing.scss";
 
 /**
  * The slug in the address (`#tab=extensions&ext=crm&service=hubspot`).
@@ -19,7 +23,7 @@ import '../emailMarketing/emailMarketing.scss';
  */
 export function serviceFromHash() {
   const match = window.location.hash.match(/[#&]service=([\w-]+)/);
-  return match ? match[1] : '';
+  return match ? match[1] : "";
 }
 
 /**
@@ -29,13 +33,13 @@ export function serviceFromHash() {
  * @param {string} slug Slug, or '' for the grid.
  */
 export function writeServiceToHash(slug) {
-  const params = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  const params = new URLSearchParams(window.location.hash.replace(/^#/, ""));
   if (slug) {
-    params.set('service', slug);
+    params.set("service", slug);
   } else {
-    params.delete('service');
+    params.delete("service");
   }
-  window.history.pushState(null, '', `#${params.toString()}`);
+  window.history.pushState(null, "", `#${params.toString()}`);
 }
 
 /**
@@ -53,24 +57,28 @@ function CrmServiceDetail({ service, onBack, onToggle, enabled }) {
   const { data: connection, error: queryError } = useServiceState(service.slug);
   const storeState = useStoreServiceState();
   const setEnabled = useSetServiceEnabled();
-  const [error, setError] = useState('');
-  const loadError = queryError && !connection ? queryError.message || __('Could not load the connection.', 'subtleforms') : '';
+  const [error, setError] = useState("");
+  const loadError =
+    queryError && !connection
+      ? queryError.message ||
+        __("Could not load the connection.", "subtleforms")
+      : "";
   const Settings = service.settingsComponent;
 
   const toggle = async (next) => {
-    setError('');
+    setError("");
     try {
       await setEnabled.mutateAsync({ service: service.slug, enabled: next });
       announceService(service.slug, { enabled: next });
       onToggle(service.slug, next);
       if (!next) onBack();
     } catch (e) {
-      setError(e?.message || __('Could not change the switch.', 'subtleforms'));
+      setError(e?.message || __("Could not change the switch.", "subtleforms"));
     }
   };
 
   return (
-    <div className='sf-em-detail sf-crm-detail' data-service={service.slug}>
+    <div className="sf-em-detail sf-crm-detail" data-service={service.slug}>
       <ServiceDetailHeader
         id={`sf-crm-toggle-${service.slug}`}
         label={service.label}
@@ -78,28 +86,38 @@ function CrmServiceDetail({ service, onBack, onToggle, enabled }) {
         brandColor={service.brandColor}
         enabled={!!enabled}
         busy={setEnabled.isPending}
-        backLabel={__('Back to CRM', 'subtleforms')}
+        backLabel={__("Back to CRM", "subtleforms")}
         onBack={onBack}
         onToggle={toggle}
       />
 
       {error && (
-        <p role='alert' className='sf-em-detail__error'>
+        <p role="alert" className="sf-em-detail__error">
           {error}
         </p>
       )}
 
-      <div className='sf-em-detail__body'>
-        {loadError && <p className='sf-em-card__error'>{loadError}</p>}
+      <div className="sf-em-detail__body">
+        {loadError && <p className="sf-em-card__error">{loadError}</p>}
         {!loadError && !connection && (
-          <p role='status' className='sf-em-card__loading'>
-            <Spinner /> {__('Loading…', 'subtleforms')}
+          <p role="status" className="sf-em-card__loading">
+            <Spinner /> {__("Loading…", "subtleforms")}
           </p>
         )}
         {connection && Settings && (
-          <Settings service={service.slug} connection={connection} onConnection={(next) => storeState(service.slug, next)} />
+          <Settings
+            service={service.slug}
+            connection={connection}
+            onConnection={(next) => storeState(service.slug, next)}
+          />
         )}
-        {connection && <ExtensionSlot name='crm.service.settings' service={service.slug} connected={isConnected(connection)} />}
+        {connection && (
+          <ExtensionSlot
+            name="crm.service.settings"
+            service={service.slug}
+            connected={isConnected(connection)}
+          />
+        )}
       </div>
       <CrmProBanner />
     </div>
@@ -121,12 +139,14 @@ export default function CrmSettings() {
     return map;
   });
   const [busy, setBusy] = useState({});
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const setServiceEnabled = useSetServiceEnabled();
 
   const services = useMemo(() => {
     const server = pageData().services;
-    return getCrmServices().filter((s) => server[s.slug] && server[s.slug].available !== false);
+    return getCrmServices().filter(
+      (s) => server[s.slug] && server[s.slug].available !== false,
+    );
     // The registry can grow while the page loads; the list is read again on every address change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
@@ -134,11 +154,11 @@ export default function CrmSettings() {
   // The browser's Back and Forward buttons, and a hash edited by hand.
   useEffect(() => {
     const sync = () => setActive(serviceFromHash());
-    window.addEventListener('popstate', sync);
-    window.addEventListener('hashchange', sync);
+    window.addEventListener("popstate", sync);
+    window.addEventListener("hashchange", sync);
     return () => {
-      window.removeEventListener('popstate', sync);
-      window.removeEventListener('hashchange', sync);
+      window.removeEventListener("popstate", sync);
+      window.removeEventListener("hashchange", sync);
     };
   }, []);
 
@@ -155,7 +175,7 @@ export default function CrmSettings() {
   // opens its screen, where the token goes.
   const toggleFromGrid = useCallback(
     async (slug, value) => {
-      setError('');
+      setError("");
       setBusy((current) => ({ ...current, [slug]: true }));
       setSwitch(slug, value);
       try {
@@ -164,19 +184,27 @@ export default function CrmSettings() {
         if (value) open(slug);
       } catch (e) {
         setSwitch(slug, !value);
-        setError(e?.message || __('Could not change the switch.', 'subtleforms'));
+        setError(
+          e?.message || __("Could not change the switch.", "subtleforms"),
+        );
       }
       setBusy((current) => ({ ...current, [slug]: false }));
     },
-    [open, setSwitch, setServiceEnabled]
+    [open, setSwitch, setServiceEnabled],
   );
 
   const current = active ? services.find((s) => s.slug === active) : null;
 
   if (current) {
     return (
-      <div className='sf-ext-panel sf-em sf-crm'>
-        <CrmServiceDetail key={current.slug} service={current} enabled={!!enabled[current.slug]} onToggle={setSwitch} onBack={() => open('')} />
+      <div className="sf-ext-panel sf-em sf-crm">
+        <CrmServiceDetail
+          key={current.slug}
+          service={current}
+          enabled={!!enabled[current.slug]}
+          onToggle={setSwitch}
+          onBack={() => open("")}
+        />
       </div>
     );
   }
@@ -187,18 +215,36 @@ export default function CrmSettings() {
     logo: service.icon,
     brandColor: service.brandColor,
     enabled: !!enabled[service.slug],
-    statusLabel: '',
+    statusLabel: "",
   }));
 
   return (
-    <div className='sf-ext-panel sf-em sf-crm'>
-      <SectionHeader title={__('CRM', 'subtleforms')} description={__('Send contacts to HubSpot from the forms you choose.', 'subtleforms')} />
+    <div className="sf-ext-panel sf-em sf-crm">
+      <SectionHeader
+        title={__("CRM", "subtleforms")}
+        description={
+          services.length > 1
+            ? __(
+                "Send contacts to your CRM from the forms you choose.",
+                "subtleforms",
+              )
+            : __(
+                "Send contacts to HubSpot from the forms you choose.",
+                "subtleforms",
+              )
+        }
+      />
       {error && (
-        <p role='alert' className='sf-em-detail__error'>
+        <p role="alert" className="sf-em-detail__error">
           {error}
         </p>
       )}
-      <ServiceTileGrid services={items} busy={busy} onOpen={open} onToggle={toggleFromGrid} />
+      <ServiceTileGrid
+        services={items}
+        busy={busy}
+        onOpen={open}
+        onToggle={toggleFromGrid}
+      />
       <CrmProBanner />
     </div>
   );

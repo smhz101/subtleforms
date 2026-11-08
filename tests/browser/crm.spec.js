@@ -71,7 +71,7 @@ test.afterAll(async () => {
 
 test.describe.configure({ mode: 'serial' });
 
-if (SHOTS) test.use({ viewport: { width: Number(process.env.SF_SHOT_WIDTH || 1280), height: 1800 } });
+if (SHOTS) test.use({ viewport: { width: Number(process.env.SF_SHOT_WIDTH || 1280), height: 1800 }, deviceScaleFactor: Number(process.env.SF_SHOT_SCALE || 1) });
 
 test('Grid: a CRM entry after Email marketing, one HubSpot tile, off, no Save button, one note about Pro', async ({ page }) => {
   await loginPage(page);
