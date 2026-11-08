@@ -142,6 +142,7 @@ final class RestController {
 
 		( new WebhooksApi() )->registerRoutes();
 		( new EmailMarketingApi() )->registerRoutes();
+		( new CrmApi() )->registerRoutes();
 
 		$dashboardApi = new DashboardApi(
 			$this->formsRepo,

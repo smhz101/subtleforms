@@ -155,6 +155,10 @@ final class Plugin {
 		// Email marketing (Mailchimp, Brevo, Kit): queue a job for each saved entry, and run it.
 		add_action( 'subtleforms_async_email_marketing', array( \SubtleForms\Async\AsyncDispatcher::class, 'executeEmailMarketing' ), 10, 1 );
 		\SubtleForms\Integrations\EmailMarketing\Sender::register();
+
+		// CRM (HubSpot): the same, for contacts.
+		add_action( 'subtleforms_async_crm', array( \SubtleForms\Async\AsyncDispatcher::class, 'executeCrm' ), 10, 1 );
+		\SubtleForms\Integrations\Crm\Sender::register();
 	}
 
 	/**

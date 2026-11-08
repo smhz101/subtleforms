@@ -5,8 +5,8 @@
  * Shown on the front end and in the admin to people who can manage SubtleForms
  * entries: the mark, the name and a bubble with the unread entries (styled
  * like the Comments bubble, absent when nothing is unread). Its sub items are
- * Submissions, All Forms, Add New and, while no add-on is active, Upgrade to
- * Pro. The count is the one the admin menu badge uses, read once per request.
+ * Submissions, All Forms, Add New and, while no add-on is active, the
+ * Upgrade item. The count is the one the admin menu badge uses, read once per request.
  *
  * @package SubtleForms\Admin
  * @since   2.7.5
@@ -113,7 +113,7 @@ final class AdminBar {
 				array(
 					'parent' => self::NODE,
 					'id'     => self::NODE . '-upgrade',
-					'title'  => '<span class="sf-ab-upgrade">' . esc_html__( 'Upgrade to Pro', 'subtleforms' ) . '</span>',
+					'title'  => '<span class="sf-ab-upgrade">' . AdminMenu::upgrade_label() . '</span>',
 					'href'   => admin_url( 'admin.php?page=' . AdminMenu::UPGRADE_SLUG ),
 				)
 			);

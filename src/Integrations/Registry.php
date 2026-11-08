@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace SubtleForms\Integrations;
 
 use SubtleForms\Integrations\EmailMarketing\Connection;
+use SubtleForms\Integrations\Crm\Services as CrmServices;
 use SubtleForms\Integrations\EmailMarketing\Services;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -18,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Webhooks and Email marketing are part of this plugin. An add-on lists its
+ * Webhooks, Email marketing and CRM are part of this plugin. An add-on lists its
  * own integrations through `subtleforms/admin/integrations`.
  *
  * An add-on that lists an entry under the slug `email_marketing` without the
@@ -46,6 +47,7 @@ final class Registry {
 				'configured'  => true,
 			),
 			Services::INTEGRATION     => self::emailMarketing(),
+			CrmServices::INTEGRATION  => self::crm(),
 		);
 
 		/**
@@ -90,6 +92,49 @@ final class Registry {
 			'configured'  => $configured,
 			'builtin'     => true,
 		);
+	}
+
+	/**
+	 * This plugin's CRM entry. It is on while any of its services is switched
+	 * on, and set up while a switched-on service is connected.
+	 *
+	 * @return array<string,mixed>
+	 */
+	private static function crm(): array {
+		$enabled    = false;
+		$configured = false;
+		foreach ( CrmServices::slugs() as $slug ) {
+			$connection = new Connection( $slug );
+			if ( $connection->isEnabled() ) {
+				$enabled = true;
+				if ( Connection::STATUS_CONNECTED === CrmServices::status( $slug ) ) {
+					$configured = true;
+				}
+			}
+		}
+		return array(
+			'slug'        => CrmServices::INTEGRATION,
+			'label'       => __( 'CRM', 'subtleforms' ),
+			'description' => __( 'Send contacts to HubSpot from the forms you choose.', 'subtleforms' ),
+			'available'   => true,
+			'enabled'     => $enabled,
+			'configured'  => $configured,
+			'builtin'     => true,
+		);
+	}
+
+	/**
+	 * Whether this plugin's own CRM is the one in charge: nothing replaced
+	 * the entry.
+	 */
+	public static function coreOwnsCrm(): bool {
+		try {
+			$all = self::all();
+		} catch ( \Throwable $e ) {
+			return true;
+		}
+		$entry = $all[ CrmServices::INTEGRATION ] ?? null;
+		return is_array( $entry ) && ! empty( $entry['builtin'] );
 	}
 
 	/**
