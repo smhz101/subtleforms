@@ -206,6 +206,10 @@ Used for the same purpose when the administrator connects Brevo. Requests go to 
 
 Used for the same purpose when the administrator connects Kit (formerly ConvertKit). Requests go to https://api.kit.com, with the subscriber's email address, the mapped answers, the Kit form the administrator chose and the tags the administrator typed. [Terms of Service](https://kit.com/terms), [Privacy Policy](https://kit.com/privacy).
 
+= HubSpot (CRM) =
+
+Used only when a site administrator connects a HubSpot account under Settings, Integrations, CRM, and only for forms where the administrator turns HubSpot on. After an entry is saved, the site sends the person's email address to HubSpot, with the form answers the administrator mapped (such as first name, last name, phone number, company name or other contact properties). The contact is created, or updated when the email address is already a contact and the administrator allows updates. Entries marked as spam, and entries where the consent box the administrator chose was not ticked, are not sent. The visitor's IP address and browser are not sent. When the administrator connects, tests the connection or loads their contact properties in wp-admin, the site sends the private app access token to HubSpot to sign in and receives the account name and number and the list of contact properties. Requests go to https://api.hubapi.com. The access token is stored in the WordPress options table and is never shown again after saving. [Terms of Service](https://legal.hubspot.com/terms-of-service), [Privacy Policy](https://legal.hubspot.com/privacy-policy).
+
 = Webhooks =
 
 When you add a webhook action to a form, each new entry is sent as JSON to the URL you, the site owner, enter, after the entry is saved (and when you press Test). The data goes only to that URL: nothing is sent to SubtleForms or to any address you did not enter. What that service does with it is set by its own terms.
