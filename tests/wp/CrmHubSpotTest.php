@@ -231,6 +231,7 @@ final class CrmHubSpotTest extends TestCase {
 		$this->assertStringNotContainsString( $this->token(), $json );
 		$this->assertStringContainsString( substr( $this->token(), -4 ), $json );
 		$this->assertSame( $this->token(), $this->conn()->apiKey() );
+		$this->assertStringContainsString( 'Acme Studio (4455667)', $json );
 		$this->assertSame( 'Bearer ' . $this->token(), $this->http[0]['auth'] );
 
 		// The option is not autoloaded.

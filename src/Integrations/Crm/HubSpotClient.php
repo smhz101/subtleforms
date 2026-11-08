@@ -168,7 +168,7 @@ final class HubSpotClient {
 	 * refuses them, a read of the contact properties still proves the token
 	 * works (and the contact scope is there), and the name is left empty.
 	 *
-	 * @return array{name:string,email:string,portal_id:string}
+	 * @return array{name:string,email:string,portal_id:string,label:string}
 	 * @throws ServiceException When HubSpot refuses the token.
 	 */
 	public function account(): array {
@@ -190,6 +190,8 @@ final class HubSpotClient {
 				'name'      => $name,
 				'email'     => '',
 				'portal_id' => $portal,
+				// What the screens show: the name with the portal ID, so two accounts are told apart.
+				'label'     => '' !== $name && '' !== $portal && false === strpos( $name, $portal ) ? sprintf( '%s (%s)', $name, $portal ) : $name,
 			);
 		} catch ( ServiceException $e ) {
 			if ( 401 === $e->status() || 0 === $e->status() || $e->isRetryable() ) {
@@ -202,6 +204,7 @@ final class HubSpotClient {
 			'name'      => '',
 			'email'     => '',
 			'portal_id' => '',
+			'label'     => '',
 		);
 	}
 

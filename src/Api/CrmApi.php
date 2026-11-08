@@ -209,7 +209,7 @@ final class CrmApi {
 			return ApiResponse::error( 'subtleforms_crm_failed', $e->getMessage(), 400 );
 		}
 		$connection = new Connection( $slug );
-		$connection->save( $token, $account );
+		$connection->save( $token, array_merge( $account, array( 'name' => '' !== $account['label'] ? $account['label'] : $account['name'] ) ) );
 		delete_transient( $connection->cacheKey( 'properties' ) );
 		return ApiResponse::success( array_merge( Services::state( $slug ), array( 'ok' => true ) ) );
 	}
@@ -238,10 +238,11 @@ final class CrmApi {
 				)
 			);
 		}
-		$connection->recordCheck( true, $account );
-		$message = '' !== $account['portal_id']
-			/* translators: 1: account name, 2: HubSpot account (portal) ID */
-			? sprintf( __( 'Connected to %1$s (portal %2$s).', 'subtleforms' ), $account['name'], $account['portal_id'] )
+		$connection->recordCheck( true, array_merge( $account, array( 'name' => '' !== $account['label'] ? $account['label'] : $account['name'] ) ) );
+		$shown   = '' !== $account['label'] ? $account['label'] : $account['name'];
+		$message = '' !== $shown
+			/* translators: %s: HubSpot account name and portal ID */
+			? sprintf( __( 'Connected to %s.', 'subtleforms' ), $shown )
 			: __( 'Connected.', 'subtleforms' );
 		return ApiResponse::success(
 			array(
