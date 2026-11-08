@@ -30,9 +30,10 @@
 		width: 100%;
 		max-width: 100%;
 		margin: 0 !important;
-		border-radius: var(--sf-radius-md);
-		// The core notice look: white card, hairline, coloured left border.
-		background: var(--sf-bg-surface);
+		// The core notice look: white surface, hairline, coloured left border,
+		// square corners.
+		border-radius: 0;
+		background: #fff;
 		box-shadow: none;
 		overflow-wrap: anywhere;
 	}

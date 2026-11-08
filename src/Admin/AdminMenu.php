@@ -141,7 +141,44 @@ class AdminMenu {
 	 */
 	public static function forget_unread_count(): void {
 		self::$unread = null;
+		self::$total  = null;
 	}
+
+	/**
+	 * Every entry the Submissions screen can list (not the Trash, not builder
+	 * previews), for the Submissions badge in the plugin navigation.
+	 *
+	 * Cached in a transient named after the counts generation, which the
+	 * entries repository bumps on every new, changed or removed entry, so a
+	 * new entry shows on the next page load without a count on every request.
+	 *
+	 * @return int
+	 */
+	public static function total_count(): int {
+		if ( null !== self::$total ) {
+			return self::$total;
+		}
+		$key    = 'subtleforms_total_entries_' . (int) get_option( 'subtleforms_counts_generation', 1 );
+		$cached = get_transient( $key );
+		if ( false !== $cached ) {
+			self::$total = (int) $cached;
+			return self::$total;
+		}
+		try {
+			self::$total = (int) ( new SubmissionsRepository() )->count();
+		} catch ( \Throwable $e ) {
+			return 0;
+		}
+		set_transient( $key, self::$total, DAY_IN_SECONDS );
+		return self::$total;
+	}
+
+	/**
+	 * Total entries as counted earlier in this request.
+	 *
+	 * @var int|null
+	 */
+	private static $total = null;
 
 	/**
 	 * Unread entries as counted earlier in this request.
@@ -576,6 +613,8 @@ class AdminMenu {
 			'restNonce'      => wp_create_nonce( 'wp_rest' ),
 			'version'        => SUBTLEFORMS_VERSION,
 			'unreadCount'    => $this->get_unread_count(),
+			// Every entry, for the Submissions badge in the plugin navigation.
+			'totalCount'     => self::total_count(),
 			'capabilities'   => $live_caps->all(),
 			'hasProPlugin'   => self::companion_active(),
 			'knownFieldTypes' => \SubtleForms\Fields\FieldTypeAvailability::knownTypes(),

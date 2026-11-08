@@ -72,10 +72,12 @@
 	}
 
 	&__conversational-notice {
-		background-color: var(--sf-blue-50);
+		background-color: #fff;
 		padding: 1rem;
-		border-left: 4px solid var(--sf-blue-500);
-		border-radius: var(--sf-radius-sm);
+		border: 1px solid #c3c4c7;
+		border-left: 4px solid #72aee6;
+		border-radius: 0;
+		box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
 
 		p {
 			color: var(--sf-blue-800);
@@ -365,9 +367,11 @@
 		font-size: var(--sf-text-xs);
 		line-height: var(--sf-leading-normal);
 		color: var(--sf-warning-strong);
-		background: var(--sf-warning-bg);
-		border: 1px solid var(--sf-warning-border);
-		border-radius: var(--sf-radius-sm);
+		background: #fff;
+		border: 1px solid #c3c4c7;
+		border-left: 4px solid #dba617;
+		border-radius: 0;
+		box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
 	}
 
 	// The frame sizes itself to its content, so it needs no height here, only

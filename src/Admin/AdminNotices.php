@@ -83,7 +83,7 @@ class AdminNotices {
 		$permalink_url = admin_url( 'options-permalink.php' );
 
 		printf(
-			'<div class="notice notice-error"><p>%s</p></div>',
+			'<div class="notice notice-error is-dismissible"><p>%s</p></div>',
 			wp_kses(
 				sprintf(
 					/* translators: %s: URL to the Permalinks settings page */
