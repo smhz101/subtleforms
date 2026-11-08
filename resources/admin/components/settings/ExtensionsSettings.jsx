@@ -2,20 +2,22 @@ import { useEffect, useReducer, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import WebhooksPanel from './extensions/WebhooksPanel';
 import EmailMarketingSettings from '../integrations/emailMarketing/EmailMarketingSettings';
+import CrmSettings from '../integrations/crm/CrmSettings';
 import SectionPanel from '../sectionPanel/SectionPanel';
 import SectionHeader from '../sectionPanel/SectionHeader';
 import { getSlotItems } from '../../../shared/extend';
 
 // Panels add-ons bring are registered in the `settings.extensions` slot with
-// the integration slug as id. Webhooks and Email marketing are the panels this
-// plugin ships. The Email marketing panel is drawn only while the integration
-// list carries this plugin's own entry (`builtin`); an add-on that lists its
-// own `email_marketing` entry draws its panel from the slot instead.
+// the integration slug as id. Webhooks, Email marketing and CRM are the panels this
+// plugin ships. The Email marketing and CRM panels are drawn only while the
+// integration list carries this plugin's own entry (`builtin`); an add-on that
+// lists its own entry under the same slug draws its panel from the slot instead.
 const EXTENSION_PANELS = {
   webhooks: WebhooksPanel,
 };
 const BUILT_IN_WHEN_LISTED = {
   email_marketing: EmailMarketingSettings,
+  crm: CrmSettings,
 };
 
 /**
@@ -39,14 +41,14 @@ function panelFor(slug, ext = null) {
 }
 
 /**
- * Slugs to list in the sidebar: Webhooks, Email marketing, then what an add-on lists.
+ * Slugs to list in the sidebar: Webhooks, Email marketing, CRM, then what an add-on lists.
  * An entry is shown only when it is available and something draws its panel.
  *
  * @param {Object} extensions Integrations by slug.
  * @return {string[]} Slugs.
  */
 export function listedExtensions(extensions) {
-  const rank = (slug) => (slug === 'webhooks' ? 0 : slug === 'email_marketing' ? 1 : 2);
+  const rank = (slug) => (slug === 'webhooks' ? 0 : slug === 'email_marketing' ? 1 : slug === 'crm' ? 2 : 3);
   const slugs = Object.keys(extensions).sort((a, b) => rank(a) - rank(b));
   return slugs.filter((slug) => {
     const ext = extensions[slug];
@@ -102,7 +104,7 @@ export function dotFor(slug, ext) {
 
 /**
  * ExtensionsSettings, the Integrations tab of Settings: a section panel with
- * Webhooks, Email marketing and whatever an add-on lists.
+ * Webhooks, Email marketing, CRM and whatever an add-on lists.
  *
  * An add-on that registers its panel with `title` (and `description`) on the
  * `settings.extensions` slot item gets the standard section header drawn above

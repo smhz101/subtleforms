@@ -1,0 +1,41 @@
+/**
+ * The HubSpot logo, as ONE full-colour artwork: the sprocket mark from the
+ * gilbarbara/logos collection (https://github.com/gilbarbara/logos, licence
+ * CC0-1.0, hubspot), cropped from the wordmark, in HubSpot orange (#FF7A59).
+ *
+ * The mark is a trademark of its owner and is shown only to name the service.
+ * The entry holds the SVG's viewBox and its shapes as [ tag, attributes ]
+ * pairs, so no markup is injected.
+ */
+import { createElement } from '@wordpress/element';
+
+export const LOGOS = {
+  hubspot: {
+    title: 'HubSpot',
+    brandColor: '#FF7A59',
+    source: 'gilbarbara/logos (CC0-1.0), hubspot, sprocket only',
+    viewBox: '325 0 150 150',
+    nodes: [['path', { fill: '#FF7A59', d: 'M461.278 69.831c-3.256-5.602-7.836-10.093-13.562-13.474c-4.279-2.491-8.716-4.072-13.716-4.751v-17.8c5-2.123 8.103-6.822 8.103-12.304c0-7.472-5.992-13.527-13.458-13.527c-7.472 0-13.569 6.055-13.569 13.527c0 5.482 2.924 10.181 7.924 12.304v17.808c-4 .578-8.148 1.825-11.936 3.741c-7.737-5.876-33.107-25.153-47.948-36.412c.352-1.269.623-2.577.623-3.957c0-8.276-6.702-14.984-14.981-14.984S333.78 6.71 333.78 14.986s6.706 14.985 14.985 14.985c2.824 0 5.436-.826 7.69-2.184l3.132 2.376l43.036 31.008c-2.275 2.089-4.394 4.465-6.089 7.131C393.099 73.737 391 79.717 391 86.24v1.361c0 4.579.87 8.902 2.352 12.963c1.305 3.546 3.213 6.77 5.576 9.685l-14.283 14.318a11.5 11.5 0 0 0-12.166 2.668a11.5 11.5 0 0 0-3.388 8.19c.001 3.093 1.206 6 3.394 8.187a11.5 11.5 0 0 0 8.188 3.394a11.5 11.5 0 0 0 8.191-3.394a11.5 11.5 0 0 0 3.39-8.187c0-1.197-.185-2.365-.533-3.475l14.763-14.765c2.024 1.398 4.21 2.575 6.56 3.59c4.635 2.004 9.751 3.225 15.35 3.225h1.026c6.19 0 12.029-1.454 17.518-4.428c5.784-3.143 10.311-7.441 13.731-12.928c3.438-5.502 5.331-11.581 5.331-18.269v-.334c0-6.579-1.523-12.649-4.722-18.21m-18.038 30.973c-4.007 4.453-8.613 7.196-13.82 7.196h-.858c-2.974 0-5.883-.822-8.731-2.317c-3.21-1.646-5.65-3.994-7.647-6.967c-2.064-2.918-3.184-6.104-3.184-9.482v-1.026c0-3.321.637-6.47 2.243-9.444c1.717-3.251 4.036-5.779 7.12-7.789c3.028-1.996 6.262-2.975 9.864-2.975h.335c3.266 0 6.358.644 9.276 2.137c2.973 1.592 5.402 3.767 7.285 6.628c1.829 2.862 2.917 5.949 3.267 9.312c.055.699.083 1.415.083 2.099c0 4.564-1.744 8.791-5.233 12.628' }]],
+  },
+};
+
+/**
+ * A logo as a component. `size` is the height of the square logo.
+ *
+ * @param {string} slug Service slug.
+ * @return {Function|null} Component taking { size, className }, or null when there is no artwork.
+ */
+export function logoFor(slug) {
+  const logo = LOGOS[slug];
+  if (!logo || !logo.nodes) {
+    return null;
+  }
+  const Logo = ({ size = 24, className = '' }) =>
+    createElement(
+      'svg',
+      { className, width: size, height: size, viewBox: logo.viewBox, 'aria-hidden': 'true', focusable: 'false' },
+      ...logo.nodes.map(([tag, attrs], i) => createElement(tag, { key: i, ...attrs }))
+    );
+  Logo.displayName = `${logo.title}Logo`;
+  return Logo;
+}
