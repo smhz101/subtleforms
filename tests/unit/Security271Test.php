@@ -61,7 +61,14 @@ final class Security271Test extends TestCase {
 	public function test_the_cloudflare_toggle_trusts_cloudflare_and_its_header_only(): void {
 		$_SERVER['REMOTE_ADDR']           = '104.16.0.5';
 		$_SERVER['HTTP_CF_CONNECTING_IP'] = '198.51.100.20';
-		$this->assertSame( '104.16.0.5', ClientIp::get(), 'off by default' );
+		// Since 2.8.1 a connection from Cloudflare's ranges is believed without the setting.
+		$this->assertSame( '198.51.100.20', ClientIp::get(), 'automatic by default' );
+
+		$GLOBALS['sf_test_filters']['subtleforms/client_ip/auto_cloudflare'] = static function () {
+			return false;
+		};
+		$this->assertSame( '104.16.0.5', ClientIp::get(), 'the filter turns the automatic use off' );
+		unset( $GLOBALS['sf_test_filters']['subtleforms/client_ip/auto_cloudflare'] );
 
 		$GLOBALS['sf_test_options']['subtleforms_settings'] = array( 'trust_cloudflare' => true );
 		$this->assertSame( '198.51.100.20', ClientIp::get() );
