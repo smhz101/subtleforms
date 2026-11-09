@@ -1,0 +1,1 @@
+RTX281-01,P1,Free 2.8.1,,smhz101,present since rich text field,fixed,Free 2.8.1,internal audit,The Rich Text field wrote its starting value into the editor without the allowlist it uses for typed text.,The starting value now goes through sanitizeHtml() before it is shown (RichTextInput.jsx); Jest tests cover disallowed tags and attributes and javascript: links.

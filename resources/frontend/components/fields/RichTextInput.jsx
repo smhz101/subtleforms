@@ -87,7 +87,9 @@ export default function RichTextInput( {
     // value is stored, so it must not count as a change or the caret jumps.
     const visible = ( html ) => ( html || '' ).replace( /\u200b/g, '' );
     if ( el && visible( el.innerHTML ) !== visible( value || '' ) ) {
-      el.innerHTML = value || '';
+      // The value can come from outside the editor (block prefill, a default,
+      // the URL), so it goes through the same allowlist as typed input.
+      el.innerHTML = sanitizeHtml( value || '' );
     }
   }, [ value ] );
 
