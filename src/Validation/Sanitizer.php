@@ -28,6 +28,9 @@ class Sanitizer {
 	 */
 	const MAX_DEPTH = 8;
 
+	/** Stand-in for a "<" that is not the start of a tag, while tags are stripped. */
+	private const LESS_THAN_MARK = "\x1A\x1ASF_LT\x1A\x1A";
+
 	/**
 	 * Maximum bytes for JSON strings
 	 *
@@ -392,14 +395,41 @@ class Sanitizer {
 			return '';
 		}
 
-		$str = (string) $value;
+		// Strip all HTML tags using WordPress function, then trim whitespace.
+		return self::keepLessThan(
+			(string) $value,
+			static function ( string $text ): string {
+				return trim( wp_strip_all_tags( $text ) );
+			}
+		);
+	}
 
-		// Strip all HTML tags using WordPress function
-		$str = wp_strip_all_tags( $str );
+	/**
+	 * Run a sanitizer over an answer without losing a "<" that is plain text.
+	 *
+	 * A "<" that does not open a tag ("budget <5000", "I <3 it", "x<y") is an
+	 * ordinary character, but strip_tags() reads it as the start of a tag and
+	 * drops everything after it, and sanitize_text_field() turns it into
+	 * "&lt;". Both use the test of wp_pre_kses_less_than(). Here those signs are
+	 * set aside, the sanitizer runs, and they are put back, so the stored
+	 * answer is what the visitor typed. Real tags are still stripped. Output is
+	 * escaped where the answer is shown.
+	 *
+	 * @param string   $value     Raw answer.
+	 * @param callable $sanitizer Takes and returns a string (wp_strip_all_tags, sanitize_text_field, ...).
+	 * @return string
+	 */
+	public static function keepLessThan( string $value, callable $sanitizer ): string {
+		// The stand-in is removed first so an answer cannot carry its own.
+		$value = str_replace( self::LESS_THAN_MARK, '', $value );
+		$value = preg_replace_callback(
+			'%<[^>]*?((?=<)|>|$)%',
+			static function ( $match ) {
+				return '>' === $match[1] ? $match[0] : str_replace( '<', self::LESS_THAN_MARK, $match[0] );
+			},
+			$value
+		) ?? $value;
 
-		// Trim whitespace
-		$str = trim( $str );
-
-		return $str;
+		return str_replace( self::LESS_THAN_MARK, '<', (string) $sanitizer( $value ) );
 	}
 }
