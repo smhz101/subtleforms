@@ -388,19 +388,34 @@ export default function SubmissionsPage({ formId }) {
   };
 
   // The server streams the file; the browser saves it as it arrives (2.8.1).
+  // The list already knows how many entries match, so a filter with none says
+  // so here instead of starting a download that would fail.
   const exportSubmissions = async () => {
     setExporting(true);
-    const started = startCsvDownload({
-      form_id: selectedFormId !== 'all' ? parseInt(selectedFormId) : null,
-      status: statusFilter !== 'all' ? statusFilter : null,
-      search: search || null,
-      range: dateRange !== 'all' ? dateRange : null,
-    });
-    if (!started) {
+    const outcome = await startCsvDownload(
+      {
+        form_id: selectedFormId !== 'all' ? parseInt(selectedFormId) : null,
+        status: statusFilter !== 'all' ? statusFilter : null,
+        search: search || null,
+        range: dateRange !== 'all' ? dateRange : null,
+      },
+      { total: submissionsTableRef.current?.matchCount?.() ?? null }
+    );
+    if (outcome === 'started') {
+      // The download runs outside the page, so there is nothing to wait for.
+      setTimeout(() => setExporting(false), 1500);
+      return;
+    }
+    // Nothing was started: the button is free again before the notice opens.
+    setExporting(false);
+    if (outcome === 'empty') {
+      await noticeDialog({
+        title: __('Export CSV', 'subtleforms'),
+        message: __('No submissions to export', 'subtleforms'),
+      });
+    } else {
       await noticeDialog({ message: __('Failed to export submissions', 'subtleforms') });
     }
-    // The download runs outside the page, so there is nothing to wait for.
-    setTimeout(() => setExporting(false), 1500);
   };
 
   return (

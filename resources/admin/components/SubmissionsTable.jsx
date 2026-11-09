@@ -27,7 +27,7 @@ import { apiClient, useSettings } from '../data';
 import { deletesPermanently } from '../utils/deleteBehavior';
 import { Icon } from '../ui';
 import { keepRowsAfterFailedLoad, listQueryKey } from '../utils/failedLoad';
-import { downloadCsv } from '../utils/csvDownload';
+import { startCsvDownloadOfIds } from '../utils/csvExport';
 import { entrySender } from '../utils/entrySender';
 import { timeAgo } from '../utils/formatDate';
 import { entryAfter } from '../utils/tabCounts';
@@ -120,6 +120,9 @@ const SubmissionsTable = forwardRef(
     const pagesLoadedRef = useRef(0);
     bufferRef.current = buffer;
     totalRef.current = totalItems;
+    // How many entries match the filters, once the list has loaded them.
+    const matchCountRef = useRef(null);
+    matchCountRef.current = loading || error ? null : totalItems;
     perPageRef.current = perPage;
     pagesLoadedRef.current = pagesLoaded;
     // Each fresh load starts a new generation; answers from an older one
@@ -321,6 +324,9 @@ const SubmissionsTable = forwardRef(
         step: (id, direction) => stepRef.current(id, direction),
         removeEntry: (id) => removeEntry(id),
         patchEntry: (id, patch) => patchEntry(id, patch),
+        // Entries matching the current filters, or null while the list is
+        // loading or could not load (the export button asks before it starts).
+        matchCount: () => matchCountRef.current,
       }),
       [loadFresh]
     );
@@ -540,12 +546,15 @@ const SubmissionsTable = forwardRef(
       }
     };
 
-    // Export the selected entries as CSV.
+    // Export the selected entries as CSV: the same streamed download as the
+    // Export CSV button, with the IDs posted in the body (2.8.1).
     const handleExportSelected = async (ids) => {
       try {
-        const res = await apiClient.post('/submissions/export', { ids });
-        if (!downloadCsv(res)) {
-          createErrorNotice(res?.message || __('Nothing to export', 'subtleforms'), { type: 'snackbar' });
+        const outcome = await startCsvDownloadOfIds(ids);
+        if (outcome === 'empty') {
+          createErrorNotice(__('No submissions to export', 'subtleforms'), { type: 'snackbar' });
+        } else if (outcome === 'unavailable') {
+          createErrorNotice(__('Failed to export submissions', 'subtleforms'), { type: 'snackbar' });
         }
       } catch (err) {
         createErrorNotice(__('Failed to export submissions', 'subtleforms'), { type: 'snackbar' });

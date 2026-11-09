@@ -358,6 +358,18 @@ final class SubmissionsApi {
 			)
 		);
 
+		// A fresh nonce for the CSV download link, fetched just before the
+		// download starts so a screen left open for days still exports (2.8.1).
+		register_rest_route(
+			self::NAMESPACE,
+			'/submissions/export-nonce',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'export_nonce' ),
+				'permission_callback' => array( $this, 'check_read_permission' ),
+			)
+		);
+
 		register_rest_route(
 			self::NAMESPACE,
 			'/submissions/export',
@@ -1005,9 +1017,10 @@ final class SubmissionsApi {
 	 * @deprecated 2.8.1 The whole file is built in memory, so a very large
 	 *             export can run out of it. The screens download from
 	 *             admin-post.php?action=subtleforms_export_csv instead, which
-	 *             streams the file (see downloadCsv()). This route stays for one
-	 *             release for add-ons that call it, and for exporting selected
-	 *             entries (a short list of IDs). Remove it in the next release.
+	 *             streams the file (see downloadCsv()), also for the selected
+	 *             entries (a POST with the IDs in the body). This route stays for
+	 *             one release for add-ons that call it. Remove it in the next
+	 *             release.
 	 *
 	 * Columns are the union of every exported entry's answers, so a form whose
 	 * fields changed over time keeps all of its data. When one form is
@@ -1120,38 +1133,34 @@ final class SubmissionsApi {
 	}
 
 	/**
+	 * A fresh nonce for the CSV download address.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function export_nonce(): WP_REST_Response {
+		return ApiResponse::success( array( 'nonce' => wp_create_nonce( self::EXPORT_NONCE_ACTION ) ) );
+	}
+
+	/**
 	 * Download the CSV as a file, streamed (admin-post.php?action=subtleforms_export_csv).
 	 *
 	 * Replaces the JSON export for the Entries screen and Tools (2.8.1). Needs
 	 * a signed-in administrator and the nonce the admin screens are given.
-	 * Filters come in the query string: form_id, status, search, range, after.
+	 * A GET carries the filters in the query string: form_id, status, search,
+	 * range, after. A POST carries the IDs of the selected entries in the body
+	 * (ids[]), so a long selection does not have to fit in an address.
+	 *
+	 * A refusal (nothing to export, an old nonce, no permission) sends the
+	 * browser back to the screen it came from with sf_export=empty|expired|forbidden,
+	 * which the screen turns into a notice. Without a screen to go back to it
+	 * stops with a plain error page.
 	 */
 	public function downloadCsv(): void {
-		if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You are not allowed to perform this action.', 'subtleforms' ), '', array( 'response' => 403 ) );
-		}
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- The nonce is verified right below.
-		$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
-		if ( '' === $nonce || ! wp_verify_nonce( $nonce, self::EXPORT_NONCE_ACTION ) ) {
-			wp_die( esc_html__( 'Security check failed. Please refresh and try again.', 'subtleforms' ), '', array( 'response' => 403 ) );
-		}
-		$formId  = isset( $_GET['form_id'] ) ? absint( $_GET['form_id'] ) : 0;
-		$filters = array();
-		foreach ( array( 'status', 'search', 'range', 'after' ) as $key ) {
-			if ( isset( $_GET[ $key ] ) && is_string( $_GET[ $key ] ) ) {
-				$filters[ $key ] = sanitize_text_field( wp_unslash( $_GET[ $key ] ) );
-			}
-		}
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
-
-		$args = $this->exportQuery( array_merge( $filters, array( 'form_id' => $formId ) ) );
-		if ( null === $args ) {
-			wp_die( esc_html__( 'No submissions to export', 'subtleforms' ), '', array( 'response' => 404 ) );
-		}
+		$request = $this->exportRequest();
 
 		$slug = '';
-		if ( $formId > 0 ) {
-			$form = $this->formsRepo->find( $formId );
+		if ( $request['form_id'] > 0 ) {
+			$form = $this->formsRepo->find( $request['form_id'] );
 			$slug = sanitize_title( (string) ( $form['title'] ?? '' ) );
 		}
 		$filename = ( '' !== $slug ? $slug : 'subtleforms' ) . '-entries-' . gmdate( 'Y-m-d' ) . '.csv';
@@ -1173,11 +1182,83 @@ final class SubmissionsApi {
 		header( 'X-Accel-Buffering: no' ); // Tell nginx not to buffer the stream.
 
 		$out = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- The response stream, not a file.
-		$this->writeCsv( $args, $out, static function (): void {
+		$this->writeCsv( $request['args'], $out, static function (): void {
 			flush();
 		} );
 		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closes the response stream.
 		exit;
+	}
+
+	/**
+	 * Check a download request and work out what it asks for.
+	 *
+	 * Ends the request itself (see refuseExport()) when the user may not
+	 * export, the nonce is not good, or nothing matches.
+	 *
+	 * @internal Public so the tests can read the outcome without serving a file.
+	 * @return array{args: array, form_id: int}
+	 */
+	public function exportRequest(): array {
+		$post = isset( $_SERVER['REQUEST_METHOD'] ) && 'POST' === strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) );
+
+		if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+			$this->refuseExport( 'forbidden', __( 'You are not allowed to perform this action.', 'subtleforms' ), 403 );
+		}
+		// phpcs:disable WordPress.Security.NonceVerification -- The nonce is verified right below.
+		$source = $post ? $_POST : $_GET;
+		$nonce  = isset( $source['_wpnonce'] ) && is_string( $source['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $source['_wpnonce'] ) ) : '';
+		if ( '' === $nonce || ! wp_verify_nonce( $nonce, self::EXPORT_NONCE_ACTION ) ) {
+			$this->refuseExport( 'expired', __( 'The export link expired. Reload the page and try again.', 'subtleforms' ), 403 );
+		}
+
+		$formId  = 0;
+		$filters = array();
+		if ( $post ) {
+			// The selected entries. An empty selection must not become "everything".
+			$ids = isset( $source['ids'] ) && is_array( $source['ids'] ) ? array_values( array_filter( array_map( 'absint', array_filter( wp_unslash( $source['ids'] ), 'is_scalar' ) ) ) ) : array();
+			if ( empty( $ids ) ) {
+				$this->refuseExport( 'empty', __( 'No submissions to export', 'subtleforms' ), 404 );
+			}
+			$filters['ids'] = $ids;
+		} else {
+			$formId = isset( $source['form_id'] ) ? absint( $source['form_id'] ) : 0;
+			foreach ( array( 'status', 'search', 'range', 'after' ) as $key ) {
+				if ( isset( $source[ $key ] ) && is_string( $source[ $key ] ) ) {
+					$filters[ $key ] = sanitize_text_field( wp_unslash( $source[ $key ] ) );
+				}
+			}
+		}
+		// phpcs:enable WordPress.Security.NonceVerification
+
+		$args = $this->exportQuery( array_merge( $filters, array( 'form_id' => $formId ) ) );
+		if ( null === $args ) {
+			$this->refuseExport( 'empty', __( 'No submissions to export', 'subtleforms' ), 404 );
+		}
+		return array(
+			'args'    => $args,
+			'form_id' => $formId,
+		);
+	}
+
+	/**
+	 * End a download request that cannot be served.
+	 *
+	 * Goes back to the screen the request came from with sf_export=<reason>, so
+	 * the person sees a notice instead of a failed download. When there is no
+	 * screen to go back to (the address was opened by hand), it stops with a
+	 * plain error page.
+	 *
+	 * @param string $reason  empty, expired or forbidden.
+	 * @param string $message Text for the error page.
+	 * @param int    $status  HTTP status for the error page.
+	 */
+	private function refuseExport( string $reason, string $message, int $status ): void {
+		$back = wp_get_referer();
+		if ( $back ) {
+			wp_safe_redirect( add_query_arg( 'sf_export', $reason, remove_query_arg( 'sf_export', $back ) ) );
+			exit;
+		}
+		wp_die( esc_html( $message ), '', array( 'response' => $status ) );
 	}
 
 	/** Nonce action for the CSV download link. */
@@ -1245,6 +1326,15 @@ final class SubmissionsApi {
 			}
 		}
 
+		// The byte order mark does not depend on the columns, so it goes out
+		// now (and the response headers with it). Behind a proxy that gives up
+		// when the first byte is slow (Cloudflare waits 100 seconds), a very
+		// large export would otherwise time out while the columns are read.
+		fwrite( $handle, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- A stream, not a file.
+		if ( $afterChunk ) {
+			$afterChunk();
+		}
+
 		// First pass: the columns. The answers of an entry are not kept.
 		$keys = array();
 		$walk(
@@ -1291,10 +1381,11 @@ final class SubmissionsApi {
 			$headers[] = $label;
 		}
 
-		// UTF-8 BOM so Excel reads accents correctly. Lines are written with
+		// The heading line, after the columns are known. Lines are written with
 		// csv_cell() (every cell quoted and formula-protected), the same bytes
-		// as before the export was streamed.
-		fwrite( $handle, "\xEF\xBB\xBF" . implode( ',', array_map( array( $this, 'csv_cell' ), $headers ) ) . "\r\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- A stream, not a file.
+		// as before the export was streamed (the UTF-8 BOM, for Excel, is the
+		// start of the file and was written above).
+		fwrite( $handle, implode( ',', array_map( array( $this, 'csv_cell' ), $headers ) ) . "\r\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- A stream, not a file.
 		$fieldMaps   = array();
 		$count       = 0;
 		// Second pass: the rows, added to the file as each entry is read.

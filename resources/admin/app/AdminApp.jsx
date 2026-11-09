@@ -34,7 +34,8 @@ import {
 	useSearchParams,
 	useLocation,
 } from 'react-router-dom';
-import { NoticeProvider, ErrorBoundary } from '../ui/feedback';
+import { NoticeProvider, ErrorBoundary, useNotice } from '../ui/feedback';
+import { exportFlagNotice, readExportFlag } from '../utils/csvExport';
 import { ModalProvider } from '../ui/modals';
 import PageErrorBoundary from '../components/PageErrorBoundary';
 import { RouteLoadingFallback } from '../components/RouteTransition';
@@ -291,6 +292,20 @@ function FormNoticeCleaner() {
 
 function AppContent() {
 	const navigate  = useNavigate();
+	const { addNotice } = useNotice();
+
+	// The server sends the browser back here with ?sf_export=empty|expired|forbidden
+	// when it cannot serve a CSV download. Read it while rendering for the first
+	// time: the address sync below rewrites the query and drops it.
+	const [exportFlag] = useState(() => readExportFlag());
+	useEffect(() => {
+		const notice = exportFlagNotice(exportFlag);
+		if (notice) {
+			addNotice({ ...notice, duration: 10000 });
+		}
+		// Once, when the screen opens.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	// Keep the URL, admin submenu and tab title in step with the router.
 	useWpAdminSync(getPageNameFromPath);

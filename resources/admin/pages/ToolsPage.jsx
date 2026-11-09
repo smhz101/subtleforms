@@ -247,8 +247,10 @@ function Transfer( { forms, busy, setBusy, tell } ) {
   };
 
   // The server streams the file; the browser saves it as it arrives (2.8.1).
-  const exportCsv = () => {
-    if ( ! startCsvDownload( { form_id: target ? Number( target ) : null } ) ) {
+  // A form with no entries is answered by the server, which sends the browser
+  // back here with a notice.
+  const exportCsv = async () => {
+    if ( 'unavailable' === await startCsvDownload( { form_id: target ? Number( target ) : null } ) ) {
       tell( 'error', __( 'CSV export failed.', 'subtleforms' ) );
     }
   };
