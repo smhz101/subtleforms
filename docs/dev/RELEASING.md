@@ -15,7 +15,7 @@ The release is one pull request, `release/<version>`, opened after every feature
    ```
    In the agent environment, where WP-CLI runs offline: `WP_CLI="env I18N_OFFLINE=1 php /tmp/claude-0/wp-cli-latest-offline.phar --allow-root" bin/make-pot.sh`. The checkout folder must be named `subtleforms`. Commit `languages/subtleforms.pot` and `languages/subtleforms-js.pot`.
 7. Open the pull request from `release/<version>` into `main`. The `POT freshness check` job fails a stale POT only for pull requests whose head branch starts with `release/`; every other pull request and pushes to `main` only get a warning (a failing extraction always fails).
-8. When every check is green and `docs/dev/MERGING.md` is satisfied, merge, tag `main` as `v<version>` and follow `RELEASE.md` for WordPress.org.
+8. When every check is green and `docs/dev/MERGING.md` is satisfied, merge, tag `main` as `v<version>` and follow `RELEASE.md` for WordPress.org. What goes to WordPress.org is the contents of the release zip (`npm run build:all && npx gulp quickZip`, then `dist/subtleforms-<version>.zip`), which is built with `composer install --no-dev`. Never copy the working tree to SVN: it has the development `vendor/`.
 
 ## Why the POT is not in every pull request
 

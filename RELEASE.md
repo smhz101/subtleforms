@@ -97,8 +97,16 @@ Until the automated workflow is enabled, deployments are manual:
 # 1. Check out SVN
 svn co https://plugins.svn.wordpress.org/subtleforms /tmp/svn-subtleforms
 
-# 2. Sync production files to /trunk (respecting .distignore)
-rsync -rc --exclude-from=.distignore . /tmp/svn-subtleforms/trunk/ --delete
+# 2. Build the release zip and put its contents in /trunk.
+#    The zip is built with `composer install --no-dev`, so it carries the
+#    production vendor/ only. Never copy the working tree (rsync of ".", for
+#    example): it holds the development vendor/, whose autoloader requires
+#    files from packages the release leaves out, and the site would fatal on
+#    every request. Steps and checks: docs/dev/RELEASING.md.
+npm run build:all && npx gulp quickZip
+rm -rf /tmp/subtleforms-release && mkdir /tmp/subtleforms-release
+unzip -q dist/subtleforms-1.9.0.zip -d /tmp/subtleforms-release
+rsync -a --delete --exclude='.svn' /tmp/subtleforms-release/subtleforms/ /tmp/svn-subtleforms/trunk/
 
 # 3. Commit trunk
 cd /tmp/svn-subtleforms
