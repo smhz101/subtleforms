@@ -131,8 +131,9 @@ final class PublicSubmitApi {
 		// (store their user id, pass logged-in-only rules or limits). Guests need
 		// no nonce, so cached pages keep working (2.8.1).
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- This is the nonce check.
-		$nonce = isset( $_POST['subtleforms_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['subtleforms_nonce'] ) ) : '';
-		if ( is_user_logged_in() && ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+		$nonce    = isset( $_POST['subtleforms_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['subtleforms_nonce'] ) ) : '';
+		$previous = get_current_user_id();
+		if ( $previous > 0 && ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
 			wp_set_current_user( 0 );
 		}
 		$request = new WP_REST_Request( 'POST', '/subtleforms/v1/submit' );
@@ -145,6 +146,11 @@ final class PublicSubmitApi {
 			$response = $this->submit_form( $request );
 		} finally {
 			$this->classicPost = false;
+			// Only the submission runs as a guest. The page that shows the
+			// result must still render for the logged-in visitor.
+			if ( $previous > 0 && get_current_user_id() !== $previous ) {
+				wp_set_current_user( $previous );
+			}
 		}
 		$outcome           = ClassicResult::outcome( $response->get_status(), $response->get_data(), $built['form_id'], $built['data'] );
 

@@ -124,7 +124,7 @@ final class ClassicSubmitTest extends TestCase {
 
 		$this->assertGreaterThan( 0, $id, 'The entry was still saved.' );
 		$this->assertSame( 0, (int) $wpdb->get_var( $wpdb->prepare( "SELECT user_id FROM {$wpdb->prefix}subtleforms_submissions WHERE id = %d", $id ) ) );
-		$this->assertSame( 0, get_current_user_id(), 'The request runs as a guest from here on.' );
+		$this->assertSame( $userId, get_current_user_id(), 'Only the submission ran as a guest; the page still renders for the user.' );
 	}
 
 	public function test_a_logged_in_post_with_a_wrong_nonce_is_stored_as_a_guest(): void {
