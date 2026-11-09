@@ -83,13 +83,17 @@ final class CsvStream281Test extends TestCase {
 	}
 
 	public function test_memory_does_not_grow_with_the_number_of_entries_and_the_file_is_right(): void {
+		if ( ! function_exists( 'memory_reset_peak_usage' ) ) {
+			$this->markTestSkipped( 'Needs PHP 8.2 (memory_reset_peak_usage) to measure the peak of one export.' );
+		}
 		$id  = $this->form();
 		$api = $this->api();
-		// A 1,000 character answer in each entry, so one whole copy of the 12,000
-		// entry file (about 12.8 MB) is bigger than the limit asserted below. (At
-		// 400 characters the file is 5.6 MB, hardly more than the 5 MB one chunk
-		// of 2,000 entries takes, so no limit could tell the two apart.)
-		$this->seed( $id, 2000, 0, 1000 );
+		// A 2,000 character answer in each entry, so one whole copy of the 12,000
+		// entry file (about 25 MB) is far more than one chunk of 2,000 entries
+		// takes. (At 400 characters the file is 5.6 MB, hardly more than the 5 MB
+		// one chunk uses, so memory held for the whole file could not be told
+		// from memory held for a chunk.)
+		$this->seed( $id, 2000, 0, 2000 );
 
 		// Warm up so one-time caches (schemas, translations) are not counted.
 		$warm = fopen( 'php://temp', 'r+' );
@@ -100,19 +104,22 @@ final class CsvStream281Test extends TestCase {
 		fclose( $small['file'] );
 		$this->assertSame( 2000, $small['written'] );
 
-		$this->seed( $id, 12000, 2000, 1000 );
+		$this->seed( $id, 12000, 2000, 2000 );
 		$large = $this->measure( $api, $id );
 		$this->assertSame( 12000, $large['written'] );
 		$this->assertGreaterThanOrEqual( 12, $large['chunks'], 'written chunk by chunk, two passes of 6 chunks' );
+		$this->assertGreaterThan( 20 * 1024 * 1024, $large['bytes'], 'the file is big enough for memory held for all of it to show' );
 
 		// Flat, not proportional: six times the entries must not cost six times
 		// the memory. (A build-it-in-memory export grows by the size of the file.)
 		$this->assertLessThan( 1.5 * $small['growth'] + 2 * 1024 * 1024, $large['growth'], 'memory growth at 12,000 entries stays near the growth at 2,000' );
-		// And the absolute check: one whole copy of this file is over the limit,
-		// so an export that holds the file (or its base64) in memory fails here.
-		$limit = self::MEMORY_LIMIT;
-		$this->assertGreaterThan( $limit, $large['bytes'], 'the file is bigger than the memory limit asserted next' );
-		$this->assertLessThan( $limit, $large['growth'], 'memory stays under one copy of the file' );
+		// And the absolute check. What one chunk takes depends on the database
+		// driver (MySQL holds more than SQLite), so the limit is this machine's
+		// own growth at 2,000 entries plus a quarter of the file: one whole copy
+		// of the file, which is what an export that holds the file or its base64
+		// in memory adds on top of a chunk, is over it four times.
+		$limit = $small['growth'] + intdiv( $large['bytes'], 4 );
+		$this->assertLessThan( $limit, $large['growth'], 'memory stays under one chunk plus a quarter of the file' );
 
 		$file = $large['file'];
 		rewind( $file );
@@ -133,11 +140,8 @@ final class CsvStream281Test extends TestCase {
 		foreach ( $names as $name ) {
 			$this->assertStringStartsNotWith( '=', $name, 'no cell starts with =' );
 		}
-		$this->assertSame( 1000, strlen( $data[0][5] ), 'the long answer is whole' );
+		$this->assertSame( 2000, strlen( $data[0][5] ), 'the long answer is whole' );
 	}
-
-	/** Memory the 12,000 entry export may grow by. One full copy of the file is more. */
-	const MEMORY_LIMIT = 10 * 1024 * 1024;
 
 	public function test_the_file_starts_before_the_entries_are_read_for_the_columns(): void {
 		$id = $this->form();

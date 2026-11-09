@@ -1258,7 +1258,7 @@ final class SubmissionsApi {
 			wp_safe_redirect( add_query_arg( 'sf_export', $reason, remove_query_arg( 'sf_export', $back ) ) );
 			exit;
 		}
-		wp_die( esc_html( $message ), '', array( 'response' => $status ) );
+		wp_die( esc_html( $message ), '', array( 'response' => absint( $status ) ) );
 	}
 
 	/** Nonce action for the CSV download link. */
