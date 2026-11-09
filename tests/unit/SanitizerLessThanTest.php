@@ -51,6 +51,35 @@ final class SanitizerLessThanTest extends TestCase {
 		$this->assertSame( 'a <5 bold', Sanitizer::sanitizeSubmissionValue( 'a <5 <b>bold</b>' ) );
 	}
 
+	/**
+	 * Stripping a tag nested inside another, or putting a sign back, must not
+	 * join the pieces into a tag that was not in the input.
+	 *
+	 * @dataProvider joinedTags
+	 */
+	public function test_pieces_never_join_into_a_tag( string $input ): void {
+		$out = Sanitizer::sanitizeSubmissionValue( $input );
+		$this->assertDoesNotMatchRegularExpression( '/<[A-Za-z\/!?][^>]*>/', $out, 'no tag in the answer' );
+		$this->assertStringNotContainsString( 'onerror', strtolower( str_replace( 'alert(1)', '', $out ) ) );
+		$this->assertSame( $out, Sanitizer::sanitizeSubmissionValue( $out ), 'a second pass changes nothing' );
+	}
+
+	public static function joinedTags(): array {
+		return array(
+			'tag inside an attribute list' => array( '<img src=x onerror=alert(1)<b>>' ),
+			'tag inside a tag name'        => array( '<img<i> src=x onerror=alert(1)>' ),
+			'script split by a tag'        => array( '<scr<b>ipt>alert(1)</script>' ),
+			'doubled opener'               => array( '<<script>script>alert(1)<</script>/script>' ),
+			'nested twice'                 => array( '<b<i<u>>>' ),
+		);
+	}
+
+	public function test_the_joined_inputs_come_out_as_plain_text_or_nothing(): void {
+		$this->assertSame( '', Sanitizer::sanitizeSubmissionValue( '<img src=x onerror=alert(1)<b>>' ) );
+		$this->assertSame( '', Sanitizer::sanitizeSubmissionValue( '<img<i> src=x onerror=alert(1)>' ) );
+		$this->assertSame( 'alert(1)', Sanitizer::sanitizeSubmissionValue( '<scr<b>ipt>alert(1)</script>' ) );
+	}
+
 	public function test_a_visitor_cannot_smuggle_the_stand_in_character(): void {
 		$answer = "x\x1A\x1ASF_LT\x1A\x1Ay";
 		$this->assertSame( 'xy', Sanitizer::sanitizeSubmissionValue( $answer ) );

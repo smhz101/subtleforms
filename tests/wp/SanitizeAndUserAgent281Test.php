@@ -88,6 +88,17 @@ final class SanitizeAndUserAgent281Test extends TestCase {
 		$this->assertSame( 'x<y', $stored['name'] );
 	}
 
+	public function test_pieces_that_would_join_into_a_tag_are_not_stored_as_one(): void {
+		$id = $this->form();
+		foreach ( array( '<img src=x onerror=alert(1)<b>>', '<img<i> src=x onerror=alert(1)>', '<scr<b>ipt>alert(1)</script>' ) as $input ) {
+			$this->assertSame( 200, $this->submit( $id, array( 'name' => $input, 'message' => $input ) )['status'] );
+			$stored = $this->storedPayload( $id );
+			foreach ( array( 'name', 'message' ) as $key ) {
+				$this->assertDoesNotMatchRegularExpression( '/<[A-Za-z\/!?][^>]*>/', (string) $stored[ $key ], $input . ' in ' . $key );
+			}
+		}
+	}
+
 	public function test_the_entry_view_shows_the_answer_escaped_once(): void {
 		$id = $this->form();
 		$this->submit( $id, array( 'name' => 'Ada', 'message' => 'a <5 b & c' ) );

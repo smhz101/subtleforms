@@ -28,6 +28,9 @@ class Sanitizer {
 	 */
 	const MAX_DEPTH = 8;
 
+	/** Most passes keepLessThan() makes before it gives up on an answer. */
+	private const MAX_LESS_THAN_PASSES = 5;
+
 	/** Stand-in for a "<" that is not the start of a tag, while tags are stripped. */
 	private const LESS_THAN_MARK = "\x1A\x1ASF_LT\x1A\x1A";
 
@@ -415,11 +418,36 @@ class Sanitizer {
 	 * answer is what the visitor typed. Real tags are still stripped. Output is
 	 * escaped where the answer is shown.
 	 *
+	 * Putting a sign back, or stripping a tag that sat inside another, can join
+	 * the pieces into a tag that was not in the input ("<img src=x<b>>"). So the
+	 * pass is repeated until the answer no longer changes: what is returned is
+	 * what the sanitizer would leave alone, and it holds no tag.
+	 *
 	 * @param string   $value     Raw answer.
 	 * @param callable $sanitizer Takes and returns a string (wp_strip_all_tags, sanitize_text_field, ...).
 	 * @return string
 	 */
 	public static function keepLessThan( string $value, callable $sanitizer ): string {
+		for ( $pass = 0; $pass < self::MAX_LESS_THAN_PASSES; $pass++ ) {
+			$next = self::keepLessThanOnce( $value, $sanitizer );
+			if ( $next === $value ) {
+				return $next;
+			}
+			$value = $next;
+		}
+		// Still changing after that many passes: nothing like an ordinary
+		// answer. Keep no "<" at all rather than risk a tag.
+		return str_replace( '<', '', self::keepLessThanOnce( $value, $sanitizer ) );
+	}
+
+	/**
+	 * One pass of keepLessThan().
+	 *
+	 * @param string   $value     Answer.
+	 * @param callable $sanitizer Sanitizer.
+	 * @return string
+	 */
+	private static function keepLessThanOnce( string $value, callable $sanitizer ): string {
 		// The stand-in is removed first so an answer cannot carry its own.
 		$value = str_replace( self::LESS_THAN_MARK, '', $value );
 		$value = preg_replace_callback(
