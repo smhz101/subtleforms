@@ -71,10 +71,12 @@ final class FreeQa272Test extends TestCase {
 	}
 
 	private function jobTransient( string $dispatchId ) {
-		return get_transient( AsyncDispatcher::JOB_PREFIX . md5( $dispatchId ) );
+		$stored = get_option( AsyncDispatcher::JOB_PREFIX . md5( $dispatchId ), false );
+		return is_array( $stored ) && isset( $stored['job'] ) ? $stored['job'] : false;
 	}
 
-	public function test_queued_job_data_is_short_lived_minimal_and_deleted_when_the_job_runs(): void {
+	public function test_queued_job_data_is_minimal_not_autoloaded_and_deleted_when_the_job_runs(): void {
+		global $wpdb;
 		wp_unschedule_hook( 'subtleforms_async_email' );
 		$this->assertTrue( AsyncDispatcher::dispatchEmail( array( 'to' => 'a@example.com', 'subject' => 'Hello', 'body' => 'Body', 'submission_id' => 0, 'form_id' => 4 ) ) );
 		$events = array();
@@ -91,9 +93,10 @@ final class FreeQa272Test extends TestCase {
 		foreach ( array( 'dispatch_id', 'submission_id', 'step_id', 'retry_count' ) as $key ) {
 			$this->assertArrayNotHasKey( $key, $stored, $key . ' is in the reference already' );
 		}
-		$timeout = (int) get_option( '_transient_timeout_' . AsyncDispatcher::JOB_PREFIX . md5( $ref ) );
-		$this->assertGreaterThan( time() + 5 * HOUR_IN_SECONDS, $timeout );
-		$this->assertLessThanOrEqual( time() + 6 * HOUR_IN_SECONDS + 5, $timeout );
+		// Kept until the job runs (2.8.1): no expiry, and not read on every request.
+		$name = AsyncDispatcher::JOB_PREFIX . md5( $ref );
+		$this->assertFalse( (bool) get_option( '_transient_timeout_' . $name ) );
+		$this->assertContains( $wpdb->get_var( $wpdb->prepare( "SELECT autoload FROM {$wpdb->options} WHERE option_name = %s", $name ) ), array( 'no', 'off' ), 'not loaded on every request' );
 
 		$sent = array();
 		add_filter( 'pre_wp_mail', function ( $null, $atts ) use ( &$sent ) {
