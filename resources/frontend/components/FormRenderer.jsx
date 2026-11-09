@@ -817,6 +817,10 @@ export default function FormRenderer({
           };
           add('subtleforms_classic', '1');
           add('subtleforms_form_id', String(formId));
+          // Logged-in visitors carry the REST nonce; without it the server
+          // handles the post as a guest's (2.8.1). Guests have none.
+          const classicNonce = restNonce();
+          if (classicNonce) add('subtleforms_nonce', classicNonce);
           classicFieldInputs(submissionPayload).forEach(([name, value]) => add(name, value));
           document.body.appendChild(classic);
           classic.submit();
