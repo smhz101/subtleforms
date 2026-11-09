@@ -12,7 +12,19 @@
 	margin-bottom: 1rem;
 }
 
-// Ensure snackbars are compact and don't overflow the viewport
-.components-snackbar {
-	max-width: 380px !important;
+// Snackbars are toasts with the core notice look: square corners, a 4px
+// left border in the status colour and core's dark admin surface. They stay
+// compact and do not overflow the viewport.
+.subtleforms-snackbars .components-snackbar {
+	max-width: 380px;
+	border-radius: 0;
+	border-left: 4px solid #72aee6;
+	background: #1d2327;
+	color: #fff;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+
+	&.is-success { border-left-color: #00a32a; }
+	&.is-warning { border-left-color: #dba617; }
+	&.is-error { border-left-color: #d63638; }
+	&.is-info { border-left-color: #72aee6; }
 }

@@ -4,6 +4,7 @@ import { __ } from '@wordpress/i18n';
 import { getSlotItems } from '../../../shared/extend';
 import { integrationFieldOptions } from './utils/integrationFields';
 import { EmailMarketingFormPanel, isBuiltInEmailMarketing } from '../integrations/emailMarketing';
+import { CrmFormPanel, isBuiltInCrm } from '../integrations/crm';
 import '../settings/extensions/extensions.scss';
 
 /**
@@ -26,8 +27,9 @@ export default function IntegrationsPanel({ schema, onChange, isReadOnly = false
   const fieldOptions = useMemo(() => integrationFieldOptions(schema?.fields), [schema?.fields]);
 
   const hasEmailMarketing = isBuiltInEmailMarketing();
+  const hasCrm = isBuiltInCrm();
 
-  if (slotItems.length === 0 && !legacyWebhookUrl && !hasEmailMarketing) {
+  if (slotItems.length === 0 && !legacyWebhookUrl && !hasEmailMarketing && !hasCrm) {
     return (
       <p className='sf-form-settings__intro'>
         {__('Send entries to other services with webhooks. Add a Webhook action under Notifications. Defaults for every webhook are under Settings > Integrations.', 'subtleforms')}
@@ -54,6 +56,17 @@ export default function IntegrationsPanel({ schema, onChange, isReadOnly = false
       {/* Email marketing is part of this plugin; an add-on that lists its own takes it over. */}
       {hasEmailMarketing && (
         <EmailMarketingFormPanel
+          schema={schema}
+          integrations={integrations}
+          patch={patch}
+          isReadOnly={isReadOnly}
+          fieldOptions={fieldOptions}
+        />
+      )}
+
+      {/* CRM is part of this plugin; an add-on that lists its own takes it over. */}
+      {hasCrm && (
+        <CrmFormPanel
           schema={schema}
           integrations={integrations}
           patch={patch}

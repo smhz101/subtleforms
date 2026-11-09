@@ -26,7 +26,7 @@ afterEach(() => {
 });
 
 const text = () => container.querySelector('[data-testid="mailpoet-status"]').textContent;
-const link = () => container.querySelector('a');
+const link = () => container.querySelector('[data-testid="mailpoet-status"] a, [data-testid="mailpoet-status"] .components-button[href]');
 const badge = () => container.querySelector('.sf-em-badge').textContent;
 
 const URLS = {

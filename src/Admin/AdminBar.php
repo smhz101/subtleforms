@@ -5,8 +5,8 @@
  * Shown on the front end and in the admin to people who can manage SubtleForms
  * entries: the mark, the name and a bubble with the unread entries (styled
  * like the Comments bubble, absent when nothing is unread). Its sub items are
- * Submissions, All Forms and Add New. The count is the one the admin menu
- * badge uses, read once per request.
+ * Submissions, All Forms, Add New and, while no add-on is active, the
+ * Upgrade item. The count is the one the admin menu badge uses, read once per request.
  *
  * @package SubtleForms\Admin
  * @since   2.7.5
@@ -107,6 +107,17 @@ final class AdminBar {
 				'href'   => admin_url( 'admin.php?page=subtleforms-new-form' ),
 			)
 		);
+		// Last, under the same condition as the menu entry.
+		if ( AdminMenu::show_upgrade_item() ) {
+			$bar->add_node(
+				array(
+					'parent' => self::NODE,
+					'id'     => self::NODE . '-upgrade',
+					'title'  => '<span class="sf-ab-upgrade">' . AdminMenu::upgrade_label() . '</span>',
+					'href'   => admin_url( 'admin.php?page=' . AdminMenu::UPGRADE_SLUG ),
+				)
+			);
+		}
 	}
 
 	/**
@@ -117,15 +128,29 @@ final class AdminBar {
 			return;
 		}
 		$mark = AdminMenu::default_menu_icon();
-		$css  = '#wpadminbar #wp-admin-bar-subtleforms .ab-icon{float:left;width:22px!important;height:32px!important;margin-inline-end:2px;}'
-			. '#wpadminbar #wp-admin-bar-subtleforms .ab-icon::before{content:"";display:block;width:20px;height:20px;margin-top:6px;background:currentColor;'
+		$node = '#wpadminbar #wp-admin-bar-subtleforms';
+		// The icon box is core's: .ab-icon keeps its float, its 4px vertical padding and
+		// font metrics, so it is 20 by 20 inside that padding with the same 6px gap as
+		// the Comments item. The mark is a mask filled with currentColor, which core
+		// colours per scheme and on hover, like the dashicons of the other items.
+		$css = $node . ' .ab-icon{width:20px;height:20px;margin-inline-end:6px;}'
+			. $node . ' .ab-icon::before{content:"";display:block;position:relative;top:2px;width:20px;height:20px;background:currentColor;'
 			. '-webkit-mask:url("' . $mark . '") center/contain no-repeat;mask:url("' . $mark . '") center/contain no-repeat;}'
-			. '#wpadminbar #wp-admin-bar-subtleforms:hover .ab-icon::before{color:#72aee6;}'
-			. '#wpadminbar #wp-admin-bar-subtleforms .awaiting-mod{display:inline-block;box-sizing:border-box;min-width:18px;height:18px;margin:7px 0 0 6px;padding:0 5px;border-radius:9px;background:#d63638;color:#fff;font-size:11px;line-height:1.6;text-align:center;}'
-			. '#wpadminbar #wp-admin-bar-subtleforms .sf-ab-count{display:inline-block;min-width:18px;margin-inline-start:4px;padding:0 5px;border-radius:9px;background:#d63638;color:#fff;font-size:11px;line-height:18px;text-align:center;}'
-			. '@media screen and (max-width:782px){#wpadminbar #wp-admin-bar-subtleforms{display:block;}#wpadminbar #wp-admin-bar-subtleforms .sf-ab-name{display:none;}'
-			. '#wpadminbar #wp-admin-bar-subtleforms .ab-icon{width:52px!important;height:46px!important;text-align:center;}#wpadminbar #wp-admin-bar-subtleforms .ab-icon::before{width:26px;height:26px;margin:10px auto 0;}'
-			. '#wpadminbar #wp-admin-bar-subtleforms .awaiting-mod{position:absolute;top:2px;inset-inline-start:26px;margin:0;}}';
+			. $node . ' .awaiting-mod,' . $node . ' .sf-ab-count{box-sizing:border-box;border-radius:9px;background:#d63638;color:#fff;text-align:center;}'
+			. $node . ' .awaiting-mod{display:inline-block;min-width:18px;height:18px;margin:7px 0 0 6px;padding:0 5px;font-size:11px;line-height:1.6;}'
+			. $node . ' .sf-ab-count{display:inline-block;min-width:18px;margin-inline-start:4px;padding:0 5px;font-size:11px;line-height:18px;}'
+			// Hover and focus turn the item text blue, never the bubble.
+			. '#wpadminbar:not(.mobile)>#wp-toolbar #wp-admin-bar-subtleforms:hover .awaiting-mod,#wpadminbar>#wp-toolbar #wp-admin-bar-subtleforms.hover .awaiting-mod,'
+			. '#wpadminbar:not(.mobile)>#wp-toolbar #wp-admin-bar-subtleforms a:focus .awaiting-mod,#wpadminbar #wp-admin-bar-subtleforms li:hover .sf-ab-count,'
+			. '#wpadminbar #wp-admin-bar-subtleforms li a:hover .sf-ab-count,#wpadminbar #wp-admin-bar-subtleforms li a:focus .sf-ab-count{color:#fff;background:#d63638;}'
+			// The upgrade item: the brand colour and star of the menu entry.
+			. $node . ' .sf-ab-upgrade{color:#8fa3ff;font-weight:600;}'
+			. $node . ' .sf-ab-upgrade::before{content:"\\f155";font:normal 13px/1 dashicons;margin-inline-end:5px;vertical-align:-1px;}'
+			. $node . ' a:hover .sf-ab-upgrade,' . $node . ' a:focus .sf-ab-upgrade{color:#fff;}'
+			. 'body.admin-color-light ' . $node . ' .sf-ab-upgrade{color:#3858e9;}'
+			. '@media screen and (max-width:782px){' . $node . '{display:block;}' . $node . ' .sf-ab-name{display:none;}'
+			. $node . ' .ab-icon{width:52px!important;height:46px!important;margin:0;text-align:center;}' . $node . ' .ab-icon::before{width:26px;height:26px;top:0;margin:10px auto 0;}'
+			. $node . ' .awaiting-mod{position:absolute;top:2px;inset-inline-start:26px;margin:0;}}';
 		wp_register_style( 'subtleforms-admin-bar', false, array(), SUBTLEFORMS_VERSION );
 		wp_enqueue_style( 'subtleforms-admin-bar' );
 		wp_add_inline_style( 'subtleforms-admin-bar', $css );

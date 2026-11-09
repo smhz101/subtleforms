@@ -60,6 +60,9 @@ final class RestController {
 	/** @var CaptchaManager|null */
 	private $captchaManager;
 
+	/** @var PublicSubmitApi|null The container's instance, which also handles classic posts. */
+	private $publicSubmitApi;
+
 	/**
 	 * Constructor, same signature as pre-1.9.0 for backward compatibility.
 	 *
@@ -71,6 +74,7 @@ final class RestController {
 	 * @param SchemaCompiler        $compiler        Schema compiler.
 	 * @param Settings|null         $settings        Plugin settings.
 	 * @param CaptchaManager|null   $captchaManager  CAPTCHA manager.
+	 * @param PublicSubmitApi|null  $publicSubmitApi Public submit controller; built here when omitted.
 	 */
 	public function __construct(
 		$pipeline,
@@ -80,7 +84,8 @@ final class RestController {
 		$fieldRegistry,
 		$compiler,
 		$settings = null,
-		$captchaManager = null
+		$captchaManager = null,
+		$publicSubmitApi = null
 	) {
 		$this->pipeline            = $pipeline;
 		$this->formsRepo           = $formsRepo;
@@ -90,6 +95,7 @@ final class RestController {
 		$this->compiler            = $compiler;
 		$this->settings            = $settings;
 		$this->captchaManager      = $captchaManager;
+		$this->publicSubmitApi     = $publicSubmitApi;
 
 		Logger::debug( 'RestController (router) initialized' );
 	}
@@ -118,7 +124,7 @@ final class RestController {
 		);
 		$submissionsApi->registerRoutes();
 
-		$publicSubmitApi = new PublicSubmitApi(
+		$publicSubmitApi = $this->publicSubmitApi ?? new PublicSubmitApi(
 			$this->pipeline,
 			$this->formsRepo,
 			$this->submissionsRepo,
@@ -142,6 +148,7 @@ final class RestController {
 
 		( new WebhooksApi() )->registerRoutes();
 		( new EmailMarketingApi() )->registerRoutes();
+		( new CrmApi() )->registerRoutes();
 
 		$dashboardApi = new DashboardApi(
 			$this->formsRepo,

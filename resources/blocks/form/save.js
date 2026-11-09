@@ -15,7 +15,7 @@ export default function save({ attributes }) {
 	showTitle = true,
 	showDescription = true,
 	theme = 'default',
-	ajax = false,
+	ajax = true,
 	tabIndex = 0,
 	fieldValues = '',
 	} = attributes;

@@ -70,6 +70,18 @@ final class Plugin {
 			}
 		);
 
+		// A form post without AJAX goes to the page itself, not to REST, so its
+		// handler is hooked on every front-end request (2.8.1). It was hooked
+		// from the REST routes before, which a page request never reaches.
+		if ( ! is_admin() ) {
+			add_action(
+				'template_redirect',
+				function () {
+					$this->container->get( \SubtleForms\Api\PublicSubmitApi::class )->handleClassicPost();
+				}
+			);
+		}
+
 		// Register frontend shortcode
 		add_action(
 			'init',
@@ -155,6 +167,10 @@ final class Plugin {
 		// Email marketing (Mailchimp, Brevo, Kit): queue a job for each saved entry, and run it.
 		add_action( 'subtleforms_async_email_marketing', array( \SubtleForms\Async\AsyncDispatcher::class, 'executeEmailMarketing' ), 10, 1 );
 		\SubtleForms\Integrations\EmailMarketing\Sender::register();
+
+		// CRM (HubSpot): the same, for contacts.
+		add_action( 'subtleforms_async_crm', array( \SubtleForms\Async\AsyncDispatcher::class, 'executeCrm' ), 10, 1 );
+		\SubtleForms\Integrations\Crm\Sender::register();
 	}
 
 	/**

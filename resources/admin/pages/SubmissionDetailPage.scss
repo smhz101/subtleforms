@@ -496,6 +496,15 @@ $pipe-status-colors: (
 		}
 	}
 
+	&__open {
+		margin: 0;
+		font-size: var(--sf-text-sm);
+		font-weight: var(--sf-weight-semibold);
+
+		a { color: var(--sf-brand); text-decoration: none; }
+		a:hover { text-decoration: underline; }
+	}
+
 	&__async-time {
 		font-size: var(--sf-text-2xs);
 		color: var(--sf-gray-400);

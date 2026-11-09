@@ -222,6 +222,21 @@ final class PageHeaderMenuTest extends TestCase {
 		$this->assertStringContainsString( 'sf-ab-count', $bar->get_node( 'subtleforms-submissions' )->title );
 	}
 
+	public function test_admin_bar_has_the_upgrade_item_last_and_the_filter_removes_it(): void {
+		$this->asAdmin();
+		$bar  = $this->bar();
+		$node = $bar->get_node( 'subtleforms-upgrade' );
+		$this->assertNotNull( $node );
+		$this->assertSame( 'subtleforms', $node->parent );
+		$this->assertStringContainsString( 'sf-ab-upgrade', $node->title );
+		$this->assertStringContainsString( 'page=' . AdminMenu::UPGRADE_SLUG, $node->href );
+		$children = array_keys( array_filter( $bar->get_nodes(), static fn( $n ) => 'subtleforms' === $n->parent ) );
+		$this->assertSame( 'subtleforms-upgrade', end( $children ) );
+
+		add_filter( 'subtleforms/admin/upgrade_menu_item', '__return_false' );
+		$this->assertNull( $this->bar()->get_node( 'subtleforms-upgrade' ) );
+	}
+
 	public function test_admin_bar_item_follows_comments_and_is_hidden_from_visitors(): void {
 		$this->assertSame( 61, has_action( 'admin_bar_menu', array( AdminBar::class, 'add_nodes' ) ) );
 		wp_set_current_user( self::factory_user( 'subscriber' ) );

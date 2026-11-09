@@ -77,6 +77,14 @@ export const queryKeys = {
     templates: () => ['emailMarketing', 'templates'],
   },
 
+  // CRM services and their connection state
+  crm: {
+    root: ['crm'],
+    all: () => ['crm', 'all'],
+    state: (service) => ['crm', 'state', service],
+    properties: (service) => ['crm', 'properties', service],
+  },
+
   // Settings > Tools and Settings > Logs
   logs: {
     all: ['logs'],

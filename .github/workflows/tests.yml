@@ -124,6 +124,11 @@ jobs:
             echo "wp-env start failed (attempt $attempt of 3)"
             npx --yes @wordpress/env@10 stop || true
             npx --yes @wordpress/env@10 clean all || npx --yes @wordpress/env@10 destroy --force || true
+            # A half-started attempt leaves files under ~/wp-env owned by root, and the
+            # next attempt then fails with EACCES when it rewrites the mapped mu-plugins.
+            # Hand the tree back to the runner user and clear it before trying again.
+            sudo chown -R "$(id -u):$(id -g)" "$HOME/wp-env" 2>/dev/null || true
+            rm -rf "$HOME/wp-env" || true
             sleep 20
           done
           if [ "$started" != "1" ]; then

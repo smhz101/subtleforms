@@ -35,6 +35,7 @@ store.fieldIcons = store.fieldIcons || {};
 store.fieldCategories = store.fieldCategories || {};
 store.payloadGroups = store.payloadGroups || {};
 store.emailMarketing = store.emailMarketing || {};
+store.crm = store.crm || {};
 store.settingsRedirects = store.settingsRedirects || [];
 store.adminPages = store.adminPages || {};
 
@@ -542,6 +543,46 @@ export function getEmailMarketingService(slug) {
   return store.emailMarketing[slug] || null;
 }
 
+/**
+ * Register a CRM: a tile in Settings > Integrations > CRM and the screens
+ * behind it. This plugin registers HubSpot the same way. The server lists the
+ * service through the PHP filter `subtleforms/crm/services`; a tile shows only
+ * when both sides know the slug. Mirrors `registerEmailMarketingService`.
+ *
+ * A slug this plugin already registered is replaced, which is how an add-on
+ * takes a service over. Add-ons add options to a built-in service in the
+ * `crm.service.settings` slot (its screen in Settings, which receives
+ * { service, connected }) and the `crm.service.form` slot (its section in a
+ * form's Integrations tab, which receives { service, connected, schema,
+ * config, patch, isReadOnly, fieldOptions }).
+ *
+ * @param {string} slug Service slug (lowercase letters, numbers, dashes and underscores).
+ * @param {Object} def  {
+ *   label,               Name shown on the tile and in headings.
+ *   icon,                Component drawing the logo: receives { size, className }. Optional: the label is shown instead.
+ *   brandColor,          Hex colour the logo takes on hover and while the service is on.
+ *   order,               Position in the grid (lower first).
+ *   settingsComponent,   Settings screen of the service: receives { service, connection, onConnection }.
+ *   formComponent,       The service's section in a form's Integrations tab: receives
+ *                        { service, connected, connection, schema, config, patch( values ), isReadOnly, fieldOptions }.
+ * }
+ */
+export function registerCrmService(slug, def) {
+  if (typeof slug === 'string' && /^[a-z0-9_-]+$/.test(slug) && def && typeof def.label === 'string') {
+    store.crm[slug] = { order: 100, ...def, slug };
+  }
+}
+
+/** Registered CRMs as [{ slug, label, ... }], by `order` then slug. */
+export function getCrmServices() {
+  return Object.values(store.crm).sort((a, b) => (a.order - b.order) || a.slug.localeCompare(b.slug));
+}
+
+/** One registered CRM, or null. */
+export function getCrmService(slug) {
+  return store.crm[slug] || null;
+}
+
 root.SubtleFormsExtend = Object.assign(root.SubtleFormsExtend || {}, {
   registerFieldType,
   registerValueComputer,
@@ -562,4 +603,5 @@ root.SubtleFormsExtend = Object.assign(root.SubtleFormsExtend || {}, {
   registerFieldCategory,
   registerPayloadGroup,
   registerEmailMarketingService,
+  registerCrmService,
 });

@@ -6,6 +6,7 @@ import AdminApp from './app/AdminApp';
 import '../shared/extend';
 // The shared service tile grid and header, for add-ons (since 2.7.5, add-ons feature-detect it).
 import './components/integrations/serviceTiles/expose';
+import './components/integrations/connectionStepsExpose';
 import './components/sectionPanel/expose';
 import './components/pageHeader/expose';
 // The shared query client and hooks, for add-ons (since 2.8.0, add-ons feature-detect it).

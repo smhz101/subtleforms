@@ -141,7 +141,44 @@ class AdminMenu {
 	 */
 	public static function forget_unread_count(): void {
 		self::$unread = null;
+		self::$total  = null;
 	}
+
+	/**
+	 * Every entry the Submissions screen can list (not the Trash, not builder
+	 * previews), for the Submissions badge in the plugin navigation.
+	 *
+	 * Cached in a transient named after the counts generation, which the
+	 * entries repository bumps on every new, changed or removed entry, so a
+	 * new entry shows on the next page load without a count on every request.
+	 *
+	 * @return int
+	 */
+	public static function total_count(): int {
+		if ( null !== self::$total ) {
+			return self::$total;
+		}
+		$key    = 'subtleforms_total_entries_' . (int) get_option( 'subtleforms_counts_generation', 1 );
+		$cached = get_transient( $key );
+		if ( false !== $cached ) {
+			self::$total = (int) $cached;
+			return self::$total;
+		}
+		try {
+			self::$total = (int) ( new SubmissionsRepository() )->count();
+		} catch ( \Throwable $e ) {
+			return 0;
+		}
+		set_transient( $key, self::$total, DAY_IN_SECONDS );
+		return self::$total;
+	}
+
+	/**
+	 * Total entries as counted earlier in this request.
+	 *
+	 * @var int|null
+	 */
+	private static $total = null;
 
 	/**
 	 * Unread entries as counted earlier in this request.
@@ -451,6 +488,15 @@ class AdminMenu {
 	}
 
 	/**
+	 * Label of the Upgrade item, for the admin bar.
+	 *
+	 * @return string Escaped text.
+	 */
+	public static function upgrade_label(): string {
+		return esc_html__( 'Upgrade to Pro', 'subtleforms' );
+	}
+
+	/**
 	 * Address of the Pro page on subtleforms.com, tagged with where the click came from.
 	 *
 	 * @param string $medium Where the link is shown.
@@ -576,6 +622,8 @@ class AdminMenu {
 			'restNonce'      => wp_create_nonce( 'wp_rest' ),
 			'version'        => SUBTLEFORMS_VERSION,
 			'unreadCount'    => $this->get_unread_count(),
+			// Every entry, for the Submissions badge in the plugin navigation.
+			'totalCount'     => self::total_count(),
 			'capabilities'   => $live_caps->all(),
 			'hasProPlugin'   => self::companion_active(),
 			'knownFieldTypes' => \SubtleForms\Fields\FieldTypeAvailability::knownTypes(),
@@ -589,9 +637,19 @@ class AdminMenu {
 			'siteToday'      => wp_date( 'Y-m-d' ),
 			// The Pro page on subtleforms.com, for the Upgrade page.
 			'upgradeUrl'     => self::upgrade_url( 'menu' ),
+			// Addresses of the admin screens that connection instructions link to (2.8.1).
+			'adminUrls'      => array(
+				'forms'    => admin_url( 'admin.php?page=subtleforms-forms' ),
+				'newForm'  => admin_url( 'admin.php?page=subtleforms-new-form' ),
+				'entries'  => admin_url( 'admin.php?page=subtleforms-submissions' ),
+				'settings' => admin_url( 'admin.php?page=subtleforms-settings' ),
+				'plugins'  => admin_url( 'plugins.php' ),
+			),
 			'extensions'     => $this->buildExtensionsData(),
 			// Email marketing: the services, who adds extras to them and the Pro note.
 			'emailMarketing' => self::email_marketing_data(),
+			// CRM: the services, who adds extras to them and the Pro note.
+			'crm'            => self::crm_data(),
 			'isDev'          => defined( 'WP_DEBUG' ) && WP_DEBUG,
 			// The builder preview renders the real frontend markup inside an
 			// iframe, so it needs the public stylesheet to look like production
@@ -825,9 +883,31 @@ class AdminMenu {
 	}
 
 	/**
+	 * What the CRM screens need beside the integration list; the same shape as
+	 * email_marketing_data(). Services are listed with their switch and whether
+	 * they are connected, `extras` names the services an add-on adds options
+	 * to, and `banner.show` is false for a user who dismissed the note about
+	 * SubtleForms Pro and while an add-on adds extras.
+	 *
+	 * @return array{services:object,extras:string[],banner:array{show:bool,url:string}}
+	 */
+	public static function crm_data(): array {
+		$extras    = \SubtleForms\Integrations\Crm\Services::extras();
+		$dismissed = \SubtleForms\Api\CrmApi::bannerDismissed( get_current_user_id() );
+		return array(
+			'services' => (object) \SubtleForms\Integrations\Crm\Services::all(),
+			'extras'   => $extras,
+			'banner'   => array(
+				'show' => ! $dismissed && array() === $extras,
+				'url'  => self::MORE_FEATURES_URL,
+			),
+		);
+	}
+
+	/**
 	 * The integrations the Settings screen lists.
 	 *
-	 * Webhooks and Email marketing are part of this plugin. Any other
+	 * Webhooks, Email marketing and CRM are part of this plugin. Any other
 	 * integration comes from an add-on, which adds its entry through the
 	 * `subtleforms/admin/integrations` filter (see Integrations\Registry).
 	 *

@@ -2,6 +2,7 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import { NoticeList, SnackbarList } from '@wordpress/components';
 import { store as noticesStore } from '@wordpress/notices';
 import { createPortal, useMemo } from '@wordpress/element';
+import clsx from 'clsx';
 import './Notices.scss';
 
 export default function Notices() {
@@ -46,7 +47,10 @@ export default function Notices() {
             }}>
             <SnackbarList
               className='subtleforms-snackbars'
-              notices={snackbarNotices}
+              notices={snackbarNotices.map((notice) => ({
+                ...notice,
+                className: clsx(notice.className, `is-${notice.status || 'info'}`),
+              }))}
               onRemove={removeNotice}
             />
           </div>,

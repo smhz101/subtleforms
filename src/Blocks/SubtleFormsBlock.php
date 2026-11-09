@@ -150,7 +150,7 @@ final class SubtleFormsBlock {
 		$show_title     = isset( $attributes['showTitle'] ) ? (bool) $attributes['showTitle'] : true;
 		$show_desc      = isset( $attributes['showDescription'] ) ? (bool) $attributes['showDescription'] : true;
 		$theme          = isset( $attributes['theme'] ) ? $attributes['theme'] : 'default';
-		$ajax           = isset( $attributes['ajax'] ) ? (bool) $attributes['ajax'] : false;
+		$ajax           = isset( $attributes['ajax'] ) ? (bool) $attributes['ajax'] : true;
 		$tab_index      = isset( $attributes['tabIndex'] ) ? (int) $attributes['tabIndex'] : 0;
 		$field_values   = isset( $attributes['fieldValues'] ) ? (string) $attributes['fieldValues'] : '';
 

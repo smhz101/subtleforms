@@ -181,6 +181,37 @@ public static function dispatchEmail( array $payload ): bool {
 	}
 
 	/**
+	 * Queue a CRM job: create or update the contact for one entry.
+	 *
+	 * @param array $job   { service, submission_id, retry_count }.
+	 * @param int   $delay Seconds until it runs.
+	 * @return bool True if the job was scheduled.
+	 */
+	public static function dispatchCrm( array $job, int $delay = 0 ): bool {
+		if ( empty( $job['submission_id'] ) || empty( $job['service'] ) ) {
+			self::log( 'CRM dispatch failed: missing entry or service' );
+			return false;
+		}
+		$job['dispatch_id'] = self::dispatchId();
+		$scheduled          = wp_schedule_single_event( time() + max( 0, $delay ), 'subtleforms_async_crm', array( $job ) );
+		if ( false === $scheduled ) {
+			self::log( 'Failed to schedule CRM job', array( 'submission_id' => $job['submission_id'], 'service' => $job['service'] ) );
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Execute a CRM job (called by WP Cron).
+	 *
+	 * @param array $job Job from dispatchCrm().
+	 * @return void
+	 */
+	public static function executeCrm( array $job ): void {
+		\SubtleForms\Integrations\Crm\Sender::run( $job );
+	}
+
+	/**
 	 * Execute async email job (called by WP Cron)
 	 * 
 	 * @param array $job Email job payload

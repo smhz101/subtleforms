@@ -1,0 +1,197 @@
+// Numbered connection instructions (2.8.1), shared by every service screen
+// and exposed to add-ons. Flat colours from the --sf-* tokens.
+
+.sf-steps {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	max-width: 640px;
+	font-size: 14px;
+	line-height: 1.5;
+	color: var(--sf-text);
+
+	&__title {
+		margin: 0;
+		font-size: var(--sf-text-md);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
+	}
+
+	// The accordion form: a hairline panel like the section panels.
+	&--accordion {
+		gap: 0;
+		max-width: 640px;
+		border: 1px solid var(--sf-border-subtle);
+		border-radius: var(--sf-radius-sm);
+		background: var(--sf-bg-surface);
+		overflow: hidden;
+
+		.sf-steps__title {
+			font-size: var(--sf-text-md);
+		}
+	}
+
+	&__toggle {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		box-sizing: border-box;
+		width: 100%;
+		min-height: 44px;
+		margin: 0;
+		padding: 0 14px;
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+		color: var(--sf-text);
+		font: inherit;
+		font-size: var(--sf-text-md);
+		font-weight: var(--sf-weight-semibold);
+		line-height: 1.4;
+		text-align: left;
+		cursor: pointer;
+		transition: background-color 150ms ease;
+
+		&:hover { background: var(--sf-bg-subtle); }
+		&:focus-visible {
+			outline: 2px solid var(--sf-brand);
+			outline-offset: -2px;
+		}
+	}
+
+	&__chevron {
+		flex: none;
+		color: var(--sf-text-secondary);
+		transition: transform 150ms ease;
+	}
+
+	&--accordion.is-open &__chevron { transform: rotate(180deg); }
+
+	&__panel {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		padding: 12px 14px 14px;
+		border-top: 1px solid var(--sf-border-subtle);
+
+		&[hidden] { display: none; }
+	}
+
+	&__intro,
+	&__note {
+		margin: 0;
+		font-size: 14px;
+		line-height: 1.5;
+		color: var(--sf-text-secondary);
+	}
+
+	&__note {
+		padding: 10px 12px;
+		border: 1px solid var(--sf-border-subtle);
+		border-radius: var(--sf-radius-sm);
+		background: var(--sf-bg-subtle);
+	}
+
+	&__list {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	&__item {
+		display: grid;
+		grid-template-columns: 24px minmax(0, 1fr);
+		column-gap: 12px;
+		align-items: start;
+		margin: 0;
+	}
+
+	&__num {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+		border: 1px solid var(--sf-border-strong);
+		border-radius: 50%;
+		background: var(--sf-bg-surface);
+		color: var(--sf-text-secondary);
+		font-size: 12px;
+		font-weight: var(--sf-weight-semibold);
+		line-height: 1;
+	}
+
+	&__body {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 6px;
+		min-width: 0;
+		padding-top: 1px;
+	}
+
+	&__text {
+		margin: 0;
+		font-size: 14px;
+		line-height: 1.5;
+		font-weight: 400;
+		color: var(--sf-text);
+		overflow-wrap: anywhere;
+
+		strong {
+			font-weight: var(--sf-weight-semibold);
+		}
+	}
+
+	&__link {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		color: var(--sf-brand);
+		font-size: 13px;
+		font-weight: var(--sf-weight-semibold);
+		line-height: 20px;
+		text-decoration: none;
+
+		&:hover { text-decoration: underline; }
+		&:focus-visible {
+			outline: 2px solid var(--sf-brand);
+			outline-offset: 2px;
+			border-radius: var(--sf-radius-xs);
+		}
+		svg { flex: none; }
+	}
+
+	&__code {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 8px;
+		max-width: 100%;
+
+		code {
+			display: block;
+			max-width: 100%;
+			padding: 4px 8px;
+			border: 1px solid var(--sf-border);
+			border-radius: var(--sf-radius-sm);
+			background: var(--sf-bg-muted);
+			font-family: var(--sf-font-mono);
+			font-size: 12px;
+			line-height: 20px;
+			overflow-wrap: anywhere;
+			white-space: pre-wrap;
+		}
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sf-steps__toggle,
+	.sf-steps__chevron {
+		transition: none;
+	}
+}

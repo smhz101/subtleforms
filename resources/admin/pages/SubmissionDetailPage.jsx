@@ -17,6 +17,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import AdminShell from '../components/AdminShell';
 import { apiClient } from '../data';
 import Icon from '../ui/Icon';
+import { isSafeHref } from '../components/integrations/ConnectionSteps';
 import ExtensionSlot from '../components/ExtensionSlot';
 import './SubmissionDetailPage.scss';
 
@@ -89,7 +90,11 @@ const PipelineStepCard = ( { step } ) => {
   const asyncEntries = step.entries.filter( ( e ) => e.status.startsWith( 'async_' ) );
   const mainEntry    = mainEntries[ mainEntries.length - 1 ] || step.entries[ 0 ];
   const status       = stepStatus( step.entries );
-  const hasData      = mainEntry && Object.keys( mainEntry.data ).some( ( k ) => k !== 'summary' );
+  // A service can hand back a link to the record it made ("Open in HubSpot").
+  const linkUrl      = mainEntry && isSafeHref( mainEntry.data.link_url ) ? mainEntry.data.link_url : '';
+  const linkLabel    = String( mainEntry?.data?.link_label || __( 'Open in the service', 'subtleforms' ) );
+  const SHOWN_AS_LINK = [ 'summary', 'link_url', 'link_label' ];
+  const hasData      = mainEntry && ( linkUrl !== '' || Object.keys( mainEntry.data ).some( ( k ) => ! SHOWN_AS_LINK.includes( k ) ) );
   const hasAsync     = asyncEntries.length > 0;
 
   return (
@@ -129,8 +134,16 @@ const PipelineStepCard = ( { step } ) => {
               <div className='sf-pipe-step__section-title'>
                 { __( 'Action details', 'subtleforms' ) }
               </div>
+              { linkUrl && (
+                <p className='sf-pipe-step__open'>
+                  <a href={ linkUrl } target='_blank' rel='noopener noreferrer'>
+                    { linkLabel }
+                    <span className='sf-sr-only'> { __( '(opens in a new tab)', 'subtleforms' ) }</span>
+                  </a>
+                </p>
+              ) }
               <dl className='sf-pipe-data'>
-                { Object.entries( mainEntry.data ).filter( ( [ k ] ) => k !== 'summary' ).map( ( [ k, v ] ) => (
+                { Object.entries( mainEntry.data ).filter( ( [ k ] ) => ! SHOWN_AS_LINK.includes( k ) ).map( ( [ k, v ] ) => (
                   <div key={ k } className='sf-pipe-data__row'>
                     <dt className='sf-pipe-data__key'>{ k.replace( /_/g, ' ' ) }</dt>
                     <dd className='sf-pipe-data__val'>

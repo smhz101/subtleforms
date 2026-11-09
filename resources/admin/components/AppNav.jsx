@@ -1,8 +1,9 @@
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { useLocation, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import Icon from '../ui/Icon';
 import { getBranding } from '../utils/branding';
+import { formatCompactCount } from '../utils/compactCount';
 
 /**
  * Primary navigation for the SubtleForms frame.
@@ -35,7 +36,9 @@ export const NAV_ITEMS = [
     label: __('Submissions', 'subtleforms'),
     icon: Icon.Inbox,
     match: (pathname) => pathname.startsWith('/submissions'),
-    count: () => Number(window.subtleformsAdmin?.unreadCount || 0),
+    // The badge is the total number of entries, not the unread ones. The
+    // WordPress menu badge and the admin bar bubble keep counting unread.
+    count: () => Number(window.subtleformsAdmin?.totalCount || 0),
   },
   {
     key: 'reports',
@@ -54,6 +57,20 @@ export const NAV_ITEMS = [
     match: (pathname) => pathname.startsWith('/settings'),
   },
 ];
+
+/**
+ * "N submissions in total", the tooltip and the screen reader text of the badge.
+ *
+ * @param {number} count Total entries.
+ * @return {string} Label.
+ */
+export function totalLabel(count) {
+  return sprintf(
+    /* translators: %s: total number of submissions. */
+    _n('%s submission in total', '%s submissions in total', count, 'subtleforms'),
+    count.toLocaleString()
+  );
+}
 
 export default function AppNav() {
   const location = useLocation();
@@ -94,12 +111,11 @@ export default function AppNav() {
                 <ItemIcon className='sf-appnav__icon' size={16} aria-hidden='true' />
                 <span className='sf-appnav__label'>{item.label}</span>
                 {count > 0 && (
-                  <span className='sf-appnav__count'>
-                    {count > 9 ? '9+' : count}
-                    <span className='screen-reader-text'>
-                      {' '}
-                      {__('unread', 'subtleforms')}
-                    </span>
+                  <span
+                    className='sf-appnav__count'
+                    title={totalLabel(count)}>
+                    <span aria-hidden='true'>{formatCompactCount(count)}</span>
+                    <span className='screen-reader-text'>{totalLabel(count)}</span>
                   </span>
                 )}
               </a>

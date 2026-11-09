@@ -80,7 +80,6 @@ final class PublicSubmitApi {
 	 * Register REST API routes.
 	 */
 	public function registerRoutes(): void {
-		add_action( 'template_redirect', array( $this, 'handleClassicPost' ) );
 		register_rest_route(
 			self::NAMESPACE,
 			'/submit',
@@ -129,8 +128,13 @@ final class PublicSubmitApi {
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body( (string) wp_json_encode( $built ) );
 		$request->set_param( 'form_id', $built['form_id'] );
+		// The handler is a shared instance now (2.8.1): the flag lasts for this one post only.
 		$this->classicPost = true;
-		$response          = $this->submit_form( $request );
+		try {
+			$response = $this->submit_form( $request );
+		} finally {
+			$this->classicPost = false;
+		}
 		$outcome           = ClassicResult::outcome( $response->get_status(), $response->get_data(), $built['form_id'], $built['data'] );
 
 		// Only a submission that went through follows a redirect confirmation.
@@ -155,7 +159,13 @@ final class PublicSubmitApi {
 		// errors with the visitor's answers.
 		$page = wp_get_referer();
 		if ( ! is_string( $page ) || '' === $page ) {
-			$page = home_url( '/' );
+			// The form posts to its own page, and wp_get_referer() gives nothing
+			// when the referer is the page being requested: return to this page.
+			$uri  = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+			$home = wp_parse_url( home_url( '/' ) );
+			$page = ( '' !== $uri && is_array( $home ) && ! empty( $home['host'] ) )
+				? ( $home['scheme'] ?? 'http' ) . '://' . $home['host'] . ( isset( $home['port'] ) ? ':' . $home['port'] : '' ) . $uri
+				: home_url( '/' );
 		}
 		wp_safe_redirect( ClassicResult::returnUrl( $page, ClassicResult::store( $outcome ) ) );
 		exit;

@@ -58,7 +58,7 @@ final class Connection {
 	/**
 	 * The stored record.
 	 *
-	 * @return array{api_key:string,account_name:string,account_email:string,status:string,error:string,checked_at:int,enabled:bool,settings:array}
+	 * @return array{api_key:string,account_name:string,account_email:string,account_id:string,status:string,error:string,checked_at:int,enabled:bool,settings:array}
 	 */
 	private function record(): array {
 		$stored = get_option( self::optionName( $this->slug ), array() );
@@ -67,6 +67,7 @@ final class Connection {
 			'api_key'       => isset( $stored['api_key'] ) ? trim( (string) $stored['api_key'] ) : '',
 			'account_name'  => (string) ( $stored['account_name'] ?? '' ),
 			'account_email' => (string) ( $stored['account_email'] ?? '' ),
+			'account_id'    => (string) ( $stored['account_id'] ?? '' ),
 			'status'        => (string) ( $stored['status'] ?? '' ),
 			'error'         => (string) ( $stored['error'] ?? '' ),
 			'checked_at'    => (int) ( $stored['checked_at'] ?? 0 ),
@@ -141,6 +142,16 @@ final class Connection {
 	}
 
 	/**
+	 * The service's ID for the account from a check's answer: digits and letters only.
+	 *
+	 * @param array $account Account details (`id` or `portal_id`).
+	 */
+	private static function accountId( array $account ): string {
+		$id = (string) ( $account['id'] ?? $account['portal_id'] ?? '' );
+		return preg_replace( '/[^A-Za-z0-9_-]/', '', $id ) ?? '';
+	}
+
+	/**
 	 * The last four characters of a key.
 	 *
 	 * @param string $key API key.
@@ -154,7 +165,10 @@ final class Connection {
 	 *
 	 * `connected` is true when a key is saved and its last check did not fail.
 	 *
-	 * @return array{status:string,enabled:bool,has_key:bool,connected:bool,last4:string,account_name:string,account_email:string,error:string,checked_at:int,settings:array}
+	 * `account_id` is the service's own ID for the account when it told us one
+	 * (HubSpot's portal ID), used to build links into the service.
+	 *
+	 * @return array{status:string,enabled:bool,has_key:bool,connected:bool,last4:string,account_name:string,account_email:string,account_id:string,error:string,checked_at:int,settings:array}
 	 */
 	public function state(): array {
 		$record = $this->record();
@@ -166,6 +180,7 @@ final class Connection {
 			'last4'         => self::lastFour( $record['api_key'] ),
 			'account_name'  => $record['account_name'],
 			'account_email' => $record['account_email'],
+			'account_id'    => $record['account_id'],
 			'error'         => $record['error'],
 			'checked_at'    => $record['checked_at'],
 			'settings'      => $record['settings'],
@@ -196,7 +211,7 @@ final class Connection {
 	 * Save a key that has just passed a check.
 	 *
 	 * @param string    $key     API key.
-	 * @param array     $account Account details from the check: name, email.
+	 * @param array     $account Account details from the check: name, email, id (or portal_id).
 	 * @param bool|null $enabled New switch; null keeps the current one.
 	 */
 	public function save( string $key, array $account = array(), ?bool $enabled = null ): void {
@@ -204,6 +219,7 @@ final class Connection {
 		$record['api_key']       = trim( $key );
 		$record['account_name']  = (string) ( $account['name'] ?? '' );
 		$record['account_email'] = (string) ( $account['email'] ?? '' );
+		$record['account_id']    = self::accountId( $account );
 		$record['status']        = self::STATUS_CONNECTED;
 		$record['error']         = '';
 		$record['checked_at']    = time();
@@ -231,6 +247,8 @@ final class Connection {
 		if ( $ok ) {
 			$record['account_name']  = (string) ( $account['name'] ?? $record['account_name'] );
 			$record['account_email'] = (string) ( $account['email'] ?? $record['account_email'] );
+			$id                      = self::accountId( $account );
+			$record['account_id']    = '' !== $id ? $id : $record['account_id'];
 		}
 		$this->write( $record );
 	}
@@ -244,6 +262,7 @@ final class Connection {
 		$record['api_key']       = '';
 		$record['account_name']  = '';
 		$record['account_email'] = '';
+		$record['account_id']    = '';
 		$record['status']        = '';
 		$record['error']         = '';
 		$record['checked_at']    = 0;

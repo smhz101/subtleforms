@@ -1,6 +1,8 @@
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { StatusBadge } from './ServiceConnection';
+import { stepsFor } from './serviceSteps';
+import ConnectionSteps from '../ConnectionSteps';
 import './emailMarketing.scss';
 
 /**
@@ -96,6 +98,7 @@ export default function MailPoetStatus({ connection }) {
         )}
         {action && <div className='sf-em-card__actions'>{action}</div>}
       </section>
+      <ConnectionSteps id='sf-steps-mailpoet' defaultOpen={state !== 'ready'} title={__('How to set up MailPoet', 'subtleforms')} {...stepsFor('mailpoet', local)} />
     </div>
   );
 }
