@@ -112,7 +112,7 @@ export default function CrmConnection({ service, label, state, onState, ui = {} 
       </header>
       {!(result.text && result.tone === 'ok') && <p className='sf-em-card__summary'>{summary}</p>}
 
-      {showField && guide && <ConnectionSteps id={`sf-steps-${service}`} title={ui.stepsTitle} {...guide} />}
+      {showField && guide && <ConnectionSteps id={`sf-steps-${service}`} title={ui.stepsTitle} defaultOpen={state.status !== 'connected'} {...guide} />}
 
       {showField ? (
         <div className='sf-em-card__key'>
@@ -173,10 +173,7 @@ export default function CrmConnection({ service, label, state, onState, ui = {} 
       )}
 
       {!showField && guide && (
-        <details className='sf-em-card__more'>
-          <summary>{__('Show the steps to create a new key', 'subtleforms')}</summary>
-          <ConnectionSteps id={`sf-steps-${service}`} {...guide} />
-        </details>
+        <ConnectionSteps id={`sf-steps-${service}`} title={ui.stepsTitle} defaultOpen={false} {...guide} />
       )}
 
       {result.text && (

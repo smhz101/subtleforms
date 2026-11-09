@@ -25,6 +25,10 @@ async function mount(node) {
   });
 }
 
+beforeEach(() => {
+  window.localStorage.clear();
+});
+
 afterEach(() => {
   if (root) act(() => root.unmount());
   if (container) container.remove();
@@ -90,7 +94,7 @@ describe('ConnectionSteps', () => {
   });
 
   it('skips empty steps and draws no heading without a title', async () => {
-    await mount(<ConnectionSteps steps={[null, { text: '' }, { text: 'Real step' }]} />);
+    await mount(<ConnectionSteps collapsible={false} steps={[null, { text: '' }, { text: 'Real step' }]} />);
     expect(container.querySelectorAll('li')).toHaveLength(1);
     expect(container.querySelector('.sf-steps__title')).toBeNull();
   });
@@ -99,5 +103,66 @@ describe('ConnectionSteps', () => {
     const target = {};
     exposeConnectionSteps(target);
     expect(target.ConnectionSteps).toBe(ConnectionSteps);
+  });
+
+  describe('accordion', () => {
+    const toggleOf = () => container.querySelector('button.sf-steps__toggle');
+    const panelOf = () => container.querySelector('.sf-steps__panel');
+
+    it('is open by default and has the default title', async () => {
+      await mount(<ConnectionSteps steps={[{ text: 'Go' }]} />);
+      expect(toggleOf().textContent).toBe('How to connect');
+      expect(toggleOf().getAttribute('aria-expanded')).toBe('true');
+      expect(panelOf().hasAttribute('hidden')).toBe(false);
+      expect(toggleOf().getAttribute('aria-controls')).toBe(panelOf().id);
+    });
+
+    it('starts closed with defaultOpen false and opens on click', async () => {
+      await mount(<ConnectionSteps id='sf-steps-x' title='How to connect X' defaultOpen={false} steps={[{ text: 'Go' }]} />);
+      expect(toggleOf().getAttribute('aria-expanded')).toBe('false');
+      expect(panelOf().hasAttribute('hidden')).toBe(true);
+      await act(async () => toggleOf().click());
+      expect(toggleOf().getAttribute('aria-expanded')).toBe('true');
+      expect(panelOf().hasAttribute('hidden')).toBe(false);
+      await act(async () => toggleOf().click());
+      expect(toggleOf().getAttribute('aria-expanded')).toBe('false');
+    });
+
+    it('remembers the choice under the storage key', async () => {
+      await mount(<ConnectionSteps id='sf-steps-y' storageKey='sf-steps-custom' steps={[{ text: 'Go' }]} />);
+      await act(async () => toggleOf().click());
+      expect(window.localStorage.getItem('sf-steps-custom')).toBe('0');
+      act(() => root.unmount());
+      container.remove();
+      await mount(<ConnectionSteps id='sf-steps-y' storageKey='sf-steps-custom' steps={[{ text: 'Go' }]} />);
+      expect(toggleOf().getAttribute('aria-expanded')).toBe('false');
+    });
+
+    it('uses the id as the storage key and lets a saved choice beat the default', async () => {
+      window.localStorage.setItem('sf-steps-hubspot', '1');
+      await mount(<ConnectionSteps id='sf-steps-hubspot' defaultOpen={false} steps={[{ text: 'Go' }]} />);
+      expect(toggleOf().getAttribute('aria-expanded')).toBe('true');
+    });
+
+    it('still works when storage throws', async () => {
+      const get = jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+        throw new Error('blocked');
+      });
+      const set = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+        throw new Error('blocked');
+      });
+      await mount(<ConnectionSteps defaultOpen={false} steps={[{ text: 'Go' }]} />);
+      expect(toggleOf().getAttribute('aria-expanded')).toBe('false');
+      await act(async () => toggleOf().click());
+      expect(toggleOf().getAttribute('aria-expanded')).toBe('true');
+      get.mockRestore();
+      set.mockRestore();
+    });
+
+    it('draws a plain section when not collapsible', async () => {
+      await mount(<ConnectionSteps collapsible={false} title='Plain' steps={[{ text: 'Go' }]} />);
+      expect(toggleOf()).toBeNull();
+      expect(container.querySelector('h4.sf-steps__title').textContent).toBe('Plain');
+    });
   });
 });

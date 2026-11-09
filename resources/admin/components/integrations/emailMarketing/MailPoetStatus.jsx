@@ -98,7 +98,7 @@ export default function MailPoetStatus({ connection }) {
         )}
         {action && <div className='sf-em-card__actions'>{action}</div>}
       </section>
-      <ConnectionSteps id='sf-steps-mailpoet' title={__('How to set up MailPoet', 'subtleforms')} {...stepsFor('mailpoet', local)} />
+      <ConnectionSteps id='sf-steps-mailpoet' defaultOpen={state !== 'ready'} title={__('How to set up MailPoet', 'subtleforms')} {...stepsFor('mailpoet', local)} />
     </div>
   );
 }

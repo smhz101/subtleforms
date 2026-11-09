@@ -1,4 +1,4 @@
-import { useState } from '@wordpress/element';
+import { useState, useCallback } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import Icon from '../../ui/Icon';
@@ -48,6 +48,37 @@ export function isSafeHref(href) {
 }
 
 /**
+ * Read the remembered open or closed choice for a set of steps.
+ *
+ * @param {string} key Storage key.
+ * @return {?boolean} The saved choice, or null when there is none or storage is unavailable.
+ */
+function readChoice(key) {
+  try {
+    const value = window.localStorage.getItem(key);
+    if (value === '1') return true;
+    if (value === '0') return false;
+  } catch (e) {
+    // Storage can be blocked; the default applies.
+  }
+  return null;
+}
+
+/**
+ * Remember the open or closed choice. Storage may be blocked, so a failure is ignored.
+ *
+ * @param {string}  key  Storage key.
+ * @param {boolean} open Choice to keep.
+ */
+function writeChoice(key, open) {
+  try {
+    window.localStorage.setItem(key, open ? '1' : '0');
+  } catch (e) {
+    // Nothing to do; the choice only lasts for this screen.
+  }
+}
+
+/**
  * Numbered instructions for connecting a service. Every connection screen
  * uses it, so the steps look and read the same everywhere.
  *
@@ -55,26 +86,48 @@ export function isSafeHref(href) {
  * button that opens that page in a new tab. A step that gives the person
  * something to paste carries `code`; it is drawn as a copy field.
  *
+ * The steps sit in an accordion so they are read only when needed. Pass
+ * `defaultOpen` true when the service is not connected yet and false when it
+ * is. The person's own choice is remembered per `storageKey` and wins over the
+ * default.
+ *
  * The component is also on `window.SubtleFormsExtend.ConnectionSteps`, so an
  * add-on draws its own instructions the same way. Add-ons check that it exists
  * before they use it.
  *
  * @param {Object}   props
- * @param {string}   [props.title] Optional heading above the steps.
- * @param {*}        [props.intro] One or two sentences before the steps.
- * @param {Array}    props.steps   [{ text, href, hrefLabel, code }]. `hrefLabel` is the visible link text, "Open the page" by default.
- * @param {*}        [props.note]  Something to know after the steps.
- * @param {string}   [props.id]    Id prefix, for tests and anchors.
+ * @param {string}   [props.title]       Heading of the accordion. "How to connect" by default when collapsible.
+ * @param {*}        [props.intro]       One or two sentences before the steps.
+ * @param {Array}    props.steps         [{ text, href, hrefLabel, code }]. `hrefLabel` is the visible link text, "Open the page" by default.
+ * @param {*}        [props.note]        Something to know after the steps.
+ * @param {string}   [props.id]          Id prefix, for tests and anchors.
+ * @param {boolean}  [props.collapsible] Draw the steps inside an accordion. True by default.
+ * @param {boolean}  [props.defaultOpen] Whether the accordion starts open when the person has not chosen yet. True by default.
+ * @param {string}   [props.storageKey]  localStorage key of the remembered choice. `id` by default.
  */
-export default function ConnectionSteps({ title, intro, steps = [], note, id = 'sf-steps' }) {
+export default function ConnectionSteps({
+  title,
+  intro,
+  steps = [],
+  note,
+  id = 'sf-steps',
+  collapsible = true,
+  defaultOpen = true,
+  storageKey,
+}) {
   const list = (Array.isArray(steps) ? steps : []).filter((step) => step && step.text);
-  return (
-    <section className='sf-steps' aria-labelledby={title ? `${id}-title` : undefined} data-testid='connection-steps'>
-      {title && (
-        <h4 id={`${id}-title`} className='sf-steps__title'>
-          {title}
-        </h4>
-      )}
+  const key = storageKey || id;
+  const [saved, setSaved] = useState(() => (collapsible ? readChoice(key) : null));
+  const open = !collapsible || (saved === null ? !!defaultOpen : saved);
+  const toggle = useCallback(() => {
+    const next = !open;
+    setSaved(next);
+    writeChoice(key, next);
+  }, [open, key]);
+
+  const heading = title || (collapsible ? __('How to connect', 'subtleforms') : '');
+  const content = (
+    <>
       {intro && <p className='sf-steps__intro'>{intro}</p>}
       <ol className='sf-steps__list'>
         {list.map((step, index) => {
@@ -105,6 +158,44 @@ export default function ConnectionSteps({ title, intro, steps = [], note, id = '
         })}
       </ol>
       {note && <p className='sf-steps__note'>{note}</p>}
+    </>
+  );
+
+  if (!collapsible) {
+    return (
+      <section className='sf-steps' aria-labelledby={heading ? `${id}-title` : undefined} data-testid='connection-steps'>
+        {heading && (
+          <h4 id={`${id}-title`} className='sf-steps__title'>
+            {heading}
+          </h4>
+        )}
+        {content}
+      </section>
+    );
+  }
+
+  return (
+    <section
+      className={`sf-steps sf-steps--accordion${open ? ' is-open' : ''}`}
+      aria-labelledby={`${id}-title`}
+      data-testid='connection-steps'
+    >
+      <h4 className='sf-steps__title'>
+        <button
+          type='button'
+          id={`${id}-title`}
+          className='sf-steps__toggle'
+          aria-expanded={open}
+          aria-controls={`${id}-panel`}
+          onClick={toggle}
+        >
+          <span>{heading}</span>
+          <Icon.ChevronDown size={16} aria-hidden='true' className='sf-steps__chevron' />
+        </button>
+      </h4>
+      <div id={`${id}-panel`} className='sf-steps__panel' role='region' aria-labelledby={`${id}-title`} hidden={!open}>
+        {content}
+      </div>
     </section>
   );
 }

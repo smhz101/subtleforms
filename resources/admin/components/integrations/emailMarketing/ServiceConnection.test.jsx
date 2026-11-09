@@ -164,12 +164,18 @@ test.each([
   expect(container.querySelector('input[type="password"]').getAttribute('placeholder')).toContain(label);
 });
 
-test('a connected card keeps the steps in a closed details element', async () => {
+test('a connected card keeps the steps in a closed accordion', async () => {
   await mount(CONNECTED);
-  const more = container.querySelector('details.sf-em-card__more');
-  expect(more).not.toBeNull();
-  expect(more.hasAttribute('open')).toBe(false);
-  expect(more.querySelector('ol.sf-steps__list')).not.toBeNull();
+  const toggle = container.querySelector('button.sf-steps__toggle');
+  expect(toggle).not.toBeNull();
+  expect(toggle.getAttribute('aria-expanded')).toBe('false');
+  expect(container.querySelector('.sf-steps__panel').hasAttribute('hidden')).toBe(true);
+  expect(container.querySelector('ol.sf-steps__list')).not.toBeNull();
+});
+
+test('a card with no key shows the steps open', async () => {
+  await mount(NONE);
+  expect(container.querySelector('button.sf-steps__toggle').getAttribute('aria-expanded')).toBe('true');
 });
 
 test('the typed key is sent to the right service route', async () => {
