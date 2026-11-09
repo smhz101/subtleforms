@@ -90,6 +90,17 @@ final class OnboardingApi {
 			)
 		);
 
+		// Cloudflare notice on Security & privacy (dismissed per user).
+		register_rest_route(
+			self::NAMESPACE,
+			'/cloudflare-notice/dismiss',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'dismiss_cloudflare_notice' ),
+				'permission_callback' => array( $this, 'check_write_permission' ),
+			)
+		);
+
 		// Builder tour
 		register_rest_route(
 			self::NAMESPACE,
@@ -127,6 +138,23 @@ final class OnboardingApi {
 		}
 
 		update_user_meta( $user_id, \SubtleForms\Admin\AdminMenu::MORE_FEATURES_META, true );
+
+		return ApiResponse::success( array( 'dismissed' => true ) );
+	}
+
+	/**
+	 * Remember that this user dismissed the Cloudflare notice.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response
+	 */
+	public function dismiss_cloudflare_notice( WP_REST_Request $request ): WP_REST_Response {
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) {
+			return ApiResponse::unauthorized( __( 'User not authenticated', 'subtleforms' ) );
+		}
+
+		update_user_meta( $user_id, \SubtleForms\Admin\AdminMenu::CLOUDFLARE_NOTICE_META, true );
 
 		return ApiResponse::success( array( 'dismissed' => true ) );
 	}

@@ -633,6 +633,8 @@ class AdminMenu {
 			'addonFeatures'  => \SubtleForms\Support\ExtensionPoints::provided(),
 			// The More features card on the Dashboard (see more_features()).
 			'moreFeatures'   => self::more_features(),
+			// Cloudflare is in front of the site and the setting is off (2.8.1).
+			'cloudflareNotice' => self::cloudflare_notice(),
 			// Today in the site's time zone (Y-m-d), the end of the Reports date range.
 			'siteToday'      => wp_date( 'Y-m-d' ),
 			// The Pro page on subtleforms.com, for the Upgrade page.
@@ -827,6 +829,11 @@ class AdminMenu {
 	public const MORE_FEATURES_META = 'subtleforms_more_features_dismissed';
 
 	/**
+	 * User meta that remembers the Cloudflare notice was dismissed.
+	 */
+	public const CLOUDFLARE_NOTICE_META = 'subtleforms_cloudflare_notice_dismissed';
+
+	/**
 	 * Product page the More features card links to.
 	 */
 	public const MORE_FEATURES_URL = 'https://subtleforms.com/pro/';
@@ -857,6 +864,25 @@ class AdminMenu {
 			'show' => $show,
 			'url'  => self::MORE_FEATURES_URL,
 		);
+	}
+
+	/**
+	 * Whether Security & privacy shows the Cloudflare notice: this request
+	 * came through Cloudflare, the "Site is behind Cloudflare" setting is off
+	 * and this user has not dismissed it.
+	 *
+	 * @return bool
+	 */
+	public static function cloudflare_notice(): bool {
+		$user_id = get_current_user_id();
+		if ( $user_id <= 0 || get_user_meta( $user_id, self::CLOUDFLARE_NOTICE_META, true ) ) {
+			return false;
+		}
+		$settings = get_option( 'subtleforms_settings', array() );
+		if ( is_array( $settings ) && ! empty( $settings['trust_cloudflare'] ) ) {
+			return false;
+		}
+		return \SubtleForms\Security\ClientIp::cloudflare_detected();
 	}
 
 	/**

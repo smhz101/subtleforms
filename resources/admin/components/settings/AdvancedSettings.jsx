@@ -1,6 +1,7 @@
 import { useEffect, useState } from '@wordpress/element';
 import {
 	Button,
+	Notice,
 	TextControl,
 	TextareaControl,
 	ToggleControl,
@@ -8,6 +9,7 @@ import {
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import FieldError from './FieldError';
+import { apiClient } from '../../data/apiClient';
 
 /** Turn the textarea (one address or range per line, or commas) into a list. */
 export function parseProxyList( text ) {
@@ -15,6 +17,59 @@ export function parseProxyList( text ) {
 		.split( /[\s,]+/ )
 		.map( ( item ) => item.trim() )
 		.filter( Boolean );
+}
+
+/**
+ * Said once when this page came through Cloudflare and the setting below is
+ * off. SubtleForms already reads the visitor address from Cloudflare then, so
+ * rate limits count visitors one by one; the setting makes that fixed.
+ * The server decides whether it shows (subtleformsAdmin.cloudflareNotice) and
+ * remembers a dismissal for the user.
+ *
+ * @param {Object} props
+ * @param {Object} props.settings Current settings values.
+ */
+export function CloudflareNotice( { settings } ) {
+	const [ hidden, setHidden ] = useState( false );
+	const detected = !! window.subtleformsAdmin?.cloudflareNotice;
+	if ( ! detected || hidden || settings.trust_cloudflare ) {
+		return null;
+	}
+
+	const dismiss = () => {
+		setHidden( true );
+		apiClient.post( '/cloudflare-notice/dismiss', {} ).catch( () => {
+			// Hidden for this page view either way.
+		} );
+	};
+	const showSetting = () => {
+		const toggle = document.querySelector( '#sf-trust-cloudflare input' );
+		if ( toggle ) {
+			toggle.scrollIntoView( { block: 'center' } );
+			toggle.focus();
+		}
+	};
+
+	return (
+		<Notice
+			status="info"
+			isDismissible
+			onRemove={ dismiss }
+			className="sf-cloudflare-notice"
+			actions={ [
+				{
+					label: __( 'Show the setting', 'subtleforms' ),
+					onClick: showSetting,
+					variant: 'secondary',
+				},
+			] }
+		>
+			{ __(
+				'This site is behind Cloudflare. SubtleForms reads each visitor address from Cloudflare, so rate limits and spam checks count visitors one by one. Turn on "Site is behind Cloudflare" below to make this a fixed setting.',
+				'subtleforms'
+			) }
+		</Notice>
+	);
 }
 
 /**
@@ -39,17 +94,20 @@ function ProxySettings( { settings, updateSetting, fieldErrors } ) {
 			<h4 className="sf-section-title">
 				{ __( 'Visitor IP behind a proxy', 'subtleforms' ) }
 			</h4>
-			<ToggleControl
-				label={ __( 'Site is behind Cloudflare', 'subtleforms' ) }
-				checked={ !! settings.trust_cloudflare }
-				onChange={ ( value ) =>
-					updateSetting( 'trust_cloudflare', value )
-				}
-				help={ __(
-					'Read the visitor address from Cloudflare when the request really comes from Cloudflare. Leave this off if the site is not behind Cloudflare.',
-					'subtleforms'
-				) }
-			/>
+			<CloudflareNotice settings={ settings } />
+			<div id="sf-trust-cloudflare">
+				<ToggleControl
+					label={ __( 'Site is behind Cloudflare', 'subtleforms' ) }
+					checked={ !! settings.trust_cloudflare }
+					onChange={ ( value ) =>
+						updateSetting( 'trust_cloudflare', value )
+					}
+					help={ __(
+						'Read the visitor address from Cloudflare when the request really comes from Cloudflare. SubtleForms also does this by itself for a request it sees coming from Cloudflare. Leave this off if the site is not behind Cloudflare.',
+						'subtleforms'
+					) }
+				/>
+			</div>
 			<FieldError errors={ fieldErrors.trust_cloudflare } />
 			<TextareaControl
 				label={ __( 'Trusted proxy addresses', 'subtleforms' ) }

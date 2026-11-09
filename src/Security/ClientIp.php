@@ -10,7 +10,13 @@
  * Settings (in the subtleforms_settings option):
  * - trusted_proxy_cidrs: proxy addresses or CIDR ranges, one per line or comma separated.
  * - trust_cloudflare: when on, Cloudflare's published ranges are trusted and
- *   the CF-Connecting-IP header is used.
+ *   the CF-Connecting-IP header is used. Since 2.8.1 the header is also used
+ *   without this setting when the connection itself comes from one of
+ *   Cloudflare's ranges (see cloudflare_visitor()), because otherwise every
+ *   visitor of a site behind Cloudflare shares a few edge addresses and the
+ *   rate limits count them together. The setting stays as the explicit switch,
+ *   and the `subtleforms/client_ip/auto_cloudflare` filter turns the automatic
+ *   use off.
  *
  * @package SubtleForms
  * @subpackage Security
@@ -28,7 +34,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class ClientIp {
 
 	/**
-	 * Cloudflare's published IPv4 and IPv6 ranges.
+	 * Cloudflare's published IPv4 and IPv6 ranges (https://www.cloudflare.com/ips-v4
+	 * and https://www.cloudflare.com/ips-v6), as last compared on 2026-11-09.
+	 * The pages could not be fetched on that day, so the list is the one
+	 * Cloudflare published when it was last copied here; it changes rarely.
+	 * Add a range that is missing with the `subtleforms/client_ip/trusted_proxies`
+	 * filter or the trusted proxy setting.
 	 *
 	 * @var string[]
 	 */
@@ -67,6 +78,24 @@ final class ClientIp {
 		$remote = self::valid( $remote ) ? $remote : '';
 		if ( '' === $remote ) {
 			return '';
+		}
+
+		// A connection from Cloudflare that names the visitor (2.8.1). A header
+		// from any other address is ignored: only Cloudflare sets it.
+		$visitor = self::cloudflare_visitor( $remote );
+		if ( '' !== $visitor ) {
+			/**
+			 * Filter whether the visitor address from Cloudflare is used
+			 * without the "Site is behind Cloudflare" setting. Return false
+			 * to use it only when that setting is on.
+			 *
+			 * @param bool   $auto   Whether to use it. Default true.
+			 * @param string $visitor The address Cloudflare sent.
+			 * @since 2.8.1
+			 */
+			if ( apply_filters( 'subtleforms/client_ip/auto_cloudflare', true, $visitor ) ) {
+				return $visitor;
+			}
 		}
 
 		$settings   = get_option( 'subtleforms_settings', array() );
@@ -112,6 +141,35 @@ final class ClientIp {
 		}
 
 		return $remote;
+	}
+
+	/**
+	 * The visitor address Cloudflare sent, when this request came through it.
+	 *
+	 * That is when the connection comes from one of Cloudflare's ranges and
+	 * the CF-Connecting-IP header holds a valid address. Empty otherwise.
+	 *
+	 * @param string $remote The connecting address; REMOTE_ADDR when omitted.
+	 * @return string
+	 */
+	public static function cloudflare_visitor( string $remote = '' ): string {
+		if ( '' === $remote ) {
+			$remote = self::server_value( 'REMOTE_ADDR' );
+		}
+		if ( ! self::valid( $remote ) || ! self::in_ranges( $remote, self::CLOUDFLARE_RANGES ) ) {
+			return '';
+		}
+		$visitor = self::server_value( 'HTTP_CF_CONNECTING_IP' );
+		return self::valid( $visitor ) ? $visitor : '';
+	}
+
+	/**
+	 * Whether this request came through Cloudflare (used by the admin notice).
+	 *
+	 * @return bool
+	 */
+	public static function cloudflare_detected(): bool {
+		return '' !== self::cloudflare_visitor();
 	}
 
 	/**
@@ -172,6 +230,11 @@ final class ClientIp {
 		$parts  = explode( '/', $range, 2 );
 		$subnet = @inet_pton( $parts[0] ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- Invalid input is handled below.
 		$addr   = @inet_pton( $ip ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- Invalid input is handled below.
+		// An IPv4 address a dual-stack server reports as ::ffff:a.b.c.d is
+		// checked as the IPv4 address it is.
+		if ( false !== $addr && 16 === strlen( $addr ) && false !== $subnet && 4 === strlen( $subnet ) && str_starts_with( $addr, "\0\0\0\0\0\0\0\0\0\0\xff\xff" ) ) {
+			$addr = substr( $addr, 12 );
+		}
 		if ( false === $subnet || false === $addr || strlen( $subnet ) !== strlen( $addr ) ) {
 			return false;
 		}
