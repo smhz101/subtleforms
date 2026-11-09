@@ -42,7 +42,8 @@ final class ExtensionPoints {
 	 * screen slots `dashboard.tiles`, `dashboard.widgets`, `dashboard.attention`,
 	 * `dashboard.top_forms.column` and `reports.series`; and the filters
 	 * `subtleforms/admin/upgrade_menu_item`, `subtleforms/dashboard/data` and
-	 * `subtleforms/reports/data`.
+	 * `subtleforms/reports/data`. Since 2.8.1 `window.SubtleFormsExtend` also
+	 * has `ConnectionSteps`, the numbered instructions of a connection screen.
 	 */
 	public const LEVEL = 3;
 

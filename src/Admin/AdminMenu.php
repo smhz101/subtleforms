@@ -637,6 +637,14 @@ class AdminMenu {
 			'siteToday'      => wp_date( 'Y-m-d' ),
 			// The Pro page on subtleforms.com, for the Upgrade page.
 			'upgradeUrl'     => self::upgrade_url( 'menu' ),
+			// Addresses of the admin screens that connection instructions link to (2.8.1).
+			'adminUrls'      => array(
+				'forms'    => admin_url( 'admin.php?page=subtleforms-forms' ),
+				'newForm'  => admin_url( 'admin.php?page=subtleforms-new-form' ),
+				'entries'  => admin_url( 'admin.php?page=subtleforms-submissions' ),
+				'settings' => admin_url( 'admin.php?page=subtleforms-settings' ),
+				'plugins'  => admin_url( 'plugins.php' ),
+			),
 			'extensions'     => $this->buildExtensionsData(),
 			// Email marketing: the services, who adds extras to them and the Pro note.
 			'emailMarketing' => self::email_marketing_data(),
