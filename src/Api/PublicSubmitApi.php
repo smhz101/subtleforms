@@ -112,9 +112,10 @@ final class PublicSubmitApi {
 	 */
 	public function handleClassicPost(): void {
 		$method = isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_key( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '';
-		// Public form posts carry no nonce, like the REST submit route: visitors have
-		// no nonce so cached pages keep working (2.3.9). The post goes through the
-		// same spam, rate limit and validation checks as an AJAX submit.
+		// Guest posts carry no nonce, like the REST submit route: visitors have no
+		// nonce so cached pages keep working (2.3.9); a logged-in visitor's post is
+		// checked below. The post goes through the same spam, rate limit and
+		// validation checks as an AJAX submit.
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Public form; see above.
 		if ( 'post' !== $method || empty( $_POST['subtleforms_classic'] ) ) {
 			return;
@@ -123,6 +124,16 @@ final class PublicSubmitApi {
 		$built = self::classicSubmission( wp_unslash( $_POST ) );
 		if ( $built['form_id'] < 1 ) {
 			return;
+		}
+		// A logged-in visitor must prove the post came from the page, as the REST
+		// route does with its nonce: without one, the post is handled as a guest's
+		// (wp_set_current_user( 0 )), so a cross-site post cannot act as the user
+		// (store their user id, pass logged-in-only rules or limits). Guests need
+		// no nonce, so cached pages keep working (2.8.1).
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- This is the nonce check.
+		$nonce = isset( $_POST['subtleforms_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['subtleforms_nonce'] ) ) : '';
+		if ( is_user_logged_in() && ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+			wp_set_current_user( 0 );
 		}
 		$request = new WP_REST_Request( 'POST', '/subtleforms/v1/submit' );
 		$request->set_header( 'Content-Type', 'application/json' );
