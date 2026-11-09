@@ -1,1 +1,0 @@
-GH85-01,P2,Free 2.8.1,,Muzammil,new in 2.3.8,fixed,Free 2.8.1 (#91),GitHub issue #85 (2.8.0),The CSV export stopped at the newest 10000 entries without a notice so on a large form the oldest entries were missing from a file that looked complete,Entries are read 2000 at a time in two passes ordered by date and id. The response carries total.

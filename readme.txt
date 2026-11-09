@@ -4,7 +4,7 @@ Tags: form builder, contact form, multi-step form, conversational form, forms
 Requires at least: 6.6
 Tested up to: 7.2
 Requires PHP: 8.1
-Stable tag: 2.8.0
+Stable tag: 2.8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -229,6 +229,24 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 
 == Changelog ==
 
+= 2.8.1 - 2026-11-09 =
+* New: HubSpot is built in: connect a HubSpot service key (a legacy private app access token also works) under Settings, Integrations, CRM, then switch HubSpot on for a form to create or update a contact for each entry, with field mapping, custom properties, a consent checkbox and a line in each entry's activity log with an Open in HubSpot link.
+* New: The SubtleForms menu shows the total number of entries as a short count (1k, 1.2k, 12k) with the full number as its tooltip.
+* Change: The admin bar icon lines up with the other items, the bubble keeps its place on hover, and the SubtleForms menu has an Upgrade to Pro item on free sites.
+* Change: Every connection screen (Mailchimp, Brevo, Kit, MailPoet, HubSpot and webhooks) now has numbered steps in plain words, and each step on another website links straight to that page; a rejected HubSpot key says to paste the new one.
+* Change: All notices in the admin follow WordPress styling: square corners, the core border colours and a white background.
+* Change: The "How to connect" steps on every service screen sit in an accordion that starts open until the service is connected, then closed, and remembers your choice.
+* Fix: Forms with AJAX off lost every entry: the classic post handler was only registered on REST requests (broken since 2.4.0). The block default is now AJAX on, so form blocks saved without an AJAX setting now submit with AJAX.
+* Fix: The New form page has the same space above its heading as the other screens.
+* Fix: A form post without AJAX from a logged-in visitor now carries the REST nonce; a post without a valid one is handled as a guest post, so a cross-site post cannot act as the logged-in user.
+* Fix: Behind Cloudflare each visitor now has their own rate limit: the visitor address from Cloudflare is used for requests that come from Cloudflare's published ranges without turning on a setting, and Security & privacy shows a dismissible notice when it sees Cloudflare in front of the site.
+* Fix: The CSV export includes every matching entry instead of stopping at the newest 10,000, and the answer now carries the number of entries exported.
+* Fix: The CSV export, Export selected included, is now sent as a file while it is written instead of being built in memory, so a very large form no longer runs out of memory, and a download that cannot start says why instead of failing silently.
+* Fix: Notification emails are no longer lost when WP-Cron runs late: the queued email waits in the options table until it is sent instead of a transient that expired after 6 hours, and an email whose stored copy is gone is built again from the saved entry.
+* Fix: A logged-in visitor whose page was open for a long time can send a form with the time trap again (the form retries once with a fresh token instead of repeating "Please send it again"), and a form with AJAX off no longer creates a second entry when Submit is clicked twice while the page is posting.
+* Fix: An answer with a "<" in it, such as "Budget <5000", is saved and emailed in full instead of being cut at that point, and an entry is no longer lost when the visitor's browser sends a User-Agent longer than 255 characters (Facebook and Instagram in-app browsers on iPhone).
+* Security: The Rich Text field now cleans its starting value with the same allowlist as typed text, so a value filled in from the block, a default or the page address can only show the allowed formatting and safe links.
+
 = 2.8.0 - 2026-11-07 =
 * New: Email marketing is built in: connect Mailchimp, Brevo or Kit under Settings, Integrations, Email marketing, then switch it on for a form to add people to a list with field mapping, tags, double opt-in, a consent checkbox and a line in each entry's activity log.
 * New: Import forms from WPForms and Ninja Forms, from the site or from an export file, and copy their entries too if you tick the box that asks first.
@@ -245,22 +263,15 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Change: Notices from WordPress and other plugins now appear under the SubtleForms header instead of above it.
 * Change: SubtleForms screens have a footer with the version, documentation and support links and the list pagination, while the page content scrolls between the header and the footer.
 
-= 2.7.3 - 2026-10-29 =
-* New: Custom styling now has grouped, resettable controls that start from your theme colours and fonts, a compact or comfortable density, contrast warnings, and the builder preview shows the theme exactly as your site does.
-* New: The Phone and Country fields have a new "Show country flags" setting that draws a small flag next to each country, loading the flag image only for forms that use it.
-* Change: Removed freeform Custom CSS from the form builder for WordPress.org compliance. Structured appearance settings still work.
-* Security: Classic form result storage, admin action nonces and every REST nonce check now sanitize request input before use, and public REST route detection normalizes REQUEST_URI before parsing.
-* Security: The onboarding test email and the onboarding, tour and card dismiss routes now require the manage_options capability, the same as every SubtleForms screen.
-
 The full history is in changelog.txt in the plugin folder.
 
 == Upgrade Notice ==
+
+= 2.8.1 =
+Fixes lost or cut-off answers (a "<" in an answer, very long browser user agents), emails that could be dropped when WP-Cron ran late, duplicate entries from double clicks and large CSV exports, and includes a security fix for the Rich Text field. Recommended for everyone.
 
 = 2.8.0 =
 Email marketing with Mailchimp, Brevo, Kit and MailPoet is built in, you can import forms from WPForms and Ninja Forms, and fields get an input mask.
 
 = 2.7.4 =
 SubtleForms has a new logo, and the admin menu shows how many entries are unread.
-
-= 2.7.3 =
-If you use the SubtleForms Pro add-on, update it to 2.8.0 or later. Freeform Custom CSS is removed; structured appearance settings are kept.
