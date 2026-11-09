@@ -1,1 +1,0 @@
-GH87-01,P3,Free 2.8.1,,Muzammil,new in 2.3.8,fixed,Free 2.8.1 (#93),GitHub issue #87 (2.8.0),RELEASE.md told the releaser to rsync the working tree to SVN trunk and the development vendor/ it holds would fatal every request,The manual deployment step now builds the release zip with composer install --no-dev and syncs trunk from its contents.
