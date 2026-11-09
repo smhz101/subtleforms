@@ -5,6 +5,8 @@ import Icon from '../../../ui/Icon';
 import { announceService } from './api';
 import { useConnectService, useDisconnectService, useTestService } from './queries';
 import { uiFor } from './serviceUi';
+import { stepsFor } from './serviceSteps';
+import ConnectionSteps from '../ConnectionSteps';
 import './emailMarketing.scss';
 
 const BADGES = {
@@ -122,6 +124,12 @@ export default function ServiceConnection({ service, label, state, onState }) {
   }
 
   const titleId = `sf-em-conn-${service}`;
+  const guide = stepsFor(service);
+  const guideTitle = sprintf(
+    /* translators: %s: service name */
+    __('How to connect %s', 'subtleforms'),
+    label
+  );
 
   return (
     <section className='sf-em-card' aria-labelledby={titleId}>
@@ -133,6 +141,8 @@ export default function ServiceConnection({ service, label, state, onState }) {
       </header>
       {!(result.text && result.tone === 'ok') && <p className='sf-em-card__summary'>{summary}</p>}
 
+      {showField && guide && <ConnectionSteps id={`sf-steps-${service}`} title={guideTitle} {...guide} />}
+
       {showField ? (
         <div className='sf-em-card__key'>
           <TextControl
@@ -142,9 +152,9 @@ export default function ServiceConnection({ service, label, state, onState }) {
             value={key}
             onChange={setKey}
             placeholder={ui.keyPlaceholder}
-            help={ui.keyHelp || undefined}
+            help={(!guide && ui.keyHelp) || undefined}
           />
-          {ui.keyLink && (
+          {!guide && ui.keyLink && (
             <p className='sf-em-card__link'>
               <a href={ui.keyLink} target='_blank' rel='noopener noreferrer'>
                 {ui.keyLinkText}
@@ -197,6 +207,13 @@ export default function ServiceConnection({ service, label, state, onState }) {
             </Button>
           </div>
         </div>
+      )}
+
+      {!showField && guide && (
+        <details className='sf-em-card__more'>
+          <summary>{__('Show the steps to get a new key', 'subtleforms')}</summary>
+          <ConnectionSteps id={`sf-steps-${service}`} {...guide} />
+        </details>
       )}
 
       {result.text && (

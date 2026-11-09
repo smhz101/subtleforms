@@ -5,6 +5,8 @@ import FieldError from '../FieldError';
 import ConnectionTest from './ConnectionTest';
 import SectionHeader from '../../sectionPanel/SectionHeader';
 import { normalizeWebhookUrl } from '../../../utils/webhookUrl';
+import ConnectionSteps from '../../integrations/ConnectionSteps';
+import { webhookSteps } from './webhookSteps';
 
 const RETRIES = [0, 1, 2, 3, 4, 5].map((n) => ({
   value: String(n),
@@ -53,6 +55,10 @@ export default function WebhooksPanel({ settings, updateSetting, fieldErrors = {
       />
 
       <div className='sf-ext-panel__body'>
+        <div className='sf-settings-field'>
+          <ConnectionSteps id='sf-steps-webhooks' title={__('How to send entries to a webhook', 'subtleforms')} {...webhookSteps()} />
+        </div>
+
         <div className='sf-settings-field'>
           <SelectControl
             label={__('Retry failed deliveries', 'subtleforms')}

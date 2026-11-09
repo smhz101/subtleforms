@@ -74,6 +74,19 @@
 		gap: 4px 8px;
 	}
 
+	&__more {
+		font-size: 14px;
+		line-height: 1.5;
+
+		summary {
+			cursor: pointer;
+			color: var(--sf-brand);
+			font-weight: var(--sf-weight-semibold);
+			margin-bottom: 12px;
+		}
+		&:not([open]) summary { margin-bottom: 0; }
+	}
+
 	&__masked {
 		display: flex;
 		flex-wrap: wrap;

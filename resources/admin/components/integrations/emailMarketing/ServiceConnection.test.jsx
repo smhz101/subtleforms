@@ -150,17 +150,26 @@ test('the page data and the sidebar dot follow a successful test', async () => {
 });
 
 test.each([
-  ['brevo', 'Brevo', 'xkeysib-', 'https://help.brevo.com/'],
-  ['kit', 'Kit', 'v4 API key', 'https://developers.kit.com/'],
-  ['mailchimp', 'Mailchimp', '-us21', 'https://mailchimp.com/'],
-])('%s: the key help names the service and links to its key page in a new tab', async (service, label, hint, href) => {
+  ['brevo', 'Brevo', 'xkeysib-', 'https://app.brevo.com/settings/keys/api'],
+  ['kit', 'Kit', 'V4 Keys', 'https://app.kit.com/account_settings/developer_settings'],
+  ['mailchimp', 'Mailchimp', '-us21', 'https://admin.mailchimp.com/account/api/'],
+])('%s: the numbered steps name the service and link to its key page in a new tab', async (service, label, hint, href) => {
   await mount(NONE, service, label);
+  expect(container.querySelector('ol.sf-steps__list')).not.toBeNull();
   expect(container.textContent).toContain(hint);
-  const link = [...container.querySelectorAll('a')].find((a) => a.getAttribute('href').startsWith(href));
+  const link = [...container.querySelectorAll('a')].find((a) => a.getAttribute('href') === href);
   expect(link).toBeDefined();
   expect(link.getAttribute('target')).toBe('_blank');
   expect(link.getAttribute('rel')).toContain('noopener');
   expect(container.querySelector('input[type="password"]').getAttribute('placeholder')).toContain(label);
+});
+
+test('a connected card keeps the steps in a closed details element', async () => {
+  await mount(CONNECTED);
+  const more = container.querySelector('details.sf-em-card__more');
+  expect(more).not.toBeNull();
+  expect(more.hasAttribute('open')).toBe(false);
+  expect(more.querySelector('ol.sf-steps__list')).not.toBeNull();
 });
 
 test('the typed key is sent to the right service route', async () => {
