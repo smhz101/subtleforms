@@ -90,11 +90,13 @@ final class SanitizeAndUserAgent281Test extends TestCase {
 
 	public function test_pieces_that_would_join_into_a_tag_are_not_stored_as_one(): void {
 		$id = $this->form();
-		foreach ( array( '<img src=x onerror=alert(1)<b>>', '<img<i> src=x onerror=alert(1)>', '<scr<b>ipt>alert(1)</script>' ) as $input ) {
+		foreach ( array( '<img src=x onerror=alert(1)<b>>', '<img<i> src=x onerror=alert(1)>', '<scr<b>ipt>alert(1)</script>', 'hi <img src=x onerror=alert(1) ', '<svg onload=alert(1) ' ) as $input ) {
 			$this->assertSame( 200, $this->submit( $id, array( 'name' => $input, 'message' => $input ) )['status'] );
 			$stored = $this->storedPayload( $id );
 			foreach ( array( 'name', 'message' ) as $key ) {
 				$this->assertDoesNotMatchRegularExpression( '/<[A-Za-z\/!?][^>]*>/', (string) $stored[ $key ], $input . ' in ' . $key );
+				// An unclosed start must not survive either: "<td>{value}</td>" downstream would close it.
+				$this->assertDoesNotMatchRegularExpression( '/<[A-Za-z\/!?][^<>]*[\s\/][A-Za-z_:][\w:.-]*\s*=/', (string) $stored[ $key ], $input . ' in ' . $key . ' (unclosed)' );
 			}
 		}
 	}

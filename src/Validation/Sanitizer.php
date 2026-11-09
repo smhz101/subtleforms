@@ -423,6 +423,13 @@ class Sanitizer {
 	 * pass is repeated until the answer no longer changes: what is returned is
 	 * what the sanitizer would leave alone, and it holds no tag.
 	 *
+	 * An unclosed tag start ("hi <img src=x onerror=alert(1) ") is inert on its
+	 * own, but closes the moment something downstream drops the answer raw into
+	 * HTML followed by a ">" ("<td>{value}</td>"). So a "<" followed by a
+	 * letter, "/", "!" or "?" is only kept when nothing after it reads as an
+	 * attribute ("name=", with a space or "/" before it): "x<y" and "<y words"
+	 * stay as typed, and the "<" of a would-be tag is dropped.
+	 *
 	 * @param string   $value     Raw answer.
 	 * @param callable $sanitizer Takes and returns a string (wp_strip_all_tags, sanitize_text_field, ...).
 	 * @return string
@@ -453,7 +460,17 @@ class Sanitizer {
 		$value = preg_replace_callback(
 			'%<[^>]*?((?=<)|>|$)%',
 			static function ( $match ) {
-				return '>' === $match[1] ? $match[0] : str_replace( '<', self::LESS_THAN_MARK, $match[0] );
+				if ( '>' === $match[1] ) {
+					return $match[0];
+				}
+				// A run from "<" up to the next "<" or the end: no tag closes here,
+				// so it is plain text, unless it looks like a tag start with an
+				// attribute, which a later ">" could turn into a working tag.
+				$run = $match[0];
+				if ( preg_match( '%^<[A-Za-z/!?]%', $run ) && preg_match( '%[\s/][A-Za-z_:][\w:.-]*\s*=%', $run ) ) {
+					return substr( $run, 1 );
+				}
+				return str_replace( '<', self::LESS_THAN_MARK, $run );
 			},
 			$value
 		) ?? $value;

@@ -60,7 +60,7 @@ final class SanitizerLessThanTest extends TestCase {
 	public function test_pieces_never_join_into_a_tag( string $input ): void {
 		$out = Sanitizer::sanitizeSubmissionValue( $input );
 		$this->assertDoesNotMatchRegularExpression( '/<[A-Za-z\/!?][^>]*>/', $out, 'no tag in the answer' );
-		$this->assertStringNotContainsString( 'onerror', strtolower( str_replace( 'alert(1)', '', $out ) ) );
+		$this->assertDoesNotMatchRegularExpression( '/<[A-Za-z\/!?][^<>]*[\s\/][A-Za-z_:][\w:.-]*\s*=/', $out, 'no tag start that an attribute could arm' );
 		$this->assertSame( $out, Sanitizer::sanitizeSubmissionValue( $out ), 'a second pass changes nothing' );
 	}
 
@@ -75,9 +75,37 @@ final class SanitizerLessThanTest extends TestCase {
 	}
 
 	public function test_the_joined_inputs_come_out_as_plain_text_or_nothing(): void {
-		$this->assertSame( '', Sanitizer::sanitizeSubmissionValue( '<img src=x onerror=alert(1)<b>>' ) );
+		$this->assertSame( 'img src=x onerror=alert(1)>', Sanitizer::sanitizeSubmissionValue( '<img src=x onerror=alert(1)<b>>' ) );
 		$this->assertSame( '', Sanitizer::sanitizeSubmissionValue( '<img<i> src=x onerror=alert(1)>' ) );
 		$this->assertSame( 'alert(1)', Sanitizer::sanitizeSubmissionValue( '<scr<b>ipt>alert(1)</script>' ) );
+	}
+
+	/**
+	 * An unclosed tag start must not survive: a later ">" downstream
+	 * ("<td>{value}</td>") would close it into a working tag.
+	 *
+	 * @dataProvider unclosedTagStarts
+	 */
+	public function test_an_unclosed_tag_start_loses_its_opener( string $input, string $expected ): void {
+		$out = Sanitizer::sanitizeSubmissionValue( $input );
+		$this->assertSame( $expected, $out );
+		$this->assertDoesNotMatchRegularExpression( '/<[A-Za-z\/!?][^<>]*[\s\/][A-Za-z_:][\w:.-]*\s*=/', $out, 'nothing that reads as a tag start with an attribute' );
+	}
+
+	public static function unclosedTagStarts(): array {
+		return array(
+			'img with handler, no closing'  => array( 'hi <img src=x onerror=alert(1) ', 'hi img src=x onerror=alert(1)' ),
+			'svg with handler, no closing'  => array( '<svg onload=alert(1) ', 'svg onload=alert(1)' ),
+			'slash as attribute separator'  => array( 'x<svg/onload=alert(1) ', 'xsvg/onload=alert(1)' ),
+			'closing tag start'             => array( 'a </b class=x ', 'a /b class=x' ),
+		);
+	}
+
+	/** A "<" before a letter with no attribute after it is still plain text. */
+	public function test_a_less_than_before_a_word_without_an_attribute_is_kept(): void {
+		$this->assertSame( 'x<y', Sanitizer::sanitizeSubmissionValue( 'x<y' ) );
+		$this->assertSame( '<y words', Sanitizer::sanitizeSubmissionValue( '<y words' ) );
+		$this->assertSame( 'a < b > c', Sanitizer::sanitizeSubmissionValue( 'a < b > c' ) );
 	}
 
 	public function test_a_visitor_cannot_smuggle_the_stand_in_character(): void {
