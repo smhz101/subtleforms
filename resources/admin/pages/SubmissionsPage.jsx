@@ -423,6 +423,16 @@ export default function SubmissionsPage({ formId }) {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        if (Number(response.total) > Number(response.rows)) {
+          await noticeDialog({
+            message: sprintf(
+              /* translators: 1: entries in the file, 2: entries that matched */
+              __('The file has %1$d of the %2$d matching entries. Some were removed while it was being made. Export again to check.', 'subtleforms'),
+              Number(response.rows),
+              Number(response.total)
+            ),
+          });
+        }
       } else {
         await noticeDialog({
           message: response.message || __('Failed to export submissions', 'subtleforms'),
