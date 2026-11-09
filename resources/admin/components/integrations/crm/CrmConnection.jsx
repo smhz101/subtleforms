@@ -3,6 +3,7 @@ import { Button, TextControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import Icon from '../../../ui/Icon';
 import { StatusBadge } from '../emailMarketing/ServiceConnection';
+import ConnectionSteps from '../ConnectionSteps';
 import { announceService } from './api';
 import { useConnectService, useDisconnectService, useTestService } from './queries';
 import '../emailMarketing/emailMarketing.scss';
@@ -16,11 +17,11 @@ const connectedText = (name) => {
 };
 
 /**
- * The connection of one CRM: access token, test and status.
+ * The connection of one CRM: service key, test and status.
  *
- * The saved token is never shown. A saved token appears as a masked line with
- * its last four characters and a "Change token" button. Disconnect removes the
- * token; the switch and each form's settings stay. Like Email marketing, every
+ * The saved key is never shown. A saved key appears as a masked line with
+ * its last four characters and a "Change key" button. Disconnect removes the
+ * key; the switch and each form's settings stay. Like Email marketing, every
  * action here applies at once, so there is no Save button in the section.
  *
  * @param {Object}   props
@@ -28,7 +29,7 @@ const connectedText = (name) => {
  * @param {string}   props.label   Service name.
  * @param {Object}   props.state   Connection state from the server.
  * @param {Function} props.onState Called with the new state after every change.
- * @param {Object}   props.ui      { tokenHelp, tokenLink, tokenLinkText, placeholder }.
+ * @param {Object}   props.ui      { fieldLabel, placeholder, tokenHelp, stepsTitle, steps }. `steps` is a function that returns the props of ConnectionSteps.
  */
 export default function CrmConnection({ service, label, state, onState, ui = {} }) {
   const [editing, setEditing] = useState(false);
@@ -76,13 +77,13 @@ export default function CrmConnection({ service, label, state, onState, ui = {} 
       apply(await disconnectMutation.mutateAsync());
       setEditing(false);
     } catch (e) {
-      setResult({ tone: 'error', text: e?.message || __('Could not remove the token.', 'subtleforms') });
+      setResult({ tone: 'error', text: e?.message || __('Could not remove the key.', 'subtleforms') });
     }
   };
 
   let summary = sprintf(
     /* translators: %s: service name */
-    __('Add a %s private app access token to connect this site to your account.', 'subtleforms'),
+    __('Add a %s service key to connect this site to your account.', 'subtleforms'),
     label
   );
   if (state.status === 'connected') {
@@ -92,12 +93,14 @@ export default function CrmConnection({ service, label, state, onState, ui = {} 
       state.error ||
       sprintf(
         /* translators: %s: service name */
-        __('%s did not accept the saved token. Test the connection or change the token.', 'subtleforms'),
+        __('%s did not accept the saved key. Test the connection or change the key.', 'subtleforms'),
         label
       );
   }
 
   const titleId = `sf-crm-conn-${service}`;
+  const fieldLabel = ui.fieldLabel || __('Service key', 'subtleforms');
+  const guide = typeof ui.steps === 'function' ? ui.steps() : null;
 
   return (
     <section className='sf-em-card' aria-labelledby={titleId}>
@@ -109,10 +112,12 @@ export default function CrmConnection({ service, label, state, onState, ui = {} 
       </header>
       {!(result.text && result.tone === 'ok') && <p className='sf-em-card__summary'>{summary}</p>}
 
+      {showField && guide && <ConnectionSteps id={`sf-steps-${service}`} title={ui.stepsTitle} {...guide} />}
+
       {showField ? (
         <div className='sf-em-card__key'>
           <TextControl
-            label={__('Access token', 'subtleforms')}
+            label={fieldLabel}
             type='password'
             autoComplete='off'
             value={token}
@@ -120,14 +125,6 @@ export default function CrmConnection({ service, label, state, onState, ui = {} 
             placeholder={ui.placeholder}
             help={ui.tokenHelp || undefined}
           />
-          {ui.tokenLink && (
-            <p className='sf-em-card__link'>
-              <a href={ui.tokenLink} target='_blank' rel='noopener noreferrer'>
-                {ui.tokenLinkText}
-                <span className='sf-sr-only'> {__('(opens in a new tab)', 'subtleforms')}</span>
-              </a>
-            </p>
-          )}
           <div className='sf-em-card__actions'>
             <Button variant='primary' onClick={save} isBusy={busy === 'save'} disabled={!token.trim() || !!busy}>
               {__('Save and connect', 'subtleforms')}
@@ -149,12 +146,12 @@ export default function CrmConnection({ service, label, state, onState, ui = {} 
       ) : (
         <div className='sf-em-card__key'>
           <p className='sf-em-card__masked'>
-            <span className='sf-em-card__masked-label'>{__('Access token', 'subtleforms')}</span>
+            <span className='sf-em-card__masked-label'>{fieldLabel}</span>
             <span
               className='sf-em-card__masked-value'
               aria-label={sprintf(
-                /* translators: %s: last four characters of the saved token */
-                __('Saved token ending in %s', 'subtleforms'),
+                /* translators: %s: last four characters of the saved key */
+                __('Saved key ending in %s', 'subtleforms'),
                 state.last4
               )}>
               {'•'.repeat(16)}
@@ -166,13 +163,20 @@ export default function CrmConnection({ service, label, state, onState, ui = {} 
               {__('Test connection', 'subtleforms')}
             </Button>
             <Button variant='tertiary' onClick={() => setEditing(true)} disabled={!!busy}>
-              {__('Change token', 'subtleforms')}
+              {__('Change key', 'subtleforms')}
             </Button>
             <Button variant='tertiary' isDestructive onClick={disconnect} disabled={!!busy}>
               {__('Disconnect', 'subtleforms')}
             </Button>
           </div>
         </div>
+      )}
+
+      {!showField && guide && (
+        <details className='sf-em-card__more'>
+          <summary>{__('Show the steps to create a new key', 'subtleforms')}</summary>
+          <ConnectionSteps id={`sf-steps-${service}`} {...guide} />
+        </details>
       )}
 
       {result.text && (

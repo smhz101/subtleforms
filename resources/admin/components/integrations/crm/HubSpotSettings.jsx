@@ -1,16 +1,15 @@
 import { __ } from '@wordpress/i18n';
 import CrmConnection from './CrmConnection';
+import { hubspotSteps } from './hubspotSteps';
 import '../emailMarketing/emailMarketing.scss';
 
-/** What differs on the HubSpot connection card: names and help text. */
+/** What differs on the HubSpot connection card: names, help text and the steps. */
 export const HUBSPOT_UI = {
-  placeholder: __('Paste your HubSpot access token', 'subtleforms'),
-  tokenHelp: __(
-    'In HubSpot, open Settings, Integrations, Private Apps, create an app with the scopes crm.objects.contacts.read and crm.objects.contacts.write, and copy its access token. It starts with pat-.',
-    'subtleforms'
-  ),
-  tokenLink: 'https://developers.hubspot.com/docs/api/private-apps',
-  tokenLinkText: __('How to create a HubSpot private app', 'subtleforms'),
+  fieldLabel: __('HubSpot service key', 'subtleforms'),
+  placeholder: 'pat-na1-...',
+  tokenHelp: __('Create it under Development > Keys > Service keys in your HubSpot account. A legacy private app access token also works.', 'subtleforms'),
+  stepsTitle: __('How to connect HubSpot', 'subtleforms'),
+  steps: hubspotSteps,
 };
 
 /**

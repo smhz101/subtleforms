@@ -45,10 +45,10 @@ function pageData(overrides = {}) {
   };
 }
 
-async function mount(element, data = pageData(), hash = '#tab=extensions&ext=crm', all = { services: { hubspot: CONNECTED } }) {
+async function mount(element, data = pageData(), hash = '#tab=extensions&ext=crm', all = { services: { hubspot: CONNECTED } }, state = CONNECTED) {
   window.subtleformsAdmin = data;
   window.history.replaceState(null, '', `/wp-admin/admin.php${hash}`);
-  crmApi.state.mockResolvedValue(CONNECTED);
+  crmApi.state.mockResolvedValue(state);
   crmApi.all.mockResolvedValue(all);
   crmApi.setEnabled.mockResolvedValue(CONNECTED);
   crmApi.properties.mockResolvedValue([
@@ -117,6 +117,32 @@ describe('the HubSpot screen', () => {
     const btn = [...container.querySelectorAll('button')].find((b) => b.textContent === 'Test connection');
     await act(async () => btn.click());
     expect(container.querySelector('[role="status"]').textContent).toContain('Acme Portal (123456)');
+  });
+});
+
+describe('the HubSpot service key screen', () => {
+  const NONE = { enabled: true, status: 'none', has_key: false, connected: false, last4: '', account_name: '', error: '' };
+
+  test('asks for a HubSpot service key and shows numbered steps with the real HubSpot pages', async () => {
+    await mount(<CrmSettings />, pageData(), '#tab=extensions&ext=crm&service=hubspot', { services: { hubspot: NONE } }, NONE);
+    expect(container.textContent).toContain('HubSpot service key');
+    expect(container.querySelector('input[type="password"]').getAttribute('placeholder')).toBe('pat-na1-...');
+    expect(container.textContent).toContain('Development > Keys > Service keys');
+    expect(container.textContent).toContain('A legacy private app access token also works.');
+    expect(container.querySelector('ol.sf-steps__list')).not.toBeNull();
+    const hrefs = [...container.querySelectorAll('a.sf-steps__link')].map((a) => a.getAttribute('href'));
+    expect(hrefs).toContain('https://app.hubspot.com/');
+    expect(hrefs).toContain('https://developers.hubspot.com/docs/apps/developer-platform/build-apps/authentication/account-service-keys');
+    ['crm.objects.contacts.read', 'crm.objects.contacts.write', 'crm.schemas.contacts.read'].forEach((scope) => expect(container.textContent).toContain(scope));
+    expect(container.textContent).not.toMatch(/Access token|private app access token to connect/);
+  });
+
+  test('a rejected key shows the clear sentence on the card', async () => {
+    const REJECTED = { ...CONNECTED, status: 'error', connected: false, error: 'HubSpot rejected the key. If you rotated it, paste the new key.' };
+    await mount(<CrmSettings />, pageData(), '#tab=extensions&ext=crm&service=hubspot', { services: { hubspot: REJECTED } }, REJECTED);
+    await act(async () => {});
+    expect(container.querySelector('.sf-em-card__summary').textContent).toContain('HubSpot rejected the key. If you rotated it, paste the new key.');
+    expect(container.textContent).toContain('Needs attention');
   });
 });
 

@@ -107,7 +107,7 @@ test('Turning HubSpot on opens it; connect with a token, see the portal, test th
   await expect(card.getByText('Not set up')).toBeVisible();
   await shot(page, 'crm-free-detail-not-connected', content(page));
 
-  await card.getByLabel('Access token').fill(TOKEN);
+  await card.getByLabel('HubSpot service key').fill(TOKEN);
   await card.getByRole('button', { name: 'Save and connect' }).click();
   await expect(card.getByText(/Connected to Acme Portal/)).toHaveCount(1);
   await expect(card.getByText(/123456/)).toHaveCount(1);
