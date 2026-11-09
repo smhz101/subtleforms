@@ -266,6 +266,14 @@ function Transfer( { forms, busy, setBusy, tell } ) {
         link.download = response.filename || 'submissions.csv';
         link.click();
         URL.revokeObjectURL( url );
+        if ( Number( response.total ) > Number( response.rows ) ) {
+          tell( 'error', sprintf(
+            /* translators: 1: entries in the file, 2: entries that matched */
+            __( 'The file has %1$d of the %2$d matching entries. Some were removed while it was being made. Export again to check.', 'subtleforms' ),
+            Number( response.rows ),
+            Number( response.total )
+          ) );
+        }
       } else {
         tell( 'error', response?.message || __( 'CSV export failed.', 'subtleforms' ) );
       }

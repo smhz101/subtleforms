@@ -1047,6 +1047,9 @@ final class SubmissionsApi {
 		}
 		$args['max_id'] = (int) $newest[0]['id'];
 		unset( $newest );
+		// What the file should hold. A shortfall (entries deleted while the
+		// export ran) shows on the screen instead of passing unnoticed.
+		$total = $this->submissionsRepo->count( $args );
 
 		if ( function_exists( 'wp_raise_memory_limit' ) ) {
 			wp_raise_memory_limit( 'admin' );
@@ -1058,13 +1061,19 @@ final class SubmissionsApi {
 		 * @param callable $each Receives one entry row.
 		 */
 		$walk = function ( callable $each ) use ( $args ): void {
-			$offset = 0;
+			$cursor = null;
 			do {
-				$chunk = $this->submissionsRepo->findAll( array_merge( $args, array( 'limit' => self::EXPORT_CHUNK, 'offset' => $offset ) ) );
+				// Keyset paging on (created_at, id): each query starts after the
+				// last entry of the previous one instead of counting rows to skip.
+				if ( function_exists( 'set_time_limit' ) ) {
+					@set_time_limit( 60 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- A host may forbid it; the export still runs within its own limit.
+				}
+				$chunk = $this->submissionsRepo->findAll( array_merge( $args, array( 'limit' => self::EXPORT_CHUNK, 'offset' => 0, 'cursor' => $cursor ) ) );
 				foreach ( $chunk as $submission ) {
 					$each( $submission );
 				}
-				$offset += self::EXPORT_CHUNK;
+				$last   = end( $chunk );
+				$cursor = $last ? array( 'created_at' => $last['created_at'], 'id' => (int) $last['id'] ) : null;
 			} while ( count( $chunk ) === self::EXPORT_CHUNK );
 		};
 
@@ -1200,16 +1209,20 @@ final class SubmissionsApi {
 		);
 
 		$filename = 'subtleforms-submissions-' . gmdate( 'Y-m-d-His' ) . '.csv';
+		$encoded  = base64_encode( $csv_string ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Binary-safe transport of the CSV file in JSON.
+		// The plain copy is not needed once encoded; free it before the
+		// response is built so both are not held through the send.
+		unset( $csv_string );
 
 		return ApiResponse::success(
 			array(
 				'success'  => true,
-				'csv'      => base64_encode( $csv_string ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Binary-safe transport of the CSV file in JSON.
+				'csv'      => $encoded,
 				'filename' => $filename,
 				'rows'     => $count,
-				// Entries that matched; equal to rows, so the screen can tell a
-				// file that is complete from one that is not.
-				'total'    => $count,
+				// Entries that matched when the export started. The screen warns
+				// when rows is lower, so an incomplete file is never silent.
+				'total'    => max( $total, $count ),
 			)
 		);
 	}
