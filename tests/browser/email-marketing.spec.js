@@ -115,7 +115,7 @@ test('Turning Mailchimp on opens it; connect with a key, see the account, test t
 
   await expect(page).toHaveURL(/service=mailchimp/);
   const detail = page.locator('.sf-em-detail[data-service="mailchimp"]');
-  await expect(detail.getByRole('heading', { name: 'Mailchimp' })).toBeVisible();
+  await expect(detail.getByRole('heading', { name: 'Mailchimp', exact: true })).toBeVisible();
   const card = detail.locator('.sf-em-card');
   await expect(card.getByText('Not set up')).toBeVisible();
   await shot(page, 'free-detail-not-connected', content(page));

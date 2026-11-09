@@ -102,7 +102,7 @@ test('Turning HubSpot on opens it; connect with a token, see the portal, test th
 
   await expect(page).toHaveURL(/service=hubspot/);
   const detail = page.locator('.sf-em-detail[data-service="hubspot"]');
-  await expect(detail.getByRole('heading', { name: 'HubSpot' })).toBeVisible();
+  await expect(detail.getByRole('heading', { name: 'HubSpot', exact: true })).toBeVisible();
   const card = detail.locator('.sf-em-card');
   await expect(card.getByText('Not set up')).toBeVisible();
   await shot(page, 'crm-free-detail-not-connected', content(page));
