@@ -1024,7 +1024,6 @@ final class SubmissionsApi {
 			'ids'     => isset( $params['ids'] ) && is_array( $params['ids'] ) ? array_map( 'absint', $params['ids'] ) : null,
 			'orderby' => 'created_at',
 			'order'   => 'DESC',
-			'limit'   => 10000,
 		);
 
 		$args = array_filter( $args, fn( $value ) => $value !== null && $value !== '' );
@@ -1033,9 +1032,12 @@ final class SubmissionsApi {
 			unset( $args['status'] );
 		}
 
-		$submissions = $this->submissionsRepo->findAll( $args );
-
-		if ( empty( $submissions ) ) {
+		// Every matching entry is exported, however many there are (2.8.1: the
+		// file used to stop at the newest 10,000 without a word). They are read
+		// EXPORT_CHUNK at a time, so no query or payload list grows with the
+		// export, and only entries that existed when it started are included.
+		$newest = $this->submissionsRepo->findAll( array_merge( $args, array( 'orderby' => 'id', 'order' => 'DESC', 'limit' => 1 ) ) );
+		if ( empty( $newest ) ) {
 			return ApiResponse::success(
 				array(
 					'success' => false,
@@ -1043,6 +1045,28 @@ final class SubmissionsApi {
 				)
 			);
 		}
+		$args['max_id'] = (int) $newest[0]['id'];
+		unset( $newest );
+
+		if ( function_exists( 'wp_raise_memory_limit' ) ) {
+			wp_raise_memory_limit( 'admin' );
+		}
+
+		/**
+		 * Call $each( $submission ) for every matching entry, newest first.
+		 *
+		 * @param callable $each Receives one entry row.
+		 */
+		$walk = function ( callable $each ) use ( $args ): void {
+			$offset = 0;
+			do {
+				$chunk = $this->submissionsRepo->findAll( array_merge( $args, array( 'limit' => self::EXPORT_CHUNK, 'offset' => $offset ) ) );
+				foreach ( $chunk as $submission ) {
+					$each( $submission );
+				}
+				$offset += self::EXPORT_CHUNK;
+			} while ( count( $chunk ) === self::EXPORT_CHUNK );
+		};
 
 		$skip = array( 'website_url', 'form_rendered_at' );
 
@@ -1065,28 +1089,20 @@ final class SubmissionsApi {
 			}
 		}
 
-		$rows = array();
+		// First pass: the columns. The answers of an entry are not kept.
 		$keys = array();
-		foreach ( $submissions as $submission ) {
-			$payload = is_string( $submission['payload'] ?? null )
-				? json_decode( $submission['payload'], true )
-				: ( $submission['payload'] ?? array() );
-			$payload = is_array( $payload ) ? $payload : array();
-
-			// Passwords are never exported (2.2.1).
-			foreach ( $this->secretKeysForForm( (int) ( $submission['form_id'] ?? 0 ) ) as $secret ) {
-				unset( $payload[ $secret ] );
-			}
-
-			foreach ( array_keys( $payload ) as $key ) {
-				$key = (string) $key;
-				if ( '' === $key || '_' === $key[0] || in_array( $key, $skip, true ) ) {
-					continue;
+		$walk(
+			function ( array $submission ) use ( &$keys, $skip ): void {
+				$payload = $this->exportPayload( $submission );
+				foreach ( array_keys( $payload ) as $key ) {
+					$key = (string) $key;
+					if ( '' === $key || '_' === $key[0] || in_array( $key, $skip, true ) ) {
+						continue;
+					}
+					$keys[ $key ] = true;
 				}
-				$keys[ $key ] = true;
 			}
-			$rows[] = array( $submission, $payload );
-		}
+		);
 
 		$ordered = array();
 		foreach ( array_keys( $labels ) as $key ) {
@@ -1119,69 +1135,69 @@ final class SubmissionsApi {
 			$headers[] = $label;
 		}
 
-		$csv_data = array( $headers );
-		$fieldMaps = array();
-		foreach ( $rows as list( $submission, $payload ) ) {
-			$row = array(
-				$submission['id'],
-				$submission['form_id'],
-				$submission['status'],
-				$submission['created_at'],
-			);
-			// Each entry is read with the schema version it was made with,
-			// through the one answer formatter: labels, Yes/No, matrix rows,
-			// dates in the field format, file names with links (2.4.0). A
-			// drawn signature reads "Signed" (2.3.3).
-			$schema  = \SubtleForms\Support\EntrySchema::forEntry( $submission, $this->formsRepo ) ?? array();
-			$mapKey  = (int) $submission['form_id'] . ':' . ( $submission['schema_version'] ?? ( 'legacy-entry-' . $submission['id'] ) );
-			if ( ! isset( $fieldMaps[ $mapKey ] ) ) {
-				$fieldMaps[ $mapKey ] = array();
-				foreach ( \SubtleForms\Support\FieldMapper::fields( $schema ) as $field ) {
-					$fieldMaps[ $mapKey ][ $field['key'] ] = $field['field'];
-				}
-			}
-			$fields  = $fieldMaps[ $mapKey ];
-			$display = \SubtleForms\Support\AnswerFormatter::entryContext(
-				$schema,
-				$submission,
-				array(
-					'submission_id' => (int) $submission['id'],
-					'links'         => true,
-					'signature'     => 'short',
-				)
-			);
-			foreach ( $ordered as $key ) {
-				if ( isset( $repeaters[ $key ] ) ) {
-					// Format with the entry's own version of the Repeater, then
-					// fill the columns of the current version in header order:
-					// a child added or removed since leaves its cell empty
-					// instead of shifting the others.
-					$cells = \SubtleForms\Support\Repeater::csvCells( $payload[ $key ] ?? array(), $fields[ $key ] ?? $repeaters[ $key ], $display );
-					foreach ( \SubtleForms\Support\Repeater::childFields( $repeaters[ $key ] ) as $child ) {
-						$row[] = $cells[ $child['key'] ] ?? '';
-					}
-					continue;
-				}
-				$value = $payload[ $key ] ?? '';
-				if ( isset( $fields[ $key ] ) ) {
-					$row[] = \SubtleForms\Support\AnswerFormatter::text( $value, $fields[ $key ], $display );
-					continue;
-				}
-				// Not in the schema (exports of several forms, or a field since
-				// removed): groups read as numbered lines.
-				$row[] = \SubtleForms\Support\Repeater::looksLikeGroups( $value ) && null === \SubtleForms\Support\AnswerFormatter::items( $value, array(), $display )
-					? $this->groupsText( $value )
-					: \SubtleForms\Support\AnswerFormatter::text( $value, array(), $display );
-			}
-			$csv_data[] = $row;
-		}
-
 		$csv_string = "\xEF\xBB\xBF"; // UTF-8 BOM so Excel reads accents correctly.
-
-		foreach ( $csv_data as $row ) {
-			$escaped_row = array_map( array( $this, 'csv_cell' ), $row );
-			$csv_string .= implode( ',', $escaped_row ) . "\r\n";
-		}
+		$csv_string .= implode( ',', array_map( array( $this, 'csv_cell' ), $headers ) ) . "\r\n";
+		$fieldMaps   = array();
+		$count       = 0;
+		// Second pass: the rows, added to the file as each entry is read.
+		$walk(
+			function ( array $submission ) use ( &$csv_string, &$fieldMaps, &$count, $ordered, $repeaters ): void {
+				$payload = $this->exportPayload( $submission );
+				$row = array(
+					$submission['id'],
+					$submission['form_id'],
+					$submission['status'],
+					$submission['created_at'],
+				);
+				// Each entry is read with the schema version it was made with,
+				// through the one answer formatter: labels, Yes/No, matrix rows,
+				// dates in the field format, file names with links (2.4.0). A
+				// drawn signature reads "Signed" (2.3.3).
+				$schema  = \SubtleForms\Support\EntrySchema::forEntry( $submission, $this->formsRepo ) ?? array();
+				$mapKey  = (int) $submission['form_id'] . ':' . ( $submission['schema_version'] ?? ( 'legacy-entry-' . $submission['id'] ) );
+				if ( ! isset( $fieldMaps[ $mapKey ] ) ) {
+					$fieldMaps[ $mapKey ] = array();
+					foreach ( \SubtleForms\Support\FieldMapper::fields( $schema ) as $field ) {
+						$fieldMaps[ $mapKey ][ $field['key'] ] = $field['field'];
+					}
+				}
+				$fields  = $fieldMaps[ $mapKey ];
+				$display = \SubtleForms\Support\AnswerFormatter::entryContext(
+					$schema,
+					$submission,
+					array(
+						'submission_id' => (int) $submission['id'],
+						'links'         => true,
+						'signature'     => 'short',
+					)
+				);
+				foreach ( $ordered as $key ) {
+					if ( isset( $repeaters[ $key ] ) ) {
+						// Format with the entry's own version of the Repeater, then
+						// fill the columns of the current version in header order:
+						// a child added or removed since leaves its cell empty
+						// instead of shifting the others.
+						$cells = \SubtleForms\Support\Repeater::csvCells( $payload[ $key ] ?? array(), $fields[ $key ] ?? $repeaters[ $key ], $display );
+						foreach ( \SubtleForms\Support\Repeater::childFields( $repeaters[ $key ] ) as $child ) {
+							$row[] = $cells[ $child['key'] ] ?? '';
+						}
+						continue;
+					}
+					$value = $payload[ $key ] ?? '';
+					if ( isset( $fields[ $key ] ) ) {
+						$row[] = \SubtleForms\Support\AnswerFormatter::text( $value, $fields[ $key ], $display );
+						continue;
+					}
+					// Not in the schema (exports of several forms, or a field since
+					// removed): groups read as numbered lines.
+					$row[] = \SubtleForms\Support\Repeater::looksLikeGroups( $value ) && null === \SubtleForms\Support\AnswerFormatter::items( $value, array(), $display )
+						? $this->groupsText( $value )
+						: \SubtleForms\Support\AnswerFormatter::text( $value, array(), $display );
+				}
+				$csv_string .= implode( ',', array_map( array( $this, 'csv_cell' ), $row ) ) . "\r\n";
+				++$count;
+			}
+		);
 
 		$filename = 'subtleforms-submissions-' . gmdate( 'Y-m-d-His' ) . '.csv';
 
@@ -1190,9 +1206,35 @@ final class SubmissionsApi {
 				'success'  => true,
 				'csv'      => base64_encode( $csv_string ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Binary-safe transport of the CSV file in JSON.
 				'filename' => $filename,
-				'rows'     => count( $rows ),
+				'rows'     => $count,
+				// Entries that matched; equal to rows, so the screen can tell a
+				// file that is complete from one that is not.
+				'total'    => $count,
 			)
 		);
+	}
+
+	/**
+	 * Entries read per query by the CSV export.
+	 */
+	const EXPORT_CHUNK = 2000;
+
+	/**
+	 * The answers of one entry as the export reads them: decoded, and without
+	 * the answers of password fields (2.2.1).
+	 *
+	 * @param array $submission Entry row.
+	 * @return array
+	 */
+	private function exportPayload( array $submission ): array {
+		$payload = is_string( $submission['payload'] ?? null )
+			? json_decode( $submission['payload'], true )
+			: ( $submission['payload'] ?? array() );
+		$payload = is_array( $payload ) ? $payload : array();
+		foreach ( $this->secretKeysForForm( (int) ( $submission['form_id'] ?? 0 ) ) as $secret ) {
+			unset( $payload[ $secret ] );
+		}
+		return $payload;
 	}
 
 	/**

@@ -476,6 +476,7 @@ final class SubmissionsRepository {
 			'field_value' => null,
 			'starred'     => null,
 			'ids'         => null,
+			'max_id'      => null,
 			'limit'       => 20,
 			'offset'      => 0,
 			'orderby'     => 'created_at',
@@ -490,6 +491,13 @@ final class SubmissionsRepository {
 		if ( $args['form_id'] ) {
 			$where[]  = 'form_id = %d';
 			$params[] = intval( $args['form_id'] );
+		}
+
+		// Entries added after a reader started paging (an export) stay out of
+		// its pages, so none is shown twice.
+		if ( $args['max_id'] ) {
+			$where[]  = 'id <= %d';
+			$params[] = intval( $args['max_id'] );
 		}
 
 		if ( $args['status'] && $args['status'] !== 'all' ) {
@@ -538,9 +546,12 @@ final class SubmissionsRepository {
 		       // Fetch all columns needed for admin list (including payload/meta)
 		       // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name, orderby and order are whitelisted.
 		       $sql = sprintf(
-			       "SELECT id, form_id, schema_version, status, is_read, starred, created_at, payload, meta, user_agent FROM {$this->table} %s ORDER BY %s %s LIMIT %%d OFFSET %%d",
+			       // The id breaks ties, so entries made in the same second keep one
+			       // order and a reader that pages with OFFSET sees each entry once.
+			       "SELECT id, form_id, schema_version, status, is_read, starred, created_at, payload, meta, user_agent FROM {$this->table} %s ORDER BY %s %s, id %s LIMIT %%d OFFSET %%d",
 					       $whereClause,
 					       $orderby,
+					       $order,
 					       $order
 				       );
 		       // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
