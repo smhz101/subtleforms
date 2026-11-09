@@ -8,7 +8,6 @@ import TabBar from '../components/TabBar';
 import SubmissionsTable, { ALL_COLUMNS, DEFAULT_VISIBLE, COLUMN_LABELS } from '../components/SubmissionsTable';
 import useRealTimeUpdates from '../hooks/useRealTimeUpdates';
 import { Icon } from '../ui';
-import apiFetch from '@wordpress/api-fetch';
 import { apiPost } from '../utils/api';
 import { useForms, useSettings } from '../data';
 import { deletesPermanently } from '../utils/deleteBehavior';
@@ -16,6 +15,7 @@ import { tabsFor } from '../utils/tabCounts';
 import { buildInboxTabs, tabFromParams } from '../utils/inboxTabs';
 import lazyWithRetry from '../utils/lazyWithRetry';
 import { noticeDialog } from '../utils/confirmDialog';
+import { startCsvDownload } from '../utils/csvExport';
 import './SubmissionsPage.scss';
 
 const SubmissionDetailPage = lazyWithRetry(
@@ -387,62 +387,34 @@ export default function SubmissionsPage({ formId }) {
     setProcessingStatus('');
   };
 
+  // The server streams the file; the browser saves it as it arrives (2.8.1).
+  // The list already knows how many entries match, so a filter with none says
+  // so here instead of starting a download that would fail.
   const exportSubmissions = async () => {
     setExporting(true);
-
-    try {
-      const response = await apiFetch({
-        path: '/subtleforms/v1/submissions/export',
-        method: 'POST',
-        data: {
-          form_id: selectedFormId !== 'all' ? parseInt(selectedFormId) : null,
-          status: statusFilter !== 'all' ? statusFilter : null,
-          search: search || null,
-          range: dateRange !== 'all' ? dateRange : null,
-        },
+    const outcome = await startCsvDownload(
+      {
+        form_id: selectedFormId !== 'all' ? parseInt(selectedFormId) : null,
+        status: statusFilter !== 'all' ? statusFilter : null,
+        search: search || null,
+        range: dateRange !== 'all' ? dateRange : null,
+      },
+      { total: submissionsTableRef.current?.matchCount?.() ?? null }
+    );
+    if (outcome === 'started') {
+      // The download runs outside the page, so there is nothing to wait for.
+      setTimeout(() => setExporting(false), 1500);
+      return;
+    }
+    // Nothing was started: the button is free again before the notice opens.
+    setExporting(false);
+    if (outcome === 'empty') {
+      await noticeDialog({
+        title: __('Export CSV', 'subtleforms'),
+        message: __('No submissions to export', 'subtleforms'),
       });
-
-      if (response.success && response.csv) {
-        // Decode base64 to raw bytes. Passing the atob() string straight to
-        // Blob re-encodes every byte as UTF-8, which garbles accents and the BOM.
-        const binary = atob(response.csv);
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) {
-          bytes[i] = binary.charCodeAt(i);
-        }
-        const blob = new Blob([bytes], {
-          type: 'text/csv;charset=utf-8;',
-        });
-
-        // Create download link
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', response.filename);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        if (Number(response.total) > Number(response.rows)) {
-          await noticeDialog({
-            message: sprintf(
-              /* translators: 1: entries in the file, 2: entries that matched */
-              __('The file has %1$d of the %2$d matching entries. Some were removed while it was being made. Export again to check.', 'subtleforms'),
-              Number(response.rows),
-              Number(response.total)
-            ),
-          });
-        }
-      } else {
-        await noticeDialog({
-          message: response.message || __('Failed to export submissions', 'subtleforms'),
-        });
-      }
-    } catch (error) {
-      console.error('Export failed:', error);
+    } else {
       await noticeDialog({ message: __('Failed to export submissions', 'subtleforms') });
-    } finally {
-      setExporting(false);
     }
   };
 

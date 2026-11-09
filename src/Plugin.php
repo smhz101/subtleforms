@@ -113,6 +113,19 @@ final class Plugin {
 			20
 		);
 
+		// The entries CSV, streamed as a file (2.8.1). admin-post.php does not
+		// run the REST routes, so the handler is hooked here.
+		add_action(
+			'admin_post_subtleforms_export_csv',
+			function () {
+				( new \SubtleForms\Api\SubmissionsApi(
+					new \SubtleForms\Repositories\FormsRepository(),
+					new \SubtleForms\Repositories\SubmissionsRepository(),
+					$this->container->get( \SubtleForms\Support\FeatureGate::class )
+				) )->downloadCsv();
+			}
+		);
+
 		// File and image uploads: endpoint, admin downloads, clean-up (2.1).
 		\SubtleForms\Uploads\Uploads::register();
 		\SubtleForms\Tools\EntrySchemaMigration::register();
