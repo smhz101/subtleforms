@@ -99,6 +99,16 @@ describe('the grid', () => {
     expect(tile('acme')).toBeNull();
     delete window.__subtleformsExtend.crm.acme;
   });
+  test("an add-on's service opens from the page data and never asks this plugin's route for its state", async () => {
+    registerCrmService('acme', { label: 'Acme', settingsComponent: ({ connection }) => <p id='acme-screen'>{connection.label}</p> });
+    const data = pageData();
+    data.crm.services.acme = { slug: 'acme', label: 'Acme Pro', available: true, enabled: false, configured: false, builtin: false };
+    await mount(<CrmSettings />, data, '#tab=extensions&ext=crm&service=acme', { services: {} });
+    await act(async () => {});
+    expect(crmApi.state).not.toHaveBeenCalledWith('acme');
+    expect(container.querySelector('#acme-screen')?.textContent).toBe('Acme Pro');
+    delete window.__subtleformsExtend.crm.acme;
+  });
 });
 
 describe('the HubSpot screen', () => {

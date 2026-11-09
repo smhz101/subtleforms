@@ -5,7 +5,7 @@
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../../../data/queryKeys';
-import { crmApi } from './api';
+import { crmApi, pageData } from './api';
 
 export const STATE_STALE_TIME = 60 * 1000;
 export const PROPERTIES_STALE_TIME = 5 * 60 * 1000;
@@ -21,7 +21,11 @@ export function useServiceState(service) {
   const client = useQueryClient();
   return useQuery({
     queryKey: queryKeys.crm.state(service),
-    queryFn: () => crmApi.state(service),
+    queryFn: () => {
+      // An add-on's service keeps its connection in the add-on's own API: this plugin's route answers only for its own services.
+      const listed = pageData().services?.[service];
+      return listed && listed.builtin === false ? Promise.resolve(listed) : crmApi.state(service);
+    },
     staleTime: STATE_STALE_TIME,
     initialData: () => client.getQueryData(queryKeys.crm.all())?.services?.[service],
     initialDataUpdatedAt: () => client.getQueryState(queryKeys.crm.all())?.dataUpdatedAt,
