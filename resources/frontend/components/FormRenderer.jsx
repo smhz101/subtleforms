@@ -85,6 +85,8 @@ export default function FormRenderer({
   const [error, setError] = useState(null);
   const [values, setValues] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  // True once a form with AJAX off has been handed to the browser to post.
+  const classicPostedRef = useRef(false);
   const [submitError, setSubmitError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   // What the visitor sees after submitting (2.0 per-form confirmation).
@@ -823,20 +825,37 @@ export default function FormRenderer({
           if (classicNonce) add('subtleforms_nonce', classicNonce);
           classicFieldInputs(submissionPayload).forEach(([name, value]) => add(name, value));
           document.body.appendChild(classic);
+          // The browser is now posting and the page is about to be replaced.
+          // Keep the form locked until then: releasing it here lets a second
+          // click send the form again while the first post is still running.
+          classicPostedRef.current = true;
           classic.submit();
           return;
         }
 
-        const response = await restFetch('/submit', {
-          method: 'POST',
-          body: {
-            form_id: formId,
-            data: submissionPayload,
-            ...(preview ? { preview: true } : {}),
-          },
-        });
+        const postSubmission = () =>
+          restFetch('/submit', {
+            method: 'POST',
+            body: {
+              form_id: formId,
+              data: submissionPayload,
+              ...(preview ? { preview: true } : {}),
+            },
+          });
 
-        const result = await response.json();
+        let response = await postSubmission();
+        let result = await response.json();
+
+        // The server answers 409 when the page was open for a long time, or
+        // when the page ticket went out before it was traded, and hands back
+        // a fresh submit token. Send the same answers once more with it. Only
+        // once: if that is refused too, the visitor sees the message.
+        const freshToken = result?.error?.meta?.spam_token;
+        if (response.status === 409 && typeof freshToken === 'string' && freshToken) {
+          submissionPayload.form_rendered_at = freshToken;
+          response = await postSubmission();
+          result = await response.json();
+        }
 
         if (response.ok && result?.data?.success && result.data.redirect && !preview) {
           // An add-on takes the visitor to another page.
@@ -922,7 +941,10 @@ export default function FormRenderer({
       } catch (err) {
         setSubmitError(__('Network error. Please try again.', 'subtleforms'));
       } finally {
-        setSubmitting(false);
+        // A classic post keeps the form locked until the page is replaced.
+        if (!classicPostedRef.current) {
+          setSubmitting(false);
+        }
       }
     },
     [
@@ -959,11 +981,27 @@ export default function FormRenderer({
       try {
         await handleSubmitOnce(e);
       } finally {
-        submitLockRef.current = false;
+        if (!classicPostedRef.current) {
+          submitLockRef.current = false;
+        }
       }
     },
     [handleSubmitOnce]
   );
+
+  // The browser's back button can bring this page back from its cache with the
+  // classic post already sent. Unlock the form then, so it can be sent again.
+  useEffect(() => {
+    const unlock = (event) => {
+      if (event.persisted && classicPostedRef.current) {
+        classicPostedRef.current = false;
+        submitLockRef.current = false;
+        setSubmitting(false);
+      }
+    };
+    window.addEventListener('pageshow', unlock);
+    return () => window.removeEventListener('pageshow', unlock);
+  }, []);
 
   // Handle explicit submit button click
   // Sets intent flag before form submission

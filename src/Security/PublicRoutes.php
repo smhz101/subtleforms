@@ -21,9 +21,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class PublicRoutes {
 
 	/**
-	 * Routes a visitor calls while filling in and sending a form.
+	 * Routes a visitor calls while filling in and sending a form. The
+	 * spam-token route trades the page ticket for a submit token: with an
+	 * expired nonce it must still be served, or a logged-in visitor's browser
+	 * can never get a token and the form cannot be sent.
 	 */
-	const PATTERN = '#^/subtleforms/v1/(submit|uploads|forms/\d+/(schema|view))/?$#';
+	const PATTERN = '#^/subtleforms/v1/(submit|uploads|forms/\d+/(schema|view|spam-token))/?$#';
 
 	/**
 	 * Register hooks.
