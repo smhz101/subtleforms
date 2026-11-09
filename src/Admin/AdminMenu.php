@@ -681,6 +681,9 @@ class AdminMenu {
 			'flagBaseUrl'    => SUBTLEFORMS_PLUGIN_URL . 'build/frontend/flags/',
 			// Nonce for admin download links to uploaded files (2.1).
 			'fileNonce'      => \SubtleForms\Uploads\Uploads::nonce(),
+			// The streamed CSV download: its address and nonce (2.8.1).
+			'exportCsvUrl'   => admin_url( 'admin-post.php?action=subtleforms_export_csv' ),
+			'exportCsvNonce' => wp_create_nonce( \SubtleForms\Api\SubmissionsApi::EXPORT_NONCE_ACTION ),
 			// Name, menu name and logo (2.1).
 			'branding'       => self::branding(),
 			// Preview device widths and the active theme's styles, so "inherit

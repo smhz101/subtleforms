@@ -1,8 +1,8 @@
 import { useMemo, useRef, useState } from '@wordpress/element';
 import { Button, Notice, SearchControl, SelectControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
-import apiFetch from '@wordpress/api-fetch';
 import { apiGet, apiPost } from '../utils/api';
+import { startCsvDownload } from '../utils/csvExport';
 import { getBranding } from '../utils/branding';
 import { formOptionLabel } from '../utils/toolLabels';
 import SiteImport from '../components/tools/SiteImport';
@@ -246,41 +246,11 @@ function Transfer( { forms, busy, setBusy, tell } ) {
     setBusy( false );
   };
 
-  const exportCsv = async () => {
-    setBusy( true );
-    try {
-      const response = await apiFetch( {
-        path: '/subtleforms/v1/submissions/export',
-        method: 'POST',
-        data: { form_id: target ? Number( target ) : null },
-      } );
-      if ( response?.success && response.csv ) {
-        const binary = atob( response.csv );
-        const bytes = new Uint8Array( binary.length );
-        for ( let i = 0; i < binary.length; i++ ) {
-          bytes[ i ] = binary.charCodeAt( i );
-        }
-        const url = URL.createObjectURL( new Blob( [ bytes ], { type: 'text/csv;charset=utf-8;' } ) );
-        const link = document.createElement( 'a' );
-        link.href = url;
-        link.download = response.filename || 'submissions.csv';
-        link.click();
-        URL.revokeObjectURL( url );
-        if ( Number( response.total ) > Number( response.rows ) ) {
-          tell( 'error', sprintf(
-            /* translators: 1: entries in the file, 2: entries that matched */
-            __( 'The file has %1$d of the %2$d matching entries. Some were removed while it was being made. Export again to check.', 'subtleforms' ),
-            Number( response.rows ),
-            Number( response.total )
-          ) );
-        }
-      } else {
-        tell( 'error', response?.message || __( 'CSV export failed.', 'subtleforms' ) );
-      }
-    } catch {
+  // The server streams the file; the browser saves it as it arrives (2.8.1).
+  const exportCsv = () => {
+    if ( ! startCsvDownload( { form_id: target ? Number( target ) : null } ) ) {
       tell( 'error', __( 'CSV export failed.', 'subtleforms' ) );
     }
-    setBusy( false );
   };
 
   return (

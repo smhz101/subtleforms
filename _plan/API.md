@@ -344,6 +344,8 @@ Export submissions as a CSV file.
 
 **Response:** CSV file download (`Content-Type: text/csv`).
 
+**Deprecated (2.8.1):** the file comes back as base64 inside JSON, built in memory. Use the streamed download instead: `GET /wp-admin/admin-post.php?action=subtleforms_export_csv&_wpnonce=<nonce>` with optional `form_id`, `status`, `search`, `range`, `after`. It needs `manage_options` and answers `text/csv` as an attachment, written 2,000 entries at a time. The JSON route stays for one release.
+
 ---
 
 ### Settings

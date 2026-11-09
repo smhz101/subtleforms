@@ -1000,7 +1000,14 @@ final class SubmissionsApi {
 	}
 
 	/**
-	 * Export submissions as CSV.
+	 * Export submissions as CSV, returned as base64 inside JSON.
+	 *
+	 * @deprecated 2.8.1 The whole file is built in memory, so a very large
+	 *             export can run out of it. The screens download from
+	 *             admin-post.php?action=subtleforms_export_csv instead, which
+	 *             streams the file (see downloadCsv()). This route stays for one
+	 *             release for add-ons that call it, and for exporting selected
+	 *             entries (a short list of IDs). Remove it in the next release.
 	 *
 	 * Columns are the union of every exported entry's answers, so a form whose
 	 * fields changed over time keeps all of its data. When one form is
@@ -1015,6 +1022,55 @@ final class SubmissionsApi {
 		$params = $request->get_json_params();
 		$params = is_array( $params ) ? $params : array();
 
+		$args = $this->exportQuery( $params );
+		if ( null === $args ) {
+			return ApiResponse::success(
+				array(
+					'success' => false,
+					'message' => __( 'No submissions to export', 'subtleforms' ),
+				)
+			);
+		}
+		// What the file should hold. A shortfall (entries deleted while the
+		// export ran) is reported in the response.
+		$total = $this->submissionsRepo->count( $args );
+
+		if ( function_exists( 'wp_raise_memory_limit' ) ) {
+			wp_raise_memory_limit( 'admin' );
+		}
+
+		$handle = fopen( 'php://temp', 'r+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- An in-memory stream, not a file.
+		$count  = $this->writeCsv( $args, $handle );
+		rewind( $handle );
+		$csv_string = (string) stream_get_contents( $handle );
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closes the in-memory stream.
+
+		$filename = 'subtleforms-submissions-' . gmdate( 'Y-m-d-His' ) . '.csv';
+		$encoded  = base64_encode( $csv_string ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Binary-safe transport of the CSV file in JSON.
+		// The plain copy is not needed once encoded; free it before the
+		// response is built so both are not held through the send.
+		unset( $csv_string );
+
+		return ApiResponse::success(
+			array(
+				'success'  => true,
+				'csv'      => $encoded,
+				'filename' => $filename,
+				'rows'     => $count,
+				'total'    => max( $total, $count ),
+			)
+		);
+	}
+
+	/**
+	 * The query arguments for an export: filters from a request, minus the
+	 * Trash, capped at the newest entry that exists now so rows added while the
+	 * file is written are left out.
+	 *
+	 * @param array $params form_id, status, search, range, after, ids.
+	 * @return array|null Query arguments, or null when nothing matches.
+	 */
+	private function exportQuery( array $params ): ?array {
 		$args = array(
 			'form_id' => ! empty( $params['form_id'] ) ? intval( $params['form_id'] ) : null,
 			'status'  => isset( $params['status'] ) ? Helpers::safe_sanitize_text( $params['status'] ) : null,
@@ -1038,29 +1094,110 @@ final class SubmissionsApi {
 		// export, and only entries that existed when it started are included.
 		$newest = $this->submissionsRepo->findAll( array_merge( $args, array( 'orderby' => 'id', 'order' => 'DESC', 'limit' => 1 ) ) );
 		if ( empty( $newest ) ) {
-			return ApiResponse::success(
-				array(
-					'success' => false,
-					'message' => __( 'No submissions to export', 'subtleforms' ),
-				)
-			);
+			return null;
 		}
 		$args['max_id'] = (int) $newest[0]['id'];
-		unset( $newest );
-		// What the file should hold. A shortfall (entries deleted while the
-		// export ran) shows on the screen instead of passing unnoticed.
-		$total = $this->submissionsRepo->count( $args );
+		return $args;
+	}
+
+	/**
+	 * Write the CSV for one form (or all, with 0) to a stream, one chunk of
+	 * entries at a time, and return the number of entries written.
+	 *
+	 * Nothing accumulates: each chunk is written and dropped, so memory stays
+	 * flat however many entries there are. $afterChunk runs after each chunk is
+	 * written (the download flushes the output there).
+	 *
+	 * @param int           $formId     Form ID, 0 for every form.
+	 * @param array         $filters    status, search, range, after, ids.
+	 * @param resource      $handle     Open stream to write to.
+	 * @param callable|null $afterChunk Called after each chunk is written.
+	 * @return int Entries written (0 when nothing matches; nothing is written then).
+	 */
+	public function streamCsv( int $formId, array $filters, $handle, ?callable $afterChunk = null ): int {
+		$args = $this->exportQuery( array_merge( $filters, array( 'form_id' => $formId ) ) );
+		return null === $args ? 0 : $this->writeCsv( $args, $handle, $afterChunk );
+	}
+
+	/**
+	 * Download the CSV as a file, streamed (admin-post.php?action=subtleforms_export_csv).
+	 *
+	 * Replaces the JSON export for the Entries screen and Tools (2.8.1). Needs
+	 * a signed-in administrator and the nonce the admin screens are given.
+	 * Filters come in the query string: form_id, status, search, range, after.
+	 */
+	public function downloadCsv(): void {
+		if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You are not allowed to perform this action.', 'subtleforms' ), '', array( 'response' => 403 ) );
+		}
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- The nonce is verified right below.
+		$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+		if ( '' === $nonce || ! wp_verify_nonce( $nonce, self::EXPORT_NONCE_ACTION ) ) {
+			wp_die( esc_html__( 'Security check failed. Please refresh and try again.', 'subtleforms' ), '', array( 'response' => 403 ) );
+		}
+		$formId  = isset( $_GET['form_id'] ) ? absint( $_GET['form_id'] ) : 0;
+		$filters = array();
+		foreach ( array( 'status', 'search', 'range', 'after' ) as $key ) {
+			if ( isset( $_GET[ $key ] ) && is_string( $_GET[ $key ] ) ) {
+				$filters[ $key ] = sanitize_text_field( wp_unslash( $_GET[ $key ] ) );
+			}
+		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		$args = $this->exportQuery( array_merge( $filters, array( 'form_id' => $formId ) ) );
+		if ( null === $args ) {
+			wp_die( esc_html__( 'No submissions to export', 'subtleforms' ), '', array( 'response' => 404 ) );
+		}
+
+		$slug = '';
+		if ( $formId > 0 ) {
+			$form = $this->formsRepo->find( $formId );
+			$slug = sanitize_title( (string) ( $form['title'] ?? '' ) );
+		}
+		$filename = ( '' !== $slug ? $slug : 'subtleforms' ) . '-entries-' . gmdate( 'Y-m-d' ) . '.csv';
 
 		if ( function_exists( 'wp_raise_memory_limit' ) ) {
 			wp_raise_memory_limit( 'admin' );
 		}
+		if ( function_exists( 'set_time_limit' ) ) {
+			@set_time_limit( 0 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- A host may forbid it; the file is still written.
+		}
+		// Output buffers would hold the whole file back until the end.
+		while ( ob_get_level() > 0 ) {
+			ob_end_clean();
+		}
+		nocache_headers();
+		header( 'Content-Type: text/csv; charset=utf-8' );
+		header( 'Content-Disposition: attachment; filename="' . str_replace( '"', '', $filename ) . '"' );
+		header( 'X-Content-Type-Options: nosniff' );
+		header( 'X-Accel-Buffering: no' ); // Tell nginx not to buffer the stream.
 
+		$out = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- The response stream, not a file.
+		$this->writeCsv( $args, $out, static function (): void {
+			flush();
+		} );
+		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closes the response stream.
+		exit;
+	}
+
+	/** Nonce action for the CSV download link. */
+	public const EXPORT_NONCE_ACTION = 'subtleforms_export_csv';
+
+	/**
+	 * Write the header and every entry of an export query to a stream.
+	 *
+	 * @param array         $args       From exportQuery().
+	 * @param resource      $handle     Open stream.
+	 * @param callable|null $afterChunk Called after each chunk is read and written.
+	 * @return int Entries written.
+	 */
+	private function writeCsv( array $args, $handle, ?callable $afterChunk = null ): int {
 		/**
 		 * Call $each( $submission ) for every matching entry, newest first.
 		 *
 		 * @param callable $each Receives one entry row.
 		 */
-		$walk = function ( callable $each ) use ( $args ): void {
+		$walk = function ( callable $each ) use ( $args, $afterChunk ): void {
 			$cursor = null;
 			do {
 				// Keyset paging on (created_at, id): each query starts after the
@@ -1074,7 +1211,17 @@ final class SubmissionsApi {
 				}
 				$last   = end( $chunk );
 				$cursor = $last ? array( 'created_at' => $last['created_at'], 'id' => (int) $last['id'] ) : null;
-			} while ( count( $chunk ) === self::EXPORT_CHUNK );
+				$size   = count( $chunk );
+				unset( $chunk, $last );
+				// Query logging (SAVEQUERIES) would keep every chunk's SQL.
+				global $wpdb;
+				if ( ! empty( $wpdb->queries ) ) {
+					$wpdb->queries = array();
+				}
+				if ( $afterChunk ) {
+					$afterChunk();
+				}
+			} while ( self::EXPORT_CHUNK === $size );
 		};
 
 		$skip = array( 'website_url', 'form_rendered_at' );
@@ -1144,13 +1291,15 @@ final class SubmissionsApi {
 			$headers[] = $label;
 		}
 
-		$csv_string = "\xEF\xBB\xBF"; // UTF-8 BOM so Excel reads accents correctly.
-		$csv_string .= implode( ',', array_map( array( $this, 'csv_cell' ), $headers ) ) . "\r\n";
+		// UTF-8 BOM so Excel reads accents correctly. Lines are written with
+		// csv_cell() (every cell quoted and formula-protected), the same bytes
+		// as before the export was streamed.
+		fwrite( $handle, "\xEF\xBB\xBF" . implode( ',', array_map( array( $this, 'csv_cell' ), $headers ) ) . "\r\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- A stream, not a file.
 		$fieldMaps   = array();
 		$count       = 0;
 		// Second pass: the rows, added to the file as each entry is read.
 		$walk(
-			function ( array $submission ) use ( &$csv_string, &$fieldMaps, &$count, $ordered, $repeaters ): void {
+			function ( array $submission ) use ( $handle, &$fieldMaps, &$count, $ordered, $repeaters ): void {
 				$payload = $this->exportPayload( $submission );
 				$row = array(
 					$submission['id'],
@@ -1203,28 +1352,12 @@ final class SubmissionsApi {
 						? $this->groupsText( $value )
 						: \SubtleForms\Support\AnswerFormatter::text( $value, array(), $display );
 				}
-				$csv_string .= implode( ',', array_map( array( $this, 'csv_cell' ), $row ) ) . "\r\n";
+				fwrite( $handle, implode( ',', array_map( array( $this, 'csv_cell' ), $row ) ) . "\r\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- A stream, not a file.
 				++$count;
 			}
 		);
 
-		$filename = 'subtleforms-submissions-' . gmdate( 'Y-m-d-His' ) . '.csv';
-		$encoded  = base64_encode( $csv_string ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Binary-safe transport of the CSV file in JSON.
-		// The plain copy is not needed once encoded; free it before the
-		// response is built so both are not held through the send.
-		unset( $csv_string );
-
-		return ApiResponse::success(
-			array(
-				'success'  => true,
-				'csv'      => $encoded,
-				'filename' => $filename,
-				'rows'     => $count,
-				// Entries that matched when the export started. The screen warns
-				// when rows is lower, so an incomplete file is never silent.
-				'total'    => max( $total, $count ),
-			)
-		);
+		return $count;
 	}
 
 	/**
