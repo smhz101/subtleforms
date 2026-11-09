@@ -149,6 +149,9 @@ final class Plugin {
 		// Register async email handler
 		add_action( 'subtleforms_async_email', array( \SubtleForms\Async\AsyncDispatcher::class, 'executeEmail' ), 10, 1 );
 
+		// Stored details of jobs that never ran are removed after a week.
+		add_action( 'subtleforms_daily_cleanup', array( \SubtleForms\Async\AsyncDispatcher::class, 'pruneOrphans' ) );
+
 		// Register async webhook handler
 		add_action( 'subtleforms_async_webhook', array( \SubtleForms\Async\AsyncDispatcher::class, 'executeWebhook' ), 10, 1 );
 
