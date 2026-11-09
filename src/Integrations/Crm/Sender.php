@@ -155,7 +155,7 @@ final class Sender {
 		}
 		if ( ! Services::usable( $service ) ) {
 			/* translators: %s: CRM name */
-			ActivityLog::record( $submissionId, $service, $service, 'skipped', sprintf( __( '%s: skipped (not connected, add an access token in Settings > Integrations > CRM)', 'subtleforms' ), $label ), array( 'reason' => 'not_connected' ) );
+			ActivityLog::record( $submissionId, $service, $service, 'skipped', sprintf( __( '%s: skipped (not connected, add a service key in Settings > Integrations > CRM)', 'subtleforms' ), $label ), array( 'reason' => 'not_connected' ) );
 			return false;
 		}
 
@@ -235,6 +235,10 @@ final class Sender {
 				}
 			);
 		} catch ( ServiceException $e ) {
+			if ( 401 === $e->status() ) {
+				// The key was rotated or has expired: the connection card says so until a new key is pasted.
+				$connection->recordCheck( false, array(), $e->getMessage() );
+			}
 			$willRetry = $e->isRetryable() && $retryCount < count( self::RETRY_DELAYS );
 			$line      = EmailSender::failedLine( $label, $e->getMessage() );
 			if ( $willRetry ) {
@@ -277,18 +281,29 @@ final class Sender {
 			return false;
 		}
 
-		$result = array(
+		$portalId = (string) ( $connection->state()['account_id'] ?? '' );
+		$url      = HubSpotClient::contactUrl( $portalId, $sent['id'] );
+		$result   = array(
 			'service'    => $service,
 			'email'      => $contact->email,
 			'contact_id' => $sent['id'],
 			'result'     => $sent['result'],
+			'portal_id'  => $portalId,
+			'url'        => $url,
 		);
-		ActivityLog::record( $submissionId, $service, $service, 'succeeded', self::resultLine( $label, $sent['result'] ), array_filter( $result, static fn( $v ) => '' !== $v ) );
+		$logged   = array_filter( $result, static fn( $v ) => '' !== $v );
+		unset( $logged['url'] );
+		if ( '' !== $url ) {
+			// The entry screen shows these two as an "Open in HubSpot" link.
+			$logged['link_url']   = $url;
+			$logged['link_label'] = __( 'Open in HubSpot', 'subtleforms' );
+		}
+		ActivityLog::record( $submissionId, $service, $service, 'succeeded', self::resultLine( $label, $sent['result'] ), $logged );
 
 		/**
 		 * A contact was created or updated in a CRM.
 		 *
-		 * @param array  $result  `service`, `email`, `contact_id`, `result` (created, updated or exists).
+		 * @param array  $result  `service`, `email`, `contact_id`, `result` (created, updated or exists), `portal_id` and `url` (the record in HubSpot; both empty when the account ID is not known).
 		 * @param array  $feed    The form's settings for the CRM.
 		 * @param array  $context Entry context.
 		 * @param string $service Service slug.

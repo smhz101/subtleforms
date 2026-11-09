@@ -2,7 +2,7 @@
 /**
  * CRM connections and lookups for Settings and the form builder.
  *
- * An access token is saved by POST /integrations/crm/{service}/connect and is
+ * A service key (or a legacy private app access token) is saved by POST /integrations/crm/{service}/connect and is
  * never sent back: every answer carries only the last four characters.
  *
  * @package SubtleForms
@@ -224,11 +224,12 @@ final class CrmApi {
 		$slug       = $this->slug( $request );
 		$connection = new Connection( $slug );
 		if ( ! $connection->hasKey() ) {
-			return ApiResponse::error( 'subtleforms_crm_token', __( 'Add an access token first.', 'subtleforms' ), 400 );
+			return ApiResponse::error( 'subtleforms_crm_token', __( 'Add a service key first.', 'subtleforms' ), 400 );
 		}
 		try {
 			$account = ( new HubSpotClient( $connection->apiKey() ) )->account();
 		} catch ( ServiceException $e ) {
+			// A 401 reads "HubSpot rejected the key. If you rotated it, paste the new key." and stays on the card.
 			$connection->recordCheck( false, array(), $e->getMessage() );
 			return ApiResponse::success(
 				array(
@@ -288,6 +289,9 @@ final class CrmApi {
 		try {
 			$list = ( new HubSpotClient( $connection->apiKey() ) )->properties();
 		} catch ( ServiceException $e ) {
+			if ( 401 === $e->status() ) {
+				$connection->recordCheck( false, array(), $e->getMessage() );
+			}
 			return ApiResponse::error( 'subtleforms_crm_failed', $e->getMessage(), 400 );
 		}
 		set_transient( $cacheKey, $list, self::CACHE_TTL );

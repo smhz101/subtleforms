@@ -123,7 +123,7 @@ final class CrmHubSpotTest extends TestCase {
 	}
 
 	private function connect( bool $enabled = true ): void {
-		$this->conn()->save( $this->token(), array( 'name' => 'Acme Studio' ), $enabled );
+		$this->conn()->save( $this->token(), array( 'name' => 'Acme Studio (4455667)', 'portal_id' => '4455667' ), $enabled );
 	}
 
 	private function rest( string $method, string $route, array $params = array(), bool $nonce = true ) {
@@ -278,6 +278,81 @@ final class CrmHubSpotTest extends TestCase {
 		$this->assertFalse( $this->conn()->hasKey() );
 		$state = wp_json_encode( Services::state( 'hubspot' ) );
 		$this->assertStringNotContainsString( $this->token(), $state );
+	}
+
+	public function test_connect_and_test_store_the_portal_id_for_links(): void {
+		$this->asAdmin();
+		$this->rest( 'POST', '/integrations/crm/hubspot/connect', array( 'token' => $this->token() ) );
+		$this->assertSame( '4455667', Services::state( 'hubspot' )['account_id'] );
+
+		$this->conn()->clear();
+		$this->assertSame( '', Services::state( 'hubspot' )['account_id'] );
+		$this->conn()->save( $this->token(), array( 'name' => 'Acme Studio' ) );
+		$this->assertSame( '', Services::state( 'hubspot' )['account_id'] );
+		$this->rest( 'POST', '/integrations/crm/hubspot/test' );
+		$this->assertSame( '4455667', Services::state( 'hubspot' )['account_id'] );
+	}
+
+	public function test_a_rotated_or_expired_key_shows_a_clear_status_on_test_and_in_the_entry_log(): void {
+		$expected = 'HubSpot rejected the key. If you rotated it, paste the new key.';
+		$this->asAdmin();
+		$this->connect();
+		$this->answer = static fn() => array( 401, array( 'message' => 'Authentication credentials not found.' ) );
+		$data         = $this->rest( 'POST', '/integrations/crm/hubspot/test' )->get_data();
+		$data         = $data['data'] ?? $data;
+		$this->assertFalse( $data['ok'] );
+		$this->assertSame( $expected, $data['message'] );
+		$this->assertSame( $expected, Services::state( 'hubspot' )['error'] );
+
+		// A send that meets the 401 puts the same sentence in the entry log and on the card, and is not retried.
+		$this->connect();
+		$this->assertSame( 'connected', $this->conn()->status() );
+		$id = $this->submitAndRun( $this->hubspotForm(), $this->answers() );
+		$this->assertSame( array( 'HubSpot: failed: ' . $expected ), $this->lines( $id ) );
+		$this->assertCount( 1, $this->jobs, 'A rejected key is not retried.' );
+		$this->assertSame( 'error', $this->conn()->status() );
+		$this->assertSame( $expected, Services::state( 'hubspot' )['error'] );
+	}
+
+	public function test_a_403_names_the_service_key_scope(): void {
+		$this->assertStringContainsString( 'service key may be missing a scope', \SubtleForms\Integrations\Crm\HubSpotClient::errorMessage( 403, array() ) );
+		$this->assertStringContainsString( 'service key', \SubtleForms\Integrations\Crm\HubSpotClient::badTokenMessage() );
+	}
+
+	public function test_a_delivered_contact_logs_a_link_to_its_record_in_hubspot(): void {
+		$this->connect();
+		$seen = array();
+		add_action(
+			'subtleforms/crm/delivered',
+			static function ( $result ) use ( &$seen ) {
+				$seen = $result;
+			}
+		);
+		$id = $this->submitAndRun( $this->hubspotForm(), $this->answers() );
+		$this->assertSame( 'https://app.hubspot.com/contacts/4455667/record/0-1/9001', $seen['url'] );
+		$this->assertSame( '4455667', $seen['portal_id'] );
+		$row = null;
+		foreach ( ( new LogsRepository() )->findBySubmission( $id ) as $log ) {
+			if ( 'hubspot' === ( $log['context']['action_type'] ?? '' ) ) {
+				$row = $log['context']['data'];
+			}
+		}
+		$this->assertSame( 'https://app.hubspot.com/contacts/4455667/record/0-1/9001', $row['link_url'] );
+		$this->assertSame( 'Open in HubSpot', $row['link_label'] );
+		$this->assertArrayNotHasKey( 'url', $row );
+	}
+
+	public function test_no_link_is_logged_when_the_portal_id_is_not_known(): void {
+		$this->conn()->save( $this->token(), array( 'name' => 'Acme Studio' ), true );
+		$id  = $this->submitAndRun( $this->hubspotForm(), $this->answers() );
+		$row = null;
+		foreach ( ( new LogsRepository() )->findBySubmission( $id ) as $log ) {
+			if ( 'hubspot' === ( $log['context']['action_type'] ?? '' ) ) {
+				$row = $log['context']['data'];
+			}
+		}
+		$this->assertArrayNotHasKey( 'link_url', $row );
+		$this->assertSame( 'HubSpot: contact created', $row['summary'] );
 	}
 
 	public function test_properties_lists_only_writable_custom_properties(): void {

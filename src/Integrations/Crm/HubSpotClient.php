@@ -1,6 +1,7 @@
 <?php
 /**
- * HubSpot CRM API v3 with a private app access token: the contact side.
+ * HubSpot CRM API v3 with a service key (or a legacy private app access
+ * token, which is sent the same way): the contact side.
  *
  * @package SubtleForms\Integrations\Crm
  * @since   2.8.1
@@ -43,7 +44,7 @@ final class HubSpotClient {
 	private int $timeout;
 
 	/**
-	 * @param string $token   Private app access token.
+	 * @param string $token   Service key or legacy private app access token.
 	 * @param int    $timeout Seconds.
 	 */
 	public function __construct( string $token, int $timeout = self::ADMIN_TIMEOUT ) {
@@ -52,9 +53,9 @@ final class HubSpotClient {
 	}
 
 	/**
-	 * Whether a text can be a private app access token. HubSpot's start with
-	 * `pat-`; anything long without spaces is let through so a token format
-	 * HubSpot adds later is not refused here. HubSpot has the last word.
+	 * Whether a text can be a HubSpot service key or private app access token.
+	 * Both start with `pat-`; anything long without spaces is let through so a
+	 * format HubSpot adds later is not refused here. HubSpot has the last word.
 	 *
 	 * @param string $token Text.
 	 */
@@ -64,10 +65,10 @@ final class HubSpotClient {
 	}
 
 	/**
-	 * The message for a text that is not a token.
+	 * The message for a text that is not a key.
 	 */
 	public static function badTokenMessage(): string {
-		return __( 'That does not look like a HubSpot private app access token. It starts with pat- and has no spaces.', 'subtleforms' );
+		return __( 'That does not look like a HubSpot service key. It starts with pat- and has no spaces.', 'subtleforms' );
 	}
 
 	/**
@@ -137,6 +138,29 @@ final class HubSpotClient {
 	}
 
 	/**
+	 * What HubSpot's 401 means for the person: a key that was rotated or has
+	 * expired stops working, and the new one has to be pasted.
+	 */
+	public static function rejectedMessage(): string {
+		return __( 'HubSpot rejected the key. If you rotated it, paste the new key.', 'subtleforms' );
+	}
+
+	/**
+	 * Address of a contact's record in HubSpot, or '' when the portal ID or
+	 * the contact ID is not a number. The address is the same for every
+	 * account: HubSpot shows the record to people who are signed in to it.
+	 *
+	 * @param string $portalId  HubSpot account (portal) ID.
+	 * @param string $contactId HubSpot contact ID.
+	 */
+	public static function contactUrl( string $portalId, string $contactId ): string {
+		if ( 1 !== preg_match( '/^\d+$/', $portalId ) || 1 !== preg_match( '/^\d+$/', $contactId ) ) {
+			return '';
+		}
+		return 'https://app.hubspot.com/contacts/' . $portalId . '/record/0-1/' . $contactId;
+	}
+
+	/**
 	 * A plain sentence for an error answer.
 	 *
 	 * @param int   $status  HTTP status.
@@ -144,14 +168,14 @@ final class HubSpotClient {
 	 */
 	public static function errorMessage( int $status, array $decoded ): string {
 		if ( 401 === $status ) {
-			return __( 'HubSpot did not accept this access token.', 'subtleforms' );
+			return self::rejectedMessage();
 		}
 		$detail = wp_strip_all_tags( (string) ( $decoded['message'] ?? '' ) );
 		if ( 403 === $status ) {
 			return '' !== $detail
 				/* translators: %s: text from HubSpot */
-				? sprintf( __( 'HubSpot refused the request, the private app may be missing a scope: %s', 'subtleforms' ), $detail )
-				: __( 'HubSpot refused the request, the private app may be missing a scope.', 'subtleforms' );
+				? sprintf( __( 'HubSpot refused the request, the service key may be missing a scope: %s', 'subtleforms' ), $detail )
+				: __( 'HubSpot refused the request, the service key may be missing a scope.', 'subtleforms' );
 		}
 		if ( '' === $detail ) {
 			/* translators: %d: HTTP status code */
@@ -164,7 +188,7 @@ final class HubSpotClient {
 	/**
 	 * Check the token and read the account's portal.
 	 *
-	 * The account details need no extra scope on a private app. When HubSpot
+	 * The account details need no extra scope. When HubSpot
 	 * refuses them, a read of the contact properties still proves the token
 	 * works (and the contact scope is there), and the name is left empty.
 	 *
