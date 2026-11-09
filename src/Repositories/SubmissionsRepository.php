@@ -147,6 +147,29 @@ final class SubmissionsRepository {
 		return $results;
 	}
 
+	/** Length of the ip_address column. */
+	public const IP_LENGTH = 45;
+
+	/** Length of the user_agent column. */
+	public const USER_AGENT_LENGTH = 255;
+
+	/**
+	 * Cut a request value to the length of the column it is stored in.
+	 *
+	 * Counts characters, like a MySQL varchar, so a multibyte User-Agent is
+	 * not cut mid-character.
+	 *
+	 * @param mixed $value  Value from the request.
+	 * @param int   $length Column length in characters.
+	 * @return mixed The value, shortened when it is a string longer than $length.
+	 */
+	public static function fit( $value, int $length ) {
+		if ( ! is_string( $value ) ) {
+			return $value;
+		}
+		return mb_substr( $value, 0, $length );
+	}
+
 	/**
 	 * Create a new submission.
 	 *
@@ -176,8 +199,10 @@ final class SubmissionsRepository {
 				'payload'        => wp_json_encode( Helpers::safe_array_get( $data, 'payload', array() ) ),
 				'meta'           => wp_json_encode( Helpers::safe_array_get( $data, 'meta', array() ) ),
 				'status'         => Helpers::safe_array_get( $data, 'status', 'unread' ),
-				'ip_address'     => Helpers::safe_array_get( $data, 'ip_address', '' ),
-				'user_agent'     => Helpers::safe_array_get( $data, 'user_agent', '' ),
+				// wpdb::insert() refuses a value longer than its column and the
+				// whole entry is lost, so request data is cut to fit.
+				'ip_address'     => self::fit( Helpers::safe_array_get( $data, 'ip_address', '' ), self::IP_LENGTH ),
+				'user_agent'     => self::fit( Helpers::safe_array_get( $data, 'user_agent', '' ), self::USER_AGENT_LENGTH ),
 				// Stored in UTC so every reader can convert to the viewer's time.
 				'created_at'     => current_time( 'mysql', true ),
 			),

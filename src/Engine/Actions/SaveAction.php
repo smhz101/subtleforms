@@ -98,7 +98,7 @@ final class SaveAction implements ActionInterface {
 			// Fallback: ensure scalar values are safely cast
 			array_walk_recursive( $payload, function ( &$value ) {
 				if ( is_string( $value ) ) {
-					$value = sanitize_text_field( $value );
+					$value = \SubtleForms\Validation\Sanitizer::keepLessThan( $value, 'sanitize_text_field' );
 				}
 			} );
 		}
@@ -214,7 +214,7 @@ final class SaveAction implements ActionInterface {
 					// A masked number such as "12-34" is kept as the visitor typed it
 					// (the server checked it against the mask already).
 					if ( ! is_numeric( $value ) && null !== \SubtleForms\Engine\FieldValidator::maskOf( is_array( $field ) ? $field : array() ) ) {
-						$sanitized[ $key ] = sanitize_text_field( (string) $value );
+						$sanitized[ $key ] = \SubtleForms\Validation\Sanitizer::keepLessThan( (string) $value, 'sanitize_text_field' );
 						break;
 					}
 					$sanitized[ $key ] = is_numeric( $value ) ? $value : 0;
@@ -224,7 +224,7 @@ final class SaveAction implements ActionInterface {
 					if ( ! empty( $field['allow_html'] ) ) {
 						$sanitized[ $key ] = wp_kses_post( (string) $value );
 					} else {
-						$sanitized[ $key ] = sanitize_text_field( (string) $value );
+						$sanitized[ $key ] = \SubtleForms\Validation\Sanitizer::keepLessThan( (string) $value, 'sanitize_text_field' );
 					}
 					break;
 			}
@@ -280,7 +280,7 @@ final class SaveAction implements ActionInterface {
 				if ( $field && ! empty( $field['allow_html'] ) ) {
 					$result[ $k ] = wp_kses_post( $v );
 				} else {
-					$result[ $k ] = sanitize_text_field( $v );
+					$result[ $k ] = \SubtleForms\Validation\Sanitizer::keepLessThan( $v, 'sanitize_text_field' );
 				}
 			} else {
 				$result[ $k ] = $v;
@@ -398,8 +398,8 @@ final class SaveAction implements ActionInterface {
 				continue;
 			}
 			$normalized[ $sub_key ] = is_string( $sub_val )
-				? sanitize_text_field( $sub_val )
-				: ( is_null( $sub_val ) ? null : sanitize_text_field( (string) $sub_val ) );
+				? \SubtleForms\Validation\Sanitizer::keepLessThan( $sub_val, 'sanitize_text_field' )
+				: ( is_null( $sub_val ) ? null : \SubtleForms\Validation\Sanitizer::keepLessThan( (string) $sub_val, 'sanitize_text_field' ) );
 		}
 		return $normalized;
 	}

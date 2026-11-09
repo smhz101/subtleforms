@@ -95,7 +95,12 @@ final class EntryValues {
 			return '';
 		}
 		$value = str_replace( array( "\r\n", "\r" ), "\n", (string) $value );
-		return function_exists( 'sanitize_textarea_field' ) ? sanitize_textarea_field( $value ) : trim( wp_strip_all_tags( $value ) );
+		return Sanitizer::keepLessThan(
+			$value,
+			function_exists( 'sanitize_textarea_field' ) ? 'sanitize_textarea_field' : static function ( string $text ): string {
+				return trim( wp_strip_all_tags( $text ) );
+			}
+		);
 	}
 
 	/**
