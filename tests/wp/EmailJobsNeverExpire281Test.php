@@ -96,7 +96,8 @@ final class EmailJobsNeverExpire281Test extends TestCase {
 		$this->assertCount( 1, $this->sent );
 		$this->assertSame( 'New lead from Ada', $this->sent[0]['subject'] );
 		$this->assertStringContainsString( 'Hello there', $this->sent[0]['message'] );
-		$this->assertFalse( get_option( $name ), 'deleted once it ran' );
+		$this->assertArrayNotHasKey( 'job', (array) get_option( $name ), 'the details are gone once it ran' );
+		$this->assertTrue( get_option( $name )['done'], 'and a note says it ran' );
 	}
 
 	public function test_an_email_whose_stored_details_are_gone_is_built_again_from_the_entry(): void {
@@ -131,6 +132,69 @@ final class EmailJobsNeverExpire281Test extends TestCase {
 		$this->assertCount( 0, $this->sent );
 	}
 
+	public function test_the_same_event_run_twice_sends_one_email(): void {
+		$this->submit( $this->form(), array( 'name' => 'Ada', 'message' => 'Hello there' ) );
+		$queued = $this->queued();
+
+		do_action( 'subtleforms_async_email', $queued[0] );
+		do_action( 'subtleforms_async_email', $queued[0] );
+
+		$this->assertCount( 1, $this->sent, 'a second run of the same event does not build and send it again' );
+	}
+
+	public function test_a_run_that_overlaps_the_first_does_not_send_again(): void {
+		$this->submit( $this->form(), array( 'name' => 'Ada', 'message' => 'Hello there' ) );
+		$queued = $this->queued();
+
+		// The second run starts while the first is inside wp_mail().
+		$again = false;
+		add_filter(
+			'pre_wp_mail',
+			function ( $pre ) use ( $queued, &$again ) {
+				if ( ! $again ) {
+					$again = true;
+					do_action( 'subtleforms_async_email', $queued[0] );
+				}
+				return $pre;
+			},
+			5
+		);
+		do_action( 'subtleforms_async_email', $queued[0] );
+
+		$this->assertCount( 1, $this->sent );
+	}
+
+	public function test_removing_an_earlier_email_action_does_not_make_a_lost_job_send_the_wrong_email(): void {
+		$id = $this->publish(
+			array( array( 'id' => 'n', 'key' => 'name', 'type' => 'text', 'label' => 'Name' ) ),
+			array(
+				array( 'id' => 'save', 'type' => 'save', 'enabled' => true ),
+				array( 'id' => 'first', 'type' => 'email', 'enabled' => true, 'config' => array( 'to' => 'first@example.org', 'subject' => 'First', 'message' => '{field:name}' ) ),
+				array( 'id' => 'second', 'type' => 'email', 'enabled' => true, 'config' => array( 'to' => 'second@example.org', 'subject' => 'Second', 'message' => '{field:name}' ) ),
+			)
+		);
+		$this->submit( $id, array( 'name' => 'Ada' ) );
+		$queued = $this->queued();
+		$this->assertCount( 2, $queued );
+		foreach ( $queued as $reference ) {
+			delete_option( $this->storedName( $reference ) );
+		}
+
+		// The first email action is removed: the second one takes its place in the list.
+		$repo   = new \SubtleForms\Repositories\FormsRepository();
+		$schema = $repo->loadSchemaVersion( $id )['schema'];
+		array_splice( $schema['actions'], 1, 1 );
+		$repo->saveSchemaVersion( $id, $schema, true );
+
+		foreach ( $queued as $reference ) {
+			do_action( 'subtleforms_async_email', $reference );
+		}
+
+		$this->assertCount( 1, $this->sent, 'the removed action sends nothing and the other is sent once' );
+		$this->assertSame( array( 'second@example.org' ), (array) $this->sent[0]['to'] );
+		$this->assertSame( 'Second', $this->sent[0]['subject'] );
+	}
+
 	public function test_a_job_queued_by_the_earlier_version_still_runs_from_its_transient(): void {
 		AsyncDispatcher::dispatchEmail( array( 'to' => 'a@example.com', 'subject' => 'Hello', 'body' => 'Body', 'form_id' => 4 ) );
 		$queued = $this->queued();
@@ -144,16 +208,39 @@ final class EmailJobsNeverExpire281Test extends TestCase {
 		$this->assertFalse( get_transient( $name ), 'the transient is deleted too' );
 	}
 
-	public function test_the_daily_cleanup_removes_details_left_for_more_than_a_week(): void {
+	public function test_the_daily_cleanup_removes_details_of_events_that_are_gone(): void {
 		update_option( AsyncDispatcher::JOB_PREFIX . 'old', array( 'stored_at' => time() - 8 * DAY_IN_SECONDS, 'job' => array( 'to' => 'x@example.com' ) ), false );
 		update_option( AsyncDispatcher::JOB_PREFIX . 'recent', array( 'stored_at' => time() - 2 * DAY_IN_SECONDS, 'job' => array( 'to' => 'x@example.com' ) ), false );
 		update_option( AsyncDispatcher::JOB_PREFIX . 'unknown_age', array( 'to' => 'x@example.com' ), false );
+		update_option( AsyncDispatcher::JOB_PREFIX . 'ran_long_ago', array( 'stored_at' => time() - 2 * DAY_IN_SECONDS, 'done' => true ), false );
+		update_option( AsyncDispatcher::JOB_PREFIX . 'ran_today', array( 'stored_at' => time() - HOUR_IN_SECONDS, 'done' => true ), false );
 
 		do_action( 'subtleforms_daily_cleanup' );
 
 		$this->assertFalse( get_option( AsyncDispatcher::JOB_PREFIX . 'old' ) );
 		$this->assertFalse( get_option( AsyncDispatcher::JOB_PREFIX . 'unknown_age' ) );
+		$this->assertFalse( get_option( AsyncDispatcher::JOB_PREFIX . 'ran_long_ago' ), 'the note that a job ran is kept for a day' );
 		$this->assertIsArray( get_option( AsyncDispatcher::JOB_PREFIX . 'recent' ) );
-		delete_option( AsyncDispatcher::JOB_PREFIX . 'recent' );
+		$this->assertIsArray( get_option( AsyncDispatcher::JOB_PREFIX . 'ran_today' ) );
+		foreach ( array( 'recent', 'ran_today' ) as $name ) {
+			delete_option( AsyncDispatcher::JOB_PREFIX . $name );
+		}
+	}
+
+	public function test_the_cleanup_keeps_old_details_while_their_event_is_still_queued(): void {
+		AsyncDispatcher::dispatchEmail( array( 'to' => 'a@example.com', 'subject' => 'Hello', 'body' => 'Body', 'form_id' => 4 ) );
+		$queued = $this->queued();
+		$name   = $this->storedName( $queued[0] );
+		$value  = get_option( $name );
+		$value['stored_at'] = time() - 30 * DAY_IN_SECONDS;
+		update_option( $name, $value, false );
+
+		do_action( 'subtleforms_daily_cleanup' );
+		$this->assertIsArray( get_option( $name ), 'the only complete copy of a waiting email stays' );
+
+		// Once the event is gone nothing needs it.
+		wp_unschedule_hook( 'subtleforms_async_email' );
+		do_action( 'subtleforms_daily_cleanup' );
+		$this->assertFalse( get_option( $name ) );
 	}
 }

@@ -73,6 +73,7 @@ public static function dispatchEmail( array $payload ): bool {
 			'step_id'       => $payload['step_id'] ?? 'email',
 			'form_id'       => isset( $payload['form_id'] ) ? (int) $payload['form_id'] : 0,
 			'audience'      => $payload['audience'] ?? 'admin',
+			'step_sig'      => $payload['step_sig'] ?? '',
 			'retry_count'   => $payload['retry_count'] ?? 0,
 			// A fresh id so a second send within ten minutes is not dropped as a duplicate cron event.
 			'dispatch_id'   => self::dispatchId(),
@@ -204,6 +205,12 @@ public static function dispatchEmail( array $payload ): bool {
 		$reference = $job;
 		$job       = self::resolve( $job );
 		if ( null === $job ) {
+			// This event already ran (WP-Cron started it twice, or someone ran
+			// it by hand): its email is sent, or on its way. Do not send it again.
+			if ( isset( $reference['job_ref'] ) && self::handled( (string) $reference['job_ref'] ) ) {
+				self::log( 'Email job skipped: it already ran', array( 'submission_id' => $reference['submission_id'] ?? null ) );
+				return;
+			}
 			// The stored details are gone (a job queued before 2.8.1 whose
 			// 6 hour copy expired, or one removed as an orphan). The entry is
 			// saved, so the email is built again from it rather than lost.
@@ -214,8 +221,8 @@ public static function dispatchEmail( array $payload ): bool {
 			}
 			self::log( 'Email built again from the saved entry', array( 'submission_id' => $reference['submission_id'] ?? null ) );
 		}
-		// The stored copy has done its job: it is deleted now, and written
-		// again only if a retry is scheduled.
+		// The stored copy has done its job: it is replaced by a note that the
+		// job ran, and written again only if a retry is scheduled.
 		self::forget( $job );
 		$retry_count   = $job['retry_count'] ?? 0;
 		$submission_id = isset( $job['submission_id'] ) ? (int) $job['submission_id'] : 0;
@@ -374,8 +381,8 @@ public static function dispatchEmail( array $payload ): bool {
 			self::log( 'Webhook job skipped: its stored details expired' );
 			return;
 		}
-		// The stored copy has done its job: it is deleted now, and written
-		// again only if a retry is scheduled.
+		// The stored copy has done its job: it is replaced by a note that the
+		// job ran, and written again only if a retry is scheduled.
 		self::forget( $job );
 		$retry_count   = $job['retry_count'] ?? 0;
 		$submission_id = isset( $job['submission_id'] ) ? (int) $job['submission_id'] : 0;
@@ -510,8 +517,8 @@ public static function dispatchEmail( array $payload ): bool {
 	const JOB_PREFIX = 'subtleforms_job_';
 
 	/**
-	 * How long details of a job that never ran are kept before the daily
-	 * cleanup removes them (seconds). A job normally deletes its own copy.
+	 * How long details of a job that never ran are kept, once its cron event is
+	 * gone, before the daily cleanup removes them (seconds).
 	 */
 	const JOB_ORPHAN_AGE = 7 * DAY_IN_SECONDS;
 
@@ -532,7 +539,7 @@ public static function dispatchEmail( array $payload ): bool {
 	private static function stash( array $job, int $delay = 0 ): array {
 		$ref    = (string) ( $job['dispatch_id'] ?? self::dispatchId() );
 		$stored = $job;
-		unset( $stored['dispatch_id'], $stored['submission_id'], $stored['step_id'], $stored['retry_count'] );
+		unset( $stored['dispatch_id'], $stored['submission_id'], $stored['step_id'], $stored['retry_count'], $stored['step_sig'] );
 		if ( ! empty( $job['submission_id'] ) ) {
 			unset( $stored['form_id'] );
 		}
@@ -550,8 +557,21 @@ public static function dispatchEmail( array $payload ): bool {
 			'dispatch_id'   => $ref,
 			'submission_id' => $job['submission_id'] ?? null,
 			'step_id'       => $job['step_id'] ?? '',
+			'step_sig'      => $job['step_sig'] ?? '',
 			'retry_count'   => $job['retry_count'] ?? 0,
 		);
+	}
+
+	/**
+	 * A short fingerprint of an email step's settings. The cron reference
+	 * carries it, so an email built again from the entry is only built from the
+	 * step it came from, even when actions were added or removed since.
+	 *
+	 * @param array $settings Settings of the pipeline step.
+	 * @return string
+	 */
+	public static function stepSignature( array $settings ): string {
+		return substr( md5( (string) wp_json_encode( $settings ) ), 0, 16 );
 	}
 
 	/**
@@ -567,8 +587,22 @@ public static function dispatchEmail( array $payload ): bool {
 		if ( is_array( $value ) && isset( $value['job'] ) && is_array( $value['job'] ) ) {
 			return $value['job'];
 		}
+		if ( is_array( $value ) && ! empty( $value['done'] ) ) {
+			return null;
+		}
 		$legacy = get_transient( $name );
 		return is_array( $legacy ) ? $legacy : null;
+	}
+
+	/**
+	 * Whether the job behind a reference already ran.
+	 *
+	 * @param string $ref Job reference.
+	 * @return bool
+	 */
+	private static function handled( string $ref ): bool {
+		$value = get_option( self::JOB_PREFIX . md5( $ref ), null );
+		return is_array( $value ) && ! empty( $value['done'] );
 	}
 
 	/**
@@ -590,6 +624,7 @@ public static function dispatchEmail( array $payload ): bool {
 		$stored['dispatch_id']   = $job['dispatch_id'] ?? $job['job_ref'];
 		$stored['submission_id'] = $job['submission_id'] ?? null;
 		$stored['step_id']       = $job['step_id'] ?? '';
+		$stored['step_sig']      = $job['step_sig'] ?? '';
 		if ( isset( $stored['audience'] ) && ! isset( $stored['form_id'] ) && ! empty( $stored['submission_id'] ) && class_exists( '\SubtleForms\Repositories\SubmissionsRepository' ) ) {
 			$row               = ( new \SubtleForms\Repositories\SubmissionsRepository() )->find( (int) $stored['submission_id'] );
 			$stored['form_id'] = (int) ( $row['form_id'] ?? 0 );
@@ -624,8 +659,19 @@ public static function dispatchEmail( array $payload ): bool {
 				return null;
 			}
 			$compiler = \SubtleForms\Plugin::instance()->container()->get( \SubtleForms\Engine\SchemaCompiler::class );
+			$signature = isset( $reference['step_sig'] ) ? (string) $reference['step_sig'] : '';
 			foreach ( $compiler->compile( $schema ) as $step ) {
-				if ( $step->id() !== $step_id || 'email' !== $step->action()->id() ) {
+				if ( 'email' !== $step->action()->id() ) {
+					continue;
+				}
+				// Step ids count the actions, so removing an earlier action
+				// gives its successor the old id. A job that carries the
+				// fingerprint of its step is matched by that; an older one by
+				// its id.
+				$same = '' !== $signature
+					? self::stepSignature( (array) $step->settings() ) === $signature
+					: $step->id() === $step_id;
+				if ( ! $same ) {
 					continue;
 				}
 				$context = new \SubtleForms\Engine\SubmissionContext( $form_id, $entry['payload'] );
@@ -654,24 +700,34 @@ public static function dispatchEmail( array $payload ): bool {
 	}
 
 	/**
-	 * Delete a finished job's stored details.
+	 * Replace a job's stored details with a note that it ran. The note, not
+	 * nothing, is what tells a second run of the same event that the email is
+	 * sent and must not be built again. The daily cleanup removes it.
 	 *
 	 * @param array $job Full job.
 	 */
 	private static function forget( array $job ): void {
 		if ( isset( $job['dispatch_id'] ) ) {
 			$name = self::JOB_PREFIX . md5( (string) $job['dispatch_id'] );
-			delete_option( $name );
+			update_option(
+				$name,
+				array(
+					'stored_at' => time(),
+					'done'      => true,
+				),
+				false
+			);
 			// A job queued by an earlier version kept its details in a transient.
 			delete_transient( $name );
 		}
 	}
 
 	/**
-	 * Remove the stored details of jobs that never ran, once they are older
-	 * than JOB_ORPHAN_AGE. A job deletes its own copy when it runs, so what
-	 * is left belongs to an event that was removed from the cron queue.
-	 * Runs from the daily cleanup.
+	 * Remove stored job details that nothing will use again: notes that a job
+	 * ran, a day after it ran, and details older than JOB_ORPHAN_AGE whose cron
+	 * event is no longer queued. Details of an event that is still waiting are
+	 * kept however old they are, because they are the only complete copy of
+	 * the email. Runs from the daily cleanup.
 	 *
 	 * @return int Rows removed.
 	 */
@@ -681,18 +737,50 @@ public static function dispatchEmail( array $payload ): bool {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Options named by this class's own prefix.
 		$rows    = $wpdb->get_results( $wpdb->prepare( "SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE %s", $like ), ARRAY_A );
 		$removed = 0;
-		$cutoff  = time() - self::JOB_ORPHAN_AGE;
+		$now     = time();
+		$waiting = null;
 		foreach ( (array) $rows as $row ) {
 			$value = maybe_unserialize( $row['option_value'] );
 			$at    = is_array( $value ) ? (int) ( $value['stored_at'] ?? 0 ) : 0;
-			if ( $at > 0 && $at >= $cutoff ) {
-				continue;
+			if ( is_array( $value ) && ! empty( $value['done'] ) ) {
+				if ( $at > 0 && $at >= $now - DAY_IN_SECONDS ) {
+					continue;
+				}
+			} else {
+				if ( $at > 0 && $at >= $now - self::JOB_ORPHAN_AGE ) {
+					continue;
+				}
+				$waiting = $waiting ?? self::queuedJobOptions();
+				if ( isset( $waiting[ $row['option_name'] ] ) ) {
+					continue;
+				}
 			}
 			if ( delete_option( $row['option_name'] ) ) {
 				++$removed;
 			}
 		}
 		return $removed;
+	}
+
+	/**
+	 * The option names of the jobs whose cron event is still queued.
+	 *
+	 * @return array<string,true>
+	 */
+	private static function queuedJobOptions(): array {
+		$names = array();
+		$cron  = function_exists( '_get_cron_array' ) ? _get_cron_array() : array();
+		foreach ( (array) $cron as $events ) {
+			foreach ( array( 'subtleforms_async_email', 'subtleforms_async_webhook' ) as $hook ) {
+				foreach ( (array) ( $events[ $hook ] ?? array() ) as $event ) {
+					$ref = $event['args'][0]['job_ref'] ?? null;
+					if ( is_string( $ref ) && '' !== $ref ) {
+						$names[ self::JOB_PREFIX . md5( $ref ) ] = true;
+					}
+				}
+			}
+		}
+		return $names;
 	}
 
 	/**

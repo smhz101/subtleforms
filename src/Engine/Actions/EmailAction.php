@@ -202,6 +202,7 @@ final class EmailAction implements ActionInterface {
                         'step_id'       => $step_id,
                         'form_id'       => $context->formId,
                         'audience'      => $this->audience( $settings['to'] ?? '' ),
+                        'step_sig'      => \SubtleForms\Async\AsyncDispatcher::stepSignature( $settings ),
                 ) );
 
                 if ( ! $dispatched ) {

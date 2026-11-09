@@ -72,7 +72,7 @@ final class FreeQa272Test extends TestCase {
 
 	private function jobTransient( string $dispatchId ) {
 		$stored = get_option( AsyncDispatcher::JOB_PREFIX . md5( $dispatchId ), false );
-		return is_array( $stored ) ? $stored['job'] : false;
+		return is_array( $stored ) && isset( $stored['job'] ) ? $stored['job'] : false;
 	}
 
 	public function test_queued_job_data_is_minimal_not_autoloaded_and_deleted_when_the_job_runs(): void {
