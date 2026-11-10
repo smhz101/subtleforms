@@ -11,6 +11,7 @@ import { rangeSliderSeed } from '../utils/defaults';
 import { debug } from '../../shared/debug';
 import { cloneElement, useContext, useEffect } from '@wordpress/element';
 import ChoiceSelect from './fields/ChoiceSelect';
+import PanelContainer from './fields/PanelContainer';
 import { FormContext } from './fields/contexts';
 import { lazyField, fieldHasMask } from './fields/lazyFields';
 import { getFieldType, getFieldOverride } from '../../shared/extend';
@@ -292,6 +293,36 @@ export default function FieldRenderer({
           ))}
       </div>
     );
+  }
+
+  // Tabs and Accordion (2.9.0): panels stay mounted, closed ones are hidden.
+  if (field.type === 'tabs_container' || field.type === 'accordion_container') {
+    return (
+      <PanelContainer
+        field={field}
+        config={config}
+        errors={errors}
+        hiddenFields={hiddenFields}
+        appearanceClasses={appearanceClasses}
+        appearanceStyle={appearanceStyle}
+        renderChild={(child) => (
+          <FieldRenderer
+            key={child.config?.key || child.key || child.id}
+            field={child}
+            onChange={onChange}
+            values={values}
+            errors={errors}
+            hiddenFields={hiddenFields}
+            {...nested}
+          />
+        )}
+      />
+    );
+  }
+
+  // A panel is drawn by its container, never alone.
+  if (field.type === 'tab_panel' || field.type === 'accordion_panel') {
+    return null;
   }
 
   // Handle column containers

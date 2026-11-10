@@ -529,3 +529,249 @@
 	text-underline-offset: 2px;
 	overflow-wrap: anywhere;
 }
+
+/* ── Tabs and Accordion (2.9.0) ─────────────────────────────────────────────
+   Every panel stays in the page; a closed one is hidden. Colours, radius and
+   focus come from the same tokens as the other controls. */
+.subtleforms-field-panels {
+	flex: 1 1 100%;
+	min-width: 0;
+}
+
+.subtleforms-panel-fields {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--subtleforms-field-gap, 16px);
+	padding-top: var(--subtleforms-spacing-sm, 1rem);
+}
+
+.subtleforms-panel-fields > * {
+	flex: 1 1 100%;
+	min-width: 0;
+}
+
+.subtleforms-tabpanel[hidden],
+.subtleforms-accordion-panel[hidden] {
+	display: none;
+}
+
+.subtleforms-tabpanel:focus-visible {
+	outline: 2px solid var(--subtleforms-color-border-focus);
+	outline-offset: 2px;
+}
+
+/* Tabs: an underline marks the open one. */
+.subtleforms-tabs [role='tablist'] {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0;
+	border-bottom: 1px solid var(--subtleforms-color-border);
+}
+
+.subtleforms-tab {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	margin: 0 0 -1px;
+	padding: 0 var(--subtleforms-spacing-sm, 1rem);
+	border: 0;
+	border-bottom: 2px solid transparent;
+	border-radius: 0;
+	background: transparent;
+	color: var(--subtleforms-color-text-light);
+	font: inherit;
+	font-weight: 500;
+	line-height: 1.2;
+	cursor: pointer;
+	transition: color var(--subtleforms-transition-fast, 120ms ease);
+}
+
+.subtleforms-tab:hover {
+	color: var(--subtleforms-color-text);
+}
+
+.subtleforms-tab[aria-selected='true'] {
+	border-bottom-color: var(--subtleforms-color-primary);
+	color: var(--subtleforms-color-text);
+}
+
+.subtleforms-tab:focus-visible,
+.subtleforms-accordion-trigger:focus-visible {
+	outline: 2px solid var(--subtleforms-color-border-focus);
+	outline-offset: -2px;
+}
+
+/* Tabs on the left: a 200px column with the panel beside it. */
+.subtleforms-tabs--left {
+	display: grid;
+	grid-template-columns: 200px minmax(0, 1fr);
+	column-gap: var(--subtleforms-spacing-md, 1.5rem);
+	align-items: start;
+}
+
+.subtleforms-tabs--left [role='tablist'] {
+	flex-direction: column;
+	flex-wrap: nowrap;
+	grid-column: 1;
+	grid-row: 1 / span 99;
+	border-bottom: 0;
+	border-right: 1px solid var(--subtleforms-color-border);
+}
+
+.subtleforms-tabs--left .subtleforms-tab {
+	justify-content: flex-start;
+	margin: 0 -1px 0 0;
+	border-bottom: 0;
+	border-right: 2px solid transparent;
+	text-align: left;
+}
+
+.subtleforms-tabs--left .subtleforms-tab[aria-selected='true'] {
+	border-right-color: var(--subtleforms-color-primary);
+}
+
+.subtleforms-tabs--left > .subtleforms-tabpanel {
+	grid-column: 2;
+	grid-row: 1;
+}
+
+.subtleforms-tabs--left .subtleforms-panel-fields,
+.subtleforms-tabs--top .subtleforms-panel-fields {
+	padding-top: var(--subtleforms-spacing-sm, 1rem);
+}
+
+/* Accordion: hairlines between sections, a 48px header. */
+.subtleforms-accordion {
+	border-bottom: 1px solid var(--subtleforms-color-border);
+}
+
+.subtleforms-accordion-heading {
+	margin: 0;
+	padding: 0;
+	border-top: 1px solid var(--subtleforms-color-border);
+	font-size: inherit;
+	font-weight: inherit;
+	line-height: inherit;
+}
+
+.subtleforms-accordion-trigger {
+	display: flex;
+	align-items: center;
+	width: 100%;
+	min-height: 48px;
+	padding: 0 var(--subtleforms-spacing-xs, 0.5rem);
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	color: var(--subtleforms-color-text);
+	font: inherit;
+	font-weight: 600;
+	text-align: left;
+	cursor: pointer;
+}
+
+.subtleforms-accordion-title {
+	flex: 0 1 auto;
+	min-width: 0;
+}
+
+.subtleforms-accordion-icon {
+	position: relative;
+	flex: 0 0 auto;
+	width: 16px;
+	height: 16px;
+	margin-left: auto;
+}
+
+/* Chevron: turns over when the section is open. */
+.subtleforms-accordion-icon::before {
+	content: '';
+	position: absolute;
+	top: 3px;
+	left: 4px;
+	width: 7px;
+	height: 7px;
+	border-right: 2px solid currentColor;
+	border-bottom: 2px solid currentColor;
+	transform: rotate(45deg);
+	transition: transform var(--subtleforms-transition-fast, 120ms ease);
+}
+
+.subtleforms-accordion-trigger[aria-expanded='true'] .subtleforms-accordion-icon::before {
+	top: 6px;
+	transform: rotate(225deg);
+}
+
+/* Plus and minus: the vertical bar goes away when the section is open. */
+.subtleforms-accordion--plus .subtleforms-accordion-icon::before,
+.subtleforms-accordion--plus .subtleforms-accordion-icon::after {
+	content: '';
+	position: absolute;
+	top: 7px;
+	left: 1px;
+	width: 14px;
+	height: 2px;
+	border: 0;
+	background: currentColor;
+	transform: none;
+}
+
+.subtleforms-accordion--plus .subtleforms-accordion-icon::after {
+	transform: rotate(90deg);
+	transition: transform var(--subtleforms-transition-fast, 120ms ease), opacity var(--subtleforms-transition-fast, 120ms ease);
+}
+
+.subtleforms-accordion--plus .subtleforms-accordion-trigger[aria-expanded='true'] .subtleforms-accordion-icon::before {
+	top: 7px;
+	transform: none;
+}
+
+.subtleforms-accordion--plus .subtleforms-accordion-trigger[aria-expanded='true'] .subtleforms-accordion-icon::after {
+	transform: rotate(0deg);
+	opacity: 0;
+}
+
+.subtleforms-accordion-panel {
+	padding: 0 var(--subtleforms-spacing-xs, 0.5rem) var(--subtleforms-spacing-sm, 1rem);
+}
+
+.subtleforms-accordion-panel .subtleforms-panel-fields {
+	padding-top: var(--subtleforms-spacing-xs, 0.5rem);
+}
+
+/* Error count on a tab or section header: sits after the title. */
+.subtleforms-tab-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	min-width: 18px;
+	height: 18px;
+	margin-left: 0.5rem;
+	padding: 0 5px;
+	border-radius: var(--subtleforms-radius-full, 999px);
+	background: var(--subtleforms-color-error, #b3261e);
+	color: #fff;
+	font-size: 0.75rem;
+	font-weight: 600;
+	line-height: 1;
+}
+
+@media (max-width: 600px) {
+	.subtleforms-tabs--left {
+		display: block;
+	}
+
+	.subtleforms-tabs--left [role='tablist'] {
+		border-right: 0;
+		border-bottom: 1px solid var(--subtleforms-color-border);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.subtleforms-accordion-icon::before,
+	.subtleforms-accordion-icon::after,
+	.subtleforms-tab {
+		transition: none;
+	}
+}

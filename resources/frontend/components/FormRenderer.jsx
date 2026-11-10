@@ -19,6 +19,7 @@ import { formFieldDefaults, formHasRequiredFields, requiredIndicatorMark } from 
 import { debug } from '../../shared/debug';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { FormContext } from './fields/contexts';
+import { revealField } from '../utils/revealField';
 import { getFormWrappers } from '../../shared/extend';
 import { lazyField, loadFieldsFor, fieldsReadyFor } from './fields/lazyFields';
 import { readInlineFormData } from '../utils/inlineData';
@@ -472,12 +473,16 @@ export default function FormRenderer({
           target = target.querySelector('input, select, textarea, [tabindex]') || target;
         }
         if (target && typeof target.focus === 'function') {
-          target.focus();
-          if (typeof target.scrollIntoView === 'function') {
-            const reduce = typeof window.matchMedia === 'function'
-              && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-            target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
-          }
+          // A field in a closed tab or section cannot take focus: open the
+          // panels around it first and wait a frame (Tabs and Accordion).
+          revealField(target).then(() => {
+            target.focus();
+            if (typeof target.scrollIntoView === 'function') {
+              const reduce = typeof window.matchMedia === 'function'
+                && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+              target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+            }
+          });
         }
       })
     );
@@ -584,9 +589,12 @@ export default function FormRenderer({
   );
 
   // Form details for fields that talk to the server (uploads).
+  // The tab or section each Tabs and Accordion has open, kept here so it
+  // survives a step change (their fields are drawn again then).
+  const panelState = useRef(new Map()).current;
   const formContext = useMemo(
-    () => ({ formId, preview, fieldDefaults }),
-    [formId, preview, fieldDefaults]
+    () => ({ formId, preview, fieldDefaults, panelState }),
+    [formId, preview, fieldDefaults, panelState]
   );
 
   // On a multi-step form, show the first step that has a field in error.
