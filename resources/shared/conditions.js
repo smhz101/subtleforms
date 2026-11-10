@@ -355,7 +355,12 @@ function allNodeLogics(node) {
 
 function nodeKey(node) {
   const cfg = isPlainObject(node.config) ? node.config : {};
-  const key = node.key ?? cfg.key ?? (node.type === 'step' ? node.id : undefined);
+  const key =
+    node.key ??
+    cfg.key ??
+    (node.type === 'step' || node.type === 'tab_panel' || node.type === 'accordion_panel'
+      ? node.id
+      : undefined);
   return typeof key === 'string' && key !== '' ? key : null;
 }
 

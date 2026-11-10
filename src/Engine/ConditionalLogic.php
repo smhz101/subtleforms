@@ -597,7 +597,7 @@ final class ConditionalLogic {
 	 */
 	private static function nodeKey( array $node ): ?string {
 		$cfg = isset( $node['config'] ) && is_array( $node['config'] ) ? $node['config'] : array();
-		$key = $node['key'] ?? $cfg['key'] ?? ( ( $node['type'] ?? '' ) === 'step' ? ( $node['id'] ?? null ) : null );
+		$key = $node['key'] ?? $cfg['key'] ?? ( in_array( $node['type'] ?? '', array( 'step', 'tab_panel', 'accordion_panel' ), true ) ? ( $node['id'] ?? null ) : null );
 		return is_string( $key ) && $key !== '' ? $key : null;
 	}
 

@@ -224,6 +224,10 @@ final class SchemaValidator {
 		'six_column_container',
 		'repeat_container',
 		'group_container',
+		'tabs_container',
+		'accordion_container',
+		'tab_panel',
+		'accordion_panel',
 		'recaptcha',
 		'hcaptcha',
 		'turnstile',
@@ -392,6 +396,10 @@ final class SchemaValidator {
 		$checkboxErrors = self::checkboxOptionErrors( $schema['fields'], 'fields' );
 		if ( $checkboxErrors ) {
 			throw new InvalidArgumentException( $checkboxErrors[0]['message'] ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		}
+
+		foreach ( self::panelNestingProblems( $schema ) as $problem ) {
+			throw new InvalidArgumentException( $problem['message'] ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		// Conditional logic (permissive but structured)
@@ -637,6 +645,12 @@ final class SchemaValidator {
 			}
 		}
 
+		if ( isset( $schema['fields'] ) && is_array( $schema['fields'] ) ) {
+			foreach ( self::panelNestingProblems( $schema ) as $problem ) {
+				$errors[] = $problem;
+			}
+		}
+
 		if ( isset( $schema['logic'] ) && ! is_array( $schema['logic'] ) ) {
 			$push( $errors, 'logic', 'Schema.logic must be an array of rules.' );
 		}
@@ -791,6 +805,94 @@ final class SchemaValidator {
 	}
 
 	/**
+	 * Panel containers (Tabs, Accordion) and the panel type each one holds.
+	 *
+	 * @var array<string,string>
+	 */
+	public const PANEL_TYPES = array(
+		'tabs_container'      => 'tab_panel',
+		'accordion_container' => 'accordion_panel',
+	);
+
+	/**
+	 * Where Tabs, Accordion and their panels may not sit (2.9.0): a panel only
+	 * inside its own container, a container holding nothing but its panels,
+	 * no Page Break inside a panel container, no Tabs inside Tabs and no
+	 * Accordion inside an Accordion at any depth, and neither inside a
+	 * Repeater at any depth. Mirrors the builder (resolveDrop.js).
+	 *
+	 * @param array $schema Schema.
+	 * @return array<int, array{path:string,message:string,fieldKey:string}>
+	 */
+	public static function panelNestingProblems( array $schema ): array {
+		$problems = array();
+		self::walkPanels( (array) ( $schema['fields'] ?? array() ), 'fields', '', array(), false, $problems );
+		return $problems;
+	}
+
+	/**
+	 * Walk a field list for panelNestingProblems().
+	 *
+	 * @param array  $nodes     Field list.
+	 * @param string $path      Path of the list.
+	 * @param string $parent    Type of the parent node.
+	 * @param array  $ancestors Types of the panel containers above.
+	 * @param bool   $inRepeat  Whether a Repeater is above.
+	 * @param array  $problems  Collected problems.
+	 */
+	private static function walkPanels( array $nodes, string $path, string $parent, array $ancestors, bool $inRepeat, array &$problems ): void {
+		foreach ( $nodes as $i => $node ) {
+			if ( ! is_array( $node ) ) {
+				continue;
+			}
+			$type = (string) ( $node['type'] ?? '' );
+			$key  = (string) ( $node['key'] ?? ( $node['config']['key'] ?? '' ) );
+			$here = "{$path}[{$i}]";
+			$add  = static function ( string $message ) use ( &$problems, $here, $key ): void {
+				$problems[] = array(
+					'path'     => $here,
+					'message'  => $message,
+					'fieldKey' => $key,
+				);
+			};
+
+			$owner = array_search( $type, self::PANEL_TYPES, true );
+			if ( false !== $owner && $parent !== $owner ) {
+				$add( __( 'A tab or section can only sit inside its own Tabs or Accordion.', 'subtleforms' ) );
+			}
+			if ( isset( self::PANEL_TYPES[ $parent ] ) && self::PANEL_TYPES[ $parent ] !== $type ) {
+				$add( __( 'Tabs and Accordion can only hold their own tabs or sections. Put fields inside a tab or section.', 'subtleforms' ) );
+			}
+			if ( 'step' === $type && ( $ancestors || isset( self::PANEL_TYPES[ $parent ] ) ) ) {
+				$add( __( 'A Page Break cannot sit inside Tabs or an Accordion.', 'subtleforms' ) );
+			}
+			if ( isset( self::PANEL_TYPES[ $type ] ) ) {
+				if ( in_array( $type, $ancestors, true ) ) {
+					$add( __( 'Tabs cannot sit inside Tabs, and an Accordion cannot sit inside an Accordion.', 'subtleforms' ) );
+				}
+				if ( $inRepeat ) {
+					$add( __( 'Tabs and Accordion cannot sit inside a Repeater.', 'subtleforms' ) );
+				}
+			}
+
+			$below  = isset( self::PANEL_TYPES[ $type ] ) ? array_merge( $ancestors, array( $type ) ) : $ancestors;
+			$repeat = $inRepeat || Repeater::TYPE === $type;
+			foreach ( array( 'children', 'fields' ) as $childKey ) {
+				if ( isset( $node[ $childKey ] ) && is_array( $node[ $childKey ] ) && self::isList( $node[ $childKey ] ) ) {
+					self::walkPanels( $node[ $childKey ], "{$here}.{$childKey}", $type, $below, $repeat, $problems );
+				}
+			}
+			if ( isset( $node['columns'] ) && is_array( $node['columns'] ) ) {
+				foreach ( $node['columns'] as $c => $column ) {
+					if ( is_array( $column ) && self::isList( $column ) ) {
+						self::walkPanels( $column, "{$here}.columns[{$c}]", $type, $below, $repeat, $problems );
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * Whether an array is a plain list (0..n-1 keys).
 	 *
 	 * @param array $value Array.
@@ -803,7 +905,7 @@ final class SchemaValidator {
 	/**
 	 * Field types that hold no answer.
 	 */
-	private const LAYOUT_TYPES = array( 'html', 'section_break', 'disclaimer', 'step', 'form_step', 'repeat_field', 'recaptcha', 'hcaptcha', 'turnstile', 'captcha', 'action_hook', 'save_resume', 'hidden' );
+	private const LAYOUT_TYPES = array( 'html', 'section_break', 'disclaimer', 'step', 'form_step', 'repeat_field', 'recaptcha', 'hcaptcha', 'turnstile', 'captcha', 'action_hook', 'save_resume', 'hidden', 'tab_panel', 'accordion_panel' );
 
 	/**
 	 * Whether a field type takes an answer from the visitor.

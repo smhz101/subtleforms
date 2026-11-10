@@ -51,6 +51,8 @@ final class FieldMapper {
 		'turnstile',
 		'action_hook',
 		'save_resume',
+		'tab_panel',
+		'accordion_panel',
 	);
 
 	/**

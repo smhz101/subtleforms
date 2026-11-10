@@ -1409,6 +1409,197 @@
 				"required_fields": [],
 				"hidden_steps": []
 			}
+		},
+		{
+			"name": "a hidden tab panel hides the fields inside it",
+			"schema": {
+				"fields": [
+					{
+						"key": "kind",
+						"type": "radio"
+					},
+					{
+						"key": "tabs1",
+						"type": "tabs_container",
+						"id": "c1",
+						"children": [
+							{
+								"id": "pan1",
+								"key": "tab_a",
+								"type": "tab_panel",
+								"label": "Person",
+								"children": [
+									{
+										"key": "first",
+										"type": "text",
+										"required": true
+									}
+								]
+							},
+							{
+								"id": "pan2",
+								"key": "tab_b",
+								"type": "tab_panel",
+								"label": "Company",
+								"logic": {
+									"action": "show",
+									"groups": [
+										{
+											"match": "all",
+											"rules": [
+												{
+													"field": "kind",
+													"operator": "equals",
+													"value": "company"
+												}
+											]
+										}
+									]
+								},
+								"children": [
+									{
+										"key": "company",
+										"type": "text",
+										"required": true
+									}
+								]
+							}
+						]
+					}
+				]
+			},
+			"values": {
+				"kind": "person"
+			},
+			"expected": {
+				"hidden_fields": [
+					"tab_b",
+					"company"
+				],
+				"required_fields": [],
+				"hidden_steps": []
+			}
+		},
+		{
+			"name": "an accordion section without a key is hidden by its id",
+			"schema": {
+				"fields": [
+					{
+						"key": "kind",
+						"type": "radio"
+					},
+					{
+						"key": "acc1",
+						"type": "accordion_container",
+						"id": "c2",
+						"children": [
+							{
+								"id": "sec1",
+								"type": "accordion_panel",
+								"label": "One",
+								"children": [
+									{
+										"key": "one",
+										"type": "text"
+									}
+								]
+							},
+							{
+								"id": "sec2",
+								"type": "accordion_panel",
+								"label": "Two",
+								"logic": {
+									"action": "hide",
+									"groups": [
+										{
+											"match": "all",
+											"rules": [
+												{
+													"field": "kind",
+													"operator": "equals",
+													"value": "company"
+												}
+											]
+										}
+									]
+								},
+								"children": [
+									{
+										"key": "two",
+										"type": "text"
+									}
+								]
+							}
+						]
+					}
+				]
+			},
+			"values": {
+				"kind": "company"
+			},
+			"expected": {
+				"hidden_fields": [
+					"sec2",
+					"two"
+				],
+				"required_fields": [],
+				"hidden_steps": []
+			}
+		},
+		{
+			"name": "hiding a whole tabs container hides every panel and field",
+			"schema": {
+				"fields": [
+					{
+						"key": "kind",
+						"type": "radio"
+					},
+					{
+						"key": "tabs2",
+						"type": "tabs_container",
+						"logic": {
+							"action": "show",
+							"groups": [
+								{
+									"match": "all",
+									"rules": [
+										{
+											"field": "kind",
+											"operator": "equals",
+											"value": "company"
+										}
+									]
+								}
+							]
+						},
+						"children": [
+							{
+								"id": "pan3",
+								"key": "tab_c",
+								"type": "tab_panel",
+								"children": [
+									{
+										"key": "deep",
+										"type": "text"
+									}
+								]
+							}
+						]
+					}
+				]
+			},
+			"values": {
+				"kind": "person"
+			},
+			"expected": {
+				"hidden_fields": [
+					"tabs2",
+					"tab_c",
+					"deep"
+				],
+				"required_fields": [],
+				"hidden_steps": []
+			}
 		}
 	],
 	"ignoredState": [
