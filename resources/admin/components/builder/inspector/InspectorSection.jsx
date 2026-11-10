@@ -90,7 +90,7 @@ export default function InspectorSection( {
 					<span className="sf-isec__title">{ title }</span>
 					{ badge ? <span className="sf-isec__badge">{ badge }</span> : null }
 					<span className="sf-isec__chevron" aria-hidden="true">
-						<ChevronGlyph size={ 12 } />
+						<ChevronGlyph size={ 16 } />
 					</span>
 				</button>
 				{ action ? (

@@ -63,15 +63,18 @@ export function hasSection( def, section ) {
 }
 
 /**
- * Which block of the settings sheet draws a control.
+ * Which block of the settings panel draws a control.
  *
- *   content   what the field says and shows: the `general` controls, and for a
- *             field that takes an answer the controls the old Display panel
- *             held (placeholder, default value, label and help placement).
+ *   content   what the field says: the `general` controls (label, help text,
+ *             block content).
  *   subfields the parts of a Name or Address field.
  *   type      the settings of a layout block (Repeater, Step, Notice).
  *   rules     the `validation` controls.
  *   advanced  the `advanced` controls.
+ *   styles    the `appearance` controls of a field that takes an answer
+ *             (they sit on the Styles tab, grouped by styleGroup()).
+ *   none      a section the panel never drew (the chained levels control sits
+ *             in `choices` and has its own section).
  *
  * Every control of a definition lands in exactly one block.
  *
@@ -93,16 +96,46 @@ export function controlBlock( ctrl, isLayout ) {
 		return 'content';
 	}
 	if ( ctrl.section !== 'appearance' ) {
-		// A section the panel never drew (the chained levels control sits in
-		// `choices` and has its own Dropdowns section): not drawn here either.
 		return 'none';
 	}
-	return isLayout ? 'type' : 'content';
+	// What a block says is content even when its definition files it under
+	// `appearance` (the HTML block's content).
+	if ( GENERAL_CONTROLS.includes( ctrl.key ?? ctrl.name ) ) {
+		return 'content';
+	}
+	return isLayout ? 'type' : 'styles';
+}
+
+/**
+ * The Styles tab group an appearance control belongs to, named after what the
+ * control does and derived from its name: Label (label visibility), Help text
+ * (help text placement), Input (placeholder, default value, prefix, suffix and the rest).
+ *
+ * @param {Object} ctrl Control with `section` resolved.
+ * @return {string} Group id: label, help, layout or input.
+ */
+export function styleGroup( ctrl ) {
+	const name = String( ctrl?.key ?? ctrl?.name ?? '' ).toLowerCase();
+	if ( /help|description/.test( name ) ) {
+		return 'help';
+	}
+	if ( /label/.test( name ) ) {
+		return 'label';
+	}
+	if ( /layout|width|column|spacing/.test( name ) ) {
+		return 'layout';
+	}
+	return 'input';
 }
 
 /** A filter for DynamicInspectorPanel that keeps the controls of one block. */
 export function blockPicker( block, isLayout ) {
 	return ( ctrl ) => controlBlock( ctrl, isLayout ) === block;
+}
+
+/** A filter that keeps the Styles controls of one group (see styleGroup()). */
+export function styleGroupPicker( groupId ) {
+	return ( ctrl ) => controlBlock( ctrl, false ) === 'styles' && styleGroup( ctrl ) === groupId;
 }
 
 /**

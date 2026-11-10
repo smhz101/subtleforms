@@ -1,5 +1,5 @@
 import { Button, Notice } from '@wordpress/components';
-import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
+import { useEffect, useId, useMemo, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import Icon from '../../ui/Icon';
 import LogicEditor, { readLogic, countRules } from './LogicEditor';
@@ -13,6 +13,7 @@ import Segmented from './inspector/controls/Segmented';
 import ChipSelect from './inspector/controls/ChipSelect';
 import PropertyRow, { useRowIds } from './inspector/PropertyRow';
 import InspectorSection, { useSectionOpen } from './inspector/InspectorSection';
+import InspectorTabs, { useInspectorTab } from './inspector/InspectorTabs';
 import { AsteriskGlyph, ArrowsHorizontalGlyph, EyeGlyph } from './inspector/glyphs';
 import { chainedUsesCsv } from '../../../shared/chainedLevels';
 import { useBuilder } from './context/BuilderContext';
@@ -30,6 +31,7 @@ import { chainedNotSetUpWarning } from './utils/fieldWarnings';
 import {
   blockPicker,
   hasControls,
+  styleGroupPicker,
   isLogicOnlyType,
   resolveControls,
 } from './inspector/controlSections';
@@ -43,6 +45,14 @@ import './FieldInspector.scss';
 
 /** Types that take no answer, so there is nothing to require. */
 const NO_REQUIRED = new Set(['calculation', 'hidden', 'html']);
+
+/** The groups of the Styles tab, in order (see styleGroup()). */
+const styleGroups = () => [
+  { id: 'label', title: __('Label', 'subtleforms') },
+  { id: 'help', title: __('Help text', 'subtleforms') },
+  { id: 'layout', title: __('Layout', 'subtleforms') },
+  { id: 'input', title: __('Input', 'subtleforms') },
+];
 
 /**
  * "Step" setting for fields of a multi-step form (2.3.1): moving a field to
@@ -85,7 +95,11 @@ function showsStepSetting(tree, nodeId) {
   return !!node && node.type !== 'step' && stepOptions(tree).length > 0;
 }
 
-/** Width as a row of pills: Auto, then the widths the field layout offers. */
+/**
+ * Width as a row of equal squares, like the heading level picker in core:
+ * Auto, Full, 3/4, 2/3, 1/2, 1/3 and 1/4, the selected one bordered and bold.
+ * All seven fit in the 320px panel because the squares sit under the label.
+ */
 function WidthRow({ field, onUpdate, isReadOnly }) {
   const ids = useRowIds();
   const appearance = field?.appearance || field?.config?.appearance || {};
@@ -102,10 +116,12 @@ function WidthRow({ field, onUpdate, isReadOnly }) {
       label={__('Width', 'subtleforms')}
       ids={ids}
       composite
+      stacked
+      className='sf-prow--quick'
       icon={<ArrowsHorizontalGlyph />}
       help={__('Narrower fields sit side by side and stack on phones.', 'subtleforms')}>
       <Segmented
-        className='sf-seg--compact'
+        className='sf-seg--fill'
         options={options}
         value={appearance.width ?? ''}
         labelId={ids.labelId}
@@ -148,6 +164,8 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
   const choicesState = useSectionOpen('choices', true);
   const logicState = useSectionOpen('logic', true);
   const logicOpen = logicState[0];
+  const [savedTab, setTab] = useInspectorTab();
+  const tabBase = `sf-itab-${useId().replace(/:/g, '')}`;
 
   const definition = fieldDefinitions?.[field?.type];
   const fieldCategory = definition?.meta?.category;
@@ -221,7 +239,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
     }
     (section.querySelector('.sf-isec__body button, .sf-isec__body select, .sf-isec__body input') ||
       section.querySelector('.sf-isec__toggle'))?.focus?.();
-  }, [pending, logicOpen]);
+  }, [pending, logicOpen, savedTab]);
 
   if (!field) {
     return (
@@ -265,6 +283,8 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
 
   const FieldIcon = getIcon(field.type);
   const typeLabel = definition?.label || field.type?.replace(/_/g, ' ');
+  const typeDescription =
+    typeof definition?.meta?.description === 'string' ? definition.meta.description.trim() : '';
   const displayLabel =
     String(field.label || '').trim() || String(field.title || '').trim() || typeLabel;
   const fieldKey = field.key;
@@ -292,14 +312,20 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
   const isChoice = isChoiceType(field.type);
   const isChained = field.type === 'chained_select';
   const hasStyle = supportsAppearance(field.type);
+  // The Styles tab: the `appearance` controls in groups named after what they
+  // do, then the field's own look (layout, colours, text and shape).
+  const stylesGroups = styleGroups().filter((g) => controls.some(styleGroupPicker(g.id)));
+  const hasStylesTab = stylesGroups.length > 0 || hasStyle;
+  const tab = hasStylesTab ? savedTab : 'settings';
   const drawsAnything =
-    hasContent || hasSubfields || hasTypeControls || hasRules || hasAdvanced || isChoice || isChained || showLogic || hasStyle || showQuick;
+    hasContent || hasSubfields || hasTypeControls || hasRules || hasAdvanced || isChoice || isChained || showLogic || hasStylesTab || showQuick;
 
   const requiredHelp = field.required
     ? __('Visitors must answer before the form can be sent.', 'subtleforms')
     : __('Visitors can leave this empty.', 'subtleforms');
 
   const openLogic = (add) => {
+    setTab('settings');
     logicState[1](true);
     setPending({ section: 'logic', add });
   };
@@ -318,12 +344,17 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
 
   return (
     <div className='sf-field-inspector' ref={rootRef}>
+      <div className='sf-field-inspector__top'>
       <div className='sf-field-inspector__header'>
         <span className='sf-field-inspector__type-icon' aria-hidden='true'>
-          <FieldIcon size={18} />
+          <FieldIcon size={16} />
         </span>
         <div className='sf-field-inspector__header-info'>
           <strong className='sf-field-inspector__title'>{displayLabel}</strong>
+          <span
+            className={`sf-field-inspector__description${typeDescription ? '' : ' is-fallback'}`}>
+            {typeDescription || typeLabel}
+          </span>
           {fieldKey && (
             <FieldKeyEditor
               nodeId={selectedId}
@@ -363,6 +394,9 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
         </div>
       </div>
 
+      {hasStylesTab && <InspectorTabs tab={tab} onChange={setTab} idBase={tabBase} />}
+      </div>
+
       {(validationMessages.length > 0 || fieldWarnings.length > 0) && (
         <div className='sf-field-inspector__notices'>
           {validationMessages.slice(0, 1).map((m, i) => (
@@ -378,8 +412,13 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
         </div>
       )}
 
-      <div className='sf-field-inspector__sheet' key={field.id ?? 'none'}>
-        {showQuick && (
+      <div
+        className='sf-field-inspector__sheet'
+        key={field.id ?? 'none'}
+        role={hasStylesTab ? 'tabpanel' : undefined}
+        id={hasStylesTab ? `${tabBase}-panel` : undefined}
+        aria-labelledby={hasStylesTab ? `${tabBase}-tab-${tab}` : undefined}>
+        {tab === 'settings' && showQuick && (
           <div className='sf-field-inspector__quick' data-section='quick'>
             {showRequired && (
               <ToggleInspectorControl
@@ -390,7 +429,6 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
                 onText={__('must answer', 'subtleforms')}
                 offText={__('visitors may skip', 'subtleforms')}
                 help={requiredHelp}
-                helpAlways={false}
                 disabled={isReadOnly}
                 onChange={(checked) => handleUpdate({ required: checked })}
               />
@@ -402,7 +440,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
           </div>
         )}
 
-        {hasContent && (
+        {tab === 'settings' && hasContent && (
           <InspectorSection id='content' title={__('Content', 'subtleforms')}>
             <StepSetting
               tree={tree}
@@ -420,7 +458,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
           </InspectorSection>
         )}
 
-        {isChoice && (
+        {tab === 'settings' && isChoice && (
           <InspectorSection
             id='choices'
             title={__('Choices', 'subtleforms')}
@@ -443,7 +481,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
           </InspectorSection>
         )}
 
-        {isChained && (
+        {tab === 'settings' && isChained && (
           <InspectorSection id='dropdowns' title={__('Dropdowns', 'subtleforms')}>
             <div className='sf-prow sf-prow--wide sf-prow--bare'>
               <ChainedDisplayControl
@@ -474,7 +512,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
           </InspectorSection>
         )}
 
-        {hasSubfields && (
+        {tab === 'settings' && hasSubfields && (
           <InspectorSection id='subfields' title={__('Sub-fields', 'subtleforms')}>
             <DynamicInspectorPanel
               field={field}
@@ -486,7 +524,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
           </InspectorSection>
         )}
 
-        {hasTypeControls && (
+        {tab === 'settings' && hasTypeControls && (
           <InspectorSection
             id='type'
             title={sprintf(
@@ -504,7 +542,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
           </InspectorSection>
         )}
 
-        {hasRules && (
+        {tab === 'settings' && hasRules && (
           <InspectorSection
             id='rules'
             title={__('Rules', 'subtleforms')}
@@ -525,7 +563,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
           </InspectorSection>
         )}
 
-        {showLogic && (
+        {tab === 'settings' && showLogic && (
           <InspectorSection
             id='logic'
             title={__('Logic', 'subtleforms')}
@@ -554,19 +592,32 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
           </InspectorSection>
         )}
 
-        {hasStyle && (
-          <InspectorSection id='style' title={__('Style', 'subtleforms')} defaultOpen={false}>
-            <FieldAppearancePanel
-              field={field}
-              onUpdate={handleUpdate}
-              formAppearance={formAppearance}
-              isReadOnly={isReadOnly}
-              hideWidth={showWidth}
-            />
-          </InspectorSection>
+        {tab === 'styles' && (
+          <>
+            {stylesGroups.map((group) => (
+              <InspectorSection key={group.id} id={`style-${group.id}`} title={group.title}>
+                <DynamicInspectorPanel
+                  field={field}
+                  onUpdate={handleUpdate}
+                  isReadOnly={isReadOnly}
+                  pick={styleGroupPicker(group.id)}
+                  showEmpty={false}
+                />
+              </InspectorSection>
+            ))}
+            {hasStyle && (
+              <FieldAppearancePanel
+                field={field}
+                onUpdate={handleUpdate}
+                formAppearance={formAppearance}
+                isReadOnly={isReadOnly}
+                hideWidth={showWidth}
+              />
+            )}
+          </>
         )}
 
-        {hasAdvanced && (
+        {tab === 'settings' && hasAdvanced && (
           <InspectorSection id='advanced' title={__('Advanced', 'subtleforms')} defaultOpen={false}>
             <DynamicInspectorPanel
               field={field}
