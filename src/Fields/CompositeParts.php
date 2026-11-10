@@ -43,10 +43,173 @@ final class CompositeParts {
 	);
 
 	/**
+	 * Parts per type once add-ons have been asked, kept for the request.
+	 *
+	 * @var array<string,array<int,array>>
+	 */
+	private static array $cache = array();
+
+	/**
+	 * Forget the parts read so far (tests, or an add-on that registers its
+	 * filter late).
+	 */
+	public static function resetCache(): void {
+		self::$cache = array();
+	}
+
+	/**
+	 * The parts of a type: the built-in ones, then those an add-on appended
+	 * through `subtleforms/fields/composite_parts`.
+	 *
+	 * Built-in parts cannot be replaced, changed or removed that way. An
+	 * added part must be an array with a `part` and a `value` key (lower case
+	 * letters, digits and underscores, starting with a letter); anything else,
+	 * and any part whose name or answer key is already taken, is dropped.
+	 * A part with `data => true` is stored with the answer but never drawn,
+	 * demanded or shown as text.
+	 *
+	 * @param string $type Field type.
+	 * @return array<int,array>
+	 */
+	private static function defs( string $type ): array {
+		if ( isset( self::$cache[ $type ] ) ) {
+			return self::$cache[ $type ];
+		}
+		$defs = self::PARTS[ $type ] ?? array();
+		if ( array() === $defs ) {
+			return array();
+		}
+		if ( function_exists( 'apply_filters' ) ) {
+			/**
+			 * Add parts to a composite field (Name, Address). Return the list
+			 * you received with your parts appended. Only appended parts are
+			 * used: built-in parts cannot be replaced or removed.
+			 *
+			 * A part is an array with `part` (settings key) and `value`
+			 * (answer key), both matching /^[a-z][a-z0-9_]*$/, and optionally
+			 * `alias`, `label`, `toggleable`, `on`, `optional`, `data`,
+			 * `flags`, `auto`, `full` and `placeholder`. `data => true` keeps
+			 * the value with the answer without drawing it, demanding it or
+			 * showing it in entries, emails and exports.
+			 *
+			 * @param array  $parts Parts of the type, built-in ones first.
+			 * @param string $type  Field type, `name_group` or `address_group`.
+			 * @since 2.9.0
+			 */
+			$filtered = apply_filters( 'subtleforms/fields/composite_parts', $defs, $type );
+			if ( is_array( $filtered ) ) {
+				$taken = array();
+				foreach ( $defs as $def ) {
+					$taken[ $def['part'] ]  = true;
+					$taken[ $def['value'] ] = true;
+					if ( isset( $def['alias'] ) ) {
+						$taken[ $def['alias'] ] = true;
+					}
+				}
+				$builtIn = array_column( $defs, 'part' );
+				foreach ( $filtered as $candidate ) {
+					$def = self::cleanPart( $candidate );
+					if ( null === $def || in_array( $def['part'], $builtIn, true ) ) {
+						continue;
+					}
+					$names = array_filter( array( $def['part'], $def['value'], $def['alias'] ?? null ) );
+					if ( array_intersect_key( array_flip( $names ), $taken ) ) {
+						continue;
+					}
+					foreach ( $names as $name ) {
+						$taken[ $name ] = true;
+					}
+					$defs[] = $def;
+				}
+			}
+		}
+		self::$cache[ $type ] = $defs;
+		return $defs;
+	}
+
+	/**
+	 * One part an add-on supplied, in the shape the built-in ones have, or
+	 * null when it is not usable.
+	 *
+	 * @param mixed $part Part as supplied.
+	 * @return array|null
+	 */
+	private static function cleanPart( $part ): ?array {
+		$name = '/^[a-z][a-z0-9_]*$/';
+		if ( ! is_array( $part )
+			|| ! isset( $part['part'], $part['value'] )
+			|| ! is_string( $part['part'] ) || ! is_string( $part['value'] )
+			|| 1 !== preg_match( $name, $part['part'] ) || 1 !== preg_match( $name, $part['value'] ) ) {
+			return null;
+		}
+		$data = ! empty( $part['data'] );
+		$def  = array(
+			'part'       => $part['part'],
+			'value'      => $part['value'],
+			'label'      => isset( $part['label'] ) && is_string( $part['label'] ) && '' !== $part['label'] ? $part['label'] : $part['part'],
+			'toggleable' => ! $data && ! empty( $part['toggleable'] ),
+			'on'         => $data || ! array_key_exists( 'on', $part ) || false !== $part['on'],
+			'optional'   => $data || ! empty( $part['optional'] ),
+			'data'       => $data,
+		);
+		if ( isset( $part['alias'] ) && is_string( $part['alias'] ) && 1 === preg_match( $name, $part['alias'] ) ) {
+			$def['alias'] = $part['alias'];
+		}
+		if ( isset( $part['flags'] ) && is_array( $part['flags'] ) ) {
+			$def['flags'] = array_values( array_filter( $part['flags'], 'is_string' ) );
+		}
+		foreach ( array( 'auto', 'placeholder' ) as $text ) {
+			if ( isset( $part[ $text ] ) && is_string( $part[ $text ] ) ) {
+				$def[ $text ] = $part[ $text ];
+			}
+		}
+		$def['full'] = ! empty( $part['full'] );
+		return $def;
+	}
+
+	/**
 	 * Whether a type is made of parts.
 	 */
 	public static function has( string $type ): bool {
 		return isset( self::PARTS[ $type ] );
+	}
+
+	/**
+	 * The answer keys a type keeps: every part's `value` and `alias`, data
+	 * parts included. Anything else posted for the field is not stored.
+	 *
+	 * @param string $type Field type.
+	 * @return string[]
+	 */
+	public static function knownKeys( string $type ): array {
+		$keys = array();
+		foreach ( self::defs( $type ) as $def ) {
+			$keys[] = $def['value'];
+			if ( isset( $def['alias'] ) ) {
+				$keys[] = $def['alias'];
+			}
+		}
+		return array_values( array_unique( $keys ) );
+	}
+
+	/**
+	 * The parts that make display text, in builder order: every part that
+	 * is not a data part, whether drawn or not.
+	 *
+	 * @param string $type Field type.
+	 * @return array<int,array{value:string,alias:?string}>
+	 */
+	public static function textParts( string $type ): array {
+		$out = array();
+		foreach ( self::defs( $type ) as $def ) {
+			if ( empty( $def['data'] ) ) {
+				$out[] = array(
+					'value' => $def['value'],
+					'alias' => $def['alias'] ?? null,
+				);
+			}
+		}
+		return $out;
 	}
 
 	/**
@@ -58,8 +221,8 @@ final class CompositeParts {
 	 * @return array<string,array>|null Null when nothing usable is stored.
 	 */
 	public static function settingsMap( string $type, $fields ): ?array {
-		$defs = self::PARTS[ $type ] ?? null;
-		if ( null === $defs || ! is_array( $fields ) || array() === $fields ) {
+		$defs = self::defs( $type );
+		if ( array() === $defs || ! is_array( $fields ) || array() === $fields ) {
 			return null;
 		}
 		if ( ! array_is_list( $fields ) ) {
@@ -106,10 +269,10 @@ final class CompositeParts {
 	 *
 	 * @param string $type  Field type.
 	 * @param array  $field Field node (flat or with `config`).
-	 * @return array<int,array{part:string,value:string,alias:?string,optional:bool}>
+	 * @return array<int,array{part:string,value:string,alias:?string,optional:bool,data:bool}>
 	 */
 	public static function parts( string $type, array $field ): array {
-		$defs = self::PARTS[ $type ] ?? array();
+		$defs = self::defs( $type );
 		if ( ! $defs ) {
 			return array();
 		}
@@ -138,6 +301,7 @@ final class CompositeParts {
 					'value'    => $def['value'],
 					'alias'    => $def['alias'] ?? null,
 					'optional' => ! empty( $def['optional'] ),
+					'data'     => ! empty( $def['data'] ),
 				);
 			}
 		}
@@ -157,7 +321,7 @@ final class CompositeParts {
 		$value   = is_array( $value ) ? $value : array();
 		$missing = array();
 		foreach ( self::parts( $type, $field ) as $part ) {
-			if ( $part['optional'] ) {
+			if ( $part['optional'] || $part['data'] ) {
 				continue;
 			}
 			$v = $value[ $part['value'] ] ?? null;
