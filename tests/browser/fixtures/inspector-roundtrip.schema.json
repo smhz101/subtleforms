@@ -1,0 +1,52 @@
+[
+  {
+    "type": "text",
+    "key": "name",
+    "id": "n1",
+    "kind": "input",
+    "label": "Name"
+  },
+  {
+    "type": "dropdown",
+    "key": "topic",
+    "id": "n2",
+    "kind": "input",
+    "label": "Topic of your message",
+    "description": "We reply by email.",
+    "required": true,
+    "options": [
+      {
+        "label": "Sales",
+        "value": "sales"
+      },
+      {
+        "label": "Support",
+        "value": "support"
+      },
+      {
+        "label": "Other",
+        "value": "other"
+      }
+    ],
+    "appearance": {
+      "width": "50"
+    },
+    "requiredMessage": "Pick a topic.",
+    "logic": {
+      "action": "show",
+      "groups": [
+        {
+          "match": "all",
+          "rules": [
+            {
+              "field": "name",
+              "operator": "not_empty",
+              "value": ""
+            }
+          ]
+        }
+      ]
+    },
+    "conditions": []
+  }
+]
