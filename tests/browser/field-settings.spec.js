@@ -71,16 +71,18 @@ test('label visibility, help text placement, messages and admin label: builder, 
 
   // Name: hidden label.
   await chrome(page, 0).click();
-  await openPanel(page, 'Display');
-  await inspector(page).getByLabel('Field label visibility').selectOption('hidden');
+  await openPanel(page, 'Styles');
+  await inspector(page).getByLabel('Field label visibility', { exact: true }).selectOption('hidden');
   await expect(chrome(page, 0).locator('.sf-field-renderer__header')).toHaveClass(/is-label-hidden/);
   await expect(chrome(page, 0).locator('.sf-field-renderer__label-hidden-badge')).toBeVisible();
 
   // Email: help text above, messages, admin label.
   await chrome(page, 1).click();
-  await inspector(page).getByLabel('Help text', { exact: true }).fill('We only use it to reply.');
   await openPanel(page, 'Display');
-  await inspector(page).getByLabel('Help text placement').selectOption('above');
+  await inspector(page).getByLabel('Help text', { exact: true }).fill('We only use it to reply.');
+  await openPanel(page, 'Styles');
+  await inspector(page).getByLabel('Help text placement', { exact: true }).selectOption('above');
+  await openPanel(page, 'Display');
   const emailChrome = chrome(page, 1);
   await expect(emailChrome.locator('.sf-field-renderer__help-text--above')).toHaveText('We only use it to reply.');
   // Above means before the input.
@@ -93,11 +95,11 @@ test('label visibility, help text placement, messages and admin label: builder, 
   await page.screenshot({ path: `${SHOTS}/item5-builder-canvas.png` });
 
   await openPanel(page, 'Rules');
-  await inspector(page).getByLabel('If empty').fill('We need your email.');
-  await inspector(page).getByLabel('If invalid').fill('That does not look like an email address.');
+  await inspector(page).getByLabel('If empty', { exact: true }).fill('We need your email.');
+  await inspector(page).getByLabel('If invalid', { exact: true }).fill('That does not look like an email address.');
   await page.screenshot({ path: `${SHOTS}/item5-validation-tab.png` });
   await openPanel(page, 'Advanced');
-  await inspector(page).getByLabel('Admin label').fill('Contact email');
+  await inspector(page).getByLabel('Admin label', { exact: true }).fill('Contact email');
   await page.screenshot({ path: `${SHOTS}/item5-settings-tab.png` });
 
   await saveDraft(page);

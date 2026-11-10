@@ -229,7 +229,7 @@ test('the builder canvas and the preview show flags, and the setting turns them 
 
   await canvasField.click();
   await openPanel(page, 'General');
-  const toggle = page.locator('.sf-field-inspector').getByLabel('Show country flags');
+  const toggle = page.locator('.sf-field-inspector').getByLabel('Show country flags', { exact: true });
   await expect(toggle).not.toBeChecked();
   await expect(page.locator('.sf-field-inspector')).toContainText('Loads a flag image only for forms that use it.');
   await toggle.check();
