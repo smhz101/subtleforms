@@ -211,10 +211,9 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
     const motion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ? 'auto' : 'smooth';
     section.scrollIntoView?.({ block: 'nearest', behavior: motion });
     if (pending.add) {
-      // The Logic editor adds a rule with its own button: use it.
-      const add = [...section.querySelectorAll('.sf-isec__body button')].find((b) =>
-        /add rule/i.test(b.textContent || '')
-      );
+      // The Logic editor adds a rule with its own button, found by a stable
+      // attribute so a translated label does not matter.
+      const add = section.querySelector('.sf-isec__body [data-sf-action="add-rule"]');
       if (add) {
         add.click();
         return;

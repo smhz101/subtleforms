@@ -318,6 +318,7 @@ function FieldLogicEditor({
             <Button
               variant='link'
               className='sf-logic-editor__add-rule'
+              data-sf-action='add-rule'
               disabled={readOnly}
               onClick={() => addRule(gi)}>
               {__('+ Add rule', 'subtleforms')}
@@ -328,7 +329,7 @@ function FieldLogicEditor({
 
       <div className='sf-logic-editor__footer'>
         {groups.length === 0 ? (
-          <Button variant='secondary' size='compact' disabled={readOnly} onClick={() => addRule(0)}>
+          <Button variant='secondary' size='compact' data-sf-action='add-rule' disabled={readOnly} onClick={() => addRule(0)}>
             {addLabel || __('Add rule', 'subtleforms')}
           </Button>
         ) : null}
