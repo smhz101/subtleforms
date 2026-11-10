@@ -21,7 +21,7 @@ export default function MaskTryControl( { field, label, layout } ) {
 	const id = `sf-mask-try-${ field?.id || field?.key || 'field' }`;
 	if ( layout === 'row' ) {
 		return (
-			<PropertyRow className="sf-mask-try" label={ label || __( 'Try it', 'subtleforms' ) } ids={ { ...ids, id } } help={ message || maskHint( mask ) } helpAlways={ !! message }>
+			<PropertyRow className="sf-mask-try" label={ label || __( 'Try it', 'subtleforms' ) } ids={ { ...ids, id } } help={ maskHint( mask ) } stacked>
 				<MaskedInput
 					id={ id }
 					config={ field }
@@ -31,8 +31,13 @@ export default function MaskTryControl( { field, label, layout } ) {
 					className="sf-prow__input sf-mask-try__input"
 					autoComplete="off"
 					aria-invalid={ !! message || undefined }
-					describedBy={ ids.helpId }
+					describedBy={ message ? `${ ids.helpId } ${ id }-error` : ids.helpId }
 				/>
+				{ message ? (
+					<p className="sf-prow__note is-error" id={ `${ id }-error` } role="status">
+						{ message }
+					</p>
+				) : null }
 			</PropertyRow>
 		);
 	}

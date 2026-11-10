@@ -46,7 +46,7 @@ const NumberInspectorControl = memo( function NumberInspectorControl( {
 		);
 	}
 	return (
-		<PropertyRow label={ label } ids={ ids } help={ help }>
+		<PropertyRow label={ label } ids={ ids } help={ help } stacked={ !! unit } className={ unit ? '' : 'sf-prow--field' }>
 			<span className="sf-prow__number">
 				<input
 					type="number"

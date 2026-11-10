@@ -1,13 +1,18 @@
 /**
- * One setting of the field settings panel: the label on the left, the value
- * on the right. A wide row (a list, an add-on control, anything that cannot
- * fit beside a label) puts the label on its own line above the value.
+ * One setting of the field settings panel, in one of two layouts.
  *
- * The help text of a setting stays in the page for screen readers. It is
- * drawn under the value while the row is hovered or has focus, and always
- * for a setting that says what its state means (a toggle with a state text).
+ *   stacked  (default for text, text areas, numbers, long selects and any
+ *            `wide` control) the label above the control, the control the full
+ *            width, as the WordPress block panel draws a setting.
+ *   inline   (toggles, short choices, chips) the label on the left, the
+ *            control right-aligned, a 40px row.
+ *
+ * A setting with help text gets an info button after its label that opens a
+ * tooltip (HelpTip). The same text stays in the page, visually hidden, for the
+ * control to point at with aria-describedby.
  */
 import { useId } from '@wordpress/element';
+import HelpTip from './HelpTip';
 
 /**
  * Ids that tie a row's label, control and help text together.
@@ -28,11 +33,11 @@ export function useRowIds() {
  * @param {string}      props.label      Visible label.
  * @param {Object}      props.ids        From useRowIds().
  * @param {boolean}     props.composite  The control is a group (radio group, list): the label names it with aria-labelledby, not htmlFor.
- * @param {boolean}     props.wide       Label above the value, full width.
- * @param {boolean}     props.top        Align the label to the top of a tall value (text areas).
+ * @param {boolean}     props.wide       Stacked, and the control takes the full width.
+ * @param {boolean}     props.stacked    Stacked: label above the control.
+ * @param {boolean}     props.top        Kept for callers that align a tall value to the top; the stacked layout does not need it.
  * @param {*}           props.icon       Leading icon, drawn in muted colour.
- * @param {string}      props.help       Help text.
- * @param {boolean}     props.helpAlways Always draw the help text.
+ * @param {string}      props.help       Help text, shown in the info tooltip.
  * @param {string}      props.className  Extra class names.
  * @param {*}           props.children   The control.
  */
@@ -41,18 +46,17 @@ export default function PropertyRow( {
 	ids,
 	composite = false,
 	wide = false,
-	top = false,
+	stacked = false,
 	icon = null,
 	help,
-	helpAlways = false,
 	className = '',
 	children,
 } ) {
+	const isStacked = wide || stacked;
 	const classes = [
 		'sf-prow',
+		isStacked ? 'sf-prow--stacked' : 'sf-prow--inline',
 		wide ? 'sf-prow--wide' : '',
-		top ? 'sf-prow--top' : '',
-		help && helpAlways ? 'sf-prow--help-always' : '',
 		className,
 	]
 		.filter( Boolean )
@@ -61,14 +65,21 @@ export default function PropertyRow( {
 	return (
 		<div className={ classes }>
 			{ label ? (
-				<label
-					className="sf-prow__label"
-					id={ ids.labelId }
-					htmlFor={ composite ? undefined : ids.id }
-				>
-					{ icon ? <span className="sf-prow__icon" aria-hidden="true">{ icon }</span> : null }
-					<span className="sf-prow__label-text">{ label }</span>
-				</label>
+				<div className="sf-prow__head">
+					<label
+						className="sf-prow__label"
+						id={ ids.labelId }
+						htmlFor={ composite ? undefined : ids.id }
+					>
+						{ icon ? (
+							<span className="sf-prow__icon" aria-hidden="true">
+								{ icon }
+							</span>
+						) : null }
+						<span className="sf-prow__label-text">{ label }</span>
+					</label>
+					{ help ? <HelpTip label={ label } help={ help } /> : null }
+				</div>
 			) : null }
 			<div className="sf-prow__value">{ children }</div>
 			{ help ? (

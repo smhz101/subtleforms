@@ -12,7 +12,7 @@ import './SubfieldInspectorControl.scss';
 function SubfieldTextRow( { label, value, placeholder, disabled, onChange } ) {
 	const ids = useRowIds();
 	return (
-		<PropertyRow label={ label } ids={ ids }>
+		<PropertyRow label={ label } ids={ ids } stacked>
 			<input
 				type="text"
 				id={ ids.id }

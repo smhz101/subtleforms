@@ -18,8 +18,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: 6px;
-		min-height: 38px;
+		gap: 8px;
+		min-height: 40px;
 
 		// Override WP ToggleControl bottom margin so the row stays compressed
 		.components-toggle-control {
@@ -34,9 +34,10 @@
 
 	&__fixed-label {
 		flex: 1;
-		font-size: var(--sf-text-sm);
+		font-size: 13px;
+		line-height: 20px;
 		font-weight: 500;
-		color: var(--sf-gray-700);
+		color: var(--sf-text);
 	}
 
 	&__chevron {
@@ -63,10 +64,10 @@
 	}
 
 	&__body {
-		padding-bottom: 10px;
+		padding-bottom: 16px;
 		display: flex;
 		flex-direction: column;
-		gap: 2px;
+		gap: 16px;
 
 		.components-base-control {
 			margin-bottom: 4px;
@@ -95,7 +96,7 @@
 
 	// A part that is always on has no switch: indent it to the names beside one.
 	.sf-subfield-ctrl__fixed-label {
-		padding-left: 40px;
+		padding-left: 52px;
 	}
 
 	.sf-subfield-ctrl__name,

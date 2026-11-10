@@ -33,7 +33,7 @@ const SelectInspectorControl = memo( function SelectInspectorControl( {
 	}
 	const pills = fitsSegmented( options );
 	return (
-		<PropertyRow label={ label } ids={ ids } help={ help } composite={ pills } wide={ !! wide }>
+		<PropertyRow label={ label } ids={ ids } help={ help } composite={ pills } stacked={ ! pills } wide={ !! wide }>
 			{ pills ? (
 				<Segmented
 					options={ options }

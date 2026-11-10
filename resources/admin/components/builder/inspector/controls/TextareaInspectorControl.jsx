@@ -53,12 +53,12 @@ const TextareaInspectorControl = memo( function TextareaInspectorControl( {
 		);
 	}
 	return (
-		<PropertyRow label={ label } ids={ ids } help={ help } top wide={ !! wide }>
+		<PropertyRow label={ label } ids={ ids } help={ help } stacked wide={ !! wide }>
 			<textarea
 				ref={ ref }
 				id={ ids.id }
 				className="sf-prow__input sf-prow__input--area"
-				rows={ 1 }
+				rows={ 2 }
 				value={ value ?? '' }
 				placeholder={ placeholder || __( 'Add…', 'subtleforms' ) }
 				disabled={ disabled }

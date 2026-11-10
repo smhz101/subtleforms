@@ -31,7 +31,7 @@ const TextInspectorControl = memo( function TextInspectorControl( {
 		);
 	}
 	return (
-		<PropertyRow label={ label } ids={ ids } help={ help } wide={ !! wide }>
+		<PropertyRow label={ label } ids={ ids } help={ help } stacked wide={ !! wide }>
 			<input
 				type="text"
 				id={ ids.id }

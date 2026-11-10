@@ -19,7 +19,6 @@ const ToggleInspectorControl = memo( function ToggleInspectorControl( {
 	onText,
 	offText,
 	icon,
-	helpAlways,
 } ) {
 	const ids = useRowIds();
 	if ( layout !== 'row' ) {
@@ -35,7 +34,7 @@ const ToggleInspectorControl = memo( function ToggleInspectorControl( {
 	}
 	const stateText = value ? onText : offText;
 	return (
-		<PropertyRow label={ label } ids={ ids } help={ help } icon={ icon } helpAlways={ helpAlways ?? !! ( onText || offText ) }>
+		<PropertyRow label={ label } ids={ ids } help={ help } icon={ icon }>
 			<span className="sf-prow__toggle">
 				<Toggle
 					id={ ids.id }
