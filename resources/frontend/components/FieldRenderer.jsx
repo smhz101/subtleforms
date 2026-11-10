@@ -554,7 +554,8 @@ function renderInput(
   error,
   values = {},
   inputName = undefined,
-  valuePath = ''
+  valuePath = '',
+  skipOverride = false
 ) {
   const config = fieldConfig(field);
   const describedBy =
@@ -572,11 +573,14 @@ function renderInput(
   // An add-on can draw a built-in type its own way for some fields (for
   // example an upload that takes several files). Without it, the built-in
   // renderer below runs.
-  const override = getFieldOverride(field, config);
+  const override = skipOverride ? null : getFieldOverride(field, config);
   if (override) {
     return (
       <AddonField
         component={override.component}
+        Fallback={BuiltInField}
+        placeholder={placeholder}
+        valuePath={valuePath}
         field={field}
         config={config}
         value={value}
@@ -1015,7 +1019,9 @@ function renderInput(
     case 'name_group':
     case 'address_group': {
       // Parts, labels and placeholders come from the builder's sub-field
-      // settings; a switched-off part is not drawn (FB-02).
+      // settings; a switched-off part is not drawn (FB-02). A change keeps
+      // every other key of the answer, so values an add-on keeps in data
+      // parts (coordinates) survive typing in a part.
       const partsValue = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
       const emptyParts = new Set(error ? getCompositeEmptyParts(field, partsValue) : []);
       const baseName = config.key || field.key || '';
@@ -1507,6 +1513,29 @@ export function hasVisibleText(html) {
     return true;
   }
   return html.replace(/<[^>]*>/g, '').replace(/&nbsp;|\s/g, '').length > 0;
+}
+
+/**
+ * The built-in renderer of a field, for an override that wants to draw it
+ * and add to it. Takes the props the override received (`field`, `value`,
+ * `onChange`, `inputId`, `name`, `error`, `required`, `values`, and
+ * `placeholder`, `valuePath`), so `<Fallback {...props} />` works. Overrides
+ * are skipped for this render, so it cannot loop.
+ */
+function BuiltInField(props) {
+  return renderInput(
+    props.field,
+    props.value,
+    props.onChange,
+    props.placeholder,
+    props.inputId,
+    props.required,
+    props.error,
+    props.values,
+    props.name,
+    props.valuePath,
+    true
+  );
 }
 
 /**

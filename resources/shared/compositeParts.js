@@ -9,6 +9,7 @@
  * SubtleForms\Fields\CompositeParts on the server (FB-01, FB-02, FB-10).
  */
 import { __ } from '@wordpress/i18n';
+import { getRegisteredCompositeParts } from './extend';
 
 /*
  * One entry per part, in the order the builder lists them (the order a list
@@ -59,6 +60,75 @@ const norm = (s) => String(s ?? '').trim().toLowerCase();
 export const hasParts = (type) => !!PARTS[type];
 
 /**
+ * The parts of a type: the built-in ones, then those an add-on registered
+ * with registerCompositeParts. A registered part never replaces a built-in
+ * one; one whose name or answer key is taken is ignored.
+ */
+function defs(type) {
+  const builtIn = PARTS[type];
+  if (!builtIn) return [];
+  const out = builtIn.slice();
+  getRegisteredCompositeParts(type).forEach((added) => {
+    const names = [added.part, added.value, added.alias].filter(Boolean);
+    const taken = out.some((d) => [d.part, d.value, d.alias].some((n) => n && names.includes(n)));
+    if (!taken) out.push(added);
+  });
+  return out;
+}
+
+/** Part names in drawing order: the fixed order, then added parts. */
+function order(type) {
+  const fixed = ORDER[type] || [];
+  return fixed.concat(defs(type).map((d) => d.part).filter((name) => !fixed.includes(name)));
+}
+
+/**
+ * The parts an add-on keeps with the answer without drawing them.
+ *
+ * @param {string} type Field type.
+ * @return {Array<{part:string,value:string,alias?:string}>} Data parts.
+ */
+export function compositeDataParts(type) {
+  return defs(type)
+    .filter((d) => d.data)
+    .map((d) => ({ part: d.part, value: d.value, alias: d.alias }));
+}
+
+/**
+ * Every answer key a type keeps: the value and alias of each part, data parts
+ * included.
+ *
+ * @param {string} type Field type.
+ * @return {string[]} Keys.
+ */
+export function compositeKnownKeys(type) {
+  const keys = [];
+  defs(type).forEach((d) => {
+    keys.push(d.value);
+    if (d.alias) keys.push(d.alias);
+  });
+  return Array.from(new Set(keys));
+}
+
+/**
+ * The builder's sub-field list with the registered parts that can be set
+ * (not data parts) appended.
+ *
+ * @param {string} type      Field type.
+ * @param {Array}  subfields Sub-fields the server declared: [{ key, label, toggleable }].
+ * @return {Array} Sub-fields.
+ */
+export function compositeSubfields(type, subfields = []) {
+  if (!PARTS[type]) return subfields;
+  const have = new Set(subfields.map((s) => s.key));
+  const extra = defs(type)
+    .slice(PARTS[type].length)
+    .filter((d) => !d.data && !have.has(d.part))
+    .map((d) => ({ key: d.part, label: LABELS[d.label] || d.label, toggleable: !!d.toggleable }));
+  return extra.length ? subfields.concat(extra) : subfields;
+}
+
+/**
  * The `fields` settings as a map keyed by part, repairing a list saved
  * without keys (matched by label, else by position).
  *
@@ -67,8 +137,8 @@ export const hasParts = (type) => !!PARTS[type];
  * @return {Object|null} Map, or null when nothing usable is stored.
  */
 export function partSettingsMap(type, fields) {
-  const defs = PARTS[type];
-  if (!defs) return null;
+  const list = defs(type);
+  if (!list.length) return null;
   if (isObject(fields)) return fields;
   if (!Array.isArray(fields) || !fields.length) return null;
   const out = {};
@@ -76,8 +146,8 @@ export function partSettingsMap(type, fields) {
   fields.forEach((item) => {
     if (!isObject(item)) return;
     const named = item.part || item.key;
-    const byKey = defs.find((d) => d.part === named && !used.has(d.part));
-    const byLabel = defs.find((d) => norm(d.label) === norm(item.label) && !used.has(d.part));
+    const byKey = list.find((d) => d.part === named && !used.has(d.part));
+    const byLabel = list.find((d) => norm(d.label) === norm(item.label) && !used.has(d.part));
     const match = byKey || byLabel;
     if (match) {
       used.add(match.part);
@@ -86,7 +156,7 @@ export function partSettingsMap(type, fields) {
   });
   fields.forEach((item, index) => {
     if (!isObject(item) || Object.values(out).includes(item)) return;
-    const next = defs.slice(index).concat(defs).find((d) => !used.has(d.part));
+    const next = list.slice(index).concat(list).find((d) => !used.has(d.part));
     if (next) {
       used.add(next.part);
       out[next.part] = item;
@@ -108,14 +178,15 @@ function legacyFlag(config, def) {
  *
  * @param {string} type   Field type.
  * @param {Object} config Merged field settings.
- * @return {Array<{part:string,value:string,alias?:string,label:string,placeholder:string,optional:boolean,auto:string,full:boolean}>}
+ * @return {Array<{part:string,value:string,alias?:string,label:string,placeholder:string,optional:boolean,auto:string,full:boolean}>} Drawn parts: data parts are left out.
  */
 export function compositeParts(type, config = {}) {
-  const defs = PARTS[type];
-  if (!defs) return [];
+  const list = defs(type);
+  if (!list.length) return [];
   const map = partSettingsMap(type, config.fields);
-  return ORDER[type]
-    .map((name) => defs.find((d) => d.part === name))
+  return order(type)
+    .map((name) => list.find((d) => d.part === name))
+    .filter((def) => def && !def.data)
     .filter((def) => {
       if (!def.toggleable) return true;
       if (map) {

@@ -339,11 +339,54 @@ Picture choice, several files per upload field, advanced conditional logic and f
 | Hook | Type | Use |
 | --- | --- | --- |
 | `subtleforms/fields/register` | action `( FieldRegistry $registry )` | Register `picture_choice` with a `FieldDefinition`. Existing hook. |
-| `subtleforms/fields/validate_value` | filter | Validate the type. Existing hook. |
+| `subtleforms/fields/validate_value` | filter | Validate the type. Existing hook. Since 2.9.0 it also runs for `name_group` and `address_group`, so an add-on can check its own parts. |
+| `subtleforms/fields/composite_parts` | filter `( array $parts, string $type )` | Add parts to the Name (`name_group`) or Address (`address_group`) field. Since 2.9.0. See "Parts of the Address field" below. |
 | `subtleforms/uploads/max_files` | filter `( int $max, array $field )` | How many files the control drawn for an upload field sends (1 to 20). The plugin's own upload field sends one; an add-on that draws the field with its own control (`registerFieldOverride`) returns how many that control sends. |
 | `subtleforms/fields/inspector_controls` | filter `( array $controls, string $type )` | Change the settings controls of a field type. Since 2.7.2 this plugin ships no `multiple` control on file uploads; an add-on adds its own toggle and `maxFiles` number here. |
 
 Without Pro, a saved `picture_choice` is shown, checked and stored as a radio group, or as a multiple choice when `allowMultiple` is true. A saved multi-file upload accepts one file, and a request that posts more is refused with "You can attach up to 1 file". Nothing in the saved form JSON is changed.
+
+### Parts of the Address field (PHP and JavaScript, 2.9.0)
+
+`subtleforms/fields/composite_parts` receives the built-in parts of `name_group` or `address_group` and the type. Return the list with your parts appended. Only appended parts are used: the built-in parts cannot be replaced, changed or removed, and a part whose `part`, `value` or `alias` is already taken is ignored. The result is read once per request.
+
+A part is an array:
+
+| Key | Meaning |
+| --- | --- |
+| `part` | Settings key in the field's `fields` map. Required, `/^[a-z][a-z0-9_]*$/`. |
+| `value` | Key in the stored answer. Required, same pattern. |
+| `alias` | An older answer key that is read for this part and kept as posted. |
+| `label` | Name in the builder and above the input. |
+| `toggleable`, `on` | Whether the builder can switch it off, and whether it starts on. |
+| `optional` | Never demanded when the field is required. |
+| `data` | `true` for a value the visitor does not type. See below. |
+| `flags` | Older `enable_*` setting names that switch the part. |
+| `auto`, `full`, `placeholder` | Browser autocomplete token, full width, placeholder. |
+
+A part with `'data' => true` is stored with the answer and nothing else: no input is drawn for it, it is never required, the builder does not list it and it is left out of the text shown in the entry, emails, CSV and merge tags. `optional` is implied. The saved answer keeps only the `value` and `alias` keys of the field's parts; any other key posted is dropped.
+
+```php
+add_filter( 'subtleforms/fields/composite_parts', function ( $parts, $type ) {
+	if ( 'address_group' === $type ) {
+		$parts[] = array( 'part' => 'lat', 'value' => 'lat', 'data' => true );
+		$parts[] = array( 'part' => 'lng', 'value' => 'lng', 'data' => true );
+	}
+	return $parts;
+}, 10, 2 );
+
+// Check them: validate_value runs for address_group.
+add_filter( 'subtleforms/fields/validate_value', function ( $error, $type, $value ) {
+	if ( 'address_group' === $type && isset( $value['lat'] ) && abs( (float) $value['lat'] ) > 90 ) {
+		return __( 'The location is not valid.', 'subtleforms' );
+	}
+	return $error;
+}, 10, 3 );
+```
+
+The browser needs the same list. `SubtleFormsExtend.registerCompositeParts( type, parts )` appends parts with the same shape and the same checks, so the public form, the builder's sub-field control and the check for empty required parts all see them. Register before forms mount, and feature-detect it: `typeof SubtleFormsExtend.registerCompositeParts === 'function'`. The built-in Address field keeps the other keys of the answer when a visitor types in a part, so a field override that sets `lat` and `lng` is not wiped.
+
+Display text for an address comes from `AnswerFormatter::address( $value, $field )`: the non-empty, non-data parts in builder order (street, street line 2, city, state, postal code, country, then added parts in filter order) joined with ", ". It reads both the `value` and the `alias` key, so entries saved with `street`, `street2` or `postal` read the same. The privacy exporter still writes the raw answer.
 
 ### Conditional logic (PHP)
 
@@ -371,7 +414,8 @@ Counts already stored in the `subtleforms_stats` and `subtleforms_funnel` tables
 
 | Function | Use |
 | --- | --- |
-| `registerFieldOverride( type, { applies( field, config ), component } )` | Replace the live renderer of a core type for some fields (Pro uses it for multi-file uploads). |
+| `registerFieldOverride( type, { applies( field, config ), component } )` | Replace the live renderer of a core type for some fields (Pro uses it for multi-file uploads). Since 2.9.0 the component gets `Fallback`, the built-in renderer of the type: render `<Fallback { ...props } />` with the props the override received to draw the built-in field and add to it (a map under the Address field). Overrides are skipped inside `Fallback`, so it cannot loop. Besides the field props the component gets `placeholder` and `valuePath`. |
+| `registerCompositeParts( type, parts )` | Add parts to `name_group` or `address_group` in the browser. Same part shape and checks as the PHP filter `subtleforms/fields/composite_parts`; see "Parts of the Address field". Since 2.9.0. |
 | `registerLogicExtension( { supports, passes, evaluateCondition } )` | Browser side of the logic hooks. Functions get a helpers object: `toText`, `listOf`, `norm`, `isNumeric`, `isEmptyValue`, `textEquals`, `countryEquals`, `readValue`, `today`, `evaluateCondition`. |
 | `registerLogicEditor( Component )` | Replace the builder logic editor. It gets the editor props (`logic`, `availableFields`, `onChange`, `scope`, `disabled`, ...) plus `countries` (the country list for country rules) and `Fallback`, the free editor. |
 | `registerSlotItem( slot, id, { component, order } )` | Add an item to a screen slot. |
