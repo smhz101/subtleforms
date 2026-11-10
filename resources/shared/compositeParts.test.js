@@ -112,4 +112,18 @@ describe('parts added by an add-on (registerCompositeParts)', () => {
     const keys = compositeSubfields('address_group', [{ key: 'street', label: 'Street', toggleable: false }]).map((s) => s.key);
     expect(keys).toEqual(['street', 'apartment']);
   });
+
+  it('carries a registered part\'s on default into the inspector sub-fields', () => {
+    registerCompositeParts('address_group', [
+      { part: 'apartment', value: 'apartment', label: 'Apartment', toggleable: true, on: true },
+      { part: 'unit', value: 'unit', label: 'Unit', toggleable: true, on: false },
+      { part: 'floor', value: 'floor', label: 'Floor', toggleable: true },
+    ]);
+    const subs = compositeSubfields('address_group', [{ key: 'street2', label: 'Line 2', toggleable: true }]);
+    const on = Object.fromEntries(subs.map((s) => [s.key, s.on]));
+    expect(on.apartment).toBe(true);
+    expect(on.unit).toBe(false);
+    expect(on.floor).toBe(true);
+    expect(on.street2).toBe(false);
+  });
 });

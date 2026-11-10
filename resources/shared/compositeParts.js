@@ -120,12 +120,19 @@ export function compositeKnownKeys(type) {
  */
 export function compositeSubfields(type, subfields = []) {
   if (!PARTS[type]) return subfields;
+  const list = defs(type);
   const have = new Set(subfields.map((s) => s.key));
-  const extra = defs(type)
+  // Each sub-field carries the part's default (`on`), so the inspector reads an
+  // unsaved toggle the way compositeParts() draws it.
+  const declared = subfields.map((s) => {
+    const def = list.find((d) => d.part === s.key);
+    return def && s.on === undefined ? { ...s, on: def.on !== false } : s;
+  });
+  const extra = list
     .slice(PARTS[type].length)
     .filter((d) => !d.data && !have.has(d.part))
-    .map((d) => ({ key: d.part, label: LABELS[d.label] || d.label, toggleable: !!d.toggleable }));
-  return extra.length ? subfields.concat(extra) : subfields;
+    .map((d) => ({ key: d.part, label: LABELS[d.label] || d.label, toggleable: !!d.toggleable, on: d.on !== false }));
+  return extra.length ? declared.concat(extra) : declared;
 }
 
 /**
