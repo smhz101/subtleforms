@@ -48,15 +48,21 @@ function errorCount(panel, errors) {
   return keys.filter((key) => paths.has(key) || paths.has(key.split('.')[0])).length;
 }
 
-/** True under 600px wide, once the browser has said so. */
-function useNarrow(enabled) {
+/**
+ * True under 600px wide, once the browser has said so. The query is asked of
+ * the window that owns the container, so the builder preview iframe and the
+ * live form each measure their own viewport. The global window is only the
+ * fallback while the element is not mounted.
+ */
+function useNarrow(enabled, ref, ready) {
   const [narrow, setNarrow] = useState(false);
   useEffect(() => {
-    if (!enabled || typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+    const view = ref.current?.ownerDocument?.defaultView || (typeof window !== 'undefined' ? window : null);
+    if (!enabled || !view || typeof view.matchMedia !== 'function') {
       setNarrow(false);
       return undefined;
     }
-    const query = window.matchMedia(NARROW_QUERY);
+    const query = view.matchMedia(NARROW_QUERY);
     const update = () => setNarrow(!!query.matches);
     update();
     if (typeof query.addEventListener === 'function') {
@@ -65,7 +71,7 @@ function useNarrow(enabled) {
     }
     query.addListener?.(update);
     return () => query.removeListener?.(update);
-  }, [enabled]);
+  }, [enabled, ref, ready]);
   return enabled && narrow;
 }
 
@@ -272,7 +278,12 @@ export default function PanelContainer({
   };
 
   // Tabs on a narrow screen can draw as an Accordion (one component, two layouts).
-  const collapsed = useNarrow(isTabs && config.collapse_mobile !== false && config.collapse_mobile !== 0);
+  const wrapRef = useRef(null);
+  const collapsed = useNarrow(
+    isTabs && config.collapse_mobile !== false && config.collapse_mobile !== 0,
+    wrapRef,
+    items.length > 0
+  );
   const asAccordion = !isTabs || collapsed;
 
   // The open tab: the chosen one, else the first that is shown.
@@ -328,6 +339,7 @@ export default function PanelContainer({
 
   const wrap = (body) => (
     <div
+      ref={wrapRef}
       className={['subtleforms-field', 'subtleforms-field-container', 'subtleforms-field-panels', appearanceClasses]
         .filter(Boolean)
         .join(' ')}

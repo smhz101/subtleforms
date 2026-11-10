@@ -243,6 +243,56 @@ describe('Tabs', () => {
     expect(triggers.map((t) => t.getAttribute('aria-expanded'))).toEqual(['false', 'false', 'false']);
   });
 
+  describe('measures the window that owns the container (preview iframe)', () => {
+    // A second document stands in for the builder preview iframe; its
+    // defaultView is a fake window with its own matchMedia.
+    async function mountInOtherDocument(innerMatches) {
+      const other = document.implementation.createHTMLDocument('preview');
+      const asked = [];
+      Object.defineProperty(other, 'defaultView', {
+        configurable: true,
+        value: {
+          matchMedia: (query) => {
+            asked.push(query);
+            return {
+              matches: innerMatches,
+              media: query,
+              addEventListener() {},
+              removeEventListener() {},
+            };
+          },
+        },
+      });
+      container = other.createElement('div');
+      other.body.appendChild(container);
+      root = createRoot(container);
+      await act(async () => {
+        root.render(
+          <FormContext.Provider value={{ formId: 1, preview: true }}>
+            <FieldRenderer field={tabsField()} values={{}} onChange={() => {}} errors={{}} hiddenFields={new Set()} />
+          </FormContext.Provider>
+        );
+      });
+      return asked;
+    }
+
+    it('collapses to an accordion when the iframe is narrow and the admin window is wide', async () => {
+      mockMatchMedia(false);
+      const asked = await mountInOtherDocument(true);
+      expect(asked).toContain('(max-width: 600px)');
+      expect(window.matchMedia).not.toHaveBeenCalled();
+      expect(container.querySelector('[data-sf-tabs]')).toBeNull();
+      expect(container.querySelectorAll('.subtleforms-accordion-trigger')).toHaveLength(3);
+    });
+
+    it('keeps tabs when the iframe is wide and the admin window is narrow', async () => {
+      mockMatchMedia(true);
+      await mountInOtherDocument(false);
+      expect(window.matchMedia).not.toHaveBeenCalled();
+      expect(container.querySelector('[data-sf-tabs]')).not.toBeNull();
+    });
+  });
+
   it('stays tabs on narrow screens when the setting is off', async () => {
     mockMatchMedia(true);
     await mount(tabsField({ collapse_mobile: false }));
