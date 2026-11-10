@@ -30,6 +30,8 @@ const LAYOUT_TYPES = new Set([
   'turnstile',
   'action_hook',
   'save_resume',
+  'tab_panel',
+  'accordion_panel',
 ]);
 
 const NAME_TYPES = new Set(['name_group', 'name']);

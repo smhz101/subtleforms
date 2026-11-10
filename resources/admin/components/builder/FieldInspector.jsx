@@ -349,6 +349,10 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
                 <p className='sf-field-inspector__intro'>
                   {isStep
                     ? __('Skip this step unless its rules match. Fields in a skipped step are not checked or saved.', 'subtleforms')
+                    : field.type === 'tab_panel' || field.type === 'accordion_panel'
+                    ? __('Show or hide this tab or section based on answers to other fields. A hidden one, including every field inside it, is not checked or saved.', 'subtleforms')
+                    : field.type === 'tabs_container' || field.type === 'accordion_container'
+                    ? __('Show or hide all of these tabs or sections based on answers to other fields. Hidden fields are not checked or saved.', 'subtleforms')
                     : isRepeater
                     ? __('Show or hide this repeater based on answers to other fields. A hidden repeater, including every row inside it, is not checked or saved.', 'subtleforms')
                     : typeof definition?.meta?.logicHelp === 'string' && definition.meta.logicHelp

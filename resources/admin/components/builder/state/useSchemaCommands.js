@@ -5,7 +5,7 @@
  * Extracted from FormEditor.jsx to separate business logic from UI
  */
 
-import { useCallback } from '@wordpress/element';
+import { useCallback, useRef } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import {
   insertNode,
@@ -16,6 +16,7 @@ import {
 } from '../schema/commands';
 import { denormalizeTree } from '../utils/schemaTree';
 import { insertPageBreak, moveNodeToStep, getStepIdOf, removeStep } from '../schema/commands/steps';
+import { addPanel, removePanel, canRemovePanel } from '../schema/commands/panels';
 import { canDropInto } from '../dnd/resolveDrop';
 import { debug } from '../../../../shared/debug';
 import { confirmDialog } from '../../../utils/confirmDialog';
@@ -49,6 +50,8 @@ export function useSchemaCommands({
   onChange,
   schemaRef,
 }) {
+  const handleDeletePanelRef = useRef(null);
+
   const handleInsert = useCallback(
     (type, context) => {
       // Block inserts in read-only mode
@@ -202,6 +205,13 @@ export function useSchemaCommands({
       }
 
       const node = tree.nodes[nodeId];
+
+      // A tab or section moves its fields to a neighbour instead of taking
+      // them with it (2.9.0).
+      if (node?.type === 'tab_panel' || node?.type === 'accordion_panel') {
+        handleDeletePanelRef.current?.(nodeId);
+        return;
+      }
 
       // A step is a Page Break boundary: removing the last one keeps the
       // remaining fields and makes the form Standard again (2.3.2).
@@ -387,6 +397,78 @@ export function useSchemaCommands({
     [tree, updateTree, rootId]
   );
 
+  /**
+   * Add a tab or section to a Tabs or Accordion container and select it
+   * (2.9.0). One undoable edit.
+   */
+  const handleAddPanel = useCallback(
+    (containerId) => {
+      if (isReadOnly) {
+        return;
+      }
+      let panelId = null;
+      updateTree((currentTree) => {
+        const result = addPanel(currentTree, { containerId });
+        panelId = result.panelId;
+        return result.tree;
+      });
+      if (panelId) {
+        setSelectedId(panelId);
+      }
+    },
+    [isReadOnly, updateTree, setSelectedId]
+  );
+
+  /**
+   * Delete a tab or section. Its fields move to the previous panel (the next
+   * for the first one), after asking when there are any. The last panel
+   * cannot be deleted: the container goes instead.
+   */
+  const handleDeletePanel = useCallback(
+    async (panelId) => {
+      if (isReadOnly || !canRemovePanel(tree, panelId)) {
+        return;
+      }
+      const panel = tree.nodes[panelId];
+      const count = (panel.children || []).length;
+      if (
+        count > 0 &&
+        !(await confirmDialog({
+          destructive: true,
+          title:
+            panel.type === 'tab_panel'
+              ? __('Delete this tab?', 'subtleforms')
+              : __('Delete this section?', 'subtleforms'),
+          confirmText:
+            panel.type === 'tab_panel'
+              ? __('Delete tab', 'subtleforms')
+              : __('Delete section', 'subtleforms'),
+          message: sprintf(
+            /* translators: %d: number of fields */
+            _n(
+              'The %d field in it moves to the previous one. You can undo this.',
+              'The %d fields in it move to the previous one. You can undo this.',
+              count,
+              'subtleforms'
+            ),
+            count
+          ),
+        }))
+      ) {
+        return;
+      }
+      let movedTo = null;
+      updateTree((currentTree) => {
+        const result = removePanel(currentTree, { panelId });
+        movedTo = result.movedTo;
+        return result.tree;
+      });
+      setSelectedId(movedTo);
+    },
+    [isReadOnly, tree, updateTree, setSelectedId]
+  );
+  handleDeletePanelRef.current = handleDeletePanel;
+
   return {
     handleInsert,
     handleDockAdd,
@@ -397,5 +479,7 @@ export function useSchemaCommands({
     handleAddStep,
     handleDeleteStep,
     handleMoveToStep,
+    handleAddPanel,
+    handleDeletePanel,
   };
 }

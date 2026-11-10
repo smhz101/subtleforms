@@ -212,6 +212,8 @@ export default function FormEditor({
     handleAddStep,
     handleDeleteStep,
     handleMoveToStep,
+    handleAddPanel,
+    handleDeletePanel,
   } = commands;
   const [repairsDismissed, setRepairsDismissed] = useState(false);
 
@@ -353,6 +355,8 @@ export default function FormEditor({
       onDuplicate={handleDuplicate}
       onRequestInsert={handleRequestInsert}
       onMoveToStep={handleMoveToStep}
+      onAddPanel={handleAddPanel}
+      onDeletePanel={handleDeletePanel}
       onRenameKey={handleRenameKey}
       entryCount={entryCount}
       isReadOnly={isReadOnly}>

@@ -15,12 +15,17 @@
  */
 
 import { typeHasFlag } from '../../../utils/fieldTypeFlags';
+import { OWNER_OF, PANEL_OF, isPanelContainerType } from '../../../../shared/panels';
 
 const ROOT_NODE_ID = 'root';
 
 /** Types that cannot sit inside a Repeater (no per-group meaning or storage). */
 export const REPEATER_BLOCKED_TYPES = new Set([
   'repeat_container',
+  'tabs_container',
+  'accordion_container',
+  'tab_panel',
+  'accordion_panel',
   'repeat_field',
   'step',
   'form_step',
@@ -42,6 +47,7 @@ export function isContainerNode(node) {
     (typeof node.type === 'string' && node.type.endsWith(COLUMN_SUFFIX)) ||
     node.type === 'repeat_container' ||
     node.type === 'group_container' ||
+    isPanelContainerType(node.type) ||
     Array.isArray(node.children)
   );
 }
@@ -72,6 +78,19 @@ function insideRepeater(tree, parentId) {
     current = current.parentId ? tree.nodes[current.parentId] : null;
   }
   return false;
+}
+
+/** Types of a node and every node above it, nearest first. */
+function typesFrom(tree, nodeId) {
+  const types = [];
+  const seen = new Set();
+  let current = tree.nodes[nodeId];
+  while (current && !seen.has(current.id)) {
+    seen.add(current.id);
+    types.push(current.type);
+    current = current.parentId ? tree.nodes[current.parentId] : null;
+  }
+  return types;
 }
 
 /** Types contained in a subtree (the node and all descendants). */
@@ -108,6 +127,23 @@ export function canDropInto(tree, { nodeId = null, fieldType = null, parentId })
   if (parent.type === 'root' && !types.has('step')) {
     const rootHasSteps = (parent.children || []).some((id) => tree.nodes[id]?.type === 'step');
     if (rootHasSteps) return false;
+  }
+  // Tabs and Accordion (2.9.0).
+  const movedType = nodeId ? tree.nodes[nodeId]?.type : fieldType;
+  // A panel only sits directly inside its own container, and a container
+  // holds nothing but its own panels.
+  if (OWNER_OF[movedType] && parent.type !== OWNER_OF[movedType]) return false;
+  if (isPanelContainerType(parent.type) && PANEL_OF[parent.type] !== movedType) return false;
+  if (nodeId && OWNER_OF[movedType]) {
+    // The last panel stays: delete the container instead.
+    const from = tree.nodes[tree.nodes[nodeId].parentId];
+    if (from && from.id !== parent.id && (from.children || []).length <= 1) return false;
+  }
+  // No Tabs inside Tabs and no Accordion inside an Accordion at any depth,
+  // each on its own side of the move.
+  const above = typesFrom(tree, parent.id);
+  for (const containerType of Object.keys(PANEL_OF)) {
+    if (types.has(containerType) && above.includes(containerType)) return false;
   }
   if (insideRepeater(tree, parent.id)) {
     for (const type of types) {
@@ -192,6 +228,10 @@ export function resolveDrop(tree, active, over, { placeAfter = false } = {}) {
   if (active.kind === 'library') {
     // A Page Break dropped inside a container breaks the step after it.
     if (active.fieldType === 'step') {
+      // Not inside Tabs or an Accordion: the page would split mid-panel.
+      if (typesFrom(tree, parentId || ROOT_NODE_ID).some((t) => isPanelContainerType(t) || t in OWNER_OF)) {
+        return null;
+      }
       return { type: 'insert', fieldType: 'step', parentId, columnIndex, position };
     }
     if (!canDropInto(tree, { fieldType: active.fieldType, parentId })) return null;

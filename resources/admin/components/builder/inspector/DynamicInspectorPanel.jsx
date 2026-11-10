@@ -119,6 +119,10 @@ function ControlRenderer( { ctrl, field, onUpdate, isReadOnly } ) {
 	if ( ctrl.type === 'subfield' ) {
 		props.subfields = Array.isArray( ctrl.subfields ) ? ctrl.subfields : [];
 	}
+	// "Tab shown first" lists the panels of the selected Tabs container.
+	if ( ctrl.type === 'panel_select' ) {
+		props.field = field;
+	}
 	// Add-on controls get the full definition, the selected field and the
 	// other fields of the form ({ key, label, type }), for example to insert
 	// a field into a formula.

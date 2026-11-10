@@ -21,6 +21,8 @@ import {
   ensureUniqueFieldKey,
   collectExistingKeys,
 } from '../../utils/idGenerator';
+import { isPanelContainerType } from '../../../../../shared/panels';
+import { seedPanels } from './panels';
 import {
   createNodeFromDefinition,
   addNodeToTree,
@@ -80,6 +82,11 @@ export function insertNode(tree, command) {
     defaultChildren.forEach( ( childNode ) => {
       updatedTree = addNodeToTree( updatedTree, childNode, { parentId: newNode.id } );
     } );
+  }
+
+  // A new Tabs or Accordion starts with two panels.
+  if (isPanelContainerType(definition.type)) {
+    updatedTree = seedPanels(updatedTree, newNode.id);
   }
 
   // Validate tree integrity after mutation

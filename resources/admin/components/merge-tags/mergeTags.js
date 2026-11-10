@@ -15,7 +15,7 @@ export const GLOBAL_MERGE_TAGS = [
 ];
 
 /** Field types that hold no answer, or must never be emailed. */
-const SKIP = ['password', 'html', 'section_break', 'disclaimer', 'step', 'action_hook'];
+const SKIP = ['password', 'html', 'section_break', 'disclaimer', 'step', 'action_hook', 'tab_panel', 'accordion_panel'];
 
 /**
  * One {field:key} tag per answer-bearing field.

@@ -193,6 +193,8 @@ export function useBuilderState(schema, validationErrors, fieldErrors, onChange,
         if (
           node.type &&
           node.type !== 'step' &&
+          node.type !== 'tab_panel' &&
+          node.type !== 'accordion_panel' &&
           !node.type.includes('container')
         ) {
           const field = nodeToField(tree, node.id);
