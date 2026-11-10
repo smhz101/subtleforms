@@ -1,6 +1,7 @@
 import { memo } from '@wordpress/element';
 import { Button, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import PropertyRow, { useRowIds } from '../PropertyRow';
 
 /**
  * Maps PHP `options` control type.
@@ -11,14 +12,17 @@ import { __ } from '@wordpress/i18n';
  *   onChange, called with the updated array
  *   label   , section heading
  *   disabled, read-only mode
+ *   layout  , "row" draws the label as a full width row label
  */
 const OptionsInspectorControl = memo( function OptionsInspectorControl( {
 	value,
 	onChange,
 	label,
 	disabled,
+	layout,
 } ) {
 	const options = Array.isArray( value ) ? value : [];
+	const ids = useRowIds();
 
 	function updateOption( idx, newLabel ) {
 		const next = [ ...options ];
@@ -42,11 +46,8 @@ const OptionsInspectorControl = memo( function OptionsInspectorControl( {
 		] );
 	}
 
-	return (
-		<div className="sf-inspector-control sf-inspector-control--options">
-			{ label && (
-				<p className="sf-inspector-control__label">{ label }</p>
-			) }
+	const list = (
+		<>
 			{ options.map( ( opt, idx ) => (
 				<div key={ idx } className="sf-inspector-control__option-row">
 					<TextControl
@@ -73,6 +74,25 @@ const OptionsInspectorControl = memo( function OptionsInspectorControl( {
 			>
 				{ __( '+ Add Option', 'subtleforms' ) }
 			</Button>
+		</>
+	);
+
+	if ( layout === 'row' ) {
+		return (
+			<PropertyRow label={ label } ids={ ids } composite wide>
+				<div className="sf-inspector-control sf-inspector-control--options" role="group" aria-labelledby={ ids.labelId }>
+					{ list }
+				</div>
+			</PropertyRow>
+		);
+	}
+
+	return (
+		<div className="sf-inspector-control sf-inspector-control--options">
+			{ label && (
+				<p className="sf-inspector-control__label">{ label }</p>
+			) }
+			{ list }
 		</div>
 	);
 } );

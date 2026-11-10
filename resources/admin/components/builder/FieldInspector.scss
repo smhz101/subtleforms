@@ -1,6 +1,7 @@
 /**
- * Field inspector, right panel of the builder, styled like the block
- * editor's settings sidebar: header card, tabs, collapsible panels.
+ * Field inspector, the right panel of the builder: one scrolling sheet of
+ * property rows. Header, quick rows, then sections (Content, Choices, Rules,
+ * Logic, Style, Advanced), then a footer with the working shortcuts.
  */
 
 .sf-field-inspector {
@@ -8,6 +9,7 @@
 	flex-direction: column;
 	min-height: 100%;
 	background: var(--sf-bg-surface);
+	color: var(--sf-text);
 
 	// ── Header ───────────────────────────────────────────────────────────────
 	&__header {
@@ -17,7 +19,7 @@
 		display: flex;
 		align-items: flex-start;
 		gap: 12px;
-		padding: 16px 12px 16px 16px;
+		padding: 16px 12px 12px 16px;
 		border-bottom: 1px solid var(--sf-border-subtle);
 		background: var(--sf-bg-surface);
 	}
@@ -27,10 +29,10 @@
 		align-items: center;
 		justify-content: center;
 		flex-shrink: 0;
-		width: 36px;
-		height: 36px;
+		width: 32px;
+		height: 32px;
 		border-radius: var(--sf-radius-md);
-		background: var(--sf-primary-50);
+		background: color-mix(in srgb, var(--sf-brand) 8%, #ffffff);
 		color: var(--sf-brand);
 
 		svg {
@@ -42,16 +44,20 @@
 		display: flex;
 		flex-direction: column;
 		align-items: flex-start;
-		gap: 4px;
+		gap: 2px;
 		flex: 1 1 auto;
 		min-width: 0;
 	}
 
 	&__title {
-		font-size: var(--sf-text-sm);
+		max-width: 100%;
+		font-size: 16px;
 		font-weight: var(--sf-weight-semibold);
-		line-height: 1.4;
+		line-height: 32px;
 		color: var(--sf-text);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	&__key {
@@ -64,7 +70,7 @@
 		border: 0;
 		border-radius: var(--sf-radius-sm);
 		background: var(--sf-bg-muted);
-		color: var(--sf-text-muted);
+		color: var(--sf-text-secondary);
 		font-size: 11px;
 		cursor: pointer;
 
@@ -72,7 +78,8 @@
 			overflow: hidden;
 			padding: 0;
 			background: transparent;
-			font-size: 11px;
+			font-family: var(--sf-font-mono);
+			font-size: 11.5px;
 			color: inherit;
 			text-overflow: ellipsis;
 			white-space: nowrap;
@@ -97,7 +104,7 @@
 		display: flex;
 		align-items: center;
 		gap: 0;
-		margin-top: 2px;
+		margin-top: 0;
 
 		.components-button {
 			width: 32px;
@@ -139,125 +146,70 @@
 		}
 	}
 
-	// ── Tabs ─────────────────────────────────────────────────────────────────
-	&__tabs {
-		display: flex;
-		flex-direction: column;
+	// ── Sheet ────────────────────────────────────────────────────────────────
+	&__sheet {
 		flex: 1 1 auto;
-
-		.components-tab-panel__tabs {
-			position: sticky;
-			top: 69px;
-			z-index: 9;
-			display: flex;
-			padding: 0 8px;
-			border-bottom: 1px solid var(--sf-border-subtle);
-			background: var(--sf-bg-surface);
-		}
-
-		.components-tab-panel__tabs-item {
-			flex: 1 1 0;
-			height: 48px;
-			padding: 0 4px;
-			font-size: var(--sf-text-sm);
-			font-weight: var(--sf-weight-medium);
-			color: var(--sf-text-muted);
-
-			&.is-active {
-				color: var(--sf-text);
-			}
-
-			&:hover {
-				color: var(--sf-text);
-			}
-		}
+		padding: 0 16px;
 	}
 
-	&__tab-label {
-		display: inline-flex;
-		align-items: center;
-		gap: 6px;
-	}
-
-	&__tab-dot {
-		width: 6px;
-		height: 6px;
-		border-radius: 50%;
-		background: var(--sf-warning);
-	}
-
-	&__tab-count {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		min-width: 16px;
-		height: 16px;
-		padding: 0 4px;
-		border-radius: 999px;
-		background: var(--sf-brand);
-		color: #fff;
-		font-size: 10px;
-		font-weight: var(--sf-weight-semibold);
-	}
-
-	&__tab-content {
-		.components-panel__body {
-			border-top: 0;
-			border-bottom: 1px solid var(--sf-border-subtle);
-
-			> .components-panel__body-title {
-				margin: 0;
-
-				.components-panel__body-toggle {
-					padding: 16px;
-					font-size: var(--sf-text-sm);
-					font-weight: var(--sf-weight-semibold);
-				}
-			}
-
-			&.is-opened {
-				padding: 0 16px 16px;
-
-				> .components-panel__body-title {
-					margin: 0 -16px;
-				}
-			}
-		}
-
-		.components-base-control {
-			margin-bottom: 16px;
-		}
-
-		.components-base-control__label,
-		.components-base-control .components-input-control__label {
-			font-size: 11px;
-			font-weight: var(--sf-weight-medium);
-			text-transform: uppercase;
-			letter-spacing: 0.02em;
-			color: var(--sf-text);
-		}
-
-		.components-toggle-control .components-base-control__field label {
-			text-transform: none;
-			letter-spacing: 0;
-			font-size: var(--sf-text-sm);
-		}
-
-		.components-base-control__help {
-			margin-top: 6px;
-			font-size: 12px;
-			color: var(--sf-text-muted);
-		}
-	}
-
-	&__pad {
-		padding: 16px;
+	&__quick {
+		padding: 8px 0 8px;
+		border-bottom: 1px solid var(--sf-border-subtle);
 	}
 
 	&__intro {
-		margin: 0 0 16px;
-		font-size: var(--sf-text-sm);
+		margin: 0 0 8px;
+		font-size: 12px;
+		line-height: 1.5;
 		color: var(--sf-text-muted);
+	}
+
+	// Logic: the editor's empty line becomes a dashed box.
+	&__logic.is-empty .sf-logic-editor__empty {
+		margin: 0 0 8px;
+		padding: 12px;
+		border: 1px dashed var(--sf-border-strong);
+		border-radius: var(--sf-radius-md);
+		font-size: var(--sf-text-sm);
+		line-height: 1.5;
+		color: var(--sf-text-muted);
+	}
+
+	// ── Footer ───────────────────────────────────────────────────────────────
+	&__footer {
+		position: sticky;
+		bottom: 0;
+		z-index: 9;
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		min-height: 36px;
+		padding: 0 16px;
+		border-top: 1px solid var(--sf-border-subtle);
+		background: var(--sf-bg-surface);
+		font-size: 12px;
+		color: var(--sf-text-muted);
+	}
+
+	&__hints {
+		display: inline-flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 4px 8px;
+
+		kbd {
+			min-width: 20px;
+			padding: 1px 6px;
+			border: 1px solid var(--sf-border);
+			border-bottom-width: 2px;
+			border-radius: 4px;
+			background: var(--sf-bg-surface);
+			font-family: var(--sf-font-mono);
+			font-size: 11px;
+			line-height: 16px;
+			color: var(--sf-text-secondary);
+			text-align: center;
+		}
 	}
 
 	// ── Empty state ──────────────────────────────────────────────────────────
@@ -274,12 +226,12 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 44px;
-		height: 44px;
+		width: 32px;
+		height: 32px;
 		margin-bottom: 4px;
-		border-radius: var(--sf-radius-lg);
-		background: var(--sf-bg-muted);
-		color: var(--sf-text-muted);
+		border-radius: var(--sf-radius-md);
+		background: color-mix(in srgb, var(--sf-brand) 8%, #ffffff);
+		color: var(--sf-brand);
 
 		svg {
 			fill: none;
@@ -288,7 +240,7 @@
 
 	&__empty-title {
 		margin: 0;
-		font-size: var(--sf-text-sm);
+		font-size: 16px;
 		font-weight: var(--sf-weight-semibold);
 		color: var(--sf-text);
 	}
@@ -323,35 +275,525 @@
 			min-width: 20px;
 			padding: 1px 6px;
 			border: 1px solid var(--sf-border);
-			border-radius: 3px;
-			background: var(--sf-bg-subtle);
+			border-bottom-width: 2px;
+			border-radius: 4px;
+			background: var(--sf-bg-surface);
+			font-family: var(--sf-font-mono);
 			font-size: 11px;
+			color: var(--sf-text-secondary);
 			text-align: center;
 		}
 	}
 }
 
-// ── Choices editor ───────────────────────────────────────────────────────────
-.sf-options {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
+// ── Sections ─────────────────────────────────────────────────────────────────
+.sf-isec {
+	padding: 12px 0;
 
-	&__toolbar {
+	& + & {
+		border-top: 1px solid var(--sf-border-subtle);
+	}
+
+	.sf-field-inspector__quick + & {
+		border-top: 0;
+	}
+
+	&__head {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: 8px;
+		min-height: 32px;
+	}
 
-		.components-toggle-control {
-			margin: 0;
+	&__toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		min-height: 32px;
+		margin: 0;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: var(--sf-text-muted);
+		font-family: inherit;
+		cursor: pointer;
+
+		&:hover {
+			color: var(--sf-text);
 		}
+
+		&:focus-visible {
+			outline: 2px solid var(--sf-brand);
+			outline-offset: 2px;
+			border-radius: 2px;
+		}
+	}
+
+	&__title {
+		font-size: 11px;
+		font-weight: var(--sf-weight-semibold);
+		letter-spacing: 0.07em;
+		text-transform: uppercase;
+	}
+
+	&__badge {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 16px;
+		height: 16px;
+		padding: 0 4px;
+		border-radius: 999px;
+		background: var(--sf-brand);
+		color: #fff;
+		font-size: 10px;
+		font-weight: var(--sf-weight-semibold);
+		line-height: 1;
+	}
+
+	&__dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--sf-warning);
+	}
+
+	&__chevron {
+		display: inline-flex;
+		transition: transform 150ms ease;
+
+		svg {
+			fill: none;
+		}
+	}
+
+	&:not(.is-open) &__chevron {
+		transform: rotate(-90deg);
+	}
+
+	&__action {
+		margin: 0;
+		padding: 0 2px;
+		min-height: 32px;
+		border: 0;
+		background: transparent;
+		color: var(--sf-brand);
+		font-family: inherit;
+		font-size: 12px;
+		font-weight: var(--sf-weight-medium);
+		cursor: pointer;
+
+		&:hover:not(:disabled) {
+			text-decoration: underline;
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--sf-brand);
+			outline-offset: 2px;
+			border-radius: 2px;
+		}
+
+		&:disabled {
+			color: var(--sf-text-muted);
+			cursor: default;
+		}
+	}
+
+	&__body {
+		padding-top: 4px;
+
+		&[hidden] {
+			display: none;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		&__chevron {
+			transition: none;
+		}
+	}
+}
+
+// ── Property rows ────────────────────────────────────────────────────────────
+// Label column 112px, value column the rest. 36px rows, no borders between
+// them. A wide row (lists, add-on controls) puts the label above the value.
+.sf-prow {
+	display: grid;
+	grid-template-columns: 112px minmax(0, 1fr);
+	align-items: center;
+	column-gap: 8px;
+	min-height: 36px;
+	padding: 2px 0;
+
+	&--wide {
+		grid-template-columns: minmax(0, 1fr);
+		row-gap: 4px;
+		align-items: start;
+		padding: 4px 0 8px;
+	}
+
+	// A control with its own label (an add-on's, the chained levels): the row
+	// only gives it width and spacing.
+	&--bare {
+		display: block;
+		min-height: 0;
+
+		.components-base-control__label,
+		.components-input-control__label,
+		.components-base-control .components-base-control__label {
+			margin-bottom: 4px;
+			font-size: var(--sf-text-sm);
+			font-weight: 400;
+			text-transform: none;
+			letter-spacing: 0;
+			color: var(--sf-text-muted);
+		}
+
+		.components-base-control {
+			margin-bottom: 8px;
+		}
+	}
+
+	&--top {
+		align-items: start;
+
+		> .sf-prow__label {
+			padding-top: 6px;
+		}
+	}
+
+	&__label {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		min-width: 0;
+		margin: 0;
+		font-size: var(--sf-text-sm);
+		line-height: 1.35;
+		color: var(--sf-text-muted);
+		overflow-wrap: anywhere;
+	}
+
+	&__icon {
+		display: inline-flex;
+		flex-shrink: 0;
+		color: var(--sf-text-muted);
+
+		svg {
+			fill: none;
+		}
+	}
+
+	&__value {
+		min-width: 0;
+	}
+
+	// The help text stays in the page for screen readers; it is drawn while
+	// the row is hovered or has focus (or always, for a toggle with a state).
+	&__help {
+		grid-column: 2;
+		max-height: 0;
+		margin: 0;
+		overflow: hidden;
+		opacity: 0;
+		font-size: 12px;
+		line-height: 1.45;
+		color: var(--sf-text-muted);
+		transition: opacity 120ms ease;
+	}
+
+	&--wide &__help {
+		grid-column: 1;
+	}
+
+	&:hover > &__help,
+	&:focus-within > &__help,
+	&--help-always > &__help {
+		max-height: 12em;
+		margin: 2px 0 4px;
+		opacity: 1;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		&__help {
+			transition: none;
+		}
+	}
+
+	// Quiet inputs: no border until hover, the global focus ring on focus.
+	// (`& &__input` outranks wp-admin's input[type="text"] rules.)
+	& &__input {
+		box-sizing: border-box;
+		width: 100%;
+		min-height: 28px;
+		margin: 0;
+		padding: 4px 6px;
+		border: 1px solid transparent;
+		border-radius: var(--sf-radius-sm);
+		background: transparent;
+		box-shadow: none;
+		font-family: inherit;
+		font-size: var(--sf-text-sm);
+		line-height: 1.35;
+		color: var(--sf-text);
+
+		&::placeholder {
+			color: var(--sf-text-muted);
+			opacity: 1;
+		}
+
+		&:hover:not(:disabled):not(:focus) {
+			border-color: var(--sf-border);
+		}
+
+		&:disabled {
+			opacity: 0.6;
+		}
+
+		&--area {
+			display: block;
+			min-height: 28px;
+			resize: none;
+			overflow: hidden;
+		}
+
+		// A full width list of lines (Lines control): a visible box.
+		&--box {
+			padding: 6px 8px;
+			border-color: var(--sf-border);
+			resize: vertical;
+		}
+
+		&--number {
+			width: 72px;
+			text-align: right;
+			font-variant-numeric: tabular-nums;
+		}
+	}
+
+	&__number {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+	}
+
+	&__unit {
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text-muted);
+	}
+
+	// Toggle row: the switch, then the state text.
+	&__toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		min-height: 28px;
+	}
+
+	&__state {
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text-muted);
+	}
+}
+
+// The switch: 32 x 18, grey track and white knob; accent track when on.
+.components-form-toggle.sf-toggle {
+	flex-shrink: 0;
+	margin: 0;
+
+	.components-form-toggle__track {
+		width: 32px;
+		height: 18px;
+		border: 0;
+		border-radius: 9px;
+		background: var(--sf-border-strong);
+		box-sizing: border-box;
+	}
+
+	.components-form-toggle__thumb {
+		top: 3px;
+		left: 3px;
+		width: 12px;
+		height: 12px;
+		border: 0;
+		background: #fff;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+		box-sizing: border-box;
+	}
+
+	&.is-checked .components-form-toggle__track {
+		background: var(--sf-brand);
+	}
+
+	&.is-checked .components-form-toggle__thumb {
+		transform: translateX(14px);
+	}
+
+	&.is-disabled {
+		opacity: 0.6;
+	}
+}
+
+// Pills (2 to 4 short choices, and the Width row).
+.sf-seg {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: 2px;
+	max-width: 100%;
+	padding: 2px;
+	border-radius: var(--sf-radius-md);
+	background: var(--sf-bg-muted);
+
+	&__option {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 28px;
+		min-height: 24px;
+		margin: 0;
+		padding: 0 10px;
+		border: 1px solid transparent;
+		border-radius: 4px;
+		font-size: 12px;
+		line-height: 1.2;
+		color: var(--sf-text-secondary);
+		cursor: pointer;
+		white-space: nowrap;
+
+		&.is-on {
+			border-color: var(--sf-border);
+			background: #fff;
+			color: var(--sf-text);
+			font-weight: var(--sf-weight-medium);
+		}
+
+		&.is-disabled {
+			opacity: 0.6;
+			cursor: default;
+		}
+
+		&:focus-within {
+			outline: 2px solid var(--sf-brand);
+			outline-offset: 1px;
+		}
+	}
+
+	& &__input {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		margin: 0;
+		opacity: 0;
+		cursor: inherit;
+	}
+
+	// The Width row: seven pills in the value column.
+	&--compact {
+		flex-wrap: nowrap;
+		gap: 0;
+	}
+
+	&--compact &__option {
+		min-width: 20px;
+		padding: 0 4px;
+	}
+}
+
+// A native select drawn as a chip.
+.sf-chip-select {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	max-width: 100%;
+
+	& &__input {
+		width: auto;
+		height: auto;
+		box-sizing: border-box;
+		max-width: 100%;
+		min-height: 28px;
+		margin: 0;
+		padding: 0 26px 0 10px;
+		border: 1px solid transparent;
+		border-radius: var(--sf-radius-md);
+		background: var(--sf-bg-muted);
+		box-shadow: none;
+		font-family: inherit;
+		font-size: 12px;
+		line-height: 1.2;
+		color: var(--sf-text);
+		cursor: pointer;
+		appearance: none;
+		-webkit-appearance: none;
+		text-overflow: ellipsis;
+
+		&:hover:not(:disabled) {
+			border-color: var(--sf-border);
+		}
+
+		&:disabled {
+			opacity: 0.6;
+			cursor: default;
+		}
+	}
+
+	&__chevron {
+		position: absolute;
+		right: 8px;
+		display: inline-flex;
+		color: var(--sf-text-muted);
+		pointer-events: none;
+
+		svg {
+			fill: none;
+		}
+	}
+}
+
+// A read-only value shown as a chip that can be clicked (Visibility).
+.sf-chip {
+	min-height: 24px;
+	margin: 0;
+	padding: 0 10px;
+	border: 1px solid transparent;
+	border-radius: var(--sf-radius-md);
+	background: var(--sf-bg-muted);
+	color: var(--sf-text);
+	font-family: inherit;
+	font-size: 12px;
+	cursor: pointer;
+
+	&:hover {
+		border-color: var(--sf-border);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--sf-brand);
+		outline-offset: 2px;
+	}
+}
+
+// ── Choices editor ───────────────────────────────────────────────────────────
+// One bordered box: a row per choice (drag handle, default mark, text, remove)
+// and a last row to add one.
+.sf-options {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+
+	&__box {
+		overflow: hidden;
+		border: 1px solid var(--sf-border);
+		border-radius: var(--sf-radius-md);
+		background: var(--sf-bg-surface);
 	}
 
 	&__list {
 		display: flex;
 		flex-direction: column;
-		gap: 4px;
 		margin: 0;
 		padding: 0;
 		list-style: none;
@@ -360,10 +802,11 @@
 	&__row {
 		display: flex;
 		align-items: center;
-		gap: 4px;
+		gap: 6px;
 		margin: 0;
-		padding: 2px;
-		border-radius: var(--sf-radius-sm);
+		padding: 0 6px 0 2px;
+		min-height: 34px;
+		border-bottom: 1px solid var(--sf-border-subtle);
 		background: var(--sf-bg-surface);
 
 		&.is-dragging {
@@ -389,11 +832,11 @@
 		background: transparent;
 		color: var(--sf-text-subtle);
 		cursor: grab;
-		opacity: 0.5;
+		opacity: 0.6;
 		touch-action: none;
 
 		svg {
-			fill: none;
+			fill: currentColor;
 		}
 
 		&:focus-visible {
@@ -473,35 +916,41 @@
 	&__input[type='text'] {
 		flex: 1 1 0;
 		min-width: 0;
-		height: 32px;
-		min-height: 32px;
+		height: 28px;
+		min-height: 28px;
 		margin: 0;
-		padding: 0 8px;
-		border: 1px solid var(--sf-border);
-		border-radius: var(--sf-radius-control);
+		padding: 0 6px;
+		border: 1px solid transparent;
+		border-radius: var(--sf-radius-sm);
+		background: transparent;
 		font-size: var(--sf-text-sm);
+		color: var(--sf-text);
 		box-shadow: none;
+
+		&:hover:not(:disabled):not(:focus) {
+			border-color: var(--sf-border);
+		}
 
 		&:focus {
 			border-color: var(--sf-brand);
 			box-shadow: 0 0 0 1px var(--sf-brand);
 			outline: none;
 		}
-
 	}
 
 	&__attribute {
-		flex: 0 0 72px;
+		flex: 0 0 64px;
 	}
 
 	&__input--attribute {
 		width: 100%;
-		height: 32px;
-		min-height: 32px;
+		height: 28px;
+		min-height: 28px;
 		margin: 0;
 		padding: 0 6px;
-		border: 1px solid var(--sf-border);
-		border-radius: var(--sf-radius-control);
+		border: 1px solid transparent;
+		border-radius: var(--sf-radius-sm);
+		background: var(--sf-bg-muted);
 		font-size: var(--sf-text-sm);
 		font-variant-numeric: tabular-nums;
 		box-shadow: none;
@@ -521,10 +970,15 @@
 		font-family: var(--sf-font-mono);
 		font-size: 12px;
 		color: var(--sf-text-secondary);
+		background: var(--sf-bg-muted);
 	}
 
 	&__remove.components-button {
 		flex-shrink: 0;
+		width: 24px;
+		min-width: 24px;
+		height: 24px;
+		padding: 0;
 		color: var(--sf-text-subtle);
 
 		svg {
@@ -536,12 +990,39 @@
 		}
 	}
 
-	&__add.components-button {
-		align-self: flex-start;
-		margin-top: 4px;
+	// The last row of the box: a quiet "Add choice".
+	&__add {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		width: 100%;
+		min-height: 34px;
+		margin: 0;
+		padding: 0 10px 0 28px;
+		border: 0;
+		background: transparent;
+		font-family: inherit;
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text-muted);
+		text-align: start;
+		cursor: pointer;
 
 		svg {
 			fill: none;
+		}
+
+		&:hover:not(:disabled) {
+			color: var(--sf-brand);
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--sf-brand);
+			outline-offset: -2px;
+		}
+
+		&:disabled {
+			cursor: default;
+			opacity: 0.6;
 		}
 	}
 
@@ -560,6 +1041,11 @@
 			font-family: var(--sf-font-mono);
 			font-size: 12px;
 		}
+	}
+
+	&__bulk-actions {
+		display: flex;
+		gap: 8px;
 	}
 }
 
@@ -613,13 +1099,6 @@
 		border-radius: var(--sf-radius-sm);
 		font-family: var(--sf-font-mono);
 	}
-}
-
-// Step setting (2.3.1): sits above the field's general settings.
-.sf-field-inspector__step-setting {
-	margin-bottom: 16px;
-	padding-bottom: 16px;
-	border-bottom: 1px solid var(--sf-gray-100, #f0f0f1);
 }
 
 

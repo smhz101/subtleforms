@@ -8,12 +8,14 @@
  * - "Show values" reveals the stored value beside each label; values are
  *   generated from labels until you edit them.
  * - Tick the circle/box to make an option selected by default.
- * - "Bulk edit" swaps the list for a textarea (one option per line,
- *   `Label|value` to set a value).
+ * - "Paste list" (the Choices section's header action) swaps the list for a
+ *   textarea (one option per line, `Label|value` to set a value). The
+ *   section owns that switch, so it is passed in as `bulk` and `onBulkChange`.
  */
 
-import { useState, useMemo, useRef } from '@wordpress/element';
-import { Button, ToggleControl, TextareaControl } from '@wordpress/components';
+import { useState, useMemo, useRef, useEffect } from '@wordpress/element';
+import { Button, TextareaControl } from '@wordpress/components';
+import Toggle from '../controls/Toggle';
 import { __, sprintf } from '@wordpress/i18n';
 import { nanoid } from 'nanoid';
 import {
@@ -34,6 +36,8 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import Icon from '../../../../ui/Icon';
 import { getChoiceType } from '../../../../../shared/extend';
+import PropertyRow, { useRowIds } from '../PropertyRow';
+import { GripGlyph } from '../glyphs';
 
 const BUILT_IN_CHOICE_TYPES = ['radio', 'multiple_choice', 'dropdown', 'select', 'picture_choice'];
 
@@ -89,7 +93,7 @@ function OptionRow({
         }}
         {...attributes}
         {...listeners}>
-        <Icon.Move size={14} />
+        <GripGlyph size={14} />
       </button>
 
       <button
@@ -188,10 +192,15 @@ function OptionRow({
   );
 }
 
-export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
+export default function OptionsPanel({ field, onUpdate, isReadOnly, bulk: bulkProp, onBulkChange }) {
   const [showValues, setShowValues] = useState(false);
-  const [bulk, setBulk] = useState(false);
+  const [bulkOwn, setBulkOwn] = useState(false);
   const [bulkText, setBulkText] = useState('');
+  const showValuesIds = useRowIds();
+  // The section header can own the switch; used on its own, the panel keeps it.
+  const controlled = typeof onBulkChange === 'function';
+  const bulk = controlled ? !!bulkProp : bulkOwn;
+  const setBulk = controlled ? onBulkChange : setBulkOwn;
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -208,6 +217,15 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
     rowIds.current = ids;
     return list.map((opt, i) => ({ ...opt, _sid: ids[i] }));
   }, [field?.options]);
+
+  const wasBulk = useRef(false);
+  useEffect(() => {
+    if (bulk && !wasBulk.current) {
+      setBulkText(bulkTextFromOptions());
+    }
+    wasBulk.current = bulk;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bulk]);
 
   if (!field || !isChoiceType(field.type)) {
     return null;
@@ -248,19 +266,17 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
 
   const move = (from, to) => commit(arrayMove(options, from, to));
 
-  const openBulk = () => {
-    setBulkText(
-      options
-        .map((o) => {
-          const base = o.value && o.value !== slugify(o.label) ? `${o.label}|${o.value}` : o.label;
-          if (!attributes.length) return base;
-          const custom = o.value && o.value !== slugify(o.label) ? o.value : '';
-          return [o.label, custom, ...attributes.map((a) => o[a.key] ?? '')].join('|');
-        })
-        .join('\n')
-    );
-    setBulk(true);
-  };
+  // The pasted-list editor starts from the current options. It opens when the
+  // section header asks for it (bulk turns true), not from a button here.
+  const bulkTextFromOptions = () =>
+    options
+      .map((o) => {
+        const base = o.value && o.value !== slugify(o.label) ? `${o.label}|${o.value}` : o.label;
+        if (!attributes.length) return base;
+        const custom = o.value && o.value !== slugify(o.label) ? o.value : '';
+        return [o.label, custom, ...attributes.map((a) => o[a.key] ?? '')].join('|');
+      })
+      .join('\n');
 
   const applyBulk = () => {
     const next = bulkText
@@ -288,23 +304,6 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
 
   return (
     <div className='sf-options'>
-      <div className='sf-options__toolbar'>
-        <ToggleControl
-          __nextHasNoMarginBottom
-          label={__('Show values', 'subtleforms')}
-          checked={showValues}
-          onChange={setShowValues}
-          disabled={bulk}
-        />
-        <Button
-          variant='tertiary'
-          size='small'
-          onClick={bulk ? () => setBulk(false) : openBulk}
-          disabled={isReadOnly}>
-          {bulk ? __('Cancel', 'subtleforms') : __('Bulk edit', 'subtleforms')}
-        </Button>
-      </div>
-
       {bulk ? (
         <div className='sf-options__bulk'>
           <TextareaControl
@@ -317,76 +316,92 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
             value={bulkText}
             onChange={setBulkText}
           />
-          <Button variant='primary' size='compact' onClick={applyBulk}>
-            {__('Apply', 'subtleforms')}
-          </Button>
+          <div className='sf-options__bulk-actions'>
+            <Button variant='primary' size='compact' onClick={applyBulk}>
+              {__('Apply', 'subtleforms')}
+            </Button>
+            {!controlled && (
+              <Button variant='tertiary' size='compact' onClick={() => setBulk(false)}>
+                {__('Cancel', 'subtleforms')}
+              </Button>
+            )}
+          </div>
         </div>
       ) : (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={({ active, over }) => {
-            if (!over || active.id === over.id) return;
-            const from = options.findIndex((o) => o._sid === active.id);
-            const to = options.findIndex((o) => o._sid === over.id);
-            if (from > -1 && to > -1) move(from, to);
-          }}>
-          <SortableContext
-            items={options.map((o) => o._sid)}
-            strategy={verticalListSortingStrategy}>
-            <ul className='sf-options__list'>
-              {options.map((option, index) => (
-                <OptionRow
-                  key={option._sid}
-                  option={option}
-                  index={index}
-                  count={options.length}
-                  isDefault={defaults.includes(option.value)}
-                  multiple={multiple}
-                  showValues={showValues}
-                  extraInputs={attributes}
-                  disabled={isReadOnly}
-                  onMove={move}
-                  onChange={(next) => {
-                    const list = [...options];
-                    list[index] = next;
-                    commit(list);
-                  }}
-                  onRemove={() => commit(options.filter((_, i) => i !== index))}
-                  onToggleDefault={() => toggleDefault(option.value)}
-                />
-              ))}
-            </ul>
-          </SortableContext>
-        </DndContext>
+        <div className='sf-options__box'>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={({ active, over }) => {
+              if (!over || active.id === over.id) return;
+              const from = options.findIndex((o) => o._sid === active.id);
+              const to = options.findIndex((o) => o._sid === over.id);
+              if (from > -1 && to > -1) move(from, to);
+            }}>
+            <SortableContext
+              items={options.map((o) => o._sid)}
+              strategy={verticalListSortingStrategy}>
+              <ul className='sf-options__list'>
+                {options.map((option, index) => (
+                  <OptionRow
+                    key={option._sid}
+                    option={option}
+                    index={index}
+                    count={options.length}
+                    isDefault={defaults.includes(option.value)}
+                    multiple={multiple}
+                    showValues={showValues}
+                    extraInputs={attributes}
+                    disabled={isReadOnly}
+                    onMove={move}
+                    onChange={(next) => {
+                      const list = [...options];
+                      list[index] = next;
+                      commit(list);
+                    }}
+                    onRemove={() => commit(options.filter((_, i) => i !== index))}
+                    onToggleDefault={() => toggleDefault(option.value)}
+                  />
+                ))}
+              </ul>
+            </SortableContext>
+          </DndContext>
+          <button
+            type='button'
+            className='sf-options__add'
+            disabled={isReadOnly}
+            onClick={() => {
+              const n = options.length + 1;
+              const label = sprintf(
+                /* translators: %d: option number */
+                __('Option %d', 'subtleforms'),
+                n
+              );
+              commit([
+                ...options,
+                {
+                  label,
+                  value: `option_${nanoid(6)}`,
+                  ...Object.fromEntries(attributes.filter((a) => a.defaultValue !== undefined).map((a) => [a.key, a.defaultValue])),
+                },
+              ]);
+            }}>
+            <Icon.Plus size={14} />
+            <span>{__('Add choice', 'subtleforms')}</span>
+          </button>
+        </div>
       )}
 
-      {!bulk && (
-        <Button
-          variant='secondary'
-          size='compact'
-          className='sf-options__add'
-          icon={<Icon.Plus size={14} />}
-          disabled={isReadOnly}
-          onClick={() => {
-            const n = options.length + 1;
-            const label = sprintf(
-              /* translators: %d: option number */
-              __('Option %d', 'subtleforms'),
-              n
-            );
-            commit([
-              ...options,
-              {
-                label,
-                value: `option_${nanoid(6)}`,
-                ...Object.fromEntries(attributes.filter((a) => a.defaultValue !== undefined).map((a) => [a.key, a.defaultValue])),
-              },
-            ]);
-          }}>
-          {__('Add option', 'subtleforms')}
-        </Button>
-      )}
+      <PropertyRow label={__('Show values', 'subtleforms')} ids={showValuesIds}>
+        <span className='sf-prow__toggle'>
+          <Toggle
+            id={showValuesIds.id}
+            checked={showValues}
+            disabled={bulk}
+            onChange={(event) => setShowValues(event.target.checked)}
+          />
+        </span>
+      </PropertyRow>
     </div>
   );
 }

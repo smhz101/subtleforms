@@ -48,7 +48,27 @@ const ALIGN_LABELS = {
   right: __( 'Right', 'subtleforms' ),
 };
 
-const FRACTIONS = { 100: __( 'Full', 'subtleforms' ), 75: '¾', 66: '⅔', 50: '½', 33: '⅓', 25: '¼' };
+export const FRACTIONS = { 100: __( 'Full', 'subtleforms' ), 75: '¾', 66: '⅔', 50: '½', 33: '⅓', 25: '¼' };
+
+/**
+ * The appearance object after one setting changes: an empty value clears the
+ * key. Shared by this panel and the Width quick row of the settings sheet, so
+ * both save the same shape.
+ *
+ * @param {Object} appearance Current appearance overrides.
+ * @param {string} key        Setting.
+ * @param {*}      value      New value.
+ * @return {Object} Next appearance.
+ */
+export function nextAppearance( appearance, key, value ) {
+  const next = { ...appearance };
+  if ( value === '' || value === undefined || value === null || value === false ) {
+    delete next[ key ];
+  } else {
+    next[ key ] = value;
+  }
+  return next;
+}
 
 function WidthPicker( { value, onChange, disabled } ) {
   const options = [ { value: '', label: __( 'Auto', 'subtleforms' ) }, ...FIELD_LAYOUT.widths ];
@@ -78,7 +98,7 @@ function WidthPicker( { value, onChange, disabled } ) {
   );
 }
 
-export default function FieldAppearancePanel( { field, onUpdate, formAppearance, isReadOnly = false } ) {
+export default function FieldAppearancePanel( { field, onUpdate, formAppearance, isReadOnly = false, hideWidth = false } ) {
   const appearance = field?.config?.appearance || field?.appearance || {};
   const overrideCount = Object.values( appearance ).filter(
     ( v ) => v !== '' && v !== undefined && v !== null && v !== false
@@ -88,12 +108,7 @@ export default function FieldAppearancePanel( { field, onUpdate, formAppearance,
     if ( isReadOnly ) {
       return;
     }
-    const next = { ...appearance };
-    if ( value === '' || value === undefined || value === null || value === false ) {
-      delete next[ key ];
-    } else {
-      next[ key ] = value;
-    }
+    const next = nextAppearance( appearance, key, value );
     onUpdate( { appearance: next } );
   };
 
@@ -155,11 +170,15 @@ export default function FieldAppearancePanel( { field, onUpdate, formAppearance,
       )}
 
       <PanelBody title={ __( 'Layout', 'subtleforms' ) } initialOpen className='sf-field-appearance__panel'>
-        <p className='sf-field-appearance__label'>{ __( 'Width', 'subtleforms' ) }</p>
-        <WidthPicker value={ appearance.width } onChange={ ( v ) => setValue( 'width', v ) } disabled={ isReadOnly } />
-        <p className='sf-field-appearance__help'>
-          { __( 'Narrower fields sit side by side and stack on phones.', 'subtleforms' ) }
-        </p>
+        { ! hideWidth && (
+          <>
+            <p className='sf-field-appearance__label'>{ __( 'Width', 'subtleforms' ) }</p>
+            <WidthPicker value={ appearance.width } onChange={ ( v ) => setValue( 'width', v ) } disabled={ isReadOnly } />
+            <p className='sf-field-appearance__help'>
+              { __( 'Narrower fields sit side by side and stack on phones.', 'subtleforms' ) }
+            </p>
+          </>
+        ) }
 
         <ToggleGroupControl
           __nextHasNoMarginBottom

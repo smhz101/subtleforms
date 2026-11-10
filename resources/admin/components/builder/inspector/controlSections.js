@@ -63,6 +63,55 @@ export function hasSection( def, section ) {
 }
 
 /**
+ * Which block of the settings sheet draws a control.
+ *
+ *   content   what the field says and shows: the `general` controls, and for a
+ *             field that takes an answer the controls the old Display panel
+ *             held (placeholder, default value, label and help placement).
+ *   subfields the parts of a Name or Address field.
+ *   type      the settings of a layout block (Repeater, Step, Notice).
+ *   rules     the `validation` controls.
+ *   advanced  the `advanced` controls.
+ *
+ * Every control of a definition lands in exactly one block.
+ *
+ * @param {Object} ctrl     Control with `section` resolved (see resolveControls()).
+ * @param {boolean} isLayout Whether the field type is a layout block.
+ * @return {string} Block name.
+ */
+export function controlBlock( ctrl, isLayout ) {
+	if ( ctrl.type === 'subfield' ) {
+		return 'subfields';
+	}
+	if ( ctrl.section === 'validation' ) {
+		return 'rules';
+	}
+	if ( ctrl.section === 'advanced' ) {
+		return 'advanced';
+	}
+	if ( ctrl.section === 'general' ) {
+		return 'content';
+	}
+	return isLayout ? 'type' : 'content';
+}
+
+/** A filter for DynamicInspectorPanel that keeps the controls of one block. */
+export function blockPicker( block, isLayout ) {
+	return ( ctrl ) => controlBlock( ctrl, isLayout ) === block;
+}
+
+/**
+ * Whether a definition has a control that passes a filter.
+ *
+ * @param {Object}   def  Field definition.
+ * @param {Function} pick Filter over controls with `section` resolved.
+ * @return {boolean} True when one control passes.
+ */
+export function hasControls( def, pick ) {
+	return resolveControls( def ).some( pick );
+}
+
+/**
  * Types that take no answer but can still be shown or hidden by logic: steps,
  * content blocks and the Repeater. An add-on type says the same with
  * `meta.logicOnly` (see isLogicOnlyType()).

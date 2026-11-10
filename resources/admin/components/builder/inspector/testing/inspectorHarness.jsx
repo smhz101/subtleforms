@@ -1,3 +1,4 @@
+/* eslint-env jest */
 /**
  * Test harness for the field settings panel: mounts FieldInspector for a
  * field type with the real PHP field definitions (fixtures/fieldDefinitions.json,
@@ -124,7 +125,10 @@ export function mountInspector(typeOrField, { fieldOverrides = {}, builderOverri
   return {
     container,
     field,
-    builder,
+    // The builder stub of the latest render (render() makes a new one).
+    get builder() {
+      return builder;
+    },
     render,
     unmount: () => {
       act(() => root.unmount());

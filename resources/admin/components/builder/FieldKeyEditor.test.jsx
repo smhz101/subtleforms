@@ -32,10 +32,10 @@ function key(input, name) {
   });
 }
 
-const editButton = (container) => container.querySelector('button[aria-label="Change field ID"]');
+const editButton = (container) => container.querySelector('button[aria-label="Rename field ID"]');
 
 describe('FieldKeyEditor', () => {
-  test('shows the ID with a quiet edit button, hidden when read only', () => {
+  test('shows the ID with a rename link, hidden when read only', () => {
     const { container, render, unmount } = mount({ onRename: () => ({ references: 0 }) });
     expect(container.textContent).toContain('email_ab12');
     expect(editButton(container)).not.toBeNull();

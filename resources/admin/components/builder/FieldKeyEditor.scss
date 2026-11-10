@@ -1,5 +1,5 @@
-// Field ID in the field settings header (2.4.1): a quiet edit control next
-// to the copy chip, and an inline box that keeps the chip's size.
+// Field ID in the field settings header (2.4.1): a "rename" link next to
+// the copy chip, and an inline box that keeps the chip's size.
 
 .sf-field-key {
 	display: flex;
@@ -16,20 +16,32 @@
 		max-width: 100%;
 	}
 
-	// The pencil stays out of the way until the header is hovered or focused.
-	&__edit.components-button {
-		width: 20px;
-		min-width: 20px;
-		height: 20px;
-		padding: 0;
-		color: var(--sf-text-subtle);
-		opacity: 0.6;
-		transition: opacity 120ms ease, color 120ms ease;
+	&__dot {
+		padding: 0 6px;
+		color: var(--sf-text-muted);
+		font-size: 12px;
+	}
 
-		&:hover,
+	// "rename" reads as a quiet link beside the copy chip.
+	&__edit {
+		margin: 0;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: var(--sf-brand);
+		font-size: 12px;
+		line-height: 20px;
+		cursor: pointer;
+		white-space: nowrap;
+
+		&:hover {
+			text-decoration: underline;
+		}
+
 		&:focus-visible {
-			color: var(--sf-text);
-			opacity: 1;
+			outline: 2px solid var(--sf-brand);
+			outline-offset: 2px;
+			border-radius: 2px;
 		}
 	}
 

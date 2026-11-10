@@ -176,14 +176,18 @@ export default function FieldKeyEditor({ nodeId, fieldKey, usedKeys, onRename, e
           )}
         </button>
         {!isReadOnly && onRename && (
-          <Button
-            size='small'
-            className='sf-field-key__edit'
-            icon={<Icon.Edit size={12} />}
-            label={__('Change field ID', 'subtleforms')}
-            showTooltip
-            onClick={start}
-          />
+          <>
+            <span className='sf-field-key__dot' aria-hidden='true'>
+              ·
+            </span>
+            <button
+              type='button'
+              className='sf-field-key__edit'
+              aria-label={__('Rename field ID', 'subtleforms')}
+              onClick={start}>
+              {__('rename', 'subtleforms')}
+            </button>
+          </>
         )}
       </div>
       {done && (
