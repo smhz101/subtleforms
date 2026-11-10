@@ -16,15 +16,19 @@ describe('builder names (UX2-13)', () => {
   const sections = labels(inspector, /<InspectorSection\s+id='[a-z]+'\s+title=\{__\('([^']+)'/g);
   const previewPanels = labels(read('PreviewWorkspace.jsx'), /\{ __\( '([^']+)', 'subtleforms' \) \}/g);
 
-  test('the inspector is one sheet with a Content section, and has no tabs', () => {
+  // The two icon tabs of the panel (settings and styles).
+  const tabs = labels(read('inspector/InspectorTabs.jsx'), /label: __\( '([^']+)'/g);
+
+  test('the inspector has Content, Choices, Rules, Logic and Advanced sections and two icon tabs', () => {
     expect(inspector).not.toContain('TabPanel');
-    expect(sections).toEqual(expect.arrayContaining(['Content', 'Choices', 'Rules', 'Logic', 'Style', 'Advanced']));
+    expect(tabs).toEqual(['Field settings', 'Field styles']);
+    expect(sections).toEqual(expect.arrayContaining(['Content', 'Choices', 'Rules', 'Logic', 'Advanced']));
     expect(sections).not.toContain('Display');
     expect(sections).not.toContain('Appearance');
   });
 
-  test('no inspector section shares a name with a builder view', () => {
-    expect(sections.filter((s) => views.includes(s))).toEqual([]);
+  test('no inspector section or tab shares a name with a builder view', () => {
+    expect([...sections, ...tabs].filter((s) => views.includes(s))).toEqual([]);
   });
 
   test('the field Style section is not named like the preview Appearance panel', () => {

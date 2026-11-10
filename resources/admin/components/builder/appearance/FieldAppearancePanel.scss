@@ -12,7 +12,7 @@
 	flex-direction: column;
 
 	&__sample {
-		padding: 12px 16px;
+		padding: 16px;
 		border-bottom: 1px solid var(--sf-border-subtle);
 		background:
 			linear-gradient(45deg, var(--sf-bg-subtle) 25%, transparent 25%, transparent 75%, var(--sf-bg-subtle) 75%) 0 0 / 12px 12px,
@@ -30,9 +30,10 @@
 		align-items: center;
 		justify-content: space-between;
 		gap: 8px;
-		padding: 10px 16px;
+		padding: 12px 16px;
 		border-bottom: 1px solid var(--sf-border-subtle);
 		font-size: 12px;
+		line-height: 16px;
 		color: var(--sf-text-muted);
 	}
 
@@ -40,26 +41,39 @@
 		border-top: 0;
 		border-bottom: 1px solid var(--sf-border-subtle);
 
+		// A 48px header, 14/20 semibold, like the sections above it.
 		> .components-panel__body-title .components-panel__body-toggle {
-			padding: 14px 16px;
-			font-size: var(--sf-text-sm);
+			min-height: 48px;
+			padding: 0 16px;
+			font-size: 14px;
 			font-weight: var(--sf-weight-semibold);
+			line-height: 20px;
+			transition: background-color 200ms cubic-bezier(0.22, 1, 0.36, 1);
+
+			&:focus-visible {
+				outline: 2px solid var(--sf-brand);
+				outline-offset: -2px;
+				box-shadow: none;
+			}
 		}
 
 		&.is-opened {
-			padding: 0 16px 16px;
+			padding: 0 16px 24px;
 
-			> .components-panel__body-title { margin: 0 -16px 4px; }
+			> .components-panel__body-title { margin: 0 -16px 0; }
 		}
 
 		.components-toggle-group-control,
 		.components-toggle-control { margin-bottom: 16px; }
 
+		// Uppercase 12/16 labels over the controls, as in the rest of the panel.
 		.components-base-control__label,
 		.components-input-control__label.components-input-control__label {
 			font-size: 12px;
 			font-weight: var(--sf-weight-medium);
-			text-transform: none;
+			line-height: 16px;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
 			color: var(--sf-text);
 		}
 	}
@@ -68,12 +82,16 @@
 		margin: 0 0 8px;
 		font-size: 12px;
 		font-weight: var(--sf-weight-medium);
+		line-height: 16px;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
 		color: var(--sf-text);
 	}
 
 	&__help {
-		margin: 6px 0 16px;
+		margin: 8px 0 16px;
 		font-size: 12px;
+		line-height: 16px;
 		color: var(--sf-text-muted);
 	}
 
@@ -109,8 +127,9 @@
 		}
 
 		&:focus-visible {
-			outline: none;
-			box-shadow: var(--sf-shadow-focus);
+			outline: 2px solid var(--sf-brand);
+			outline-offset: 2px;
+			box-shadow: none;
 		}
 	}
 
@@ -136,7 +155,7 @@
 	&__option.is-active &__fill { background: var(--sf-brand); }
 
 	&__label {
-		font-size: 11px;
+		font-size: 12px;
 		line-height: 1;
 		color: var(--sf-text-secondary);
 	}
@@ -146,4 +165,43 @@
 	margin: 0;
 	font-size: 12px;
 	color: var(--sf-text-secondary, #757575);
+}
+
+// The shared appearance controls, sized for the field panel: nothing below
+// 12px, borders as visible as the other inputs, the same focus outline.
+.sf-field-appearance {
+	.sf-appearance-group__title {
+		font-size: 12px;
+		line-height: 16px;
+	}
+
+	.sf-color-token__value {
+		font-size: 12px;
+		line-height: 16px;
+	}
+
+	.sf-color-token__label {
+		font-size: 13px;
+		line-height: 20px;
+	}
+
+	.sf-color-token__toggle {
+		border-color: var(--sf-border-strong);
+		border-radius: var(--sf-radius-sm);
+		transition: border-color 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms cubic-bezier(0.22, 1, 0.36, 1);
+
+		&:hover:not(:disabled) {
+			background: var(--sf-bg-hover);
+		}
+
+		&:active:not(:disabled) {
+			transform: translateY(1px);
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--sf-brand);
+			outline-offset: 2px;
+			box-shadow: none;
+		}
+	}
 }

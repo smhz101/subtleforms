@@ -191,3 +191,25 @@ export function collectControlLabels(container) {
     });
   return [...names].sort();
 }
+
+/** Switch the panel to a tab (settings or styles). */
+export function openTab(container, id) {
+  const tab = container.querySelector(`[role="tab"][id$="-tab-${id}"]`);
+  if (tab) act(() => tab.click());
+}
+
+/**
+ * The control names on every tab, each with all its sections open, as one
+ * sorted list without repeats (the Styles tab holds the `appearance` controls).
+ */
+export function collectAllTabs(container) {
+  const names = new Set();
+  const tabs = [...container.querySelectorAll('[role="tab"]')].map((t) => t.id.split('-tab-')[1]);
+  (tabs.length ? tabs : [null]).forEach((id) => {
+    if (id) openTab(container, id);
+    openEverything(container);
+    collectControlLabels(container).forEach((n) => names.add(n));
+  });
+  if (tabs.length) openTab(container, 'settings');
+  return [...names].sort();
+}

@@ -8,7 +8,7 @@ import { act } from 'react';
 import axe from 'axe-core';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { collectControlLabels, mountInspector, openEverything } from '../testing/inspectorHarness';
+import { collectAllTabs, collectControlLabels, mountInspector, openEverything, openTab } from '../testing/inspectorHarness';
 import before from '../testing/fixtures/controlLabels.before.json';
 
 // The short names the Rules section gives the two messages. The settings and
@@ -18,7 +18,7 @@ const SHORT_NAMES = {
   'Custom validation message': 'If invalid',
 };
 
-const SECTIONS = ['content', 'choices', 'dropdowns', 'subfields', 'type', 'rules', 'logic', 'style', 'advanced'];
+const SECTIONS = ['content', 'choices', 'dropdowns', 'subfields', 'type', 'rules', 'logic', 'advanced'];
 
 const sectionIds = (container) => [...container.querySelectorAll('[data-section]')].map((s) => s.dataset.section);
 const toggle = (container, id) => container.querySelector(`[data-section="${id}"] .sf-isec__toggle`);
@@ -41,20 +41,30 @@ afterEach(() => {
   document.body.innerHTML = '';
 });
 
-describe('one sheet, no tabs', () => {
+describe('one sheet, two tabs', () => {
   test.each(Object.keys(before))('%s: the same controls as the tabbed panel', (type) => {
     const h = mountInspector(type);
-    expect(h.container.querySelector('[role="tab"]')).toBeNull();
-    openEverything(h.container);
-    const after = collectControlLabels(h.container);
+    const after = collectAllTabs(h.container);
     const expected = [...new Set(before[type].map((name) => SHORT_NAMES[name] || name))].sort();
     expect(after).toEqual(expected);
     h.unmount();
   });
 
-  test('sections come in order: quick rows, Content, Choices, Rules, Logic, Style, Advanced', () => {
+  test('Settings holds quick rows, Content, Choices, Rules, Logic, Advanced, in that order', () => {
     const h = mountInspector('dropdown');
-    expect(sectionIds(h.container)).toEqual(['quick', 'content', 'choices', 'rules', 'logic', 'style', 'advanced']);
+    expect(sectionIds(h.container)).toEqual(['quick', 'content', 'choices', 'rules', 'logic', 'advanced']);
+    h.unmount();
+  });
+
+  test('Styles holds the appearance controls in groups named after what they do', () => {
+    const h = mountInspector('dropdown');
+    openTab(h.container, 'styles');
+    expect(sectionIds(h.container)).toEqual(['style-label', 'style-help', 'style-input']);
+    const rowLabels = (id) =>
+      [...h.container.querySelectorAll(`[data-section="${id}"] .sf-prow__label-text`)].map((l) => l.textContent);
+    expect(rowLabels('style-label')).toEqual(['Field label visibility']);
+    expect(rowLabels('style-help')).toEqual(['Help text placement']);
+    expect(rowLabels('style-input')).toEqual(['Placeholder', 'Default value']);
     h.unmount();
   });
 
@@ -71,7 +81,7 @@ describe('one sheet, no tabs', () => {
     expect(sectionIds(address.container)).toContain('subfields');
     address.unmount();
     const repeater = mountInspector('repeat_container');
-    expect(sectionIds(repeater.container)).toEqual(['content', 'type', 'logic', 'style', 'advanced']);
+    expect(sectionIds(repeater.container)).toEqual(['content', 'type', 'logic', 'advanced']);
     repeater.unmount();
   });
 
@@ -89,10 +99,10 @@ describe('one sheet, no tabs', () => {
 });
 
 describe('sections collapse and remember it', () => {
-  test('Style and Advanced start closed, the others open', () => {
+  test('Advanced starts closed, the others open', () => {
     const h = mountInspector('dropdown');
     const state = Object.fromEntries(sectionIds(h.container).filter((id) => id !== 'quick').map((id) => [id, toggle(h.container, id).getAttribute('aria-expanded')]));
-    expect(state).toEqual({ content: 'true', choices: 'true', rules: 'true', logic: 'true', style: 'false', advanced: 'false' });
+    expect(state).toEqual({ content: 'true', choices: 'true', rules: 'true', logic: 'true', advanced: 'false' });
     h.unmount();
   });
 
@@ -174,17 +184,25 @@ describe('quick rows', () => {
     h.unmount();
   });
 
-  test('Width is not drawn again in Style', () => {
+  test('Width is not drawn again on the Styles tab', () => {
     const h = mountInspector('text');
-    click(toggle(h.container, 'style'));
-    expect(h.container.querySelector('[data-section="style"] [role="radiogroup"][aria-label="Width"]')).toBeNull();
+    openTab(h.container, 'styles');
+    expect(h.container.querySelector('.sf-field-appearance [role="radiogroup"][aria-label="Width"]')).toBeNull();
     h.unmount();
   });
 
-  test('a block that takes no answer keeps Width in Style and has no quick rows', () => {
+  test('a block that takes no answer keeps Width on the Styles tab and has no quick rows', () => {
     const h = mountInspector('html');
-    click(toggle(h.container, 'style'));
-    expect(h.container.querySelector('[data-section="style"] [role="radiogroup"][aria-label="Width"]')).not.toBeNull();
+    openTab(h.container, 'styles');
+    expect(h.container.querySelector('.sf-field-appearance [role="radiogroup"][aria-label="Width"]')).not.toBeNull();
+    h.unmount();
+  });
+
+  test('the Width row offers every width as a square: Auto, Full, 3/4, 2/3, 1/2, 1/3, 1/4', () => {
+    const h = mountInspector('text');
+    const radios = [...h.container.querySelectorAll('[data-section="quick"] [role="radiogroup"] input[type="radio"]')];
+    expect(radios.map((r) => r.value)).toEqual(['', '100', '75', '66', '50', '33', '25']);
+    expect(h.container.querySelector('[data-section="quick"] select')).toBeNull();
     h.unmount();
   });
 
@@ -302,10 +320,10 @@ describe('rows', () => {
     h.unmount();
   });
 
-  test('a text area grows from one line', () => {
+  test('a text area grows from two lines', () => {
     const h = mountInspector('text');
     const area = h.container.querySelector('textarea');
-    expect(area.getAttribute('rows')).toBe('1');
+    expect(area.getAttribute('rows')).toBe('2');
     h.unmount();
   });
 

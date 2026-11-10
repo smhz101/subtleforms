@@ -30,7 +30,7 @@
 		background: transparent;
 		color: var(--sf-brand);
 		font-size: 12px;
-		line-height: 20px;
+		line-height: 24px;
 		cursor: pointer;
 		white-space: nowrap;
 
@@ -51,7 +51,7 @@
 		box-sizing: border-box;
 		width: 100%;
 		max-width: 240px;
-		height: 22px;
+		height: 24px;
 		min-height: 0;
 		margin: 0;
 		padding: 0 6px;
@@ -61,13 +61,14 @@
 		box-shadow: none;
 		color: var(--sf-text);
 		font-family: var(--sf-font-mono);
-		font-size: 11px;
+		font-size: 12px;
 		line-height: 20px;
 
 		&:focus {
 			border-color: var(--sf-brand);
-			outline: none;
-			box-shadow: 0 0 0 1px var(--sf-brand);
+			outline: 2px solid var(--sf-brand);
+			outline-offset: 2px;
+			box-shadow: none;
 		}
 
 		&.has-problem,
@@ -80,9 +81,9 @@
 	&__hint,
 	&__done {
 		margin: 0;
-		font-size: 11px;
-		line-height: 1.45;
-		color: var(--sf-text-subtle);
+		font-size: 12px;
+		line-height: 16px;
+		color: var(--sf-text-muted);
 	}
 
 	&__hint.is-problem {
@@ -90,7 +91,7 @@
 	}
 
 	&__done .components-button.is-link {
-		font-size: 11px;
+		font-size: 12px;
 		text-decoration: none;
 
 		&:hover,

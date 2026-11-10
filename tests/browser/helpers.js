@@ -179,6 +179,15 @@ module.exports.useBundleOverride = useBundleOverride;
  * Open a collapsed inspector panel (for example Appearance, 2.3.3) if needed.
  */
 async function openPanel(page, title) {
+  // Settings is the default tab; Styles holds the appearance controls.
+  const wanted = String(title).toLowerCase() === 'styles' ? 'styles' : 'settings';
+  const tab = page.locator(`.sf-field-inspector .sf-itabs__tab[id$="-tab-${wanted}"]`).first();
+  if ((await tab.count()) && (await tab.getAttribute('aria-selected')) !== 'true') {
+    await tab.click();
+  }
+  if (wanted === 'styles') {
+    return;
+  }
   // The settings panel is one sheet of collapsible sections. The older group
   // names map to the section that holds their controls now.
   const ALIASES = { display: 'content', general: 'content', field: 'content', validation: 'rules' };
