@@ -1,147 +1,20 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from '@wordpress/element';
 import { Popover, Notice } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { getIcon } from './utils/iconMap';
-import Icon from '../../ui/Icon';
-import FieldDock, { categoryLabel } from './FieldDock';
+import FieldDock from './FieldDock';
 import FieldInspector from './FieldInspector';
 import FormBuilder from './FormBuilder';
 import ConversationalCanvas from './ConversationalCanvas';
 import StepNavigator from './StepNavigator';
 import { BuilderProvider } from './context/BuilderProvider';
 import BuilderDnd from './dnd/BuilderDnd';
+import FieldPickerPopover from './FieldPickerPopover';
 import { useBuilderState, useSchemaCommands, useInsertPicker } from './state';
 import { questionIds } from '../../../shared/conversational';
 import { formFieldDefaults } from '../../../shared/fieldDisplay';
 import { renameFieldKey } from '../../../shared/fieldKeys';
 import { denormalizeTree } from './utils/schemaTree';
 import './FormEditor.scss';
-
-function FieldPickerPopover({ fieldGroups, context, onInsert }) {
-  const [query, setQuery] = useState('');
-  const inputRef = useRef(null);
-
-  const flatSearchResults = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return null;
-    const results = [];
-    Object.values(fieldGroups).forEach((fields) =>
-      fields.forEach((f) => {
-        if (
-          !f.pro_placeholder &&
-          (f.label.toLowerCase().includes(q) || f.type.toLowerCase().includes(q))
-        ) {
-          results.push(f);
-        }
-      })
-    );
-    return results;
-  }, [query, fieldGroups]);
-
-  const groupedFields = useMemo(() => {
-    if (query.trim()) return null;
-    const result = {};
-    Object.entries(fieldGroups).forEach(([cat, fields]) => {
-      const visible = fields.filter((f) => !f.pro_placeholder);
-      if (visible.length) result[cat] = visible;
-    });
-    return result;
-  }, [query, fieldGroups]);
-
-  return (
-    <div
-      className='sf-field-picker-popover'
-      role='dialog'
-      aria-label={__('Add Field', 'subtleforms')}>
-      {/* Search */}
-      <div className='sf-field-picker-popover__search'>
-        <span className='sf-field-picker-popover__search-icon' aria-hidden='true'>
-          <Icon.Search size={14} />
-        </span>
-        <input
-          ref={inputRef}
-          type='text'
-          className='sf-field-picker-popover__search-input'
-          placeholder={__('Search fields…', 'subtleforms')}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') setQuery('');
-          }}
-          autoFocus
-          aria-label={__('Search fields', 'subtleforms')}
-        />
-        {query && (
-          <button
-            type='button'
-            className='sf-field-picker-popover__search-clear'
-            onClick={() => {
-              setQuery('');
-              inputRef.current?.focus();
-            }}
-            aria-label={__('Clear search', 'subtleforms')}>
-            ×
-          </button>
-        )}
-      </div>
-
-      {/* Body */}
-      <div className='sf-field-picker-popover__body'>
-        {flatSearchResults !== null ? (
-          flatSearchResults.length === 0 ? (
-            <div className='sf-field-picker-popover__empty'>
-              {__('No fields match', 'subtleforms')} &ldquo;{query}&rdquo;
-            </div>
-          ) : (
-            <div className='sf-field-picker-popover__grid'>
-              {flatSearchResults.map((f) => {
-                const FieldIcon = getIcon(f.type);
-                return (
-                  <button
-                    key={f.type}
-                    type='button'
-                    onClick={() => onInsert(f.type, context)}
-                    className='sf-field-picker-popover__item'
-                    title={f.label}>
-                    <span className='sf-field-picker-popover__item-icon'>
-                      <FieldIcon size={18} />
-                    </span>
-                    <span className='sf-field-picker-popover__item-label'>{f.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )
-        ) : (
-          groupedFields &&
-          Object.entries(groupedFields).map(([cat, fields]) => (
-            <div key={cat} className='sf-field-picker-popover__category'>
-              <div className='sf-field-picker-popover__category-label'>{categoryLabel(cat)}</div>
-              <div className='sf-field-picker-popover__grid'>
-                {fields.map((f) => {
-                  const FieldIcon = getIcon(f.type);
-                  return (
-                    <button
-                      key={f.type}
-                      type='button'
-                      onClick={() => onInsert(f.type, context)}
-                      className='sf-field-picker-popover__item'
-                      title={f.label}>
-                      <span className='sf-field-picker-popover__item-icon'>
-                        <FieldIcon size={18} />
-                      </span>
-                      <span className='sf-field-picker-popover__item-label'>{f.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-}
 
 export default function FormEditor({
   schema,
@@ -487,6 +360,8 @@ export default function FormEditor({
             <FieldPickerPopover
               fieldGroups={dockFieldGroups}
               context={insertPicker.context}
+              tree={tree}
+              rootId={rootId}
               onInsert={handleInsertWithClose}
             />
           </Popover>

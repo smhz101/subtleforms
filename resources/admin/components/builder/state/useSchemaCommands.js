@@ -17,7 +17,7 @@ import {
 import { denormalizeTree } from '../utils/schemaTree';
 import { insertPageBreak, moveNodeToStep, getStepIdOf, removeStep } from '../schema/commands/steps';
 import { addPanel, removePanel, canRemovePanel } from '../schema/commands/panels';
-import { canDropInto } from '../dnd/resolveDrop';
+import { canDropInto, canInsertType } from '../dnd/resolveDrop';
 import { debug } from '../../../../shared/debug';
 import { confirmDialog } from '../../../utils/confirmDialog';
 
@@ -62,6 +62,16 @@ export function useSchemaCommands({
       const definition = definitionMap[type];
       if (!definition) {
         console.warn('Missing field definition for', type);
+        return;
+      }
+
+      // The inline picker and the dock obey the same nesting rules as drag
+      // and drop (a step, Tabs inside Tabs, a Repeater-blocked type, a panel
+      // outside its container).
+      const targetParentId = context?.replaceId
+        ? tree.nodes[context.replaceId]?.parentId
+        : context?.parentId || rootId;
+      if (!canInsertType(tree, type, targetParentId)) {
         return;
       }
 

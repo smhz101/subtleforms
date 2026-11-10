@@ -154,6 +154,27 @@ export function canDropInto(tree, { nodeId = null, fieldType = null, parentId })
 }
 
 /**
+ * May a new field of this type be inserted into that parent from the inline
+ * picker or the dock? Root and step parents keep their existing behaviour.
+ * Anywhere else the drag and drop rules apply: no step, no Tabs inside Tabs,
+ * nothing a Repeater blocks, a panel only inside its own container.
+ *
+ * @param {Object} tree
+ * @param {string} fieldType
+ * @param {?string} parentId
+ * @return {boolean}
+ */
+export function canInsertType(tree, fieldType, parentId) {
+  const parent = tree.nodes[parentId || ROOT_NODE_ID];
+  if (!parent) return false;
+  if (parent.type === 'root' || parent.type === 'step') {
+    return !OWNER_OF[fieldType];
+  }
+  if (fieldType === 'step') return false;
+  return canDropInto(tree, { fieldType, parentId: parent.id });
+}
+
+/**
  * Turn a drop into a command.
  *
  * @param {Object} tree
