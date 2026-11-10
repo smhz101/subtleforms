@@ -183,6 +183,38 @@ final class CompositePartsFilterTest extends TestCase {
 		$this->assertSame( 'Address: 1 Main, Lahore', MergeTags::render( '{all_fields}', $ctx, false ) );
 	}
 
+	private function addNameParts(): void {
+		$GLOBALS['sf_test_filters']['subtleforms/fields/composite_parts'] = static function ( $parts, $type = '' ) {
+			return 'name_group' === $type
+				? array_merge(
+					$parts,
+					array(
+						array( 'part' => 'title', 'value' => 'title' ),
+						array( 'part' => 'prefix', 'value' => 'prefix', 'data' => true ),
+					)
+				)
+				: $parts;
+		};
+		CompositeParts::resetCache();
+	}
+
+	public function test_name_text_is_part_aware(): void {
+		$this->addNameParts();
+		$field = array( 'type' => 'name_group', 'key' => 'who' );
+		$value = array( 'prefix' => 'internal', 'suffix' => 'Jr', 'last_name' => 'Lovelace', 'title' => 'Dr', 'first_name' => 'Ada', 'middle_name' => '' );
+		$this->assertSame( 'Ada Lovelace Jr Dr', AnswerFormatter::name( $value, $field ) );
+		$this->assertSame( 'Ada Lovelace Jr Dr', AnswerFormatter::text( $value, $field ) );
+	}
+
+	public function test_name_merge_tags_use_the_part_aware_formatter(): void {
+		$this->addNameParts();
+		$schema = array( 'fields' => array( array( 'key' => 'who', 'type' => 'name_group', 'label' => 'Name' ) ) );
+		$value  = array( 'first_name' => 'Ada', 'last_name' => 'Lovelace', 'title' => 'Dr', 'prefix' => 'internal' );
+		$ctx    = array( 'answers' => array( 'who' => $value ), 'fields' => FieldMapper::fields( $schema ) );
+		$this->assertSame( 'Ada Lovelace Dr', MergeTags::render( '{field:who}', $ctx, false ) );
+		$this->assertSame( 'Name: Ada Lovelace Dr', MergeTags::render( '{all_fields}', $ctx, false ) );
+	}
+
 	public function test_merge_tag_of_another_array_keeps_the_generic_join(): void {
 		$schema = array( 'fields' => array( array( 'key' => 'tags', 'type' => 'checkbox', 'label' => 'Tags' ) ) );
 		$ctx    = array( 'answers' => array( 'tags' => array( 'a', 'b' ) ), 'fields' => FieldMapper::fields( $schema ) );

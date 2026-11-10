@@ -197,6 +197,9 @@ final class AnswerFormatter {
 		if ( 'address_group' === $type && is_array( $value ) ) {
 			return self::address( $value, $field );
 		}
+		if ( 'name_group' === $type && is_array( $value ) ) {
+			return self::name( $value, $field );
+		}
 
 		// One choice may be stored on its own rather than in a list.
 		if ( 'chained_select' === $type && is_scalar( $value ) && '' !== (string) $value ) {
@@ -250,6 +253,40 @@ final class AnswerFormatter {
 			}
 		}
 		return implode( ', ', $out );
+	}
+
+	/**
+	 * A name answer as one line: its parts in builder order (first, middle,
+	 * last, suffix, then parts an add-on appended) joined with a space. Empty
+	 * parts and data parts are left out.
+	 *
+	 * @param mixed $value Stored name.
+	 * @param array $field Field node.
+	 * @return string
+	 */
+	public static function name( $value, array $field = array() ): string {
+		if ( ! is_array( $value ) ) {
+			return FieldMapper::toText( $value );
+		}
+		$by_part = array();
+		foreach ( \SubtleForms\Fields\CompositeParts::textParts( 'name_group' ) as $part ) {
+			$v = $value[ $part['value'] ] ?? null;
+			if ( ( null === $v || '' === $v ) && null !== $part['alias'] ) {
+				$v = $value[ $part['alias'] ] ?? null;
+			}
+			if ( is_scalar( $v ) && '' !== trim( (string) $v ) ) {
+				$by_part[ $part['value'] ] = trim( (string) $v );
+			}
+		}
+		$drawing = array( 'first_name', 'middle_name', 'last_name', 'suffix' );
+		$out     = array();
+		foreach ( $drawing as $key ) {
+			if ( isset( $by_part[ $key ] ) ) {
+				$out[] = $by_part[ $key ];
+				unset( $by_part[ $key ] );
+			}
+		}
+		return implode( ' ', array_merge( $out, array_values( $by_part ) ) );
 	}
 
 	/**
