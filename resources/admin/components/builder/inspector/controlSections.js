@@ -92,6 +92,11 @@ export function controlBlock( ctrl, isLayout ) {
 	if ( ctrl.section === 'general' ) {
 		return 'content';
 	}
+	if ( ctrl.section !== 'appearance' ) {
+		// A section the panel never drew (the chained levels control sits in
+		// `choices` and has its own Dropdowns section): not drawn here either.
+		return 'none';
+	}
 	return isLayout ? 'type' : 'content';
 }
 

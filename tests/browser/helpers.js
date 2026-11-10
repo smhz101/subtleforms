@@ -179,7 +179,12 @@ module.exports.useBundleOverride = useBundleOverride;
  * Open a collapsed inspector panel (for example Appearance, 2.3.3) if needed.
  */
 async function openPanel(page, title) {
-  const toggle = page.locator('.sf-field-inspector .components-panel__body-toggle', { hasText: title }).first();
+  // The settings panel is one sheet of collapsible sections. The older group
+  // names map to the section that holds their controls now.
+  const ALIASES = { display: 'content', general: 'content', field: 'content', validation: 'rules' };
+  const key = String(title).toLowerCase();
+  const id = ALIASES[key] || key;
+  const toggle = page.locator(`.sf-field-inspector .sf-isec[data-section="${id}"] .sf-isec__toggle`).first();
   if ((await toggle.count()) && (await toggle.getAttribute('aria-expanded')) === 'false') {
     await toggle.click();
   }

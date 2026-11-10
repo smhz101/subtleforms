@@ -1,7 +1,7 @@
 /**
  * 2.8.0: input masks on Text, Number and Phone fields.
  *
- * - Builder: the Validation tab has an Input mask select, a Pattern box for
+ * - Builder: the Rules section has an Input mask select, a Pattern box for
  *   Custom, a Try it box that applies the mask, and Save as.
  * - Front end: the field formats as the visitor types, shows the format as
  *   placeholder and hint (linked with aria-describedby), the mask code is
@@ -183,7 +183,6 @@ test('builder: choose a mask, try it, and it is saved on the field', async ({ pa
   await openBuilder(page, form.id);
   await page.locator('.subtleforms-builder-canvas .sf-field-chrome').first().click();
   const inspector = page.locator('.sf-field-inspector');
-  await inspector.getByRole('tab', { name: 'Validation' }).click();
 
   const select = inspector.getByLabel('Input mask');
   await expect(select).toHaveValue('');

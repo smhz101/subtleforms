@@ -500,7 +500,9 @@
 		font-size: 12px;
 		line-height: 1.45;
 		color: var(--sf-text-muted);
-		transition: opacity 120ms ease;
+		// Closing waits a moment: a press on a button below blurs the field
+		// first, and the layout must not move before the click is finished.
+		transition: opacity 120ms ease, max-height 0s linear 0.5s, margin 0s linear 0.5s;
 	}
 
 	&--wide &__help {
@@ -513,6 +515,7 @@
 		max-height: 12em;
 		margin: 2px 0 4px;
 		opacity: 1;
+		transition: opacity 120ms ease;
 	}
 
 	@media (prefers-reduced-motion: reduce) {

@@ -92,12 +92,11 @@ test('label visibility, help text placement, messages and admin label: builder, 
   expect(order).toBe('help-first');
   await page.screenshot({ path: `${SHOTS}/item5-builder-canvas.png` });
 
-  await inspector(page).getByRole('tab', { name: 'Validation' }).click();
-  await inspector(page).getByLabel('Message when left empty').fill('We need your email.');
-  await inspector(page).getByLabel('Custom validation message').fill('That does not look like an email address.');
+  await openPanel(page, 'Rules');
+  await inspector(page).getByLabel('If empty').fill('We need your email.');
+  await inspector(page).getByLabel('If invalid').fill('That does not look like an email address.');
   await page.screenshot({ path: `${SHOTS}/item5-validation-tab.png` });
-  await inspector(page).getByRole('tab', { name: 'Field' }).click();
-  await inspector(page).getByRole('button', { name: 'Advanced' }).click();
+  await openPanel(page, 'Advanced');
   await inspector(page).getByLabel('Admin label').fill('Contact email');
   await page.screenshot({ path: `${SHOTS}/item5-settings-tab.png` });
 
