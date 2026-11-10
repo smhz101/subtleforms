@@ -194,6 +194,9 @@ final class AnswerFormatter {
 		if ( 'checkbox_grid' === $type && is_array( $value ) ) {
 			return self::matrix( $value, $field );
 		}
+		if ( 'address_group' === $type && is_array( $value ) ) {
+			return self::address( $value, $field );
+		}
 
 		// One choice may be stored on its own rather than in a list.
 		if ( 'chained_select' === $type && is_scalar( $value ) && '' !== (string) $value ) {
@@ -219,6 +222,34 @@ final class AnswerFormatter {
 		}
 
 		return FieldMapper::toText( FieldMapper::optionLabels( $value, $field ) );
+	}
+
+	/**
+	 * An address answer as one line: its parts in builder order (street,
+	 * street line 2, city, state, postal code, country, then parts an add-on
+	 * appended) joined with ", ". Empty parts and data parts are left out.
+	 * Older answer keys (`street`, `street2`, `postal`) read as the part they
+	 * stand for.
+	 *
+	 * @param mixed $value Stored address.
+	 * @param array $field Field node.
+	 * @return string
+	 */
+	public static function address( $value, array $field = array() ): string {
+		if ( ! is_array( $value ) ) {
+			return FieldMapper::toText( $value );
+		}
+		$out = array();
+		foreach ( \SubtleForms\Fields\CompositeParts::textParts( 'address_group' ) as $part ) {
+			$v = $value[ $part['value'] ] ?? null;
+			if ( ( null === $v || '' === $v ) && null !== $part['alias'] ) {
+				$v = $value[ $part['alias'] ] ?? null;
+			}
+			if ( is_scalar( $v ) && '' !== trim( (string) $v ) ) {
+				$out[] = trim( (string) $v );
+			}
+		}
+		return implode( ', ', $out );
 	}
 
 	/**

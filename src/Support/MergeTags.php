@@ -102,7 +102,9 @@ final class MergeTags {
 		if ( $key !== '' && array_key_exists( $key, $answers ) ) {
 			$value = $answers[ $key ];
 			if ( is_array( $value ) ) {
-				$value = implode( ', ', array_map( 'strval', array_filter( $value, 'is_scalar' ) ) );
+				$value = self::isAddress( $key, $context )
+					? AnswerFormatter::address( $value )
+					: implode( ', ', array_map( 'strval', array_filter( $value, 'is_scalar' ) ) );
 			}
 			return (string) $value;
 		}
@@ -113,6 +115,23 @@ final class MergeTags {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Whether the `fields` context lists a key as an Address field.
+	 *
+	 * @param string $key     Field key.
+	 * @param array  $context Merge context.
+	 * @return bool
+	 */
+	private static function isAddress( string $key, array $context ): bool {
+		$fields = isset( $context['fields'] ) && is_array( $context['fields'] ) ? $context['fields'] : array();
+		foreach ( $fields as $entry ) {
+			if ( is_array( $entry ) && (string) ( $entry['key'] ?? '' ) === $key ) {
+				return 'address_group' === (string) ( $entry['type'] ?? $entry['field']['type'] ?? '' );
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -136,7 +155,9 @@ final class MergeTags {
 			$seen[ $key ] = true;
 			$value        = $answers[ $key ];
 			if ( is_array( $value ) ) {
-				$value = implode( ', ', array_map( 'strval', array_filter( $value, 'is_scalar' ) ) );
+				$value = 'address_group' === (string) ( $entry['type'] ?? $entry['field']['type'] ?? '' )
+					? AnswerFormatter::address( $value )
+					: implode( ', ', array_map( 'strval', array_filter( $value, 'is_scalar' ) ) );
 			}
 			if ( trim( wp_strip_all_tags( (string) $value ) ) === '' && false === stripos( (string) $value, '<img' ) ) {
 				continue;
