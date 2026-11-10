@@ -61,3 +61,55 @@ describe('missingParts', () => {
     expect(missingParts('address_group', config, { street_address: '1', city: 'X', state: 'Y', postal_code: '1' })).toEqual([]);
   });
 });
+
+describe('parts added by an add-on (registerCompositeParts)', () => {
+  // eslint-disable-next-line global-require
+  const { registerCompositeParts } = require('./extend');
+  const { compositeDataParts, compositeKnownKeys, compositeSubfields } = require('./compositeParts');
+
+  afterEach(() => {
+    window.__subtleformsExtend.compositeParts = {};
+  });
+
+  it('appends parts after the built-in ones and draws them', () => {
+    registerCompositeParts('address_group', [{ part: 'apartment', value: 'apartment', label: 'Apartment' }]);
+    expect(parts('address_group', {})).toEqual(['street', 'city', 'state', 'postal', 'country', 'apartment']);
+  });
+
+  it('drops invalid shapes and cannot replace a built-in part', () => {
+    registerCompositeParts('address_group', [
+      null,
+      'city',
+      { part: 'Bad-Name', value: 'x' },
+      { part: 'ok' },
+      { part: 'city', value: 'city2' },
+      { part: 'town', value: 'city' },
+      { part: 'pc', value: 'pc', alias: 'postal' },
+    ]);
+    expect(compositeKnownKeys('address_group')).toEqual(['street_address', 'street', 'street_address_2', 'street2', 'city', 'state', 'postal_code', 'postal', 'country']);
+    expect(parts('address_group', {})).toEqual(['street', 'city', 'state', 'postal', 'country']);
+  });
+
+  it('hides data parts from the drawn parts and never demands them', () => {
+    registerCompositeParts('address_group', [
+      { part: 'lat', value: 'lat', data: true },
+      { part: 'lng', value: 'lng', data: true },
+    ]);
+    expect(parts('address_group', {})).not.toContain('lat');
+    expect(compositeDataParts('address_group').map((p) => p.value)).toEqual(['lat', 'lng']);
+    expect(compositeKnownKeys('address_group')).toEqual(
+      expect.arrayContaining(['street_address', 'street', 'postal_code', 'postal', 'lat', 'lng'])
+    );
+    const full = { street_address: 'a', city: 'b', state: 'c', postal_code: 'd', country: 'e' };
+    expect(missingParts('address_group', {}, full)).toEqual([]);
+  });
+
+  it('lists added parts the builder can set, but not data parts', () => {
+    registerCompositeParts('address_group', [
+      { part: 'apartment', value: 'apartment', label: 'Apartment', toggleable: true },
+      { part: 'lat', value: 'lat', data: true },
+    ]);
+    const keys = compositeSubfields('address_group', [{ key: 'street', label: 'Street', toggleable: false }]).map((s) => s.key);
+    expect(keys).toEqual(['street', 'apartment']);
+  });
+});

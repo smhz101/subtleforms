@@ -6,7 +6,7 @@ import { createRoot } from '@wordpress/element';
 import { act } from 'react';
 import FieldRenderer, { hasVisibleText } from './FieldRenderer';
 import { FormContext } from './fields/contexts';
-import { registerFieldType } from '../../shared/extend';
+import { registerFieldType, registerFieldOverride, registerCompositeParts } from '../../shared/extend';
 import { loadAllFieldGroups } from './fields/lazyFields';
 
 // The live form downloads a field's code before drawing it (2.6.0); these
@@ -518,6 +518,55 @@ describe('required indicator mark from form defaults', () => {
       { requiredIndicator: 'custom', requiredIndicatorText: '†' }
     );
     expect(container.querySelector('.subtleforms-required').textContent).toBe('†');
+    unmount();
+  });
+});
+
+describe('Address parts and the Fallback prop (Free 101)', () => {
+  afterEach(() => {
+    window.__subtleformsExtend.overrides = {};
+    window.__subtleformsExtend.compositeParts = {};
+  });
+
+  const address = { type: 'address_group', key: 'addr', label: 'Address' };
+
+  test('a field override receives Fallback and can render the built-in field', () => {
+    let received = null;
+    function Wrapper(props) {
+      received = props;
+      const { Fallback } = props;
+      return (
+        <div className='wrapped'>
+          <Fallback {...props} />
+        </div>
+      );
+    }
+    registerFieldOverride('address_group', { applies: () => true, component: Wrapper });
+    const { container, unmount } = render(address);
+    expect(typeof received.Fallback).toBe('function');
+    expect(container.querySelector('.wrapped #subtleforms-field-addr-street')).not.toBeNull();
+    unmount();
+  });
+
+  test('typing in a part keeps the data keys of the answer', () => {
+    registerCompositeParts('address_group', [
+      { part: 'lat', value: 'lat', data: true },
+      { part: 'lng', value: 'lng', data: true },
+    ]);
+    const onChange = jest.fn();
+    const { container, unmount } = render(address, {
+      values: { addr: { lat: '31.5', lng: '74.3' } },
+      onChange,
+    });
+    expect(container.querySelector('#subtleforms-field-addr-lat')).toBeNull();
+    const input = container.querySelector('#subtleforms-field-addr-city');
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+    act(() => {
+      setter.call(input, 'Lahore');
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    expect(onChange).toHaveBeenCalled();
+    expect(onChange.mock.calls[0][1]).toEqual({ lat: '31.5', lng: '74.3', city: 'Lahore' });
     unmount();
   });
 });
