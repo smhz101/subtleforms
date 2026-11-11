@@ -271,7 +271,7 @@ describe('header actions', () => {
     h.unmount();
   });
 
-  test('+ Rule uses the Logic editor to add a rule, and opens a closed section first', () => {
+  test('+ Condition uses the Conditions editor to add a condition, and opens a closed section first', () => {
     const h = mountInspector('text', { allFields: [{ key: 'other', label: 'Other', type: 'text' }] });
     expect(toggle(h.container, 'logic').getAttribute('aria-expanded')).toBe('false');
     click(h.container.querySelector('[data-section="logic"] .sf-isec__action'));

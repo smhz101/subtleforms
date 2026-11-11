@@ -59,9 +59,9 @@ test('the settings panel saves the same schema as the tabbed panel did', async (
     await openPanel(page, 'Rules');
     await ins.getByLabel('If empty').fill('Pick a topic.');
 
-    // Logic: one rule, added from the section header.
+    // Conditions: one condition, added from the section header.
     await openPanel(page, 'Logic');
-    await ins.getByRole('button', { name: '+ Rule' }).click();
+    await ins.getByRole('button', { name: '+ Condition' }).click();
     await ins.getByLabel('Field', { exact: true }).selectOption('name');
     await ins.getByLabel('Condition').selectOption('not_empty');
 

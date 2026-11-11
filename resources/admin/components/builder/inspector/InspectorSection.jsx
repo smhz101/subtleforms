@@ -1,7 +1,7 @@
 /**
  * A section of the field settings sheet: a small uppercase header that opens
  * and closes it, an optional text action on the right ("Paste list",
- * "+ Rule") and the settings below.
+ * "+ Condition") and the settings below.
  *
  * Whether a section is open is remembered for the browser (not per field) in
  * localStorage under `sf-inspector-<id>`. Storage can be blocked or full, so
