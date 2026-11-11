@@ -1404,6 +1404,187 @@ final class CoreFields {
 			)
 		);
 
+		// Tabs and Accordion (2.9.0): a container holds panels, each panel holds
+		// fields. Panels are created by their container and hidden from the
+		// field library. All four are layout only: nothing is answered at them.
+		$registry->register(
+			new FieldDefinition(
+				type: 'tabs_container',
+				label: __( 'Tabs', 'subtleforms' ),
+				category: 'layout',
+				icon: 'index-card',
+				kind: 'structure',
+				acceptsChildren: true,
+				baseAttributes: array(),
+				fieldSpecificAttributes: array(
+					'label'           => __( 'Tabs', 'subtleforms' ),
+					'position'        => 'top',
+					'collapse_mobile' => true,
+					'active'          => 0,
+				),
+				inspectorControls: array(),
+				meta: array( 'category' => 'layout' ),
+				layoutControls: array(
+					array(
+						'type'  => 'text',
+						'name'  => 'label',
+						'label' => __( 'Label', 'subtleforms' ),
+						'help'  => __( 'Names the tabs in the builder and for screen readers. Visitors do not see it.', 'subtleforms' ),
+					),
+					array(
+						'type'    => 'select',
+						'name'    => 'position',
+						'section' => 'general',
+						'label'   => __( 'Tab position', 'subtleforms' ),
+						'options' => array(
+							array(
+								'value' => 'top',
+								'label' => __( 'Top', 'subtleforms' ),
+							),
+							array(
+								'value' => 'left',
+								'label' => __( 'Left', 'subtleforms' ),
+							),
+						),
+					),
+					array(
+						'type'    => 'toggle',
+						'name'    => 'collapse_mobile',
+						'section' => 'general',
+						'label'   => __( 'On narrow screens, show as accordion', 'subtleforms' ),
+					),
+					array(
+						'type'    => 'panel_select',
+						'name'    => 'active',
+						'section' => 'general',
+						'label'   => __( 'Tab shown first', 'subtleforms' ),
+					),
+				),
+			)
+		);
+
+		$registry->register(
+			new FieldDefinition(
+				type: 'accordion_container',
+				label: __( 'Accordion', 'subtleforms' ),
+				category: 'layout',
+				icon: 'editor-justify',
+				kind: 'structure',
+				acceptsChildren: true,
+				baseAttributes: array(),
+				fieldSpecificAttributes: array(
+					'label'    => __( 'Accordion', 'subtleforms' ),
+					'multiple' => false,
+					'open'     => 'first',
+					'icon'     => 'chevron',
+				),
+				inspectorControls: array(),
+				meta: array( 'category' => 'layout' ),
+				layoutControls: array(
+					array(
+						'type'  => 'text',
+						'name'  => 'label',
+						'label' => __( 'Label', 'subtleforms' ),
+						'help'  => __( 'Names the accordion in the builder. Visitors do not see it.', 'subtleforms' ),
+					),
+					array(
+						'type'    => 'toggle',
+						'name'    => 'multiple',
+						'section' => 'general',
+						'label'   => __( 'Let several sections open at once', 'subtleforms' ),
+					),
+					array(
+						'type'    => 'select',
+						'name'    => 'open',
+						'section' => 'general',
+						'label'   => __( 'Open at start', 'subtleforms' ),
+						'options' => array(
+							array(
+								'value' => 'first',
+								'label' => __( 'First section', 'subtleforms' ),
+							),
+							array(
+								'value' => 'none',
+								'label' => __( 'None', 'subtleforms' ),
+							),
+							array(
+								'value' => 'all',
+								'label' => __( 'All', 'subtleforms' ),
+							),
+						),
+					),
+					array(
+						'type'    => 'select',
+						'name'    => 'icon',
+						'section' => 'general',
+						'label'   => __( 'Icon', 'subtleforms' ),
+						'options' => array(
+							array(
+								'value' => 'chevron',
+								'label' => __( 'Chevron', 'subtleforms' ),
+							),
+							array(
+								'value' => 'plus',
+								'label' => __( 'Plus and minus', 'subtleforms' ),
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$registry->register(
+			new FieldDefinition(
+				type: 'tab_panel',
+				label: __( 'Tab', 'subtleforms' ),
+				category: 'layout',
+				icon: 'index-card',
+				kind: 'structure',
+				acceptsChildren: true,
+				baseAttributes: array(),
+				fieldSpecificAttributes: array( 'label' => __( 'Tab', 'subtleforms' ) ),
+				inspectorControls: array(),
+				meta: array(
+					'category' => 'layout',
+					'internal' => true,
+				),
+				paletteHidden: true,
+				layoutControls: array(
+					array(
+						'type'  => 'text',
+						'name'  => 'label',
+						'label' => __( 'Title', 'subtleforms' ),
+					),
+				),
+			)
+		);
+
+		$registry->register(
+			new FieldDefinition(
+				type: 'accordion_panel',
+				label: __( 'Section', 'subtleforms' ),
+				category: 'layout',
+				icon: 'editor-justify',
+				kind: 'structure',
+				acceptsChildren: true,
+				baseAttributes: array(),
+				fieldSpecificAttributes: array( 'label' => __( 'Section', 'subtleforms' ) ),
+				inspectorControls: array(),
+				meta: array(
+					'category' => 'layout',
+					'internal' => true,
+				),
+				paletteHidden: true,
+				layoutControls: array(
+					array(
+						'type'  => 'text',
+						'name'  => 'label',
+						'label' => __( 'Title', 'subtleforms' ),
+					),
+				),
+			)
+		);
+
 		// ===== Step/Page Container =====
 
 		$registry->register(

@@ -43,6 +43,8 @@ export function BuilderProvider({
 	onDuplicate,
 	onRequestInsert,
 	onMoveToStep,
+	onAddPanel,
+	onDeletePanel,
 	onRenameKey,
 	entryCount = 0,
 	isReadOnly = false,
@@ -90,11 +92,14 @@ export function BuilderProvider({
 				onDuplicate,
 				onRequestInsert,
 				onMoveToStep,
+				// Tabs and Accordion panels (2.9.0).
+				onAddPanel,
+				onDeletePanel,
 				// Change a field's ID everywhere the form uses it (2.4.1).
 				onRenameKey,
 			},
 		}),
-		[onInsert, onDelete, onUpdate, onMove, onDuplicate, onRequestInsert, onMoveToStep, onRenameKey]
+		[onInsert, onDelete, onUpdate, onMove, onDuplicate, onRequestInsert, onMoveToStep, onAddPanel, onDeletePanel, onRenameKey]
 	);
 
 	// Config context - rarely changes

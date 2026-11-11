@@ -46,6 +46,10 @@ final class FieldValidator {
 		'six_column_container',
 		'repeat_container',
 		'group_container',
+		'tabs_container',
+		'accordion_container',
+		'tab_panel',
+		'accordion_panel',
 		'step',
 		// System / non-input types
 		'hidden',

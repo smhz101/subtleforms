@@ -7,6 +7,7 @@ import {
 } from './idGenerator';
 import { fieldConfig } from '../../../../shared/fieldConfig';
 import { partSettingsMap } from '../../../../shared/compositeParts';
+import { PANEL_OF } from '../../../../shared/panels';
 
 const ROOT_NODE_ID = 'root';
 
@@ -18,7 +19,15 @@ const COMPOSITE_FIELD_TYPES = new Set(['name_group', 'address_group']);
 
 // Containers keep a children list even when saved empty, so an empty Step,
 // Repeater or Group still renders with its drop zone (2.3.1).
-const CHILD_CONTAINER_TYPES = new Set(['step', 'repeat_container', 'group_container']);
+const CHILD_CONTAINER_TYPES = new Set([
+  'step',
+  'repeat_container',
+  'group_container',
+  'tabs_container',
+  'accordion_container',
+  'tab_panel',
+  'accordion_panel',
+]);
 
 function isColumnContainerType(type) {
   return typeof type === 'string' && type.endsWith(COLUMN_CONTAINER_SUFFIX);
@@ -377,6 +386,31 @@ export function createNodeFromDefinition(definition, existingKeys = new Set()) {
   }
 
   return node;
+}
+
+/**
+ * A new tab or accordion section for a Tabs or Accordion container (2.9.0).
+ * The container creates its panels, so there is no field definition for them
+ * in the library.
+ *
+ * @param {string} containerType 'tabs_container' | 'accordion_container'.
+ * @param {string} label         Panel title.
+ * @param {Set}    existingKeys  Keys in use; the new key is added in place.
+ * @return {Object} Node ready for addNodeToTree (parentId is set there).
+ */
+export function createPanelNode(containerType, label, existingKeys = new Set()) {
+  const type = PANEL_OF[containerType];
+  const id = createNodeId();
+  const key = createFieldKey(type, existingKeys);
+  existingKeys.add(key);
+  return {
+    id,
+    type,
+    kind: 'structure',
+    parentId: null,
+    config: { id, type, kind: 'structure', key, label },
+    children: [],
+  };
 }
 
 const GROUP_DEFAULT_CHILDREN = {
