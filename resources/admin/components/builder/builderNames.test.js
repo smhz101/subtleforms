@@ -19,10 +19,10 @@ describe('builder names (UX2-13)', () => {
   // The two icon tabs of the panel (settings and styles).
   const tabs = labels(read('inspector/InspectorTabs.jsx'), /label: __\( '([^']+)'/g);
 
-  test('the inspector has Content, Choices, Rules, Logic and Advanced sections and two icon tabs', () => {
+  test('the inspector has Content, Choices, Validation, Conditions and Advanced sections and two icon tabs', () => {
     expect(inspector).not.toContain('TabPanel');
     expect(tabs).toEqual(['Field settings', 'Field styles']);
-    expect(sections).toEqual(expect.arrayContaining(['Content', 'Choices', 'Rules', 'Logic', 'Advanced']));
+    expect(sections).toEqual(expect.arrayContaining(['Content', 'Choices', 'Validation', 'Conditions', 'Advanced']));
     expect(sections).not.toContain('Display');
     expect(sections).not.toContain('Appearance');
   });

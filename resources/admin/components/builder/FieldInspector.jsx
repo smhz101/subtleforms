@@ -35,7 +35,7 @@ import {
   isLogicOnlyType,
   resolveControls,
 } from './inspector/controlSections';
-import FieldAppearancePanel, { FRACTIONS, nextAppearance } from './appearance/FieldAppearancePanel';
+import FieldAppearancePanel, { FRACTIONS, FieldOverrideStatus, nextAppearance } from './appearance/FieldAppearancePanel';
 import { FIELD_LAYOUT, supportsAppearance } from '../../../shared/appearance';
 import { optionLabel } from './appearance/labels';
 import { typeHasFlag } from '../../utils/fieldTypeFlags';
@@ -546,7 +546,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
         {tab === 'settings' && hasRules && (
           <InspectorSection
             id='rules'
-            title={__('Rules', 'subtleforms')}
+            title={__('Validation', 'subtleforms')}
             badge={
               validationMessages.length > 0 ? (
                 <span
@@ -567,11 +567,11 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
         {tab === 'settings' && showLogic && (
           <InspectorSection
             id='logic'
-            title={__('Logic', 'subtleforms')}
+            title={__('Conditions', 'subtleforms')}
             state={logicState}
             badge={ruleCount > 0 ? ruleCount : null}
             action={{
-              label: __('+ Rule', 'subtleforms'),
+              label: __('+ Condition', 'subtleforms'),
               disabled: isReadOnly,
               onClick: () => openLogic(true),
             }}>
@@ -586,7 +586,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
                 emptyText={
                   isStep
                     ? __('This step is always shown.', 'subtleforms')
-                    : __('No rules yet. Show, hide or require this field based on another answer.', 'subtleforms')
+                    : __('No conditions yet. Show or hide this field depending on another answer.', 'subtleforms')
                 }
                 onChange={(logic) => handleUpdate({ logic, conditions: [] })}
               />
@@ -596,6 +596,9 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
 
         {tab === 'styles' && (
           <>
+            {hasStyle && (
+              <FieldOverrideStatus field={field} onUpdate={handleUpdate} isReadOnly={isReadOnly} />
+            )}
             {stylesGroups.map((group) => (
               <InspectorSection key={group.id} id={`style-${group.id}`} title={group.title}>
                 <DynamicInspectorPanel

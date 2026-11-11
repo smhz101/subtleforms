@@ -286,7 +286,7 @@ describe('header actions', () => {
     const h = mountInspector('text');
     click(toggle(h.container, 'logic'));
     expect(h.container.querySelector('[data-section="logic"]').textContent).toContain(
-      'No rules yet. Show, hide or require this field based on another answer.'
+      'No conditions yet. Show or hide this field depending on another answer.'
     );
     h.unmount();
   });

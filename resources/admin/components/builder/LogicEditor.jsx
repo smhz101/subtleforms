@@ -217,13 +217,13 @@ function FieldLogicEditor({
           <SelectControl
             __nextHasNoMarginBottom
             __next40pxDefaultSize
-            label={__('Action', 'subtleforms')}
+            label={__('When these match', 'subtleforms')}
             hideLabelFromVision={!panel}
             value={action}
             disabled={readOnly}
             options={actions.map((a) => ({
               value: a,
-              label: a === 'show' ? __('Show when', 'subtleforms') : __('Hide when', 'subtleforms'),
+              label: a === 'show' ? __('Show this field', 'subtleforms') : __('Hide this field', 'subtleforms'),
             }))}
             onChange={(v) => commit(groups, v)}
           />
@@ -242,8 +242,8 @@ function FieldLogicEditor({
             <div className='sf-logic-editor__group-head'>
               <span className='sf-logic-editor__match-note'>
                 {group.rules.length > 1
-                  ? __('All of these rules must match', 'subtleforms')
-                  : __('This rule must match', 'subtleforms')}
+                  ? __('All of these conditions must match', 'subtleforms')
+                  : __('This condition must match', 'subtleforms')}
               </span>
             </div>
 
@@ -323,7 +323,7 @@ function FieldLogicEditor({
               data-sf-action='add-rule'
               disabled={readOnly}
               onClick={() => addRule(gi)}>
-              {__('+ Add rule', 'subtleforms')}
+              {__('+ Add condition', 'subtleforms')}
             </Button>
           </div>
         </div>
@@ -332,7 +332,7 @@ function FieldLogicEditor({
       <div className='sf-logic-editor__footer'>
         {groups.length === 0 ? (
           <Button variant='secondary' size='compact' data-sf-action='add-rule' disabled={readOnly} onClick={() => addRule(0)}>
-            {addLabel || __('Add rule', 'subtleforms')}
+            {addLabel || __('Add condition', 'subtleforms')}
           </Button>
         ) : null}
       </div>

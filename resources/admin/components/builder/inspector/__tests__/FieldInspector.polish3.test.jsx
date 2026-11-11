@@ -83,11 +83,11 @@ describe('Logic section', () => {
     const logic = h.container.querySelector('[data-section="logic"]');
     expect(logic.querySelector('.sf-logic-editor--panel')).not.toBeNull();
     const label = logic.querySelector('.sf-logic-editor__action label');
-    expect(label.textContent).toBe('Action');
+    expect(label.textContent).toBe('When these match');
     expect(label.closest('.components-visually-hidden')).toBeNull();
     const add = logic.querySelector('.sf-logic-editor__add-rule');
     expect(add.className).toContain('is-secondary');
-    expect(logic.querySelector('.sf-logic-editor__match-note').textContent).toBe('This rule must match');
+    expect(logic.querySelector('.sf-logic-editor__match-note').textContent).toBe('This condition must match');
     // Field, operator and value are in one rule grid with the remove button.
     const ruleBox = logic.querySelector('.sf-logic-editor__rule');
     expect(ruleBox.querySelectorAll('select, input').length).toBe(3);
