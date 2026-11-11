@@ -1978,6 +1978,10 @@ $sf-row-tint: color-mix(in srgb, var(--sf-brand) 4%, transparent);
 // condition is one grid: field, operator and value in the first column, the
 // remove button in a fixed 32px column.
 .sf-logic-editor--panel {
+	// Stated here as well as in LogicEditor.scss: the panel must not depend on
+	// the editor's base rule surviving the stylesheet concatenation.
+	display: flex;
+	flex-direction: column;
 	gap: 12px;
 
 	.sf-logic-editor__empty {
