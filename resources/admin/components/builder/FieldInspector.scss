@@ -425,6 +425,12 @@ $sf-row-tint: color-mix(in srgb, var(--sf-brand) 4%, transparent);
 		border-top: 1px solid var(--sf-border-subtle);
 	}
 
+	// The Styles tab's appearance sections live in their own wrapper after the
+	// Label, Help text and Input sections; the hairline continues across it.
+	& + .sf-field-appearance > &:first-child {
+		border-top: 1px solid var(--sf-border-subtle);
+	}
+
 	.sf-field-inspector__quick + & {
 		border-top: 0;
 	}

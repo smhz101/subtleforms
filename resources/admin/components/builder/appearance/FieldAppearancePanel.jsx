@@ -89,11 +89,45 @@ function WidthPicker( { value, onChange, disabled } ) {
   );
 }
 
-export default function FieldAppearancePanel( { field, onUpdate, formAppearance, isReadOnly = false, hideWidth = false } ) {
-  const appearance = field?.config?.appearance || field?.appearance || {};
-  const overrideCount = Object.values( appearance ).filter(
+export function fieldAppearanceOf( field ) {
+  return field?.config?.appearance || field?.appearance || {};
+}
+
+export function overrideCountOf( field ) {
+  return Object.values( fieldAppearanceOf( field ) ).filter(
     ( v ) => v !== '' && v !== undefined && v !== null && v !== false
   ).length;
+}
+
+/**
+ * "N overrides on this field" with a Clear action. Sits at the top of the
+ * Styles tab, above every section, so it reads as the tab's status line.
+ */
+export function FieldOverrideStatus( { field, onUpdate, isReadOnly = false } ) {
+  const overrideCount = overrideCountOf( field );
+  if ( overrideCount < 1 ) {
+    return null;
+  }
+  return (
+    <div className='sf-field-appearance__status' role='status'>
+      <span>
+        { sprintf(
+          /* translators: %d: number of overrides */
+          _n( '%d override on this field', '%d overrides on this field', overrideCount, 'subtleforms' ),
+          overrideCount
+        ) }
+      </span>
+      { ! isReadOnly && (
+        <Button variant='link' size='small' onClick={ () => onUpdate( { appearance: {} } ) }>
+          { __( 'Clear', 'subtleforms' ) }
+        </Button>
+      ) }
+    </div>
+  );
+}
+
+export default function FieldAppearancePanel( { field, onUpdate, formAppearance, isReadOnly = false, hideWidth = false } ) {
+  const appearance = fieldAppearanceOf( field );
 
   const setValue = ( key, value ) => {
     if ( isReadOnly ) {
@@ -116,23 +150,6 @@ export default function FieldAppearancePanel( { field, onUpdate, formAppearance,
 
   return (
     <div className='sf-field-appearance'>
-      { overrideCount > 0 && (
-        <div className='sf-field-appearance__status'>
-          <span>
-            { sprintf(
-              /* translators: %d: number of overrides */
-              _n( '%d override on this field', '%d overrides on this field', overrideCount, 'subtleforms' ),
-              overrideCount
-            ) }
-          </span>
-          { ! isReadOnly && (
-            <Button variant='link' size='small' onClick={ () => onUpdate( { appearance: {} } ) }>
-              { __( 'Clear', 'subtleforms' ) }
-            </Button>
-          ) }
-        </div>
-      ) }
-
       {(field?.type === 'phone' || field?.type === 'tel') && field?.enableCountryCode && (
         <InspectorSection id='style-phone' title={ __( 'Phone', 'subtleforms' ) }>
           <ToggleControl
