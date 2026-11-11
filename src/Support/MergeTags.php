@@ -102,7 +102,10 @@ final class MergeTags {
 		if ( $key !== '' && array_key_exists( $key, $answers ) ) {
 			$value = $answers[ $key ];
 			if ( is_array( $value ) ) {
-				$value = implode( ', ', array_map( 'strval', array_filter( $value, 'is_scalar' ) ) );
+				$type  = self::compositeType( $key, $context );
+				$value = '' !== $type
+					? self::compositeText( $value, $type )
+					: implode( ', ', array_map( 'strval', array_filter( $value, 'is_scalar' ) ) );
 			}
 			return (string) $value;
 		}
@@ -113,6 +116,36 @@ final class MergeTags {
 		}
 
 		return null;
+	}
+
+	/**
+	 * The composite type (`address_group`, `name_group`) the `fields` context
+	 * lists a key as, or an empty string.
+	 *
+	 * @param string $key     Field key.
+	 * @param array  $context Merge context.
+	 * @return string
+	 */
+	private static function compositeType( string $key, array $context ): string {
+		$fields = isset( $context['fields'] ) && is_array( $context['fields'] ) ? $context['fields'] : array();
+		foreach ( $fields as $entry ) {
+			if ( is_array( $entry ) && (string) ( $entry['key'] ?? '' ) === $key ) {
+				$type = (string) ( $entry['type'] ?? $entry['field']['type'] ?? '' );
+				return in_array( $type, array( 'address_group', 'name_group' ), true ) ? $type : '';
+			}
+		}
+		return '';
+	}
+
+	/**
+	 * A composite answer as text, with the part-aware formatter of its type.
+	 *
+	 * @param array  $value Stored answer.
+	 * @param string $type  `address_group` or `name_group`.
+	 * @return string
+	 */
+	private static function compositeText( array $value, string $type ): string {
+		return 'name_group' === $type ? AnswerFormatter::name( $value ) : AnswerFormatter::address( $value );
 	}
 
 	/**
@@ -136,7 +169,10 @@ final class MergeTags {
 			$seen[ $key ] = true;
 			$value        = $answers[ $key ];
 			if ( is_array( $value ) ) {
-				$value = implode( ', ', array_map( 'strval', array_filter( $value, 'is_scalar' ) ) );
+				$type  = (string) ( $entry['type'] ?? $entry['field']['type'] ?? '' );
+				$value = in_array( $type, array( 'address_group', 'name_group' ), true )
+					? self::compositeText( $value, $type )
+					: implode( ', ', array_map( 'strval', array_filter( $value, 'is_scalar' ) ) );
 			}
 			if ( trim( wp_strip_all_tags( (string) $value ) ) === '' && false === stripos( (string) $value, '<img' ) ) {
 				continue;

@@ -18,7 +18,8 @@ import './SubfieldInspectorControl.scss';
  *                         { key: { enabled, label, placeholder }, ... }
  *   onChange  {Function}, (newFields: Object) => void
  *   subfields {Array}  , from PHP ctrl.subfields:
- *                         [{ key, label, toggleable }]
+ *                         [{ key, label, toggleable, on }]; `on` is the
+ *                         default of a toggleable part with nothing stored
  *   disabled  {boolean}
  */
 const SubfieldInspectorControl = memo( function SubfieldInspectorControl( {
@@ -37,7 +38,7 @@ const SubfieldInspectorControl = memo( function SubfieldInspectorControl( {
 		const meta    = subfields.find( ( s ) => s.key === key ) ?? {};
 		const stored  = ( value && typeof value === 'object' ) ? ( value[ key ] ?? {} ) : {};
 		return {
-			enabled:     stored.enabled     ?? ( meta.toggleable ? false : true ),
+			enabled:     stored.enabled     ?? ( meta.toggleable ? meta.on === true : true ),
 			label:       stored.label       ?? meta.label ?? '',
 			placeholder: stored.placeholder ?? '',
 		};
