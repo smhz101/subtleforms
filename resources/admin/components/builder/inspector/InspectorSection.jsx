@@ -58,7 +58,7 @@ export function useSectionOpen( id, defaultOpen ) {
  * @param {Object}   props
  * @param {string}   props.id          Section id: storage key, anchor and test hook.
  * @param {string}   props.title       Header text (drawn uppercase by CSS).
- * @param {boolean}  props.defaultOpen Open until the person closes it.
+ * @param {boolean}  props.defaultOpen Open until the person closes it. Every section starts closed; the saved choice wins.
  * @param {Object}   props.action      { label, onClick, disabled }: text action on the right.
  * @param {*}        props.badge       Small count or mark after the title.
  * @param {Array}    props.state     [open, setOpen] from useSectionOpen(), when the parent needs to open the section (a header action, a quick row).
@@ -67,7 +67,7 @@ export function useSectionOpen( id, defaultOpen ) {
 export default function InspectorSection( {
 	id,
 	title,
-	defaultOpen = true,
+	defaultOpen = false,
 	action = null,
 	badge = null,
 	state = null,

@@ -4,7 +4,7 @@
 import { act } from 'react';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { mountInspector, openTab } from '../testing/inspectorHarness';
+import { mountInspector, openEverything, openTab } from '../testing/inspectorHarness';
 
 const HELP = 'Shown under the field to guide the visitor.';
 
@@ -25,6 +25,7 @@ afterEach(() => {
 describe('help icons', () => {
   test('a setting with help text has an info button named About {label}, after its label', () => {
     const h = mountInspector('text');
+    openEverything(h.container);
     const button = helpButton(h.container);
     expect(button).not.toBeNull();
     expect(button.getAttribute('type')).toBe('button');
@@ -39,6 +40,7 @@ describe('help icons', () => {
 
   test('focus shows the tooltip at once, and blur or Escape closes it', () => {
     const h = mountInspector('text');
+    openEverything(h.container);
     const button = helpButton(h.container);
     expect(tip()).toBeNull();
     act(() => button.focus());
@@ -57,6 +59,7 @@ describe('help icons', () => {
 
   test('hover shows it after 300ms, and leaving closes it', () => {
     const h = mountInspector('text');
+    openEverything(h.container);
     const button = helpButton(h.container);
     fire(button, 'mouseover');
     expect(tip()).toBeNull();
@@ -71,6 +74,7 @@ describe('help icons', () => {
 
   test('the control points at a hidden copy of the help text', () => {
     const h = mountInspector('text');
+    openEverything(h.container);
     const input = [...h.container.querySelectorAll('input, textarea')].find(
       (el) => el.id && h.container.querySelector(`label[for="${el.id}"]`)?.textContent === 'Help text'
     );
@@ -82,6 +86,7 @@ describe('help icons', () => {
 
   test('the text is shown exactly as the definition gives it: mixed case, trailing period', () => {
     const h = mountInspector('text');
+    openEverything(h.container);
     act(() => helpButton(h.container).focus());
     expect(tip().textContent).toBe('Shown under the field to guide the visitor.');
     expect(tip().textContent).not.toBe(tip().textContent.toUpperCase());
@@ -185,6 +190,7 @@ describe('focus', () => {
 
   test('the controls carry the classes that style them', () => {
     const h = mountInspector('dropdown');
+    openEverything(h.container);
     expect(h.container.querySelector('input.sf-prow__input')).not.toBeNull();
     expect(h.container.querySelector('.sf-prow--stacked')).not.toBeNull();
     expect(h.container.querySelector('.sf-prow--inline')).not.toBeNull();

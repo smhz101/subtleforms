@@ -59,7 +59,15 @@ describe('one sheet, two tabs', () => {
   test('Styles holds the appearance controls in groups named after what they do', () => {
     const h = mountInspector('dropdown');
     openTab(h.container, 'styles');
-    expect(sectionIds(h.container)).toEqual(['style-label', 'style-help', 'style-input']);
+    expect(sectionIds(h.container)).toEqual([
+      'style-label',
+      'style-help',
+      'style-input',
+      'style-layout',
+      'style-colours',
+      'style-text-shape',
+    ]);
+    openEverything(h.container);
     const rowLabels = (id) =>
       [...h.container.querySelectorAll(`[data-section="${id}"] .sf-prow__label-text`)].map((l) => l.textContent);
     expect(rowLabels('style-label')).toEqual(['Field label visibility']);
@@ -99,26 +107,36 @@ describe('one sheet, two tabs', () => {
 });
 
 describe('sections collapse and remember it', () => {
-  test('Advanced starts closed, the others open', () => {
+  test('every section starts closed, on both tabs; the quick rows are not a section', () => {
     const h = mountInspector('dropdown');
     const state = Object.fromEntries(sectionIds(h.container).filter((id) => id !== 'quick').map((id) => [id, toggle(h.container, id).getAttribute('aria-expanded')]));
-    expect(state).toEqual({ content: 'true', choices: 'true', rules: 'true', logic: 'true', advanced: 'false' });
+    expect(state).toEqual({ content: 'false', choices: 'false', rules: 'false', logic: 'false', advanced: 'false' });
+    // The quick rows (Required, Width, Visibility) stay drawn.
+    expect(h.container.querySelector('[data-section="quick"] input[type="checkbox"]')).not.toBeNull();
+    expect(h.container.querySelector('[data-section="quick"] [role="radiogroup"]')).not.toBeNull();
+    expect(h.container.querySelector('[data-section="quick"] .sf-chip')).not.toBeNull();
+    expect(h.container.querySelectorAll('.sf-isec__body:not([hidden]) input')).toHaveLength(0);
+    openTab(h.container, 'styles');
+    const styles = [...h.container.querySelectorAll('.sf-isec__toggle')].map((b) => b.getAttribute('aria-expanded'));
+    expect(styles.length).toBeGreaterThan(3);
+    expect(styles.every((v) => v === 'false')).toBe(true);
     h.unmount();
   });
 
   test('closing a section saves it for the browser, for every field', () => {
     const h = mountInspector('text');
     click(toggle(h.container, 'content'));
-    expect(toggle(h.container, 'content').getAttribute('aria-expanded')).toBe('false');
-    expect(window.localStorage.getItem('sf-inspector-content')).toBe('closed');
+    expect(toggle(h.container, 'content').getAttribute('aria-expanded')).toBe('true');
+    expect(window.localStorage.getItem('sf-inspector-content')).toBe('open');
     click(toggle(h.container, 'advanced'));
-    expect(window.localStorage.getItem('sf-inspector-advanced')).toBe('open');
+    click(toggle(h.container, 'advanced'));
+    expect(window.localStorage.getItem('sf-inspector-advanced')).toBe('closed');
     h.unmount();
 
     // Another field, a new mount: the choice is kept.
     const next = mountInspector('dropdown');
-    expect(toggle(next.container, 'content').getAttribute('aria-expanded')).toBe('false');
-    expect(toggle(next.container, 'advanced').getAttribute('aria-expanded')).toBe('true');
+    expect(toggle(next.container, 'content').getAttribute('aria-expanded')).toBe('true');
+    expect(toggle(next.container, 'advanced').getAttribute('aria-expanded')).toBe('false');
     next.unmount();
   });
 
@@ -131,7 +149,7 @@ describe('sections collapse and remember it', () => {
     });
     const h = mountInspector('text');
     click(toggle(h.container, 'content'));
-    expect(toggle(h.container, 'content').getAttribute('aria-expanded')).toBe('false');
+    expect(toggle(h.container, 'content').getAttribute('aria-expanded')).toBe('true');
     h.unmount();
     get.mockRestore();
     set.mockRestore();
@@ -139,6 +157,8 @@ describe('sections collapse and remember it', () => {
 
   test('a closed section draws none of its settings', () => {
     const h = mountInspector('text');
+    expect(h.container.querySelector('[data-section="content"] input')).toBeNull();
+    click(toggle(h.container, 'content'));
     expect(h.container.querySelector('[data-section="content"] input')).not.toBeNull();
     click(toggle(h.container, 'content'));
     expect(h.container.querySelector('[data-section="content"] input')).toBeNull();
@@ -194,6 +214,7 @@ describe('quick rows', () => {
   test('a block that takes no answer keeps Width on the Styles tab and has no quick rows', () => {
     const h = mountInspector('html');
     openTab(h.container, 'styles');
+    openEverything(h.container);
     expect(h.container.querySelector('.sf-field-appearance [role="radiogroup"][aria-label="Width"]')).not.toBeNull();
     h.unmount();
   });
@@ -210,7 +231,6 @@ describe('quick rows', () => {
     const h = mountInspector('text');
     const chip = () => [...h.container.querySelectorAll('[data-section="quick"] button')].find((b) => /Shown|Rule-based/.test(b.textContent));
     expect(chip().textContent).toBe('Shown');
-    click(toggle(h.container, 'logic'));
     expect(toggle(h.container, 'logic').getAttribute('aria-expanded')).toBe('false');
     click(chip());
     expect(toggle(h.container, 'logic').getAttribute('aria-expanded')).toBe('true');
@@ -244,7 +264,7 @@ describe('header actions', () => {
 
   test('Paste list opens a closed Choices section', () => {
     const h = mountInspector('dropdown');
-    click(toggle(h.container, 'choices'));
+    expect(toggle(h.container, 'choices').getAttribute('aria-expanded')).toBe('false');
     click(h.container.querySelector('[data-section="choices"] .sf-isec__action'));
     expect(toggle(h.container, 'choices').getAttribute('aria-expanded')).toBe('true');
     expect(h.container.querySelector('[data-section="choices"] textarea')).not.toBeNull();
@@ -253,7 +273,7 @@ describe('header actions', () => {
 
   test('+ Rule uses the Logic editor to add a rule, and opens a closed section first', () => {
     const h = mountInspector('text', { allFields: [{ key: 'other', label: 'Other', type: 'text' }] });
-    click(toggle(h.container, 'logic'));
+    expect(toggle(h.container, 'logic').getAttribute('aria-expanded')).toBe('false');
     click(h.container.querySelector('[data-section="logic"] .sf-isec__action'));
     expect(toggle(h.container, 'logic').getAttribute('aria-expanded')).toBe('true');
     const call = h.builder.actions.onUpdate.mock.calls.at(-1);
@@ -264,6 +284,7 @@ describe('header actions', () => {
 
   test('the empty Logic section says so', () => {
     const h = mountInspector('text');
+    click(toggle(h.container, 'logic'));
     expect(h.container.querySelector('[data-section="logic"]').textContent).toContain(
       'No rules yet. Show, hide or require this field based on another answer.'
     );
@@ -304,6 +325,7 @@ describe('header', () => {
 describe('rows', () => {
   test('Rules lists the two messages first, as If empty and If invalid', () => {
     const h = mountInspector('text');
+    openEverything(h.container);
     const labels = [...h.container.querySelectorAll('[data-section="rules"] .sf-prow__label')].map((l) => l.textContent);
     expect(labels.slice(0, 2)).toEqual(['If empty', 'If invalid']);
     const placeholder = h.container.querySelector('[data-section="rules"] input').getAttribute('placeholder');
@@ -313,6 +335,7 @@ describe('rows', () => {
 
   test('help text stays in the page and is tied to its control', () => {
     const h = mountInspector('text');
+    openEverything(h.container);
     const input = [...h.container.querySelectorAll('input, textarea')].find((i) => i.id && h.container.querySelector(`label[for="${i.id}"]`)?.textContent === 'Help text');
     expect(input).toBeTruthy();
     const help = h.container.querySelector(`#${input.getAttribute('aria-describedby')}`);
@@ -322,6 +345,7 @@ describe('rows', () => {
 
   test('a text area grows from two lines', () => {
     const h = mountInspector('text');
+    openEverything(h.container);
     const area = h.container.querySelector('textarea');
     expect(area.getAttribute('rows')).toBe('2');
     h.unmount();
@@ -329,6 +353,7 @@ describe('rows', () => {
 
   test('editing a text row writes the same key', () => {
     const h = mountInspector('text');
+    openEverything(h.container);
     const label = [...h.container.querySelectorAll('input')].find((i) => h.container.querySelector(`label[for="${i.id}"]`)?.textContent === 'Label');
     setValue(label, 'Full name');
     expect(h.builder.actions.onUpdate).toHaveBeenCalledWith('n_text', { label: 'Full name' });

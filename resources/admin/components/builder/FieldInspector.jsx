@@ -161,8 +161,8 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
   const rootRef = useRef(null);
   const [bulk, setBulk] = useState(false);
   const [pending, setPending] = useState(null);
-  const choicesState = useSectionOpen('choices', true);
-  const logicState = useSectionOpen('logic', true);
+  const choicesState = useSectionOpen('choices', false);
+  const logicState = useSectionOpen('logic', false);
   const logicOpen = logicState[0];
   const [savedTab, setTab] = useInspectorTab();
   const tabBase = `sf-itab-${useId().replace(/:/g, '')}`;
@@ -397,6 +397,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
       {hasStylesTab && <InspectorTabs tab={tab} onChange={setTab} idBase={tabBase} />}
       </div>
 
+      <div className='sf-field-inspector__scroll'>
       {(validationMessages.length > 0 || fieldWarnings.length > 0) && (
         <div className='sf-field-inspector__notices'>
           {validationMessages.slice(0, 1).map((m, i) => (
@@ -580,6 +581,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
                 logic={fieldLogic}
                 availableFields={(allFields || []).filter((f) => f.key !== field.key)}
                 scope={isStep ? 'step' : 'field'}
+                panel
                 disabled={isReadOnly}
                 emptyText={
                   isStep
@@ -618,7 +620,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
         )}
 
         {tab === 'settings' && hasAdvanced && (
-          <InspectorSection id='advanced' title={__('Advanced', 'subtleforms')} defaultOpen={false}>
+          <InspectorSection id='advanced' title={__('Advanced', 'subtleforms')}>
             <DynamicInspectorPanel
               field={field}
               onUpdate={handleUpdate}
@@ -636,6 +638,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
               : __('No configurable settings for this field type.', 'subtleforms')}
           </Notice>
         )}
+      </div>
       </div>
 
       <div className='sf-field-inspector__footer'>
