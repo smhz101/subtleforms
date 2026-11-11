@@ -186,6 +186,12 @@ async function openPanel(page, title) {
     await tab.click();
   }
   if (wanted === 'styles') {
+    // Every section starts closed: the Styles tab opens all of them.
+    for (let i = 0; i < 12; i++) {
+      const closed = page.locator('.sf-field-inspector .sf-isec__toggle[aria-expanded="false"]');
+      if (!(await closed.count())) break;
+      await closed.first().click();
+    }
     return;
   }
   // The settings panel is one sheet of collapsible sections. The older group

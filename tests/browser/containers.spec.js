@@ -57,7 +57,7 @@ test('Repeater, Group and Columns: label and help text are editable, saved and s
 
   const edits = [
     { index: 0, label: 'Companies you worked for', help: 'Add one group per company.', extra: async () => {
-      await openPanel(page, 'Display');
+      await openPanel(page, 'type');
       await page.getByLabel('Button Label').fill('Add a company');
       await page.getByLabel('Max Repeats').fill('4');
     } },
@@ -67,6 +67,7 @@ test('Repeater, Group and Columns: label and help text are editable, saved and s
   for (const edit of edits) {
     const box = container(page, edit.index);
     await box.locator('.sf-container-renderer__header').click();
+    await openPanel(page, 'Content');
     const labelInput = page.locator('.sf-field-inspector').getByLabel('Label', { exact: true });
     await expect(labelInput).toBeVisible();
     await labelInput.fill(edit.label);

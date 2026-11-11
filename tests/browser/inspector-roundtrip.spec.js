@@ -40,11 +40,13 @@ test('the settings panel saves the same schema as the tabbed panel did', async (
     await page.locator('.subtleforms-builder-canvas .sf-field-chrome', { hasText: 'Topic' }).first().click();
     const ins = page.locator('.sf-field-inspector');
 
-    // Content: label and help text.
+    // Content: label and help text (every section starts closed).
+    await openPanel(page, 'Content');
     await ins.getByLabel('Label', { exact: true }).fill('Topic of your message');
     await ins.getByLabel('Help text', { exact: true }).fill('We reply by email.');
 
     // Choices: add one and name it.
+    await openPanel(page, 'Choices');
     await ins.getByRole('button', { name: 'Add choice' }).click();
     await ins.getByLabel('Option 3 label').fill('Other');
 

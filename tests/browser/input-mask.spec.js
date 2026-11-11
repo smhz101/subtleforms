@@ -10,7 +10,7 @@
  */
 const fs = require('fs');
 const { test, expect } = require('@playwright/test');
-const { adminApi, publishForm, cleanup, entries, loginPage, openBuilder, waitForForm, spamToken } = require('./helpers');
+const { adminApi, openPanel, publishForm, cleanup, entries, loginPage, openBuilder, waitForForm, spamToken } = require('./helpers');
 
 const SHOTS = process.env.SF_SHOTS || 'test-results/shots/input-mask';
 let client;
@@ -183,6 +183,7 @@ test('builder: choose a mask, try it, and it is saved on the field', async ({ pa
   await openBuilder(page, form.id);
   await page.locator('.subtleforms-builder-canvas .sf-field-chrome').first().click();
   const inspector = page.locator('.sf-field-inspector');
+  await openPanel(page, 'Rules');
 
   const select = inspector.getByLabel('Input mask', { exact: true });
   await expect(select).toHaveValue('');
