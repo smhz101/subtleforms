@@ -109,7 +109,7 @@ describe('Logic section', () => {
     expect(inspectorCss).toMatch(/&__intro \{\s+margin: 0 0 12px;\s+font-size: 12px;\s+line-height: 16px;/);
     expect(inspectorCss).toMatch(/\.sf-logic-editor__group \{\s+gap: 12px;\s+padding: 12px;\s+border: 1px solid var\(--sf-border\);\s+border-radius: var\(--sf-radius-lg\);/);
     expect(inspectorCss).toContain('grid-template-columns: minmax(0, 1fr) 32px;');
-    expect(inspectorCss).toMatch(/\.sf-logic-editor--panel \{\s+gap: 12px;/);
+    expect(inspectorCss).toMatch(/\.sf-logic-editor--panel \{[^}]*display: flex;[^}]*flex-direction: column;[^}]*gap: 12px;/);
     expect(inspectorCss).toMatch(/\.sf-logic-editor__empty \{[^}]*border: 1px dashed/);
   });
 });
