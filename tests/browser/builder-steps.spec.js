@@ -3,7 +3,7 @@
  * setting that moves fields between steps (2.3.1).
  */
 const { test, expect } = require('@playwright/test');
-const { adminApi, cleanup, loginPage, openBuilder, BASE } = require('./helpers');
+const { adminApi, cleanup, loginPage, openBuilder, openPanel, BASE } = require('./helpers');
 
 let client;
 const created = [];
@@ -212,6 +212,7 @@ test('Step setting moves a field to another step and keeps it selected; undoable
   await openStep(page, 0);
   await canvasFields(page).nth(1).click();
 
+  await openPanel(page, 'Content');
   const select = page.getByLabel('Step', { exact: true });
   await expect(select).toBeVisible();
   await expect(select.locator('option')).toHaveText(['Step 1: Contact', 'Step 2: Payment']);
