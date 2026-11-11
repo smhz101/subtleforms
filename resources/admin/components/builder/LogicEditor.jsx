@@ -164,6 +164,7 @@ function FieldLogicEditor({
   disabled = false,
   emptyText,
   addLabel,
+  panel = false,
 }) {
   const readOnly = disabled;
   const current = logic && Array.isArray(logic.groups) ? logic : null;
@@ -209,7 +210,7 @@ function FieldLogicEditor({
   ];
 
   return (
-    <div className='sf-logic-editor'>
+    <div className={`sf-logic-editor${panel ? ' sf-logic-editor--panel' : ''}`}>
 
       {showAction && groups.length > 0 && (
         <div className='sf-logic-editor__action'>
@@ -217,7 +218,7 @@ function FieldLogicEditor({
             __nextHasNoMarginBottom
             __next40pxDefaultSize
             label={__('Action', 'subtleforms')}
-            hideLabelFromVision
+            hideLabelFromVision={!panel}
             value={action}
             disabled={readOnly}
             options={actions.map((a) => ({
@@ -316,7 +317,8 @@ function FieldLogicEditor({
             })}
 
             <Button
-              variant='link'
+              variant={panel ? 'secondary' : 'link'}
+              size={panel ? 'compact' : undefined}
               className='sf-logic-editor__add-rule'
               data-sf-action='add-rule'
               disabled={readOnly}
