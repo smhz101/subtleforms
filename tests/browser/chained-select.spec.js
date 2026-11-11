@@ -3,7 +3,7 @@
  * visitor: required validation, submit, stored value.
  */
 const { test, expect } = require('@playwright/test');
-const { adminApi, publishForm, cleanup, entries, loginPage, openBuilder, waitForForm } = require('./helpers');
+const { adminApi, publishForm, cleanup, entries, loginPage, openBuilder, openPanel, waitForForm } = require('./helpers');
 
 let client;
 let form;
@@ -24,6 +24,7 @@ test('set up dropdowns in the builder, then fill the field as a visitor', async 
   await loginPage(page);
   await openBuilder(page, form.id);
   await page.locator('.sf-field-chrome').first().click();
+  await openPanel(page, 'dropdowns');
 
   await page.getByRole('button', { name: 'Set up dropdowns' }).click();
   const modal = page.locator('.sf-chained-modal');

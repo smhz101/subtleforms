@@ -5,7 +5,7 @@
  * checkout settings and a disabled blank email action) saves.
  */
 const { test, expect } = require('@playwright/test');
-const { adminApi, cleanup, loginPage, openBuilder } = require('./helpers');
+const { adminApi, cleanup, loginPage, openBuilder, openPanel } = require('./helpers');
 
 let client;
 const created = [];
@@ -104,6 +104,7 @@ test('form-scoped errors name the setting and clear when leaving the form (QA-03
     });
   });
   await page.locator('.sf-field-chrome').first().click();
+  await openPanel(page, 'Content');
   await page.getByLabel('Label', { exact: true }).fill('Full name');
   await saveDraft(page);
   await expect(saveStatus(page)).toHaveAttribute('title', /Confirmation settings: Add a message\./, { timeout: 20000 });
@@ -139,6 +140,7 @@ test('the form 11 shape saves: payment form with checkout settings and a disable
   await loginPage(page);
   await openBuilder(page, form.id);
   await page.locator('.sf-field-chrome').first().click();
+  await openPanel(page, 'Content');
   await page.getByLabel('Label', { exact: true }).fill('Email address');
   await saveDraft(page);
   await expect(saveStatus(page)).toHaveText('Saved', { timeout: 20000 });
