@@ -38,7 +38,7 @@ final class FieldSettings {
 		'choices'  => array( 'dropdown', 'radio', 'multiple_choice', 'checkbox', 'toggle', 'country', 'chained_select', 'consent' ),
 		'advanced' => array( 'date', 'time', 'datetime', 'rating', 'scale', 'net_promoter_score', 'range_slider', 'checkbox_grid', 'calculation', 'signature', 'color_picker', 'rich_text', 'hidden' ),
 		'media'    => array( 'file_upload', 'image_upload' ),
-		'layout'   => array( 'section_break', 'html', 'disclaimer', 'step', 'group_container', 'two_column_container', 'three_column_container', 'four_column_container', 'repeat_container' ),
+		'layout'   => array( 'section_break', 'html', 'disclaimer', 'step', 'group_container', 'tabs_container', 'accordion_container', 'two_column_container', 'three_column_container', 'four_column_container', 'repeat_container' ),
 		'system'   => array( 'recaptcha', 'hcaptcha', 'turnstile', 'action_hook' ),
 	);
 
@@ -64,6 +64,10 @@ final class FieldSettings {
 			'section_break'          => __( 'Section Heading', 'subtleforms' ),
 			'step'                   => __( 'Page Break', 'subtleforms' ),
 			'group_container'        => __( 'Group', 'subtleforms' ),
+			'tabs_container'         => __( 'Tabs', 'subtleforms' ),
+			'accordion_container'    => __( 'Accordion', 'subtleforms' ),
+			'tab_panel'              => __( 'Tab', 'subtleforms' ),
+			'accordion_panel'        => __( 'Section', 'subtleforms' ),
 			'two_column_container'   => __( '2 Columns', 'subtleforms' ),
 			'three_column_container' => __( '3 Columns', 'subtleforms' ),
 			'four_column_container'  => __( '4 Columns', 'subtleforms' ),
@@ -93,6 +97,8 @@ final class FieldSettings {
 		'three_column_container',  // lays them out side by side without nesting.
 		'four_column_container',   // Existing forms that use columns keep working.
 		'group_container',
+		'tab_panel',               // 2.9.0: created by Tabs, never added alone.
+		'accordion_panel',         // 2.9.0: created by Accordion, never added alone.
 		'dynamic_field',           // Not rendered on the frontend yet.
 		'post_selection',          // Not rendered on the frontend yet.
 		'save_resume',             // Not rendered on the frontend yet.
@@ -146,7 +152,15 @@ final class FieldSettings {
 	 *
 	 * @var array<int, string>
 	 */
-	const CONTAINERS = array( 'repeat_container', 'group_container' );
+	const CONTAINERS = array( 'repeat_container', 'group_container', 'tabs_container', 'accordion_container' );
+
+	/**
+	 * Containers whose label only names them (builder and screen readers):
+	 * no help text or label visibility, visitors never see a heading (2.9.0).
+	 *
+	 * @var array<int, string>
+	 */
+	const PANEL_CONTAINERS = array( 'tabs_container', 'accordion_container' );
 
 	/**
 	 * Layout controls that hold what a block says, shown under General.
@@ -599,17 +613,19 @@ final class FieldSettings {
 			}
 			unset( $layout_control );
 			$first = array( $labelControl );
-			$first[] = array(
-				'type'    => 'textarea',
-				'name'    => 'description',
-				'label'   => __( 'Help text', 'subtleforms' ),
-				'help'    => ( 'repeat_container' === $type )
-					? __( 'Shown once above the groups visitors add.', 'subtleforms' )
-					: __( 'Shown under the label, above the fields.', 'subtleforms' ),
-				'rows'    => 2,
-				'section' => 'general',
-			);
-			$first[] = self::labelVisibilityControl();
+			if ( ! in_array( $type, self::PANEL_CONTAINERS, true ) ) {
+				$first[] = array(
+					'type'    => 'textarea',
+					'name'    => 'description',
+					'label'   => __( 'Help text', 'subtleforms' ),
+					'help'    => ( 'repeat_container' === $type )
+						? __( 'Shown once above the groups visitors add.', 'subtleforms' )
+						: __( 'Shown under the label, above the fields.', 'subtleforms' ),
+					'rows'    => 2,
+					'section' => 'general',
+				);
+				$first[] = self::labelVisibilityControl();
+			}
 			$definition->layoutControls = array_values( array_merge( $first, $layout ) );
 
 			if ( 'repeat_container' === $type && ! $has( 'adminLabel' ) ) {
@@ -665,7 +681,7 @@ final class FieldSettings {
 			unset( $control );
 		}
 
-		if ( $isInput || in_array( $type, array( 'html', 'section_break', 'disclaimer', 'group_container', 'repeat_container' ), true ) || $isColumns ) {
+		if ( $isInput || in_array( $type, array( 'html', 'section_break', 'disclaimer', 'group_container', 'repeat_container', 'tabs_container', 'accordion_container' ), true ) || $isColumns ) {
 			$add(
 				array(
 					'type'        => 'text',
@@ -827,6 +843,8 @@ final class FieldSettings {
 			'disclaimer'         => __( 'Highlighted notice box', 'subtleforms' ),
 			'step'               => __( 'Split the form into pages', 'subtleforms' ),
 			'group_container'    => __( 'Group fields together', 'subtleforms' ),
+			'tabs_container'     => __( 'Split fields into tabs', 'subtleforms' ),
+			'accordion_container' => __( 'Split fields into sections that open and close', 'subtleforms' ),
 			'repeat_container'   => __( 'Let visitors add rows', 'subtleforms' ),
 			'recaptcha'          => __( 'Google reCAPTCHA', 'subtleforms' ),
 			'hcaptcha'           => __( 'hCaptcha challenge', 'subtleforms' ),

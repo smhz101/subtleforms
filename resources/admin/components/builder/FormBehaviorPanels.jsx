@@ -19,7 +19,7 @@ function collectKeys(fields, out = []) {
   fields.forEach((f) => {
     if (!f || typeof f !== 'object') return;
     const cfg = f.config ?? f;
-    if (cfg?.key && !['section', 'container', 'columns', 'group', 'form_step', 'html', 'section_break', 'page_break'].includes(f.type)) {
+    if (cfg?.key && !['section', 'container', 'columns', 'group', 'form_step', 'html', 'section_break', 'page_break', 'tab_panel', 'accordion_panel'].includes(f.type)) {
       out.push(cfg.key);
     }
     collectKeys(f.fields, out);

@@ -28,7 +28,8 @@ const NON_INPUT_TYPES = new Set([
   'section_break', 'form_step', 'repeat_field', 'html', 'hidden',
   'one_column_container', 'two_column_container', 'three_column_container',
   'four_column_container', 'five_column_container', 'six_column_container',
-  'repeat_container', 'group_container', 'step', 'action_hook', 'disclaimer',
+  'repeat_container', 'group_container', 'tabs_container', 'accordion_container',
+  'tab_panel', 'accordion_panel', 'step', 'action_hook', 'disclaimer',
   'calculation', 'recaptcha', 'hcaptcha', 'turnstile',
 ]);
 

@@ -19,6 +19,8 @@ import { useConfig } from './context/ConfigContext';
 import { formHasRequiredFields, requiredIndicatorMark } from '../../../shared/fieldDisplay';
 import FieldRenderer from './FieldRenderer';
 import ContainerRenderer from './ContainerRenderer';
+import PanelContainerRenderer from './PanelContainerRenderer';
+import { isPanelContainerType } from '../../../shared/panels';
 import GroupRenderer from './GroupRenderer';
 import ColumnDropZone from './ColumnDropZone';
 import FieldChrome from './FieldChrome';
@@ -580,6 +582,61 @@ export default function FormBuilder({ appearance } = {}) {
                 dragHandleListeners={dragHandleListeners}>
                 {childIds.map((childId, i) => renderNode(childId, nodeId, null, i))}
               </GroupRenderer>
+            </div>
+          )}
+        </SortableWrapper>
+      );
+    }
+
+    // Tabs and Accordion draw their panels themselves; the panel that is open
+    // gets a drop zone like a group (2.9.0).
+    if (isPanelContainerType(node.type)) {
+      const parentColumnIndex = isColumnContainer(tree.nodes[parentId]) ? columnIndex : null;
+      return (
+        <SortableWrapper
+          key={nodeId}
+          nodeId={nodeId}
+          parentId={parentId}
+          columnIndex={parentColumnIndex}
+          position={position}>
+          {({ setNodeRef, style, dragHandleRef, dragHandleListeners }) => (
+            <div ref={setNodeRef} style={style}>
+              <PanelContainerRenderer
+                node={node}
+                isSelected={selectedId === nodeId}
+                onSelect={() => setSelectedId(nodeId)}
+                onDelete={() => onDelete(nodeId)}
+                dragHandleRef={dragHandleRef}
+                dragHandleListeners={dragHandleListeners}
+                toolbarActions={containerToolbarActions({
+                  tree,
+                  node,
+                  nodeId,
+                  parentId,
+                  columnIndex: parentColumnIndex,
+                  position,
+                  onMove,
+                  onDelete,
+                  onDuplicate,
+                  onUpdate,
+                  fieldDefinitions,
+                })}
+                renderPanelBody={(panelId) => (
+                  <ColumnDropZone
+                    key={panelId}
+                    containerId={panelId}
+                    columnIndex={null}
+                    items={tree.nodes[panelId]?.children || []}
+                    onRequestInsert={onRequestInsert}
+                    getItemStyle={getItemStyle}
+                    spacing={16}
+                    compact
+                    renderItem={(childId, childPosition) =>
+                      renderNode(childId, panelId, null, childPosition)
+                    }
+                  />
+                )}
+              />
             </div>
           )}
         </SortableWrapper>

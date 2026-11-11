@@ -18,6 +18,7 @@ import CONTROL_REGISTRY, { getControlComponent } from './controlRegistry';
 import { PanelSection } from '../../../ui';
 import { resolveControls } from './controlSections';
 import { getInspectorControl } from '../../../../shared/extend';
+import { compositeSubfields } from '../../../../shared/compositeParts';
 
 import './DynamicInspectorPanel.scss';
 
@@ -157,7 +158,12 @@ function ControlRenderer( { ctrl, field, onUpdate, isReadOnly, override } ) {
 		if ( ctrl.rows !== undefined ) props.rows = ctrl.rows;
 	}
 	if ( ctrl.type === 'subfield' ) {
-		props.subfields = Array.isArray( ctrl.subfields ) ? ctrl.subfields : [];
+		// Parts an add-on registered join the ones the server declared.
+		props.subfields = compositeSubfields( field?.type, Array.isArray( ctrl.subfields ) ? ctrl.subfields : [] );
+	}
+	// "Tab shown first" lists the panels of the selected Tabs container.
+	if ( ctrl.type === 'panel_select' ) {
+		props.field = field;
 	}
 	// Add-on controls get the full definition, the selected field and the
 	// other fields of the form ({ key, label, type }), for example to insert

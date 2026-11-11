@@ -167,7 +167,7 @@ export function parseHeadersJson(text) {
 const LAYOUT_TYPES = [
   'html', 'heading', 'divider', 'section', 'section_break', 'step', 'form_step', 'page_break',
   'spacer', 'paragraph', 'columns', 'group', 'row', 'disclaimer', 'recaptcha', 'hcaptcha',
-  'turnstile', 'action_hook', 'save_resume',
+  'turnstile', 'action_hook', 'save_resume', 'tab_panel', 'accordion_panel',
 ];
 
 /** Types a webhook never sends (Webhooks::SENSITIVE_TYPES). */

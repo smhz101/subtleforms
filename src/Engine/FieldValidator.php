@@ -46,6 +46,10 @@ final class FieldValidator {
 		'six_column_container',
 		'repeat_container',
 		'group_container',
+		'tabs_container',
+		'accordion_container',
+		'tab_panel',
+		'accordion_panel',
 		'step',
 		// System / non-input types
 		'hidden',
@@ -598,9 +602,10 @@ final class FieldValidator {
 				return $this->validatePhone( $value, $field );
 			case 'name_group':
 			case 'address_group':
-				// Grouped fields submit as arrays/objects - no specific validation needed
-				// Individual sub-parts are strings and will be sanitized by SaveAction
-				return null;
+				// Grouped fields submit as arrays/objects with no checks of
+				// their own here (the parts are sanitized by SaveAction and
+				// demanded above); an add-on may check its own parts.
+				return $this->addonError( $type, $value, $field );
 			case 'signature':
 				// The Signature field (from an add-on) answers with a drawn
 				// PNG or JPEG. Anything else is not a signature (FA-01).

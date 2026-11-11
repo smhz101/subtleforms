@@ -38,6 +38,7 @@ store.emailMarketing = store.emailMarketing || {};
 store.crm = store.crm || {};
 store.settingsRedirects = store.settingsRedirects || [];
 store.adminPages = store.adminPages || {};
+store.compositeParts = store.compositeParts || {};
 
 /**
  * Register a public field renderer.
@@ -239,6 +240,67 @@ export function getFieldOverride(field, config) {
     }
   }
   return null;
+}
+
+const PART_NAME = /^[a-z][a-z0-9_]*$/;
+
+/**
+ * Add parts to a composite field (the Address field's `address_group`, the
+ * Name field's `name_group`). The browser side of the PHP filter
+ * `subtleforms/fields/composite_parts`: register the same parts in both.
+ *
+ * A part is { part, value, label?, alias?, toggleable?, on?, optional?, data?,
+ * flags?, auto?, full?, placeholder? }. `part` (the settings key) and `value`
+ * (the answer key) must match /^[a-z][a-z0-9_]*$/. Parts that are not usable
+ * are dropped, and so is a part whose name is already taken: the built-in
+ * parts cannot be replaced or removed, only appended to. `data: true` keeps
+ * the value with the answer without drawing an input for it; it is never
+ * required and is not listed in the builder.
+ *
+ * Feature-detect it: `typeof SubtleFormsExtend.registerCompositeParts === 'function'`.
+ *
+ * @param {string} type  `address_group` or `name_group`.
+ * @param {Array}  parts Parts to append.
+ */
+export function registerCompositeParts(type, parts) {
+  if (typeof type !== 'string' || !type || !Array.isArray(parts)) return;
+  const list = (store.compositeParts[type] = store.compositeParts[type] || []);
+  parts.forEach((part) => {
+    if (
+      !part ||
+      typeof part !== 'object' ||
+      typeof part.part !== 'string' ||
+      typeof part.value !== 'string' ||
+      !PART_NAME.test(part.part) ||
+      !PART_NAME.test(part.value)
+    ) {
+      return;
+    }
+    const alias = typeof part.alias === 'string' && PART_NAME.test(part.alias) ? part.alias : undefined;
+    const names = [part.part, part.value, alias].filter(Boolean);
+    const taken = list.some((p) => [p.part, p.value, p.alias].some((n) => n && names.includes(n)));
+    if (taken) return;
+    const data = !!part.data;
+    list.push({
+      part: part.part,
+      value: part.value,
+      alias,
+      label: typeof part.label === 'string' && part.label ? part.label : part.part,
+      toggleable: !data && !!part.toggleable,
+      on: data || part.on !== false,
+      optional: data || !!part.optional,
+      data,
+      flags: Array.isArray(part.flags) ? part.flags.filter((f) => typeof f === 'string') : undefined,
+      auto: typeof part.auto === 'string' ? part.auto : undefined,
+      full: !!part.full,
+      placeholder: typeof part.placeholder === 'string' ? part.placeholder : undefined,
+    });
+  });
+}
+
+/** Parts registered for a composite type, in registration order. */
+export function getRegisteredCompositeParts(type) {
+  return store.compositeParts[type] || [];
 }
 
 /**
@@ -592,6 +654,7 @@ root.SubtleFormsExtend = Object.assign(root.SubtleFormsExtend || {}, {
   registerSettingsRedirect,
   registerAdminPage,
   registerFieldOverride,
+  registerCompositeParts,
   registerLogicExtension,
   registerLogicEditor,
   registerSlotItem,

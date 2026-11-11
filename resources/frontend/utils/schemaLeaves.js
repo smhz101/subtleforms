@@ -137,6 +137,10 @@ export function isLayoutContainerField(field) {
   }
   return (
     type === 'group_container' ||
+    type === 'tabs_container' ||
+    type === 'accordion_container' ||
+    type === 'tab_panel' ||
+    type === 'accordion_panel' ||
     type === 'step' ||
     type === 'form_step' ||
     type === 'section' ||

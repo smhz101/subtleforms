@@ -182,7 +182,7 @@ final class SaveAction implements ActionInterface {
 
 			// Task 2: Normalize composite field payloads (name_group, address_group)
 			if ( $type === 'name_group' || $type === 'address_group' ) {
-				$sanitized[ $key ] = $this->normalize_composite_value( $value );
+				$sanitized[ $key ] = $this->normalize_composite_value( $value, $type );
 				continue;
 			}
 
@@ -382,19 +382,23 @@ final class SaveAction implements ActionInterface {
 	/**
 	 * Task 2: Normalize a composite field value (name_group, address_group).
 	 * Ensures the value is always an array of sanitized string sub-values.
-	 * Malformed input is normalized, submission is NOT rejected.
+	 * Malformed input is normalized, submission is NOT rejected. Only the keys
+	 * of the field's parts (answer key or alias, add-on parts included) are
+	 * kept; anything else posted is dropped.
 	 *
-	 * @param mixed $value
+	 * @param mixed  $value
+	 * @param string $type  Field type.
 	 * @return array
 	 */
-	private function normalize_composite_value( $value ): array {
+	private function normalize_composite_value( $value, string $type = '' ): array {
 		if ( ! is_array( $value ) ) {
 			// Null, string, or other scalar, return empty composite
 			return array();
 		}
+		$known      = \SubtleForms\Fields\CompositeParts::knownKeys( $type );
 		$normalized = array();
 		foreach ( $value as $sub_key => $sub_val ) {
-			if ( ! is_string( $sub_key ) ) {
+			if ( ! is_string( $sub_key ) || ! in_array( $sub_key, $known, true ) ) {
 				continue;
 			}
 			$normalized[ $sub_key ] = is_string( $sub_val )

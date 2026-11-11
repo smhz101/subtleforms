@@ -160,6 +160,10 @@ export const LOGIC_ONLY_TYPES = [
 	'section_break',
 	'disclaimer',
 	'repeat_container',
+	'tabs_container',
+	'accordion_container',
+	'tab_panel',
+	'accordion_panel',
 ];
 
 /** Whether a type takes no answer but can be shown or hidden by logic. */

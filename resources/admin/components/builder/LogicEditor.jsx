@@ -61,7 +61,7 @@ export function countRules(logic) {
 
 const LAYOUT_TYPES = [
   'step', 'section', 'section_break', 'html', 'form_step', 'page_break', 'hidden_price',
-  'captcha', 'recaptcha', 'honeypot', 'action_hook',
+  'captcha', 'recaptcha', 'honeypot', 'action_hook', 'tab_panel', 'accordion_panel',
 ];
 
 /**
