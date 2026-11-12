@@ -69,14 +69,14 @@ test('theme form preview matches the live page and a palette pick and radius sta
   await page.screenshot({ path: `${SHOTS}/styling-preview-1440.png` });
 
   // Custom: pick a palette swatch for the label and a button radius.
-  await page.getByRole('radio', { name: 'Custom', exact: true }).click();
-  const panel = page.locator('.sf-form-appearance');
-  await panel.locator('.components-panel__body-toggle', { hasText: 'Colours' }).click();
+  await page.getByRole('tab', { name: 'Custom', exact: true }).click();
+  const panel = page.locator('.sf-appearance-panel');
+  await panel.getByRole('button', { name: 'Colours', exact: true }).click();
   await panel.locator('.sf-color-token__toggle[aria-label^="Label:"]').click();
   await page.locator('.components-popover button:has-text("Accent 3"), .components-popover [aria-label="Accent 3"]').first().click();
   await page.keyboard.press('Escape');
-  await panel.locator('.components-panel__body-toggle', { hasText: 'Buttons' }).click();
-  const radius = panel.locator('.sf-style-control', { hasText: 'Button radius' }).locator('input[type="number"], input').first();
+  await panel.getByRole('button', { name: 'Buttons', exact: true }).click();
+  const radius = panel.getByLabel('Button radius');
   await radius.fill('22');
   await radius.blur();
   await page.screenshot({ path: `${SHOTS}/styling-panel-1440.png` });
