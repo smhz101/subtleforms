@@ -45,6 +45,8 @@ final class MergeTags {
 	 * @param string $template Template text.
 	 * @param array  $context {
 	 *     @type array  $answers    Field key => formatted answer (text or HTML).
+	 *     @type array  $raw        Optional. Field key => stored answer (secret fields left out). Parts and
+	 *                              the subtleforms/merge_tags/value filter read it when `answers` holds text.
 	 *     @type array  $fields     List of ['key','label','type','field'] (FieldMapper::fields()).
 	 *     @type string $form_title Form title.
 	 *     @type int    $entry_id   Entry ID.
@@ -110,6 +112,9 @@ final class MergeTags {
 
 		if ( '' !== $key && ( $prefixed || $has ) ) {
 			$value = $has ? $answers[ $key ] : null;
+			$raw   = isset( $context['raw'] ) && is_array( $context['raw'] ) ? $context['raw'] : array();
+			// Parts and the filter work on the stored answer when the caller has it.
+			$stored = array_key_exists( $key, $raw ) ? $raw[ $key ] : $value;
 
 			if ( function_exists( 'apply_filters' ) ) {
 				/**
@@ -125,14 +130,14 @@ final class MergeTags {
 				 * @param mixed       $value   The stored answer, or null when there is none.
 				 * @param array       $context Merge context (see render()).
 				 */
-				$custom = apply_filters( 'subtleforms/merge_tags/value', null, $key, $part, $value, $context );
+				$custom = apply_filters( 'subtleforms/merge_tags/value', null, $key, $part, $stored, $context );
 				if ( is_string( $custom ) ) {
 					return $escape( $custom );
 				}
 			}
 
 			if ( '' !== $part ) {
-				return $escape( self::partValue( $value, $part, self::compositeType( $key, $context ) ) );
+				return $escape( self::partValue( $stored, $part, self::compositeType( $key, $context ) ) );
 			}
 
 			if ( $has ) {

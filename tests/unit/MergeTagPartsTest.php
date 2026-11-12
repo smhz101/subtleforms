@@ -117,4 +117,17 @@ final class MergeTagPartsTest extends TestCase {
 		MergeTags::render( '{field:addr}', $this->context() );
 		$this->assertSame( array( '' ), $parts );
 	}
+
+	public function test_parts_and_filter_read_the_raw_answer_when_answers_are_text(): void {
+		$ctx            = $this->context();
+		$ctx['raw']     = $ctx['answers'];
+		$ctx['answers'] = array( 'addr' => '1 Main, Lahore, 54000', 'who' => 'Ada Lovelace' );
+		$this->assertSame( 'Lahore', MergeTags::render( '{field:addr:city}', $ctx ) );
+		$this->assertSame( '1 Main', MergeTags::render( '{field:addr:street}', $ctx ) );
+		$this->assertSame( '1 Main, Lahore, 54000', MergeTags::render( '{field:addr}', $ctx ), 'whole-field tag keeps the formatted text' );
+		$GLOBALS['sf_test_filters']['subtleforms/merge_tags/value'] = static function ( $custom, $key, $part, $value ) {
+			return 'map_url' === $part && is_array( $value ) ? 'lat=' . $value['lat'] : null;
+		};
+		$this->assertSame( 'lat=31.5', MergeTags::render( '{field:addr:map_url}', $ctx ) );
+	}
 }
