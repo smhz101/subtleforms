@@ -96,7 +96,7 @@ describe('time picker (FLD2-05)', () => {
     expect(document.activeElement.textContent).toBe('30');
     key(document.activeElement, 'ArrowDown');
     key(document.activeElement, ' ');
-    expect(onChange).toHaveBeenLastCalledWith('09:31');
+    expect(onChange).toHaveBeenLastCalledWith('09:45');
     key(document.activeElement, 'ArrowLeft');
     expect(document.activeElement.closest('[role="listbox"]').getAttribute('aria-label')).toBe('Hour');
     unmount();

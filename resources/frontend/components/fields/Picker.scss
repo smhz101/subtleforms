@@ -181,6 +181,18 @@
 	letter-spacing: normal;
 	text-align: start;
 	text-transform: none;
+	animation: subtleforms-picker-in 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes subtleforms-picker-in {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.subtleforms-picker .subtleforms-picker__menu { animation: none; }
 }
 
 .subtleforms-picker .subtleforms-picker__search {
@@ -431,20 +443,41 @@
 .subtleforms-picker .subtleforms-picker__columns {
 	display: flex;
 	gap: 4px;
-	height: 220px;
+	height: 198px;
 }
 
+// 5.5 rows of 36px show, with the rows fading out at the top and bottom.
 .subtleforms-picker .subtleforms-picker__column {
-	width: 52px;
-	overflow: auto;
+	width: 56px;
+	overflow-y: auto;
+	scrollbar-width: none;
 	border: 1px solid var(--subtleforms-picker-border);
 	border-radius: min(var(--subtleforms-picker-radius), 8px);
+	-webkit-mask-image: linear-gradient(to bottom, transparent, #000 14px, #000 calc(100% - 14px), transparent);
+	mask-image: linear-gradient(to bottom, transparent, #000 14px, #000 calc(100% - 14px), transparent);
+
+	&::-webkit-scrollbar { display: none; }
 }
+
+.subtleforms-picker .subtleforms-picker__heading {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--subtleforms-picker-muted);
+}
+
+.subtleforms-picker .subtleforms-picker__menu--datetime .subtleforms-picker__panel { gap: 16px; }
+
+.subtleforms-picker .subtleforms-picker__menu--datetime.is-stacked .subtleforms-picker__panel { flex-direction: column; }
+.subtleforms-picker .subtleforms-picker__menu--datetime.is-stacked .subtleforms-picker__column { flex: 1; width: auto; }
+.subtleforms-picker .subtleforms-picker__menu--datetime.is-stacked { width: 284px; }
 
 .subtleforms-picker .subtleforms-picker__tick {
 	display: block;
 	width: 100%;
-	padding: 8px 0;
+	height: 36px;
+	box-sizing: border-box;
+	padding: 0;
+	line-height: 36px;
 	font-size: 14px;
 	font-variant-numeric: tabular-nums;
 	text-align: center;
@@ -455,7 +488,12 @@
 		font-weight: 600;
 	}
 
-	&:hover:not(.is-selected) { background: color-mix(in srgb, var(--subtleforms-picker-accent) 10%, transparent); }
+	&:hover:not(.is-selected):not([aria-disabled='true']) { background: color-mix(in srgb, var(--subtleforms-picker-accent) 10%, transparent); }
+
+	&[aria-disabled='true'] {
+		cursor: default;
+		opacity: 0.4;
+	}
 }
 
 .subtleforms-picker .subtleforms-picker__meridiem {
@@ -514,7 +552,6 @@
 	.subtleforms-picker .subtleforms-picker__panel { flex-direction: column; }
 	.subtleforms-picker .subtleforms-picker__menu--calendar { width: 100%; }
 	.subtleforms-picker .subtleforms-picker__calendar { width: 100%; }
-	.subtleforms-picker .subtleforms-picker__columns { height: 160px; }
 	.subtleforms-picker .subtleforms-picker__column { flex: 1; width: auto; }
 }
 

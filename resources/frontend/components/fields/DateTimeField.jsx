@@ -104,10 +104,36 @@ function clampDay(year, month, day) {
   return new Date(year, month, Math.min(day, new Date(year, month + 1, 0).getDate()));
 }
 
-const minuteChoices = Array.from({ length: 60 }, (_, minute) => ({
-  value: minute,
-  label: String(minute).padStart(2, '0'),
-}));
+const STEPS = [1, 5, 10, 15, 30, 60];
+
+function normalizeStep(step) {
+  const n = Number(step);
+  return STEPS.includes(n) ? n : 15;
+}
+
+function minuteChoicesFor(step) {
+  const size = normalizeStep(step);
+  return Array.from({ length: Math.ceil(60 / size) }, (_, index) => ({
+    value: index * size,
+    label: String(index * size).padStart(2, '0'),
+  }));
+}
+
+/** Minutes since midnight for an H:i string, or null. */
+function clockMinutes(clock) {
+  const parsed = parseTime(clock);
+  return parsed ? parsed.hours * 60 + parsed.minutes : null;
+}
+
+/** The current time rounded up to the step, as H:i, or null past midnight. */
+function nowRounded(step, from = new Date()) {
+  const size = normalizeStep(step);
+  const total = Math.ceil((from.getHours() * 60 + from.getMinutes()) / size) * size;
+  if (total >= 24 * 60) {
+    return toTime(23, 60 - size >= 0 ? Math.floor(59 / size) * size : 0);
+  }
+  return toTime(Math.floor(total / 60), total % 60);
+}
 
 function hourChoices(twelveHour) {
   if (!twelveHour) {
@@ -122,10 +148,12 @@ function hourChoices(twelveHour) {
  * Space picks the focused value, and the left and right arrows jump to the
  * neighbouring column (FLD2-05).
  */
-function TimeColumn({ label, options, selected, onPick }) {
+function TimeColumn({ label, options, selected, onPick, isDisabled }) {
   const listRef = useRef(null);
+  const typed = useRef({ text: '', at: 0 });
   const selectedIndex = options.findIndex((option) => option.value === selected);
   const [focusIndex, setFocusIndex] = useState(Math.max(0, selectedIndex));
+  const off = (index) => !!isDisabled && !!options[index] && isDisabled(options[index].value);
 
   useEffect(() => {
     if (selectedIndex >= 0) {
@@ -133,15 +161,48 @@ function TimeColumn({ label, options, selected, onPick }) {
     }
   }, [selectedIndex]);
 
+  // The selected row sits in the middle of the column when it opens.
+  useEffect(() => {
+    const list = listRef.current;
+    const row = list?.children[Math.max(0, selectedIndex)];
+    if (list && row) {
+      list.scrollTop = row.offsetTop - (list.clientHeight - row.offsetHeight) / 2;
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // The mouse wheel moves one row at a time.
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) {
+      return undefined;
+    }
+    const onWheel = (event) => {
+      event.preventDefault();
+      const row = list.children[0]?.offsetHeight || 36;
+      list.scrollTop += Math.sign(event.deltaY) * row;
+    };
+    list.addEventListener('wheel', onWheel, { passive: false });
+    return () => list.removeEventListener('wheel', onWheel);
+  }, []);
+
   const focusOption = (index) => {
     setFocusIndex(index);
     listRef.current?.children[index]?.focus();
   };
 
+  // The next enabled row from an index in a direction, or the same index.
+  const stepFrom = (index, direction) => {
+    let next = index + direction;
+    while (next >= 0 && next < options.length && off(next)) {
+      next += direction;
+    }
+    return next >= 0 && next < options.length ? next : index;
+  };
+
   const onKeyDown = (event) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      if (options[focusIndex]) {
+      if (options[focusIndex] && !off(focusIndex)) {
         onPick(options[focusIndex].value);
       }
       return;
@@ -157,10 +218,28 @@ function TimeColumn({ label, options, selected, onPick }) {
       }
       return;
     }
+    // Typing digits jumps, as a native select does.
+    if (/^[0-9]$/.test(event.key) && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      const now = Date.now();
+      const text = now - typed.current.at > 800 ? event.key : typed.current.text + event.key;
+      typed.current = { text, at: now };
+      const hit = options.findIndex((option, index) => !off(index) && option.label.replace(/^0/, '').startsWith(text.replace(/^0/, '')) );
+      if (hit >= 0) {
+        event.preventDefault();
+        focusOption(hit);
+      }
+      return;
+    }
+    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+      event.preventDefault();
+      focusOption(stepFrom(focusIndex, event.key === 'ArrowUp' ? -1 : 1));
+      return;
+    }
     const next = moveIndex(focusIndex, event.key, options.length);
     if (next >= 0) {
       event.preventDefault();
-      focusOption(next);
+      const target = off(next) ? stepFrom(next, event.key === 'Home' || event.key === 'PageUp' ? 1 : -1) : next;
+      focusOption(target);
     }
   };
 
@@ -173,16 +252,16 @@ function TimeColumn({ label, options, selected, onPick }) {
           role='option'
           tabIndex={index === focusIndex ? 0 : -1}
           aria-selected={option.value === selected}
+          aria-disabled={off(index) || undefined}
           className={`subtleforms-picker__tick${option.value === selected ? ' is-selected' : ''}`}
           onFocus={() => setFocusIndex(index)}
-          onClick={() => onPick(option.value)}>
+          onClick={() => !off(index) && onPick(option.value)}>
           {option.label}
         </button>
       ))}
     </div>
   );
 }
-
 
 /**
  * Date, time, or both. The control stores the same ISO values a native
@@ -201,6 +280,10 @@ export default function DateTimeField({
   min,
   max,
   disablePast = false,
+  minuteStep = 15,
+  minTime,
+  maxTime,
+  defaultMode = 'none',
   disabledWeekdays,
   firstDay,
   required = false,
@@ -269,10 +352,29 @@ export default function DateTimeField({
     return new Date(today.getFullYear(), today.getMonth(), 1);
   };
 
+  // The default day or time fills a field that renders empty; a value that is
+  // already there (a draft, or a step the visitor came back to) is kept.
+  useEffect(() => {
+    if (preview || disabled || readOnly || (stored !== '' && stored !== null) || !onChange) {
+      return;
+    }
+    const wantsDate = defaultMode === 'today' || defaultMode === 'now';
+    if (!wantsDate || (defaultMode === 'now' && mode === 'date') || (defaultMode === 'today' && mode === 'time')) {
+      return;
+    }
+    const today = new Date();
+    if (mode === 'time') {
+      onChange(nowRounded(minuteStep, today));
+    } else if (!isDisabled(today)) {
+      onChange(mode === 'date' ? toIsoDate(today) : joinDateTime(toIsoDate(today), nowRounded(minuteStep, today)));
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const [cursor, setCursor] = useState(() => parseIsoDate(dateValue) || new Date());
   const [view, setView] = useState('days');
   const [yearStart, setYearStart] = useState(0);
   const [compact, setCompact] = useState(false);
+  const [stacked, setStacked] = useState(false);
   const weekdays = weekdayLabels(weekStartsOn, locale);
   const days = monthCells(cursor, weekStartsOn);
 
@@ -362,6 +464,10 @@ export default function DateTimeField({
     }
     focusBody.current = true;
     setCompact(typeof window !== 'undefined' && !!window.matchMedia && window.matchMedia('(pointer: coarse), (max-width: 480px)').matches);
+    // Side by side only when the popover can be 540px wide from the input's left edge.
+    const rect = rootRef.current?.getBoundingClientRect();
+    const room = typeof window !== 'undefined' && rect ? window.innerWidth - Math.max(0, rect.left) - 16 : 540;
+    setStacked(mode === 'datetime' && room < 540);
     setCursor(startCursor());
     setView('days');
     setOpen(true);
@@ -371,21 +477,39 @@ export default function DateTimeField({
     setCursor((current) => clampDay(current.getFullYear(), current.getMonth() + delta, current.getDate()));
   };
 
+  // The first minute on the step, at or after the current one, that is allowed in an hour.
+  const minuteIn = (hour24) => {
+    const keep = timeValue ? parsedTime.minutes : 0;
+    const choices = minuteChoicesFor(minuteStep);
+    const ok = choices.filter((choice) => !isTimeOff(hour24 * 60 + choice.value));
+    return (ok.find((choice) => choice.value >= keep) || ok[ok.length - 1] || choices[0]).value;
+  };
+
   const selectHour = (hour) => {
-    if (!twelveHour) {
-      emitTime(hour, timeValue ? parsedTime.minutes : 0);
-      return;
-    }
-    const meridiem = parsedTime.hours >= 12 ? 'PM' : 'AM';
-    const base = hour % 12;
-    emitTime(meridiem === 'PM' ? base + 12 : base, timeValue ? parsedTime.minutes : 0);
+    const pm = parsedTime.hours >= 12;
+    const hour24 = twelveHour ? (hour % 12) + (pm ? 12 : 0) : hour;
+    emitTime(hour24, minuteIn(hour24));
   };
 
   const setMeridiem = (meridiem) => {
-    const hour12 = parsedTime.hours % 12;
-    emitTime(meridiem === 'PM' ? hour12 + 12 : hour12, parsedTime.minutes);
+    const hour24 = (parsedTime.hours % 12) + (meridiem === 'PM' ? 12 : 0);
+    emitTime(hour24, timeValue ? minuteIn(hour24) : 0);
   };
 
+  // The allowed times: the field's own range, tightened to now when "No past
+  // dates" is on and the chosen day is today.
+  const step = normalizeStep(minuteStep);
+  const minuteChoices = minuteChoicesFor(step);
+  const minClock = (() => {
+    const base = clockMinutes(minTime);
+    const nowClock = disablePast && mode === 'datetime' && dateValue === todayIso
+      ? clockMinutes(toTime(new Date().getHours(), new Date().getMinutes()))
+      : null;
+    return base === null ? nowClock : (nowClock === null ? base : Math.max(base, nowClock));
+  })();
+  const maxClock = clockMinutes(maxTime);
+  const isTimeOff = (minutes) => (minClock !== null && minutes < minClock) || (maxClock !== null && minutes > maxClock);
+  const hourOff = (hour24) => minuteChoices.every((choice) => isTimeOff(hour24 * 60 + choice.value));
   const selectedHour = twelveHour ? (parsedTime.hours % 12 || 12) : parsedTime.hours;
 
   // Focus goes into the dialog when it opens, and follows the keys in the
@@ -603,7 +727,7 @@ export default function DateTimeField({
         <div
           id={dialogId}
           ref={dialogRef}
-          className={`subtleforms-picker__menu subtleforms-picker__menu--calendar${mode === 'datetime' ? ' subtleforms-picker__menu--datetime' : ''}${compact ? ' is-compact' : ''}`}
+          className={`subtleforms-picker__menu subtleforms-picker__menu--calendar${mode === 'datetime' ? ' subtleforms-picker__menu--datetime' : ''}${compact ? ' is-compact' : ''}${stacked ? ' is-stacked' : ''}`}
           role='dialog'
           aria-label={dialogLabel}
           onKeyDown={trapTab}>
@@ -783,17 +907,22 @@ export default function DateTimeField({
             )}
             {mode !== 'date' && (
               <div className='subtleforms-picker__time' ref={timeRef}>
+                {mode === 'datetime' && stacked && (
+                  <div className='subtleforms-picker__heading'>{__('Time', 'subtleforms')}</div>
+                )}
                 <div className='subtleforms-picker__columns'>
                   <TimeColumn
                     label={__('Hour', 'subtleforms')}
                     options={hourChoices(twelveHour)}
                     selected={timeValue ? selectedHour : null}
+                    isDisabled={(hour) => hourOff(twelveHour ? (hour % 12) + (parsedTime.hours >= 12 ? 12 : 0) : hour)}
                     onPick={selectHour}
                   />
                   <TimeColumn
                     label={__('Minute', 'subtleforms')}
                     options={minuteChoices}
                     selected={timeValue ? parsedTime.minutes : null}
+                    isDisabled={(minute) => isTimeOff(parsedTime.hours * 60 + minute)}
                     onPick={(minute) => emitTime(parsedTime.hours, minute)}
                   />
                 </div>
