@@ -91,8 +91,8 @@ export const OPTION_LABELS = {
 
 export const PRESET_LABELS = {
   default: {
-    label: __( 'Default', 'subtleforms' ),
-    description: __( 'Inherits the plugin defaults. Neutral and unopinionated.', 'subtleforms' ),
+    label: __( 'Clean', 'subtleforms' ),
+    description: __( 'The plugin defaults. Neutral outlined fields and a solid button.', 'subtleforms' ),
   },
   minimal: {
     label: __( 'Minimal', 'subtleforms' ),
