@@ -28,12 +28,14 @@ final class MergeTagPartsTest extends TestCase {
 		$schema = array(
 			'fields' => array(
 				array( 'key' => 'addr', 'type' => 'address_group', 'label' => 'Address' ),
+				array( 'key' => 'who', 'type' => 'name_group', 'label' => 'Name' ),
 				array( 'key' => 'rep', 'type' => 'repeat_container', 'label' => 'People' ),
 			),
 		);
 		return array(
 			'answers' => array(
-				'addr' => array( 'street_address' => '1 Main', 'city' => 'Lahore', 'lat' => 31.5, 'nested' => array( 'a' => 'b' ) ),
+				'addr' => array( 'street_address' => '1 Main', 'postal_code' => '54000', 'city' => 'Lahore', 'lat' => 31.5, 'nested' => array( 'a' => 'b' ) ),
+				'who'  => array( 'first_name' => 'Ada', 'last_name' => 'Lovelace' ),
 				'rep'  => array( array( 'city' => 'Lahore' ), array( 'city' => 'Karachi' ) ),
 			),
 			'fields'  => FieldMapper::fields( $schema ),
@@ -48,6 +50,23 @@ final class MergeTagPartsTest extends TestCase {
 		$this->assertSame( '31.5', MergeTags::render( '{field:addr:lat}', $ctx ) );
 	}
 
+	public function test_part_names_read_the_registered_answer_key(): void {
+		$ctx = $this->context();
+		$this->assertSame( '1 Main', MergeTags::render( '{field:addr:street}', $ctx ) );
+		$this->assertSame( '54000', MergeTags::render( '{field:addr:postal}', $ctx ) );
+		$this->assertSame( '1 Main', MergeTags::render( '{field:addr:street_address}', $ctx ), 'literal key still works' );
+		$this->assertSame( 'Ada', MergeTags::render( '{field:who:first_name}', $ctx ) );
+		$this->assertSame( 'Lovelace', MergeTags::render( '{field:who:last_name}', $ctx ) );
+		$this->assertSame( '', MergeTags::render( '{field:addr:unknown}', $ctx ) );
+		$this->assertSame( '', MergeTags::render( '{field:who:unknown}', $ctx ) );
+	}
+
+	public function test_literal_key_wins_over_a_part_name(): void {
+		$ctx = $this->context();
+		$ctx['answers']['addr']['street'] = 'Old key';
+		$this->assertSame( 'Old key', MergeTags::render( '{field:addr:street}', $ctx ) );
+	}
+
 	public function test_missing_or_non_scalar_part_is_empty(): void {
 		$ctx = $this->context();
 		$this->assertSame( '', MergeTags::render( '{field:addr:nope}', $ctx ) );
@@ -56,7 +75,7 @@ final class MergeTagPartsTest extends TestCase {
 	}
 
 	public function test_plain_tag_is_unchanged(): void {
-		$this->assertSame( '1 Main, Lahore', MergeTags::render( '{field:addr}', $this->context() ) );
+		$this->assertSame( '1 Main, Lahore, 54000', MergeTags::render( '{field:addr}', $this->context() ) );
 	}
 
 	public function test_part_on_a_repeater_is_empty(): void {
@@ -86,7 +105,7 @@ final class MergeTagPartsTest extends TestCase {
 		};
 		$ctx = $this->context();
 		$this->assertSame( 'Lahore', MergeTags::render( '{field:addr:city}', $ctx ) );
-		$this->assertSame( '1 Main, Lahore', MergeTags::render( '{field:addr}', $ctx ) );
+		$this->assertSame( '1 Main, Lahore, 54000', MergeTags::render( '{field:addr}', $ctx ) );
 	}
 
 	public function test_filter_gets_an_empty_part_for_a_plain_tag(): void {

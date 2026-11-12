@@ -193,6 +193,24 @@ final class CompositeParts {
 	}
 
 	/**
+	 * The answer keys to read for a part name (`street`, `postal`, `first_name`):
+	 * its `value` key, then its `alias`. Data parts and parts an add-on added
+	 * are included. Empty when the type has no such part.
+	 *
+	 * @param string $type Field type.
+	 * @param string $part Part name.
+	 * @return string[]
+	 */
+	public static function valueKeys( string $type, string $part ): array {
+		foreach ( self::defs( $type ) as $def ) {
+			if ( $def['part'] === $part ) {
+				return array_values( array_filter( array( $def['value'], $def['alias'] ?? null ) ) );
+			}
+		}
+		return array();
+	}
+
+	/**
 	 * The parts that make display text, in builder order: every part that
 	 * is not a data part, whether drawn or not.
 	 *

@@ -132,8 +132,7 @@ final class MergeTags {
 			}
 
 			if ( '' !== $part ) {
-				$scalar = is_array( $value ) && isset( $value[ $part ] ) && is_scalar( $value[ $part ] ) ? $value[ $part ] : '';
-				return $escape( (string) $scalar );
+				return $escape( self::partValue( $value, $part, self::compositeType( $key, $context ) ) );
 			}
 
 			if ( $has ) {
@@ -153,6 +152,32 @@ final class MergeTags {
 		}
 
 		return null;
+	}
+
+	/**
+	 * One part of an answer as text: the scalar at the literal key first, then,
+	 * for a Name or Address answer, at the answer key of the part with that
+	 * name (`street` reads `street_address`). Empty when there is none.
+	 *
+	 * @param mixed  $value Stored answer.
+	 * @param string $part  Key or part name.
+	 * @param string $type  Composite type, or an empty string.
+	 * @return string
+	 */
+	private static function partValue( $value, string $part, string $type ): string {
+		if ( ! is_array( $value ) ) {
+			return '';
+		}
+		$keys = array( $part );
+		if ( '' !== $type ) {
+			$keys = array_merge( $keys, \SubtleForms\Fields\CompositeParts::valueKeys( $type, $part ) );
+		}
+		foreach ( $keys as $k ) {
+			if ( isset( $value[ $k ] ) && is_scalar( $value[ $k ] ) ) {
+				return (string) $value[ $k ];
+			}
+		}
+		return '';
 	}
 
 	/**
