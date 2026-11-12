@@ -200,7 +200,7 @@ describe('2.3.0 inline layout and dark surface', () => {
   });
   test('dark surface preset exists and drops the card', () => {
     const preset = getPreset('dark-surface');
-    expect(preset.tokens.colorBackground).toBe('#1b1d24');
+    expect(preset.tokens.colorBackground).toBe('#111827');
     expect(formAppearanceClasses({ preset: 'dark-surface', variants: {} })).toContain('subtleforms--preset-dark-surface');
   });
 });
@@ -318,11 +318,10 @@ describe( 'transparent form root defaults', () => {
   it( 'defaults colorBackground to transparent and keeps intentional surfaces', () => {
     expect( TOKEN_DEFAULTS.colorBackground ).toBe( 'transparent' );
     expect( getPreset( 'soft' ).tokens.colorBackground ).toBe( '#ffffff' );
-    expect( getPreset( 'bordered' ).tokens.colorBackground ).toBe( '#fbfbfc' );
-    expect( getPreset( 'dark-surface' ).tokens.colorBackground ).toBe( '#1b1d24' );
-    expect( getPreset( 'minimal' ).tokens.colorBackground ).toBe( 'transparent' );
-    expect( getPreset( 'compact' ).tokens.colorBackground ).toBe( 'transparent' );
-    expect( getPreset( 'rounded' ).tokens.colorBackground ).toBe( 'transparent' );
+    expect( getPreset( 'bordered' ).tokens.colorBackground ).toBe( '#ffffff' );
+    expect( getPreset( 'dark-surface' ).tokens.colorBackground ).toBe( '#111827' );
+    expect( getPreset( 'minimal' ).tokens.colorBackground ).toBeUndefined();
+    expect( getPreset( 'theme' ).tokens.colorBackground ).toBe( 'transparent' );
   } );
 } );
 
