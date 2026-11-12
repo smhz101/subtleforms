@@ -27,7 +27,7 @@ function render( appearance ) {
 }
 
 function openCustom( container ) {
-  const custom = [ ...container.querySelectorAll( 'button' ) ].find( ( b ) => b.textContent === 'Custom' );
+  const custom = container.querySelector( '[role="tab"][aria-label="Custom"]' );
   if ( custom ) {
     act( () => custom.click() );
   }

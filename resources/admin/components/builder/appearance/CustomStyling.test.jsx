@@ -61,17 +61,20 @@ const themeForm = () => {
 };
 
 function openCustom( ui ) {
-  ui.click( [ ...ui.container.querySelectorAll( 'button, [role="radio"]' ) ].find( ( b ) => b.textContent === 'Custom' ) );
+  ui.click( ui.container.querySelector( '[role="tab"][aria-label="Custom"]' ) );
 }
 
 function openGroup( ui, title ) {
-  const toggle = [ ...document.querySelectorAll( '.components-panel__body-toggle' ) ].find( ( b ) => b.textContent.includes( title ) );
+  const toggle = [ ...document.querySelectorAll( '.sf-isec__toggle' ) ].find( ( b ) => b.textContent.includes( title ) );
   if ( toggle && toggle.getAttribute( 'aria-expanded' ) === 'false' ) {
     ui.click( toggle );
   }
 }
 
-beforeEach( () => setThemeStylesForTests( THEME ) );
+beforeEach( () => {
+  window.localStorage.clear();
+  setThemeStylesForTests( THEME );
+} );
 afterEach( () => {
   setThemeStylesForTests( null );
   document.body.innerHTML = '';
@@ -106,7 +109,8 @@ describe( 'theme colours and fonts first', () => {
   it( 'the font list shows the theme fonts first, then system fonts', () => {
     const ui = mount( themeForm() );
     openCustom( ui );
-    const select = [ ...ui.container.querySelectorAll( 'select' ) ].find( ( s ) => s.closest( '.components-base-control' )?.textContent.includes( 'Form font' ) );
+    openGroup( ui, 'Type' );
+    const select = [ ...ui.container.querySelectorAll( 'select' ) ].find( ( s ) => s.closest( '.sf-prow' )?.textContent.includes( 'Form font' ) );
     const labels = [ ...select.options ].map( ( o ) => o.textContent );
     expect( labels.indexOf( 'Manrope' ) ).toBeGreaterThan( -1 );
     expect( labels.indexOf( 'Manrope' ) ).toBeLessThan( labels.indexOf( 'System fonts' ) );
@@ -119,33 +123,35 @@ describe( 'theme colours and fonts first', () => {
     setThemeStylesForTests( { ...THEME, isBlockTheme: false, fontFamilies: [], bodyFont: '' } );
     const ui = mount( themeForm() );
     openCustom( ui );
+    openGroup( ui, 'Type' );
     expect( ui.container.textContent ).toContain( 'Your theme does not share its fonts with WordPress; the preview uses your site\'s stylesheet.' );
     ui.unmount();
   } );
 } );
 
 describe( 'reset buttons', () => {
-  it( 'every control has one; it clears only that control', () => {
+  it( 'a control with a value of its own has one; it clears only that control', () => {
     const ui = mount( { ...themeForm(), tokens: { ...themeForm().tokens, labelSize: '18px', radius: '12px' } } );
     openCustom( ui );
+    openGroup( ui, 'Type' );
     openGroup( ui, 'Fields' );
     const reset = document.querySelector( 'button[aria-label="Reset Label size to theme"]' );
     expect( reset ).not.toBeNull();
-    expect( reset.disabled ).toBe( false );
+    expect( document.querySelector( 'button[aria-label="Reset Label weight to theme"]' ) ).toBeNull();
     ui.click( reset );
     expect( latest.tokens.labelSize ).toBeUndefined();
     expect( latest.tokens.radius ).toBe( '12px' );
-    expect( document.querySelector( 'button[aria-label="Reset Label size to theme"]' ).disabled ).toBe( true );
+    expect( document.querySelector( 'button[aria-label="Reset Label size to theme"]' ) ).toBeNull();
     ui.unmount();
   } );
 
-  it( 'Reset all to theme asks first, then restores the theme preset', () => {
+  it( 'Reset to theme asks first, then restores the theme preset', () => {
     const ui = mount( { ...themeForm(), tokens: { ...themeForm().tokens, labelSize: '18px' } } );
     openCustom( ui );
-    ui.click( ui.byText( 'Reset all to theme' ) );
+    ui.click( ui.byText( 'Reset to theme' ) );
     expect( latest.tokens.labelSize ).toBe( '18px' );
     expect( document.body.textContent ).toContain( 'puts every colour' );
-    const confirm = [ ...document.querySelectorAll( '.sf-form-appearance__confirm button' ) ].find( ( b ) => b.textContent === 'Reset all to theme' );
+    const confirm = [ ...document.querySelectorAll( '.sf-appearance-panel__confirm button' ) ].find( ( b ) => b.textContent === 'Reset to theme' );
     ui.click( confirm );
     expect( latest.tokens ).toEqual( getPreset( 'theme' ).tokens );
     ui.unmount();
@@ -168,11 +174,14 @@ describe( 'contrast warning', () => {
     expect( contrastIssues( fine, THEME ) ).toEqual( [] );
   } );
 
-  it( 'shows in the colours group for button text on its background', () => {
+  it( 'shows under the button text colour when it is hard to read on the button', () => {
     const ui = mount( { ...themeForm(), tokens: { ...themeForm().tokens, colorPrimary: '#ffee58', colorButtonText: '#ffffff' } } );
     openCustom( ui );
     openGroup( ui, 'Colours' );
-    expect( document.querySelector( '.sf-form-appearance__contrast' ).textContent ).toMatch( /button text and the button background have a contrast of 1\.\d:1/ );
+    const error = document.querySelector( '.sf-arow__error' );
+    expect( error.textContent ).toMatch( /Contrast with the button background is 1\.\d:1\. Aim for at least 4\.5:1/ );
+    expect( error.closest( '.sf-prow' ).textContent ).toContain( 'Button text' );
+    expect( error.getAttribute( 'role' ) ).toBe( 'status' );
     ui.unmount();
   } );
 } );
@@ -181,10 +190,8 @@ describe( 'no arbitrary custom CSS', () => {
   it( 'does not show a Custom CSS control', () => {
     const ui = mount( themeForm() );
     openCustom( ui );
-    const toggle = ui.container.querySelector( '.sf-form-appearance__advanced-toggle input' );
-    if ( toggle ) {
-      ui.click( toggle );
-    }
+    document.querySelectorAll( '.sf-isec__toggle' ).forEach( ( t ) => ui.click( t ) );
+    document.querySelectorAll( '.sf-appearance-panel__more' ).forEach( ( t ) => ui.click( t ) );
     expect( document.body.textContent ).not.toMatch( /Custom CSS/i );
     expect( document.querySelector( 'textarea.sf-form-appearance__css' ) ).toBeNull();
     expect( document.querySelector( '.sf-form-appearance__css' ) ).toBeNull();
