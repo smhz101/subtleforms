@@ -213,10 +213,18 @@
 	&:hover { background: var(--subtleforms-color-bg-subtle, #f4f5f7); }
 }
 
-.subtleforms-picker__weekdays,
 .subtleforms-picker__days {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+// The weekday header and every week are rows of their own (role="row"), each a
+// seven column grid, so the seven day cells of a week sit on one line.
+.subtleforms-picker__weekdays,
+.subtleforms-picker__week {
 	display: grid;
-	grid-template-columns: repeat(7, 1fr);
+	grid-template-columns: repeat(7, minmax(0, 1fr));
 	gap: 2px;
 }
 
