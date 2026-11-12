@@ -67,7 +67,7 @@ final class MoveToPro270Test extends TestCase {
 	}
 
 	public function test_the_extension_points_are_declared_and_nothing_is_provided_alone(): void {
-		foreach ( array( 'picture_choice', 'multi_file_uploads', 'advanced_logic', 'analytics' ) as $point ) {
+		foreach ( array( 'picture_choice', 'multi_file_uploads', 'advanced_logic', 'analytics', 'address_flags' ) as $point ) {
 			$this->assertTrue( ExtensionPoints::has( $point ), $point );
 			$this->assertFalse( ExtensionPoints::isProvided( $point ), $point );
 		}

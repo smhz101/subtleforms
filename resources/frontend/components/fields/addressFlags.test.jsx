@@ -1,6 +1,7 @@
 /**
  * Country flags on the Address field (2.9.0): the Country part draws flag
- * images only when the field's "Show country flags" setting is on.
+ * images only when an add-on declares the `address_flags` feature and the
+ * field's `showFlags` setting is on.
  */
 import { createRoot } from '@wordpress/element';
 import { act } from 'react';
@@ -12,6 +13,11 @@ import { fieldGroups, loadAllFieldGroups } from './lazyFields';
 global.IS_REACT_ACT_ENVIRONMENT = true;
 
 beforeAll(() => loadAllFieldGroups());
+
+// An add-on declares the feature; the live form reads it from its own data.
+const declare = () => {
+  window.subtleformsFrontend.addonFeatures = ['address_flags'];
+};
 
 beforeEach(() => {
   window.subtleformsFrontend = { assetsUrl: 'https://example.test/wp-content/plugins/subtleforms/build/frontend/' };
@@ -45,7 +51,8 @@ function draw(field, values = {}) {
 }
 
 describe('address country with flags', () => {
-  test('on: the selected country shows a flag image and the open list has flags', () => {
+  test('on with the feature: the selected country shows a flag image and the open list has flags', () => {
+    declare();
     const { container, unmount } = draw(address({ showFlags: true }), { addr: { country: 'PK' } });
     const trigger = container.querySelector('.subtleforms-address-group .subtleforms-picker__trigger');
     expect(trigger.querySelector('img.subtleforms-flag')).not.toBeNull();
@@ -54,7 +61,17 @@ describe('address country with flags', () => {
     unmount();
   });
 
-  test.each([[undefined], [false], ['no'], ['0']])('off (%p): letters, no flag image', (value) => {
+  test('the option alone, without the feature: letters, no flag image', () => {
+    const { container, unmount } = draw(address({ showFlags: true }), { addr: { country: 'PK' } });
+    const trigger = container.querySelector('.subtleforms-address-group .subtleforms-picker__trigger');
+    expect(trigger.textContent).toContain('PK');
+    act(() => trigger.click());
+    expect(container.querySelectorAll('img.subtleforms-flag')).toHaveLength(0);
+    unmount();
+  });
+
+  test.each([[undefined], [false], ['no'], ['0']])('feature declared, option off (%p): letters, no flag image', (value) => {
+    declare();
     const { container, unmount } = draw(address(value === undefined ? {} : { showFlags: value }), { addr: { country: 'PK' } });
     const trigger = container.querySelector('.subtleforms-address-group .subtleforms-picker__trigger');
     expect(trigger.textContent).toContain('PK');
@@ -65,6 +82,7 @@ describe('address country with flags', () => {
   });
 
   test('a wrapped node reads the setting from its config', () => {
+    declare();
     const { container, unmount } = draw(address({ config: { showFlags: true } }), { addr: { country: 'DE' } });
     expect(container.querySelector('.subtleforms-picker__trigger img.subtleforms-flag')).not.toBeNull();
     unmount();
@@ -77,7 +95,12 @@ describe('flagsOn and the flags group for an address', () => {
     expect(flagsOn(address().showFlags)).toBe(false);
   });
 
-  test('the flags code is listed only for an address that asks', () => {
+  test('without the feature the flags code is never listed for an address', () => {
+    expect(fieldGroups({ fields: [address({ showFlags: true })] }).has('flags')).toBe(false);
+  });
+
+  test('with the feature the flags code is listed only for an address that asks', () => {
+    declare();
     expect(fieldGroups({ fields: [address()] }).has('flags')).toBe(false);
     expect(fieldGroups({ fields: [address({ showFlags: false })] }).has('flags')).toBe(false);
     const on = fieldGroups({ fields: [address({ showFlags: true })] });
@@ -87,7 +110,11 @@ describe('flagsOn and the flags group for an address', () => {
 });
 
 describe('builder canvas', () => {
-  test('on: a flag stands beside the Country placeholder; off: none', () => {
+  test('on with the feature: a flag stands beside the Country placeholder; off or no feature: none', () => {
+    const bare = mount(<AddressFieldRenderer field={address({ showFlags: true })} />);
+    expect(bare.container.querySelectorAll('img.subtleforms-flag')).toHaveLength(0);
+    bare.unmount();
+    declare();
     const on = mount(<AddressFieldRenderer field={address({ showFlags: true })} />);
     expect(on.container.querySelectorAll('img.subtleforms-flag')).toHaveLength(1);
     on.unmount();

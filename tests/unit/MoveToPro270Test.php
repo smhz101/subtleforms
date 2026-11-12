@@ -118,7 +118,7 @@ final class MoveToPro270Test extends TestCase {
 	// ── Extension points ────────────────────────────────────────────
 
 	public function test_every_extension_point_is_declared(): void {
-		$this->assertSame( array( 'picture_choice', 'multi_file_uploads', 'advanced_logic', 'analytics' ), ExtensionPoints::all() );
+		$this->assertSame( array( 'picture_choice', 'multi_file_uploads', 'advanced_logic', 'analytics', 'address_flags' ), ExtensionPoints::all() );
 		$this->assertSame( 3, ExtensionPoints::LEVEL );
 		foreach ( ExtensionPoints::all() as $point ) {
 			$this->assertTrue( ExtensionPoints::has( $point ) );
