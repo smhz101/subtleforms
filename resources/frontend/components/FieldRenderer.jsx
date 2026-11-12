@@ -14,7 +14,7 @@ import ChoiceSelect from './fields/ChoiceSelect';
 import PanelContainer from './fields/PanelContainer';
 import { FormContext } from './fields/contexts';
 import { lazyField, fieldHasMask } from './fields/lazyFields';
-import { getFieldType, getFieldOverride } from '../../shared/extend';
+import { getFieldType, getFieldOverride, addonProvides } from '../../shared/extend';
 import { effectiveFieldType } from '../../shared/fieldFallback';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { flagsOn } from '../../shared/flagsOn';
@@ -1079,7 +1079,7 @@ function renderInput(
                     placeholder={__('Select Country', 'subtleforms')}
                     invalid={invalid}
                     describedBy={invalid ? `${inputId}-error` : undefined}
-                    flagImages={flagsOn(config.showFlags)}
+                    flagImages={addonProvides('address_flags') && flagsOn(config.showFlags)}
                   />
                 ) : (
                   <input

@@ -131,6 +131,8 @@ final class FrontendAssets {
 				// Where the field code files are, for a page whose optimiser
 				// moved or combined the main script (2.6.0).
 				'assetsUrl'      => SUBTLEFORMS_PLUGIN_URL . 'build/frontend/',
+				// Features an active add-on provides (ExtensionPoints), read by addonProvides().
+				'addonFeatures'  => \SubtleForms\Support\ExtensionPoints::provided(),
 				// Only logged-in users need a nonce; a guest's would go stale in a
 				// cached page and block the submit (FF-03).
 				'nonce'          => is_user_logged_in() ? wp_create_nonce( 'wp_rest' ) : '',
@@ -383,7 +385,9 @@ final class FrontendAssets {
 			$config = is_array( $node['config'] ?? null ) ? $node['config'] : array();
 			$phonePicker = ( 'phone' === $type || 'tel' === $type ) && ( ! empty( $node['enableCountryCode'] ) || ! empty( $config['enableCountryCode'] ) );
 			// Country flags: one more lazy group, only for a field that asks (2.7.2).
-			if ( ( $phonePicker || 'country' === $type || 'address_group' === $type ) && self::wantsFlags( $node, $config ) ) {
+			// An Address field only counts when an add-on provides address_flags.
+			$addressFlags = 'address_group' === $type && \SubtleForms\Support\ExtensionPoints::isProvided( \SubtleForms\Support\ExtensionPoints::ADDRESS_FLAGS );
+			if ( ( $phonePicker || 'country' === $type || $addressFlags ) && self::wantsFlags( $node, $config ) ) {
 				$groups['flags'] = true;
 			}
 			// Input mask (2.8.0): one more lazy group, only for a field that asks.

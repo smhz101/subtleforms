@@ -8,6 +8,7 @@
  */
 
 import { fieldConfig } from '../../../shared/fieldConfig';
+import { addonProvides } from '../../../shared/extend';
 import { flagsOn } from '../../../shared/flagsOn';
 import FlagIcon from '../../../frontend/components/fields/FlagIcon';
 
@@ -55,7 +56,7 @@ function SubInput( { sub, cls, flag } ) {
 export default function AddressFieldRenderer( { field } ) {
 	const { fields } = field || {};
 	// A sample flag stands beside the Country placeholder when the option is on.
-	const flagOn = flagsOn( fieldConfig( field ).showFlags );
+	const flagOn = addonProvides( 'address_flags' ) && flagsOn( fieldConfig( field ).showFlags );
 	const cls = 'sf-composite-field';
 
 	const street  = getSub( fields, 'street' );

@@ -60,6 +60,13 @@ final class ExtensionPoints {
 	public const ANALYTICS = 'analytics';
 
 	/**
+	 * Country flags on the Address field. This plugin holds the flag code and
+	 * draws a flag in the Country sub-field when an add-on declares this name
+	 * and the field's `showFlags` setting is true. The add-on owns the setting.
+	 */
+	public const ADDRESS_FLAGS = 'address_flags';
+
+	/**
 	 * Every extension point this version provides.
 	 *
 	 * @return string[]
@@ -70,6 +77,7 @@ final class ExtensionPoints {
 			self::MULTI_FILE_UPLOADS,
 			self::ADVANCED_LOGIC,
 			self::ANALYTICS,
+			self::ADDRESS_FLAGS,
 		);
 	}
 

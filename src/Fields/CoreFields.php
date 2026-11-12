@@ -1675,7 +1675,6 @@ final class CoreFields {
 						'postal'  => array( 'enabled' => true,  'label' => 'Postal Code',           'placeholder' => '' ),
 						'country' => array( 'enabled' => true,  'label' => 'Country',               'placeholder' => '' ),
 					),
-					'showFlags' => false,
 				),
 				inspectorControls: array(
 					array(
@@ -1694,15 +1693,6 @@ final class CoreFields {
 							array( 'key' => 'postal',  'label' => __( 'Postal Code',           'subtleforms' ), 'toggleable' => true  ),
 							array( 'key' => 'country', 'label' => __( 'Country',               'subtleforms' ), 'toggleable' => true  ),
 						),
-					),
-					array(
-						'type'     => 'checkbox',
-						'name'     => 'showFlags',
-						'label'    => __( 'Show country flags', 'subtleforms' ),
-						'help'     => __( 'Shows a small flag next to each country in the Country sub-field. Loads flag images only for forms that use it.', 'subtleforms' ),
-						'section'  => 'general',
-						// Unset counts as on, the way the Country sub-field is drawn.
-						'showWhen' => array( 'enable_country' => array( true, 1, '1', '' ) ),
 					),
 				),
 				meta: array( 'category' => 'composite' ),
