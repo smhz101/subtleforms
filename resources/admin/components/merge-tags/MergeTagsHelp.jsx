@@ -29,6 +29,10 @@ export function MergeTagsReference() {
             <td><code>{'{field:key}'}</code></td>
             <td>{__('The answer to one field. Replace "key" with the field key shown under the field name in the builder, for example {field:email}.', 'subtleforms')}</td>
           </tr>
+          <tr>
+            <td><code>{'{field:key:part}'}</code></td>
+            <td>{__('Parts of a composite answer: {field:key:part}, for example {field:address:city}. Empty when the answer has no such part.', 'subtleforms')}</td>
+          </tr>
         </tbody>
       </table>
       <p className='sf-merge-tags-help__note'>

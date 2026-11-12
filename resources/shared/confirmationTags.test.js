@@ -17,4 +17,16 @@ describe('fillConfirmation', () => {
     })).toBe('https://example.com/?n=A%20B');
     expect(fillConfirmation('Hi {field:gone}', { values: {} })).toBe('Hi ');
   });
+
+  it('fills one part of an object answer', () => {
+    const values = { addr: { city: 'Lahore', lat: 31.5, nested: { a: 1 } }, rep: [{ city: 'Lahore' }] };
+    expect(fillConfirmation('{field:addr:city} {{field:addr:lat}} {addr:city}', { values })).toBe('Lahore 31.5 Lahore');
+    expect(fillConfirmation('[{field:addr:nope}][{field:addr:nested}][{field:rep:city}][{field:gone:city}]', { values })).toBe('[][][][]');
+    expect(fillConfirmation('{zzz:city}', { values })).toBe('{zzz:city}');
+    expect(fillConfirmation('?c={field:addr:city}', { values: { addr: { city: 'A B' } }, encode: true })).toBe('?c=A%20B');
+  });
+
+  it('keeps the plain tag as it was', () => {
+    expect(fillConfirmation('{field:addr}', { values: { addr: { city: 'Lahore', zip: '54000' } } })).toBe('Lahore 54000');
+  });
 });
