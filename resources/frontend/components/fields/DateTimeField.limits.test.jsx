@@ -134,3 +134,13 @@ describe('default today and now', () => {
     unmount();
   });
 });
+
+describe('a saved 2.8 field', () => {
+  test('a free text format and a relative minimum render and validate as before', () => {
+    jest.useFakeTimers().setSystemTime(new Date(2025, 2, 15, 10, 0));
+    const { container, unmount } = mount({ mode: 'date', format: 'd/m/Y', min: 'today', value: '2025-03-20' });
+    expect(container.querySelector('#f1').value).toBe('20/03/2025');
+    expect(container.querySelector('input[type="hidden"][name="f"]').value).toBe('2025-03-20');
+    unmount();
+  });
+});

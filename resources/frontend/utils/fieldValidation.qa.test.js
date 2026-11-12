@@ -10,8 +10,8 @@ describe('QA validation parity', () => {
   test('exact min and max dates pass, and one day outside fails', () => {
     expect(validateField(date, '2024-06-01')).toBeUndefined();
     expect(validateField(date, '2024-06-30')).toBeUndefined();
-    expect(validateField(date, '2024-05-31')).toBe('Date must be on or after 2024-06-01.');
-    expect(validateField(date, '2024-07-01')).toBe('Date must be on or before 2024-06-30.');
+    expect(validateField(date, '2024-05-31')).toBe('Pick a date on or after 2024-06-01.');
+    expect(validateField(date, '2024-07-01')).toBe('Pick a date on or before 2024-06-30.');
   });
 
   test('number rejects a value that misses the configured step', () => {

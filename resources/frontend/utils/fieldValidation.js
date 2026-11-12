@@ -19,6 +19,7 @@ import { hasParts, missingParts } from '../../shared/compositeParts';
 import { chainedSelectLevels, firstUnansweredChainedLevel } from '../../shared/chainedOptions';
 import { isValidInternational } from '../../shared/phoneDial';
 import { loadedGroup } from '../components/fields/lazyFields';
+import { dateLimitMessage, timeLimitMessage } from '../../shared/dateLimits';
 
 export const COMPOSITE_FIELD_TYPES = new Set(['name_group', 'address_group', 'address']);
 
@@ -360,22 +361,19 @@ function rawValidateField(field, value, defaults = {}) {
   if (type === 'color_picker' && !/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(value).trim())) {
     return __('Please enter a colour as a hex value, such as #336699.', 'subtleforms');
   }
-  if (type === 'date' && isIsoDate(value)) {
-    const minDate = config.minDate;
-    const maxDate = config.maxDate;
-    if (isIsoDate(minDate) && value < minDate) {
-      return sprintf(
-        /* translators: %s: earliest allowed date */
-        __('Date must be on or after %s.', 'subtleforms'),
-        minDate
-      );
+  // The limits of a date or time (DateRules::dateMessage and timeMessage).
+  if ((type === 'date' || type === 'datetime') && typeof value === 'string') {
+    const [datePart, timePart] = value.split(/[T ]/, 2);
+    const message = (isIsoDate(datePart) ? dateLimitMessage(datePart, config, type) : '')
+      || (type === 'datetime' && timePart !== undefined ? timeLimitMessage(timePart, config, type) : '');
+    if (message) {
+      return message;
     }
-    if (isIsoDate(maxDate) && value > maxDate) {
-      return sprintf(
-        /* translators: %s: latest allowed date */
-        __('Date must be on or before %s.', 'subtleforms'),
-        maxDate
-      );
+  }
+  if (type === 'time' && typeof value === 'string') {
+    const message = timeLimitMessage(value, config, 'time');
+    if (message) {
+      return message;
     }
   }
 
