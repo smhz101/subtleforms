@@ -4,14 +4,23 @@
       "frontend.js",
       "index.jsx.css"
     ],
-    "measuredGzipBytes": 46606,
+    "measuredGzipBytes": 49392,
     "limitGzipBytes": 50861,
-    "note": "Limit is the 2.6.0 size plus 10 percent (46237 * 1.1) and is kept as is. The 2.7.0 move of picture choice, multi upload, advanced logic and analytics to Pro shrank the bundle to 46606 (47493 measured at 2.6.1).",
+    "note": "Limit is the 2.6.0 size plus 10 percent (46237 * 1.1) and is kept as is. The 2.7.0 move of picture choice, multi upload, advanced logic and analytics to Pro shrank the bundle to 46606 (47493 measured at 2.6.1). 2.9.0: the picker styles moved out of index.jsx.css into picker.css and the date limit checks moved into the date file, so the base is 49392.",
     "mustNotContain": [
       "Afghanistan"
     ],
     "why": {
       "Afghanistan": "the country list belongs in the phone and country field file, which only forms with those fields download."
     }
+  },
+  "picker": {
+    "files": [
+      "picker.css"
+    ],
+    "measuredGzipBytes": 2391,
+    "limitGzipBytes": 3000,
+    "withBaseLimitGzipBytes": 52500,
+    "note": "2.9.0: picker.css is loaded only for forms with a dropdown, country, address, date or time field. A form with a picker downloads the base bundle plus this file, so the two together are held to withBaseLimitGzipBytes (the 2.8 base of 50318 plus 2.9 picker polish)."
   }
 }

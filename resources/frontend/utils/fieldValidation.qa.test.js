@@ -1,5 +1,9 @@
 import { validateField } from './fieldValidation';
 import { collectDefaultValues } from './defaults';
+import { loadGroup } from '../components/fields/lazyFields';
+
+// A form with a date field has the date file downloaded before it is validated.
+beforeAll(() => loadGroup('date'));
 
 describe('QA validation parity', () => {
   const date = {

@@ -24,6 +24,9 @@ import { CalendarIcon, ChevronIcon, ClockIcon, CloseIcon } from './PickerIcons';
 import { useMenu } from './useMenu';
 import { moveDate, moveIndex } from '../../../shared/pickerKeyboard';
 
+// The date limit checks live here so the main bundle does not carry them.
+export { dateLimitMessage, timeLimitMessage } from '../../../shared/dateLimits';
+
 /** Two letters of each weekday in the site language, starting on the week's first day. */
 function weekdayLabels(weekStartsOn, locale) {
   const sunday = new Date(2024, 0, 7);

@@ -19,7 +19,6 @@ import { hasParts, missingParts } from '../../shared/compositeParts';
 import { chainedSelectLevels, firstUnansweredChainedLevel } from '../../shared/chainedOptions';
 import { isValidInternational } from '../../shared/phoneDial';
 import { loadedGroup } from '../components/fields/lazyFields';
-import { dateLimitMessage, timeLimitMessage } from '../../shared/dateLimits';
 
 export const COMPOSITE_FIELD_TYPES = new Set(['name_group', 'address_group', 'address']);
 
@@ -362,18 +361,17 @@ function rawValidateField(field, value, defaults = {}) {
     return __('Please enter a colour as a hex value, such as #336699.', 'subtleforms');
   }
   // The limits of a date or time (DateRules::dateMessage and timeMessage).
-  if ((type === 'date' || type === 'datetime') && typeof value === 'string') {
-    const [datePart, timePart] = value.split(/[T ]/, 2);
-    const message = (isIsoDate(datePart) ? dateLimitMessage(datePart, config, type) : '')
-      || (type === 'datetime' && timePart !== undefined ? timeLimitMessage(timePart, config, type) : '');
-    if (message) {
-      return message;
-    }
-  }
-  if (type === 'time' && typeof value === 'string') {
-    const message = timeLimitMessage(value, config, 'time');
-    if (message) {
-      return message;
+  // Their code is in the date file, which a form with these fields has
+  // downloaded; the server checks the same rules.
+  if (['date', 'time', 'datetime'].includes(type) && typeof value === 'string') {
+    const limits = loadedGroup('date');
+    if (limits) {
+      const [datePart, timePart] = type === 'time' ? ['', value] : value.split(/[T ]/, 2);
+      const message = (isIsoDate(datePart) ? limits.dateLimitMessage(datePart, config, type) : '')
+        || (type !== 'date' && timePart !== undefined ? limits.timeLimitMessage(timePart, config, type) : '');
+      if (message) {
+        return message;
+      }
     }
   }
 
