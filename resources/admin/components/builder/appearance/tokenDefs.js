@@ -182,7 +182,7 @@ export const GROUPS = [
     id: 'choices',
     title: __( 'Choices (radio, checkbox, toggle)', 'subtleforms' ),
     controls: [
-      { key: 'choiceAccent', type: 'color', label: __( 'Accent colour', 'subtleforms' ) },
+      { key: 'choiceAccent', type: 'color', label: __( 'Choice accent', 'subtleforms' ) },
       { key: 'choiceSize', type: 'size', label: __( 'Size', 'subtleforms' ), units: [ 'px' ], advanced: true },
     ],
   },

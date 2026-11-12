@@ -201,7 +201,7 @@ export const FORM_PRESETS = [
     label: 'Clean',
     description: 'The plugin defaults. Neutral outlined fields and a solid button.',
     swatch: ['#4f5bd5', '#131417', '#ffffff'],
-    tokens: { labelWeight: '500', radius: '6px', borderWidth: '1px' },
+    tokens: { colorSurface: '#ffffff', labelWeight: '500', radius: '6px', borderWidth: '1px' },
     variants: { input: 'outlined', button: 'solid', buttonAlign: 'left' },
   },
   {

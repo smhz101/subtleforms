@@ -65,12 +65,21 @@
 		}
 	}
 
+	&__tools {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--sf-space-4);
+	}
+
+	// The panel scrolls inside its own column (header, tabs and footer stay),
+	// and the canvas scrolls beside it.
 	&__body {
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) 22rem;
+		grid-template-rows: minmax(0, 1fr);
 		flex: 1 1 auto;
 		min-height: 0;
-		overflow-y: auto;
+		overflow: hidden;
 
 		&.is-controls-hidden {
 			grid-template-columns: minmax(0, 1fr);
@@ -79,7 +88,8 @@
 
 	&__canvas {
 		min-width: 0;
-		overflow: visible;
+		min-height: 0;
+		overflow: auto;
 		padding: var(--sf-space-8) var(--sf-space-6);
 	}
 
@@ -101,6 +111,15 @@
 		border-radius: 0;
 		box-shadow: none;
 		padding: 0;
+
+		// The page around the form: Light or Dark (never the form's own look).
+		&.is-light {
+			background: #ffffff;
+		}
+
+		&.is-dark {
+			background: #1f1f1f;
+		}
 	}
 
 	&__form {
@@ -109,27 +128,15 @@
 		margin: 0;
 	}
 
+	// The Appearance panel fills the column; it scrolls inside.
 	&__controls {
+		display: flex;
+		flex-direction: column;
 		min-width: 0;
-		overflow: visible;
-		padding: var(--sf-space-6);
+		min-height: 0;
+		overflow: hidden;
 		background: var(--sf-bg-surface);
 		border-left: 1px solid var(--sf-border);
-	}
-
-	&__controls-title {
-		margin: 0 0 var(--sf-space-1);
-		font-size: var(--sf-text-md);
-		line-height: var(--sf-leading-tight);
-		font-weight: var(--sf-weight-semibold);
-		color: var(--sf-text);
-	}
-
-	&__controls-hint {
-		margin: 0 0 var(--sf-space-5);
-		font-size: var(--sf-text-xs);
-		line-height: var(--sf-leading-normal);
-		color: var(--sf-text-muted);
 	}
 }
 
@@ -148,5 +155,6 @@
 	.sf-preview-workspace__controls {
 		border-left: 0;
 		border-bottom: 1px solid var(--sf-border);
+		height: 70vh;
 	}
 }

@@ -24,6 +24,36 @@ export function readInspectorTab() {
 	}
 }
 
+/**
+ * A remembered tab for any set of tabs, for panels other than the field panel.
+ *
+ * @param {string}   storageKey localStorage key.
+ * @param {string[]} ids        Tab ids; the first is the default.
+ * @return {[string, Function]} The active tab and a setter that remembers it.
+ */
+export function useStoredTab( storageKey, ids ) {
+	const [ tab, setTab ] = useState( () => {
+		try {
+			const saved = window.localStorage.getItem( storageKey );
+			return ids.includes( saved ) ? saved : ids[ 0 ];
+		} catch ( e ) {
+			return ids[ 0 ];
+		}
+	} );
+	const set = useCallback(
+		( next ) => {
+			setTab( next );
+			try {
+				window.localStorage.setItem( storageKey, next );
+			} catch ( e ) {
+				// Storage is blocked: the tab still switches.
+			}
+		},
+		[ storageKey ]
+	);
+	return [ tab, set ];
+}
+
 /** @return {[string, Function]} The active tab and a setter that remembers it. */
 export function useInspectorTab() {
 	const [ tab, setTab ] = useState( readInspectorTab );
@@ -43,21 +73,24 @@ export function useInspectorTab() {
  * @param {string}   props.tab      Active tab id.
  * @param {Function} props.onChange Called with the new tab id.
  * @param {string}   props.idBase   Prefix for the tab and panel ids.
+ * @param {Array}    props.items    [{ id, label, icon }]: other tabs than the field panel's two.
+ * @param {string}   props.ariaLabel Name of the tab list.
  */
-export default function InspectorTabs( { tab, onChange, idBase } ) {
+export default function InspectorTabs( { tab, onChange, idBase, items: custom, ariaLabel } ) {
 	const listRef = useRef( null );
-	const items = [
+	const items = custom || [
 		{ id: 'settings', label: __( 'Field settings', 'subtleforms' ), icon: <GearGlyph /> },
 		{ id: 'styles', label: __( 'Field styles', 'subtleforms' ), icon: <ContrastGlyph /> },
 	];
+	const ids = items.map( ( item ) => item.id );
 
 	const onKeyDown = ( event ) => {
-		const index = TABS.indexOf( tab );
+		const index = ids.indexOf( tab );
 		let next = null;
-		if ( event.key === 'ArrowRight' ) next = TABS[ ( index + 1 ) % TABS.length ];
-		if ( event.key === 'ArrowLeft' ) next = TABS[ ( index + TABS.length - 1 ) % TABS.length ];
-		if ( event.key === 'Home' ) next = TABS[ 0 ];
-		if ( event.key === 'End' ) next = TABS[ TABS.length - 1 ];
+		if ( event.key === 'ArrowRight' ) next = ids[ ( index + 1 ) % ids.length ];
+		if ( event.key === 'ArrowLeft' ) next = ids[ ( index + ids.length - 1 ) % ids.length ];
+		if ( event.key === 'Home' ) next = ids[ 0 ];
+		if ( event.key === 'End' ) next = ids[ ids.length - 1 ];
 		if ( ! next ) {
 			return;
 		}
@@ -70,7 +103,7 @@ export default function InspectorTabs( { tab, onChange, idBase } ) {
 		<div
 			className="sf-itabs"
 			role="tablist"
-			aria-label={ __( 'Settings sections', 'subtleforms' ) }
+			aria-label={ ariaLabel || __( 'Settings sections', 'subtleforms' ) }
 			ref={ listRef }
 			onKeyDown={ onKeyDown }
 		>
