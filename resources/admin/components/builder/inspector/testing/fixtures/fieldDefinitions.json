@@ -1,0 +1,1600 @@
+{
+ "text": {
+  "type": "text",
+  "label": "Text",
+  "category": "basic",
+  "icon": "dashicons-text",
+  "kind": "input",
+  "acceptsChildren": false,
+  "baseAttributes": {
+   "id": null,
+   "key": null,
+   "type": "text",
+   "label": "",
+   "required": false,
+   "defaultValue": null,
+   "visibility": null,
+   "validation": []
+  },
+  "fieldSpecificAttributes": {
+   "placeholder": "",
+   "maxLength": null
+  },
+  "inspectorControls": [
+   {
+    "type": "text",
+    "name": "label",
+    "label": "Label",
+    "section": "general"
+   },
+   {
+    "type": "text",
+    "name": "placeholder",
+    "label": "Placeholder",
+    "section": "appearance"
+   },
+   {
+    "type": "number",
+    "name": "maxLength",
+    "label": "Max Length",
+    "section": "validation"
+   },
+   {
+    "type": "textarea",
+    "name": "description",
+    "label": "Help text",
+    "help": "Shown under the field to guide the visitor.",
+    "rows": 2,
+    "section": "general"
+   },
+   {
+    "type": "select",
+    "name": "labelVisibility",
+    "label": "Field label visibility",
+    "options": [
+     {
+      "value": "",
+      "label": "Form default"
+     },
+     {
+      "value": "visible",
+      "label": "Visible (top aligned)"
+     },
+     {
+      "value": "hidden",
+      "label": "Hidden (kept for screen readers)"
+     }
+    ],
+    "section": "appearance"
+   },
+   {
+    "type": "select",
+    "name": "descriptionPlacement",
+    "label": "Help text placement",
+    "options": [
+     {
+      "value": "",
+      "label": "Form default"
+     },
+     {
+      "value": "below",
+      "label": "Below input"
+     },
+     {
+      "value": "above",
+      "label": "Above input"
+     }
+    ],
+    "section": "appearance"
+   },
+   {
+    "type": "text",
+    "name": "defaultValue",
+    "label": "Default value",
+    "help": "Prefilled when the form loads. Supports {user_email}, {user_name}, {date} and {get:param}.",
+    "section": "appearance"
+   },
+   {
+    "type": "text",
+    "name": "prefix",
+    "label": "Prefix",
+    "placeholder": "$",
+    "section": "appearance"
+   },
+   {
+    "type": "text",
+    "name": "suffix",
+    "label": "Suffix",
+    "placeholder": "kg",
+    "section": "appearance"
+   },
+   {
+    "type": "number",
+    "name": "minLength",
+    "label": "Minimum characters",
+    "min": 0,
+    "section": "validation"
+   },
+   {
+    "type": "text",
+    "name": "pattern",
+    "label": "Pattern (regular expression)",
+    "placeholder": "^[A-Z]{2}[0-9]{4}$",
+    "section": "validation"
+   },
+   {
+    "type": "select",
+    "name": "inputMask",
+    "label": "Input mask",
+    "help": "Formats the answer as the visitor types.",
+    "options": [
+     {
+      "value": "",
+      "label": "None"
+     },
+     {
+      "value": "phone",
+      "label": "Phone"
+     },
+     {
+      "value": "date_dmy",
+      "label": "Date DD/MM/YYYY"
+     },
+     {
+      "value": "date_mdy",
+      "label": "Date MM/DD/YYYY"
+     },
+     {
+      "value": "date_ymd",
+      "label": "Date YYYY-MM-DD"
+     },
+     {
+      "value": "time_24",
+      "label": "Time HH:MM (24-hour)"
+     },
+     {
+      "value": "zip_us",
+      "label": "Postcode or ZIP (US)"
+     },
+     {
+      "value": "custom",
+      "label": "Custom"
+     }
+    ],
+    "section": "validation"
+   },
+   {
+    "type": "text",
+    "name": "maskPattern",
+    "label": "Pattern",
+    "help": "9 is a digit, A is a letter, * is a letter or digit. Anything else is typed for the visitor, for example AA-9999.",
+    "placeholder": "AA-9999",
+    "section": "validation",
+    "showWhen": {
+     "inputMask": [
+      "custom"
+     ]
+    }
+   },
+   {
+    "type": "mask_try",
+    "name": "maskTry",
+    "label": "Try it",
+    "section": "validation",
+    "showWhen": {
+     "inputMask": [
+      "phone",
+      "date_dmy",
+      "date_mdy",
+      "date_ymd",
+      "time_24",
+      "zip_us",
+      "custom"
+     ]
+    }
+   },
+   {
+    "type": "select",
+    "name": "maskStore",
+    "label": "Save as",
+    "help": "Digits only removes the dashes, spaces and brackets the mask adds before the answer is saved.",
+    "options": [
+     {
+      "value": "typed",
+      "label": "Save as typed"
+     },
+     {
+      "value": "digits",
+      "label": "Save digits only"
+     }
+    ],
+    "section": "validation",
+    "showWhen": {
+     "inputMask": [
+      "phone",
+      "zip_us",
+      "custom"
+     ]
+    }
+   },
+   {
+    "type": "text",
+    "name": "requiredMessage",
+    "label": "Message when left empty",
+    "placeholder": "This field is required.",
+    "section": "validation"
+   },
+   {
+    "type": "text",
+    "name": "validationMessage",
+    "label": "Custom validation message",
+    "help": "Shown when the answer is not valid, for example a wrong email address, a number out of range or text that does not match the pattern. Leave empty for the standard message.",
+    "section": "validation"
+   },
+   {
+    "type": "text",
+    "name": "adminLabel",
+    "label": "Admin label",
+    "help": "Used in entries, emails, exports and integrations instead of the public label.",
+    "section": "advanced"
+   },
+   {
+    "type": "checkbox",
+    "name": "readOnly",
+    "label": "Read-only",
+    "help": "Visitors can see but not change the value.",
+    "section": "advanced"
+   },
+   {
+    "type": "text",
+    "name": "cssClass",
+    "label": "CSS class",
+    "placeholder": "my-field",
+    "section": "advanced"
+   }
+  ],
+  "meta": {
+   "category": "regular",
+   "order": 0,
+   "description": "Short answer on one line"
+  },
+  "layoutControls": [],
+  "paletteHidden": false,
+  "enabled": true
+ },
+ "dropdown": {
+  "type": "dropdown",
+  "label": "Dropdown",
+  "category": "choices",
+  "icon": "dashicons-arrow-down-alt2",
+  "kind": "input",
+  "acceptsChildren": false,
+  "baseAttributes": {
+   "id": null,
+   "key": null,
+   "type": "dropdown",
+   "label": "",
+   "required": false,
+   "defaultValue": null,
+   "visibility": null,
+   "validation": []
+  },
+  "fieldSpecificAttributes": {
+   "placeholder": "Select an option",
+   "options": [
+    {
+     "label": "First choice",
+     "value": "first"
+    },
+    {
+     "label": "Second choice",
+     "value": "second"
+    },
+    {
+     "label": "Third choice",
+     "value": "third"
+    }
+   ]
+  },
+  "inspectorControls": [
+   {
+    "type": "text",
+    "name": "label",
+    "label": "Label",
+    "section": "general"
+   },
+   {
+    "type": "text",
+    "name": "placeholder",
+    "label": "Placeholder",
+    "section": "appearance"
+   },
+   {
+    "type": "textarea",
+    "name": "description",
+    "label": "Help text",
+    "help": "Shown under the field to guide the visitor.",
+    "rows": 2,
+    "section": "general"
+   },
+   {
+    "type": "select",
+    "name": "labelVisibility",
+    "label": "Field label visibility",
+    "options": [
+     {
+      "value": "",
+      "label": "Form default"
+     },
+     {
+      "value": "visible",
+      "label": "Visible (top aligned)"
+     },
+     {
+      "value": "hidden",
+      "label": "Hidden (kept for screen readers)"
+     }
+    ],
+    "section": "appearance"
+   },
+   {
+    "type": "select",
+    "name": "descriptionPlacement",
+    "label": "Help text placement",
+    "options": [
+     {
+      "value": "",
+      "label": "Form default"
+     },
+     {
+      "value": "below",
+      "label": "Below input"
+     },
+     {
+      "value": "above",
+      "label": "Above input"
+     }
+    ],
+    "section": "appearance"
+   },
+   {
+    "type": "text",
+    "name": "defaultValue",
+    "label": "Default value",
+    "help": "Prefilled when the form loads. Supports {user_email}, {user_name}, {date} and {get:param}.",
+    "section": "appearance"
+   },
+   {
+    "type": "text",
+    "name": "requiredMessage",
+    "label": "Message when left empty",
+    "placeholder": "This field is required.",
+    "section": "validation"
+   },
+   {
+    "type": "text",
+    "name": "validationMessage",
+    "label": "Custom validation message",
+    "help": "Shown when the answer is not valid, for example a wrong email address, a number out of range or text that does not match the pattern. Leave empty for the standard message.",
+    "section": "validation"
+   },
+   {
+    "type": "text",
+    "name": "adminLabel",
+    "label": "Admin label",
+    "help": "Used in entries, emails, exports and integrations instead of the public label.",
+    "section": "advanced"
+   },
+   {
+    "type": "text",
+    "name": "cssClass",
+    "label": "CSS class",
+    "placeholder": "my-field",
+    "section": "advanced"
+   }
+  ],
+  "meta": {
+   "category": "regular",
+   "order": 100,
+   "description": "Pick one from a list"
+  },
+  "layoutControls": [],
+  "paletteHidden": false,
+  "enabled": true
+ },
+ "multiple_choice": {
+  "type": "multiple_choice",
+  "label": "Checkboxes",
+  "category": "choices",
+  "icon": "dashicons-list-view",
+  "kind": "input",
+  "acceptsChildren": false,
+  "baseAttributes": {
+   "id": null,
+   "key": null,
+   "type": "multiple_choice",
+   "label": "",
+   "required": false,
+   "defaultValue": null,
+   "visibility": null,
+   "validation": []
+  },
+  "fieldSpecificAttributes": {
+   "options": [
+    {
+     "label": "First choice",
+     "value": "first"
+    },
+    {
+     "label": "Second choice",
+     "value": "second"
+    },
+    {
+     "label": "Third choice",
+     "value": "third"
+    }
+   ],
+   "allowMultiple": true
+  },
+  "inspectorControls": [
+   {
+    "type": "text",
+    "name": "label",
+    "label": "Label",
+    "section": "general"
+   },
+   {
+    "type": "checkbox",
+    "name": "allowMultiple",
+    "label": "Allow Multiple",
+    "section": "appearance"
+   },
+   {
+    "type": "textarea",
+    "name": "description",
+    "label": "Help text",
+    "help": "Shown under the field to guide the visitor.",
+    "rows": 2,
+    "section": "general"
+   },
+   {
+    "type": "select",
+    "name": "labelVisibility",
+    "label": "Field label visibility",
+    "options": [
+     {
+      "value": "",
+      "label": "Form default"
+     },
+     {
+      "value": "visible",
+      "label": "Visible (top aligned)"
+     },
+     {
+      "value": "hidden",
+      "label": "Hidden (kept for screen readers)"
+     }
+    ],
+    "section": "appearance"
+   },
+   {
+    "type": "select",
+    "name": "descriptionPlacement",
+    "label": "Help text placement",
+    "options": [
+     {
+      "value": "",
+      "label": "Form default"
+     },
+     {
+      "value": "below",
+      "label": "Below input"
+     },
+     {
+      "value": "above",
+      "label": "Above input"
+     }
+    ],
+    "section": "appearance"
+   },
+   {
+    "type": "select",
+    "name": "optionLayout",
+    "label": "Layout",
+    "options": [
+     {
+      "value": "stacked",
+      "label": "Stacked"
+     },
+     {
+      "value": "inline",
+      "label": "Inline"
+     },
+     {
+      "value": "columns-2",
+      "label": "Two columns"
+     },
+     {
+      "value": "columns-3",
+      "label": "Three columns"
+     },
+     {
+      "value": "buttons",
+      "label": "Buttons"
+     }
+    ],
+    "section": "appearance"
+   },
+   {
+    "type": "number",
+    "name": "minChoices",
+    "label": "Minimum selections",
+    "min": 0,
+    "section": "validation"
+   },
+   {
+    "type": "number",
+    "name": "maxChoices",
+    "label": "Maximum selections",
+    "min": 0,
+    "section": "validation"
+   },
+   {
+    "type": "text",
+    "name": "requiredMessage",
+    "label": "Message when left empty",
+    "placeholder": "This field is required.",
+    "section": "validation"
+   },
+   {
+    "type": "text",
+    "name": "validationMessage",
+    "label": "Custom validation message",
+    "help": "Shown when the answer is not valid, for example a wrong email address, a number out of range or text that does not match the pattern. Leave empty for the standard message.",
+    "section": "validation"
+   },
+   {
+    "type": "text",
+    "name": "adminLabel",
+    "label": "Admin label",
+    "help": "Used in entries, emails, exports and integrations instead of the public label.",
+    "section": "advanced"
+   },
+   {
+    "type": "text",
+    "name": "cssClass",
+    "label": "CSS class",
+    "placeholder": "my-field",
+    "section": "advanced"
+   }
+  ],
+  "meta": {
+   "category": "regular",
+   "order": 102,
+   "description": "Pick any number of options"
+  },
+  "layoutControls": [],
+  "paletteHidden": false,
+  "enabled": true
+ },
+ "address_group": {
+  "type": "address_group",
+  "label": "Address",
+  "category": "basic",
+  "icon": "dashicons-location",
+  "kind": "input",
+  "acceptsChildren": false,
+  "baseAttributes": {
+   "id": null,
+   "key": null,
+   "type": "address_group",
+   "label": "",
+   "required": false,
+   "defaultValue": null,
+   "visibility": null,
+   "validation": []
+  },
+  "fieldSpecificAttributes": {
+   "fields": {
+    "street": {
+     "enabled": true,
+     "label": "Street Address",
+     "placeholder": ""
+    },
+    "street2": {
+     "enabled": false,
+     "label": "Street Address Line 2",
+     "placeholder": "Apt, Suite, etc."
+    },
+    "city": {
+     "enabled": true,
+     "label": "City",
+     "placeholder": ""
+    },
+    "state": {
+     "enabled": true,
+     "label": "State / Province",
+     "placeholder": ""
+    },
+    "postal": {
+     "enabled": true,
+     "label": "Postal Code",
+     "placeholder": ""
+    },
+    "country": {
+     "enabled": true,
+     "label": "Country",
+     "placeholder": ""
+    }
+   }
+  },
+  "inspectorControls": [
+   {
+    "type": "text",
+    "name": "label",
+    "label": "Label",
+    "section": "general"
+   },
+   {
+    "type": "subfield",
+    "name": "fields",
+    "subfields": [
+     {
+      "key": "street",
+      "label": "Street Address",
+      "toggleable": false
+     },
+     {
+      "key": "street2",
+      "label": "Street Address Line 2",
+      "toggleable": true
+     },
+     {
+      "key": "city",
+      "label": "City",
+      "toggleable": false
+     },
+     {
+      "key": "state",
+      "label": "State / Province",
+      "toggleable": true
+     },
+     {
+      "key": "postal",
+      "label": "Postal Code",
+      "toggleable": true
+     },
+     {
+      "key": "country",
+      "label": "Country",
+      "toggleable": true
+     }
+    ],
+    "section": "appearance"
+   },
+   {
+    "type": "textarea",
+    "name": "description",
+    "label": "Help text",
+    "help": "Shown under the field to guide the visitor.",
+    "rows": 2,
+    "section": "general"
+   },
+   {
+    "type": "select",
+    "name": "labelVisibility",
+    "label": "Field label visibility",
+    "options": [
+     {
+      "value": "",
+      "label": "Form default"
+     },
+     {
+      "value": "visible",
+      "label": "Visible (top aligned)"
+     },
+     {
+      "value": "hidden",
+      "label": "Hidden (kept for screen readers)"
+     }
+    ],
+    "section": "appearance"
+   },
+   {
+    "type": "select",
+    "name": "descriptionPlacement",
+    "label": "Help text placement",
+    "options": [
+     {
+      "value": "",
+      "label": "Form default"
+     },
+     {
+      "value": "below",
+      "label": "Below input"
+     },
+     {
+      "value": "above",
+      "label": "Above input"
+     }
+    ],
+    "section": "appearance"
+   },
+   {
+    "type": "text",
+    "name": "requiredMessage",
+    "label": "Message when left empty",
+    "placeholder": "This field is required.",
+    "section": "validation"
+   },
+   {
+    "type": "text",
+    "name": "validationMessage",
+    "label": "Custom validation message",
+    "help": "Shown when the answer is not valid, for example a wrong email address, a number out of range or text that does not match the pattern. Leave empty for the standard message.",
+    "section": "validation"
+   },
+   {
+    "type": "text",
+    "name": "adminLabel",
+    "label": "Admin label",
+    "help": "Used in entries, emails, exports and integrations instead of the public label.",
+    "section": "advanced"
+   },
+   {
+    "type": "text",
+    "name": "cssClass",
+    "label": "CSS class",
+    "placeholder": "my-field",
+    "section": "advanced"
+   }
+  ],
+  "meta": {
+   "category": "composite",
+   "order": 7,
+   "description": "Street, city, region and country"
+  },
+  "layoutControls": [],
+  "paletteHidden": false,
+  "enabled": true
+ },
+ "name_group": {
+  "type": "name_group",
+  "label": "Name",
+  "category": "basic",
+  "icon": "dashicons-admin-users",
+  "kind": "input",
+  "acceptsChildren": false,
+  "baseAttributes": {
+   "id": null,
+   "key": null,
+   "type": "name_group",
+   "label": "",
+   "required": false,
+   "defaultValue": null,
+   "visibility": null,
+   "validation": []
+  },
+  "fieldSpecificAttributes": {
+   "fields": {
+    "first_name": {
+     "enabled": true,
+     "label": "First Name",
+     "placeholder": ""
+    },
+    "last_name": {
+     "enabled": true,
+     "label": "Last Name",
+     "placeholder": ""
+    },
+    "middle_name": {
+     "enabled": false,
+     "label": "Middle Name",
+     "placeholder": ""
+    },
+    "suffix": {
+     "enabled": false,
+     "label": "Suffix",
+     "placeholder": ""
+    }
+   }
+  },
+  "inspectorControls": [
+   {
+    "type": "text",
+    "name": "label",
+    "label": "Label",
+    "section": "general"
+   },
+   {
+    "type": "subfield",
+    "name": "fields",
+    "subfields": [
+     {
+      "key": "first_name",
+      "label": "First Name",
+      "toggleable": false
+     },
+     {
+      "key": "last_name",
+      "label": "Last Name",
+      "toggleable": false
+     },
+     {
+      "key": "middle_name",
+      "label": "Middle Name",
+      "toggleable": true
+     },
+     {
+      "key": "suffix",
+      "label": "Suffix",
+      "toggleable": true
+     }
+    ],
+    "section": "appearance"
+   },
+   {
+    "type": "textarea",
+    "name": "description",
+    "label": "Help text",
+    "help": "Shown under the field to guide the visitor.",
+    "rows": 2,
+    "section": "general"
+   },
+   {
+    "type": "select",
+    "name": "labelVisibility",
+    "label": "Field label visibility",
+    "options": [
+     {
+      "value": "",
+      "label": "Form default"
+     },
+     {
+      "value": "visible",
+      "label": "Visible (top aligned)"
+     },
+     {
+      "value": "hidden",
+      "label": "Hidden (kept for screen readers)"
+     }
+    ],
+    "section": "appearance"
+   },
+   {
+    "type": "select",
+    "name": "descriptionPlacement",
+    "label": "Help text placement",
+    "options": [
+     {
+      "value": "",
+      "label": "Form default"
+     },
+     {
+      "value": "below",
+      "label": "Below input"
+     },
+     {
+      "value": "above",
+      "label": "Above input"
+     }
+    ],
+    "section": "appearance"
+   },
+   {
+    "type": "text",
+    "name": "requiredMessage",
+    "label": "Message when left empty",
+    "placeholder": "This field is required.",
+    "section": "validation"
+   },
+   {
+    "type": "text",
+    "name": "validationMessage",
+    "label": "Custom validation message",
+    "help": "Shown when the answer is not valid, for example a wrong email address, a number out of range or text that does not match the pattern. Leave empty for the standard message.",
+    "section": "validation"
+   },
+   {
+    "type": "text",
+    "name": "adminLabel",
+    "label": "Admin label",
+    "help": "Used in entries, emails, exports and integrations instead of the public label.",
+    "section": "advanced"
+   },
+   {
+    "type": "text",
+    "name": "cssClass",
+    "label": "CSS class",
+    "placeholder": "my-field",
+    "section": "advanced"
+   }
+  ],
+  "meta": {
+   "category": "composite",
+   "order": 6,
+   "description": "First, middle and last name"
+  },
+  "layoutControls": [],
+  "paletteHidden": false,
+  "enabled": true
+ },
+ "repeat_container": {
+  "type": "repeat_container",
+  "label": "Repeater",
+  "category": "layout",
+  "icon": "controls-repeat",
+  "kind": "structure",
+  "acceptsChildren": true,
+  "baseAttributes": {
+   "id": null,
+   "key": null,
+   "type": "repeat_container",
+   "label": "",
+   "required": false,
+   "defaultValue": null,
+   "visibility": null,
+   "validation": []
+  },
+  "fieldSpecificAttributes": {
+   "min": 1,
+   "max": 5,
+   "buttonLabel": "Add New",
+   "spacing": 16
+  },
+  "inspectorControls": [
+   {
+    "type": "text",
+    "name": "adminLabel",
+    "label": "Admin label",
+    "help": "Used in entries, emails, exports and integrations instead of the public label.",
+    "section": "advanced"
+   },
+   {
+    "type": "text",
+    "name": "cssClass",
+    "label": "CSS class",
+    "placeholder": "my-field",
+    "section": "advanced"
+   }
+  ],
+  "meta": {
+   "category": "layout",
+   "order": 408,
+   "description": "Let visitors add rows"
+  },
+  "layoutControls": [
+   {
+    "type": "text",
+    "name": "label",
+    "label": "Label",
+    "section": "general"
+   },
+   {
+    "type": "textarea",
+    "name": "description",
+    "label": "Help text",
+    "help": "Shown once above the groups visitors add.",
+    "rows": 2,
+    "section": "general"
+   },
+   {
+    "type": "select",
+    "name": "labelVisibility",
+    "label": "Field label visibility",
+    "options": [
+     {
+      "value": "",
+      "label": "Form default"
+     },
+     {
+      "value": "visible",
+      "label": "Visible (top aligned)"
+     },
+     {
+      "value": "hidden",
+      "label": "Hidden (kept for screen readers)"
+     }
+    ],
+    "section": "appearance"
+   },
+   {
+    "type": "number",
+    "name": "min",
+    "label": "Min Repeats",
+    "section": "appearance"
+   },
+   {
+    "type": "number",
+    "name": "max",
+    "label": "Max Repeats",
+    "section": "appearance"
+   },
+   {
+    "type": "text",
+    "name": "buttonLabel",
+    "label": "Button Label",
+    "section": "appearance"
+   },
+   {
+    "type": "number",
+    "name": "spacing",
+    "label": "Spacing (px)",
+    "section": "appearance"
+   }
+  ],
+  "paletteHidden": false,
+  "enabled": true
+ },
+ "step": {
+  "type": "step",
+  "label": "Page Break",
+  "category": "layout",
+  "icon": "dashicons-media-document",
+  "kind": "structure",
+  "acceptsChildren": true,
+  "baseAttributes": {
+   "id": null,
+   "key": null,
+   "type": "step",
+   "label": "",
+   "required": false,
+   "defaultValue": null,
+   "visibility": null,
+   "validation": []
+  },
+  "fieldSpecificAttributes": {
+   "title": "Step",
+   "description": ""
+  },
+  "inspectorControls": [],
+  "meta": {
+   "category": "layout",
+   "order": 403,
+   "description": "Split the form into pages"
+  },
+  "layoutControls": [
+   {
+    "type": "text",
+    "name": "title",
+    "label": "Title",
+    "section": "general"
+   },
+   {
+    "type": "textarea",
+    "name": "description",
+    "label": "Description",
+    "section": "general"
+   }
+  ],
+  "paletteHidden": false,
+  "enabled": true
+ },
+ "html": {
+  "type": "html",
+  "label": "Custom HTML",
+  "category": "layout",
+  "icon": "dashicons-editor-code",
+  "kind": "structure",
+  "acceptsChildren": false,
+  "baseAttributes": {
+   "id": null,
+   "key": null,
+   "type": "html",
+   "label": "",
+   "required": false,
+   "defaultValue": null,
+   "visibility": null,
+   "validation": []
+  },
+  "fieldSpecificAttributes": {
+   "content": ""
+  },
+  "inspectorControls": [
+   {
+    "type": "textarea",
+    "name": "content",
+    "label": "HTML Content",
+    "section": "appearance"
+   },
+   {
+    "type": "text",
+    "name": "cssClass",
+    "label": "CSS class",
+    "placeholder": "my-field",
+    "section": "advanced"
+   }
+  ],
+  "meta": {
+   "category": "regular",
+   "order": 401,
+   "description": "Any HTML content"
+  },
+  "layoutControls": [],
+  "paletteHidden": false,
+  "enabled": true
+ },
+ "hidden": {
+  "type": "hidden",
+  "label": "Hidden",
+  "category": "advanced",
+  "icon": "dashicons-hidden",
+  "kind": "input",
+  "acceptsChildren": false,
+  "baseAttributes": {
+   "id": null,
+   "key": null,
+   "type": "hidden",
+   "label": "",
+   "required": false,
+   "defaultValue": null,
+   "visibility": null,
+   "validation": []
+  },
+  "fieldSpecificAttributes": {
+   "value": ""
+  },
+  "inspectorControls": [
+   {
+    "type": "text",
+    "name": "label",
+    "label": "Label",
+    "section": "general",
+    "help": "Names this field in the builder. Visitors never see it."
+   },
+   {
+    "type": "text",
+    "name": "value",
+    "label": "Value",
+    "help": "Sent with the entry to notifications and integrations. Visitors never see it. Supports {user_email}, {user_name}, {date} and {get:param}.",
+    "section": "general"
+   },
+   {
+    "type": "text",
+    "name": "adminLabel",
+    "label": "Admin label",
+    "help": "Used in entries, emails, exports and integrations instead of the public label.",
+    "section": "advanced"
+   },
+   {
+    "type": "text",
+    "name": "cssClass",
+    "label": "CSS class",
+    "placeholder": "my-field",
+    "section": "advanced"
+   }
+  ],
+  "meta": {
+   "category": "system",
+   "order": 212,
+   "description": "A value visitors never see, for tracking"
+  },
+  "layoutControls": [],
+  "paletteHidden": false,
+  "enabled": true
+ },
+ "radio": {
+  "type": "radio",
+  "label": "Radio Buttons",
+  "category": "choices",
+  "icon": "dashicons-marker",
+  "kind": "input",
+  "acceptsChildren": false,
+  "baseAttributes": {
+   "id": null,
+   "key": null,
+   "type": "radio",
+   "label": "",
+   "required": false,
+   "defaultValue": null,
+   "visibility": null,
+   "validation": []
+  },
+  "fieldSpecificAttributes": {
+   "options": [
+    {
+     "label": "First choice",
+     "value": "first"
+    },
+    {
+     "label": "Second choice",
+     "value": "second"
+    },
+    {
+     "label": "Third choice",
+     "value": "third"
+    }
+   ]
+  },
+  "inspectorControls": [
+   {
+    "type": "text",
+    "name": "label",
+    "label": "Label",
+    "section": "general"
+   },
+   {
+    "type": "textarea",
+    "name": "description",
+    "label": "Help text",
+    "help": "Shown under the field to guide the visitor.",
+    "rows": 2,
+    "section": "general"
+   },
+   {
+    "type": "select",
+    "name": "labelVisibility",
+    "label": "Field label visibility",
+    "options": [
+     {
+      "value": "",
+      "label": "Form default"
+     },
+     {
+      "value": "visible",
+      "label": "Visible (top aligned)"
+     },
+     {
+      "value": "hidden",
+      "label": "Hidden (kept for screen readers)"
+     }
+    ],
+    "section": "appearance"
+   },
+   {
+    "type": "select",
+    "name": "descriptionPlacement",
+    "label": "Help text placement",
+    "options": [
+     {
+      "value": "",
+      "label": "Form default"
+     },
+     {
+      "value": "below",
+      "label": "Below input"
+     },
+     {
+      "value": "above",
+      "label": "Above input"
+     }
+    ],
+    "section": "appearance"
+   },
+   {
+    "type": "text",
+    "name": "defaultValue",
+    "label": "Default value",
+    "help": "Prefilled when the form loads. Supports {user_email}, {user_name}, {date} and {get:param}.",
+    "section": "appearance"
+   },
+   {
+    "type": "select",
+    "name": "optionLayout",
+    "label": "Layout",
+    "options": [
+     {
+      "value": "stacked",
+      "label": "Stacked"
+     },
+     {
+      "value": "inline",
+      "label": "Inline"
+     },
+     {
+      "value": "columns-2",
+      "label": "Two columns"
+     },
+     {
+      "value": "columns-3",
+      "label": "Three columns"
+     },
+     {
+      "value": "buttons",
+      "label": "Buttons"
+     }
+    ],
+    "section": "appearance"
+   },
+   {
+    "type": "text",
+    "name": "requiredMessage",
+    "label": "Message when left empty",
+    "placeholder": "This field is required.",
+    "section": "validation"
+   },
+   {
+    "type": "text",
+    "name": "validationMessage",
+    "label": "Custom validation message",
+    "help": "Shown when the answer is not valid, for example a wrong email address, a number out of range or text that does not match the pattern. Leave empty for the standard message.",
+    "section": "validation"
+   },
+   {
+    "type": "text",
+    "name": "adminLabel",
+    "label": "Admin label",
+    "help": "Used in entries, emails, exports and integrations instead of the public label.",
+    "section": "advanced"
+   },
+   {
+    "type": "text",
+    "name": "cssClass",
+    "label": "CSS class",
+    "placeholder": "my-field",
+    "section": "advanced"
+   }
+  ],
+  "meta": {
+   "category": "regular",
+   "order": 101,
+   "description": "Pick one, all options visible"
+  },
+  "layoutControls": [],
+  "paletteHidden": false,
+  "enabled": true
+ },
+ "number": {
+  "type": "number",
+  "label": "Number",
+  "category": "basic",
+  "icon": "dashicons-calculator",
+  "kind": "input",
+  "acceptsChildren": false,
+  "baseAttributes": {
+   "id": null,
+   "key": null,
+   "type": "number",
+   "label": "",
+   "required": false,
+   "defaultValue": null,
+   "visibility": null,
+   "validation": []
+  },
+  "fieldSpecificAttributes": {
+   "placeholder": "",
+   "min": null,
+   "max": null,
+   "step": 1
+  },
+  "inspectorControls": [
+   {
+    "type": "text",
+    "name": "label",
+    "label": "Label",
+    "section": "general"
+   },
+   {
+    "type": "text",
+    "name": "placeholder",
+    "label": "Placeholder",
+    "section": "appearance"
+   },
+   {
+    "type": "number",
+    "name": "min",
+    "label": "Minimum Value",
+    "section": "validation"
+   },
+   {
+    "type": "number",
+    "name": "max",
+    "label": "Maximum Value",
+    "section": "validation"
+   },
+   {
+    "type": "number",
+    "name": "step",
+    "label": "Step size",
+    "section": "appearance"
+   },
+   {
+    "type": "textarea",
+    "name": "description",
+    "label": "Help text",
+    "help": "Shown under the field to guide the visitor.",
+    "rows": 2,
+    "section": "general"
+   },
+   {
+    "type": "select",
+    "name": "labelVisibility",
+    "label": "Field label visibility",
+    "options": [
+     {
+      "value": "",
+      "label": "Form default"
+     },
+     {
+      "value": "visible",
+      "label": "Visible (top aligned)"
+     },
+     {
+      "value": "hidden",
+      "label": "Hidden (kept for screen readers)"
+     }
+    ],
+    "section": "appearance"
+   },
+   {
+    "type": "select",
+    "name": "descriptionPlacement",
+    "label": "Help text placement",
+    "options": [
+     {
+      "value": "",
+      "label": "Form default"
+     },
+     {
+      "value": "below",
+      "label": "Below input"
+     },
+     {
+      "value": "above",
+      "label": "Above input"
+     }
+    ],
+    "section": "appearance"
+   },
+   {
+    "type": "text",
+    "name": "defaultValue",
+    "label": "Default value",
+    "help": "Prefilled when the form loads. Supports {user_email}, {user_name}, {date} and {get:param}.",
+    "section": "appearance"
+   },
+   {
+    "type": "text",
+    "name": "prefix",
+    "label": "Prefix",
+    "placeholder": "$",
+    "section": "appearance"
+   },
+   {
+    "type": "text",
+    "name": "suffix",
+    "label": "Suffix",
+    "placeholder": "kg",
+    "section": "appearance"
+   },
+   {
+    "type": "select",
+    "name": "inputMask",
+    "label": "Input mask",
+    "help": "Formats the answer as the visitor types.",
+    "options": [
+     {
+      "value": "",
+      "label": "None"
+     },
+     {
+      "value": "phone",
+      "label": "Phone"
+     },
+     {
+      "value": "date_dmy",
+      "label": "Date DD/MM/YYYY"
+     },
+     {
+      "value": "date_mdy",
+      "label": "Date MM/DD/YYYY"
+     },
+     {
+      "value": "date_ymd",
+      "label": "Date YYYY-MM-DD"
+     },
+     {
+      "value": "time_24",
+      "label": "Time HH:MM (24-hour)"
+     },
+     {
+      "value": "zip_us",
+      "label": "Postcode or ZIP (US)"
+     },
+     {
+      "value": "custom",
+      "label": "Custom"
+     }
+    ],
+    "section": "validation"
+   },
+   {
+    "type": "text",
+    "name": "maskPattern",
+    "label": "Pattern",
+    "help": "9 is a digit, A is a letter, * is a letter or digit. Anything else is typed for the visitor, for example AA-9999.",
+    "placeholder": "AA-9999",
+    "section": "validation",
+    "showWhen": {
+     "inputMask": [
+      "custom"
+     ]
+    }
+   },
+   {
+    "type": "mask_try",
+    "name": "maskTry",
+    "label": "Try it",
+    "section": "validation",
+    "showWhen": {
+     "inputMask": [
+      "phone",
+      "date_dmy",
+      "date_mdy",
+      "date_ymd",
+      "time_24",
+      "zip_us",
+      "custom"
+     ]
+    }
+   },
+   {
+    "type": "select",
+    "name": "maskStore",
+    "label": "Save as",
+    "help": "Digits only removes the dashes, spaces and brackets the mask adds before the answer is saved.",
+    "options": [
+     {
+      "value": "typed",
+      "label": "Save as typed"
+     },
+     {
+      "value": "digits",
+      "label": "Save digits only"
+     }
+    ],
+    "section": "validation",
+    "showWhen": {
+     "inputMask": [
+      "phone",
+      "zip_us",
+      "custom"
+     ]
+    }
+   },
+   {
+    "type": "text",
+    "name": "requiredMessage",
+    "label": "Message when left empty",
+    "placeholder": "This field is required.",
+    "section": "validation"
+   },
+   {
+    "type": "text",
+    "name": "validationMessage",
+    "label": "Custom validation message",
+    "help": "Shown when the answer is not valid, for example a wrong email address, a number out of range or text that does not match the pattern. Leave empty for the standard message.",
+    "section": "validation"
+   },
+   {
+    "type": "text",
+    "name": "adminLabel",
+    "label": "Admin label",
+    "help": "Used in entries, emails, exports and integrations instead of the public label.",
+    "section": "advanced"
+   },
+   {
+    "type": "checkbox",
+    "name": "readOnly",
+    "label": "Read-only",
+    "help": "Visitors can see but not change the value.",
+    "section": "advanced"
+   },
+   {
+    "type": "text",
+    "name": "cssClass",
+    "label": "CSS class",
+    "placeholder": "my-field",
+    "section": "advanced"
+   }
+  ],
+  "meta": {
+   "category": "regular",
+   "order": 3,
+   "description": "Numbers with optional limits"
+  },
+  "layoutControls": [],
+  "paletteHidden": false,
+  "enabled": true
+ }
+}

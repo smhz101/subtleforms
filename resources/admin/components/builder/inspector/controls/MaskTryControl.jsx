@@ -3,20 +3,44 @@ import { BaseControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { MaskedInput, maskError, maskHint } from '../../../../../frontend/components/fields/maskField';
 import { resolveMask } from '../../../../../shared/inputMask';
+import PropertyRow, { useRowIds } from '../PropertyRow';
 
 /**
  * A small input that applies the field's mask as the author types, so the
  * setting can be tried before the form is published. Nothing typed here is
  * saved.
  */
-export default function MaskTryControl( { field, label } ) {
+export default function MaskTryControl( { field, label, layout } ) {
 	const [ text, setText ] = useState( '' );
+	const ids = useRowIds();
 	const mask = resolveMask( field );
 	if ( ! mask ) {
 		return null;
 	}
 	const message = text ? maskError( field, text ) : '';
 	const id = `sf-mask-try-${ field?.id || field?.key || 'field' }`;
+	if ( layout === 'row' ) {
+		return (
+			<PropertyRow className="sf-mask-try" label={ label || __( 'Try it', 'subtleforms' ) } ids={ { ...ids, id } } help={ maskHint( mask ) } stacked>
+				<MaskedInput
+					id={ id }
+					config={ field }
+					value={ text }
+					onChange={ setText }
+					showHint={ false }
+					className="sf-prow__input sf-mask-try__input"
+					autoComplete="off"
+					aria-invalid={ !! message || undefined }
+					describedBy={ message ? `${ ids.helpId } ${ id }-error` : ids.helpId }
+				/>
+				{ message ? (
+					<p className="sf-prow__note is-error" id={ `${ id }-error` } role="status">
+						{ message }
+					</p>
+				) : null }
+			</PropertyRow>
+		);
+	}
 	return (
 		<BaseControl
 			__nextHasNoMarginBottom

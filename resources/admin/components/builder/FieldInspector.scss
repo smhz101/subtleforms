@@ -1,25 +1,72 @@
 /**
- * Field inspector, right panel of the builder, styled like the block
- * editor's settings sidebar: header card, tabs, collapsible panels.
+ * Field inspector, the right panel of the builder, drawn like the WordPress
+ * block panel: a block card header, Settings and Styles icon tabs, sections
+ * with 48px headers, stacked labelled controls and inline rows.
+ *
+ * Type scale: 12/16 caption, 13/20 control text and row labels (the WP admin
+ * body size), 14/20 section titles, 16/24 the field name. Spacing: 4, 8, 12,
+ * 16, 24, 32. Radius 4 for controls, 8 for boxes. Motion: opacity and
+ * transform only.
  */
+
+$sf-ease: cubic-bezier(0.22, 1, 0.36, 1);
+$sf-focus: 2px solid var(--sf-brand);
+// The ink of every field label in the panel, uppercase or not.
+$sf-label-ink: #303030;
+$sf-row-tint: color-mix(in srgb, var(--sf-brand) 4%, transparent);
+
+// Visually hidden, still read by a screen reader.
+@mixin sf-sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
 
 .sf-field-inspector {
 	display: flex;
 	flex-direction: column;
-	min-height: 100%;
+	flex: 1 1 auto;
+	min-height: 0;
+	height: 100%;
 	background: var(--sf-bg-surface);
+	color: var(--sf-text);
+	font-size: 13px;
+	line-height: 20px;
 
-	// ── Header ───────────────────────────────────────────────────────────────
+	// ── Header: the block card ───────────────────────────────────────────────
+	// The header, the tabs and the footer sit outside the scrolling element, so
+	// their width never depends on how tall the content is: the notices and the
+	// sheet scroll in `__scroll`, which always keeps room for its scrollbar.
+	&__top {
+		flex: none;
+		background: var(--sf-bg-surface);
+	}
+
+	&__scroll {
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow-x: hidden;
+		overflow-y: auto;
+		scrollbar-gutter: stable;
+		scrollbar-width: thin;
+
+		@supports not (scrollbar-gutter: stable) {
+			overflow-y: scroll;
+		}
+	}
+
 	&__header {
-		position: sticky;
-		top: 0;
-		z-index: 10;
 		display: flex;
 		align-items: flex-start;
 		gap: 12px;
-		padding: 16px 12px 16px 16px;
+		padding: 16px 8px 16px 16px;
 		border-bottom: 1px solid var(--sf-border-subtle);
-		background: var(--sf-bg-surface);
 	}
 
 	&__type-icon {
@@ -27,10 +74,10 @@
 		align-items: center;
 		justify-content: center;
 		flex-shrink: 0;
-		width: 36px;
-		height: 36px;
-		border-radius: var(--sf-radius-md);
-		background: var(--sf-primary-50);
+		width: 24px;
+		height: 24px;
+		border-radius: var(--sf-radius-sm);
+		background: color-mix(in srgb, var(--sf-brand) 8%, #ffffff);
 		color: var(--sf-brand);
 
 		svg {
@@ -48,10 +95,31 @@
 	}
 
 	&__title {
-		font-size: var(--sf-text-sm);
+		max-width: 100%;
+		font-size: 16px;
 		font-weight: var(--sf-weight-semibold);
-		line-height: 1.4;
+		line-height: 24px;
 		color: var(--sf-text);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	&__description {
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		font-size: 13px;
+		line-height: 20px;
+		color: var(--sf-text-secondary);
+
+		// No description in the definition: the type name, as a caption.
+		&.is-fallback {
+			font-size: 12px;
+			line-height: 16px;
+			color: var(--sf-text-muted);
+		}
 	}
 
 	&__key {
@@ -59,20 +127,23 @@
 		align-items: center;
 		gap: 4px;
 		max-width: 100%;
-		height: 20px;
-		padding: 0 6px;
+		height: 24px;
+		padding: 0 8px;
 		border: 0;
 		border-radius: var(--sf-radius-sm);
 		background: var(--sf-bg-muted);
-		color: var(--sf-text-muted);
-		font-size: 11px;
+		color: var(--sf-text-secondary);
+		font-size: 12px;
 		cursor: pointer;
+		transition: background-color 200ms $sf-ease;
 
 		code {
 			overflow: hidden;
 			padding: 0;
 			background: transparent;
-			font-size: 11px;
+			font-family: var(--sf-font-mono);
+			font-size: 12px;
+			line-height: 16px;
 			color: inherit;
 			text-overflow: ellipsis;
 			white-space: nowrap;
@@ -84,12 +155,17 @@
 		}
 
 		&:hover {
+			background: var(--sf-border-subtle);
 			color: var(--sf-text);
 		}
 
+		&:active {
+			transform: translateY(1px);
+		}
+
 		&:focus-visible {
-			outline: none;
-			box-shadow: var(--sf-shadow-focus);
+			outline: $sf-focus;
+			outline-offset: 2px;
 		}
 	}
 
@@ -97,7 +173,6 @@
 		display: flex;
 		align-items: center;
 		gap: 0;
-		margin-top: 2px;
 
 		.components-button {
 			width: 32px;
@@ -106,6 +181,7 @@
 			padding: 0;
 			justify-content: center;
 			color: var(--sf-text-secondary);
+			transition: background-color 200ms $sf-ease, color 200ms $sf-ease;
 
 			svg {
 				width: 16px;
@@ -119,11 +195,22 @@
 			}
 
 			&:hover:not(:disabled) {
+				background: var(--sf-bg-muted);
 				color: var(--sf-text);
+			}
+
+			&:active:not(:disabled) svg {
+				transform: translateY(1px);
 			}
 
 			&.is-destructive:hover:not(:disabled) {
 				color: var(--sf-danger);
+			}
+
+			&:focus-visible {
+				outline: $sf-focus;
+				outline-offset: 2px;
+				box-shadow: none;
 			}
 		}
 	}
@@ -132,136 +219,80 @@
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
-		padding: 12px 16px 0;
+		padding: 16px 16px 0;
 
 		.components-notice {
 			margin: 0;
+			font-size: 13px;
 		}
 	}
 
-	// ── Tabs ─────────────────────────────────────────────────────────────────
-	&__tabs {
-		display: flex;
-		flex-direction: column;
+	// ── Sheet ────────────────────────────────────────────────────────────────
+	&__sheet {
 		flex: 1 1 auto;
-
-		.components-tab-panel__tabs {
-			position: sticky;
-			top: 69px;
-			z-index: 9;
-			display: flex;
-			padding: 0 8px;
-			border-bottom: 1px solid var(--sf-border-subtle);
-			background: var(--sf-bg-surface);
-		}
-
-		.components-tab-panel__tabs-item {
-			flex: 1 1 0;
-			height: 48px;
-			padding: 0 4px;
-			font-size: var(--sf-text-sm);
-			font-weight: var(--sf-weight-medium);
-			color: var(--sf-text-muted);
-
-			&.is-active {
-				color: var(--sf-text);
-			}
-
-			&:hover {
-				color: var(--sf-text);
-			}
-		}
+		padding: 0;
 	}
 
-	&__tab-label {
-		display: inline-flex;
-		align-items: center;
-		gap: 6px;
+	// The three quick rows: no title, 40px rows with a 16px leading icon.
+	&__quick {
+		padding: 8px 16px;
+		border-bottom: 1px solid var(--sf-border-subtle);
 	}
 
-	&__tab-dot {
-		width: 6px;
-		height: 6px;
-		border-radius: 50%;
-		background: var(--sf-warning);
-	}
-
-	&__tab-count {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		min-width: 16px;
-		height: 16px;
-		padding: 0 4px;
-		border-radius: 999px;
-		background: var(--sf-brand);
-		color: #fff;
-		font-size: 10px;
-		font-weight: var(--sf-weight-semibold);
-	}
-
-	&__tab-content {
-		.components-panel__body {
-			border-top: 0;
-			border-bottom: 1px solid var(--sf-border-subtle);
-
-			> .components-panel__body-title {
-				margin: 0;
-
-				.components-panel__body-toggle {
-					padding: 16px;
-					font-size: var(--sf-text-sm);
-					font-weight: var(--sf-weight-semibold);
-				}
-			}
-
-			&.is-opened {
-				padding: 0 16px 16px;
-
-				> .components-panel__body-title {
-					margin: 0 -16px;
-				}
-			}
-		}
-
-		.components-base-control {
-			margin-bottom: 16px;
-		}
-
-		.components-base-control__label,
-		.components-base-control .components-input-control__label {
-			font-size: 11px;
-			font-weight: var(--sf-weight-medium);
-			text-transform: uppercase;
-			letter-spacing: 0.02em;
-			color: var(--sf-text);
-		}
-
-		.components-toggle-control .components-base-control__field label {
-			text-transform: none;
-			letter-spacing: 0;
-			font-size: var(--sf-text-sm);
-		}
-
-		.components-base-control__help {
-			margin-top: 6px;
-			font-size: 12px;
-			color: var(--sf-text-muted);
-		}
-	}
-
-	&__pad {
-		padding: 16px;
-	}
-
+	// The sentence above the rules: a caption, 12px of air below it.
 	&__intro {
-		margin: 0 0 16px;
-		font-size: var(--sf-text-sm);
+		margin: 0 0 12px;
+		font-size: 12px;
+		line-height: 16px;
 		color: var(--sf-text-muted);
+	}
+
+	&__logic {
+		margin: 0;
+	}
+
+	// ── Footer ───────────────────────────────────────────────────────────────
+	&__footer {
+		flex: none;
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		height: 40px;
+		padding: 0 16px;
+		border-top: 1px solid var(--sf-border-subtle);
+		background: var(--sf-bg-surface);
+		font-size: 12px;
+		line-height: 16px;
+		color: var(--sf-text-muted);
+	}
+
+	&__hints {
+		display: inline-flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 4px 8px;
+	}
+
+	&__hints kbd,
+	&__shortcuts kbd {
+		min-width: 24px;
+		padding: 0 8px;
+		border: 1px solid var(--sf-border);
+		border-bottom-width: 2px;
+		border-radius: var(--sf-radius-sm);
+		background: var(--sf-bg-surface);
+		font-family: var(--sf-font-mono);
+		font-size: 12px;
+		line-height: 16px;
+		color: var(--sf-text-secondary);
+		text-align: center;
 	}
 
 	// ── Empty state ──────────────────────────────────────────────────────────
 	&__empty {
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow-y: auto;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -274,12 +305,12 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 44px;
-		height: 44px;
+		width: 32px;
+		height: 32px;
 		margin-bottom: 4px;
-		border-radius: var(--sf-radius-lg);
-		background: var(--sf-bg-muted);
-		color: var(--sf-text-muted);
+		border-radius: var(--sf-radius-sm);
+		background: color-mix(in srgb, var(--sf-brand) 8%, #ffffff);
+		color: var(--sf-brand);
 
 		svg {
 			fill: none;
@@ -288,15 +319,17 @@
 
 	&__empty-title {
 		margin: 0;
-		font-size: var(--sf-text-sm);
+		font-size: 16px;
 		font-weight: var(--sf-weight-semibold);
+		line-height: 24px;
 		color: var(--sf-text);
 	}
 
 	&__empty-text {
 		margin: 0;
 		max-width: 30ch;
-		font-size: var(--sf-text-sm);
+		font-size: 13px;
+		line-height: 20px;
 		color: var(--sf-text-muted);
 	}
 
@@ -304,11 +337,12 @@
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
-		margin: 20px 0 0;
+		margin: 24px 0 0;
 		padding: 16px 0 0;
 		border-top: 1px solid var(--sf-border-subtle);
 		list-style: none;
 		font-size: 12px;
+		line-height: 16px;
 		color: var(--sf-text-muted);
 		text-align: start;
 
@@ -318,40 +352,835 @@
 			gap: 4px;
 			margin: 0;
 		}
+	}
+}
 
-		kbd {
-			min-width: 20px;
-			padding: 1px 6px;
-			border: 1px solid var(--sf-border);
-			border-radius: 3px;
-			background: var(--sf-bg-subtle);
-			font-size: 11px;
-			text-align: center;
+// ── Tabs: Settings (gear) and Styles (half circle) ───────────────────────────
+.sf-itabs {
+	display: flex;
+	height: 48px;
+	border-bottom: 1px solid var(--sf-border-subtle);
+	background: var(--sf-bg-surface);
+
+	// No box around a tab in any state: the active one is marked by the 2px
+	// underline alone, hover is a faint background, and the focus ring is for
+	// the keyboard (`:focus-visible`) only.
+	.components-button.sf-itabs__tab {
+		flex: 1 1 0;
+		height: 48px;
+		justify-content: center;
+		padding: 0;
+		border: 0;
+		border-radius: 0;
+		outline: none;
+		background: transparent;
+		color: var(--sf-text-muted);
+		box-shadow: inset 0 -2px 0 transparent;
+		transition: color 200ms $sf-ease, background-color 200ms $sf-ease, box-shadow 200ms $sf-ease;
+
+		svg {
+			width: 20px;
+			height: 20px;
+			fill: currentColor;
+		}
+
+		&:hover:not(:disabled) {
+			background: var(--sf-bg-hover);
+			color: var(--sf-text);
+			box-shadow: inset 0 -2px 0 transparent;
+			border: 0;
+		}
+
+		&:active svg {
+			transform: translateY(1px);
+		}
+
+		&:focus:not(:focus-visible) {
+			outline: none;
+			box-shadow: inset 0 -2px 0 transparent;
+		}
+
+		&.is-active,
+		&.is-active:hover:not(:disabled),
+		&.is-active:focus:not(:focus-visible) {
+			color: var(--sf-text);
+			box-shadow: inset 0 -2px 0 var(--sf-brand);
+		}
+
+		&:focus-visible {
+			outline: $sf-focus;
+			outline-offset: -2px;
+			box-shadow: inset 0 -2px 0 transparent;
+		}
+
+		&.is-active:focus-visible {
+			box-shadow: inset 0 -2px 0 var(--sf-brand);
 		}
 	}
 }
 
+// ── Sections: 48px headers like a core panel body ────────────────────────────
+.sf-isec {
+	& + & {
+		border-top: 1px solid var(--sf-border-subtle);
+	}
+
+	// The Styles tab's appearance sections live in their own wrapper after the
+	// Label, Help text and Input sections; the hairline continues across it.
+	& + .sf-field-appearance > &:first-child {
+		border-top: 1px solid var(--sf-border-subtle);
+	}
+
+	.sf-field-inspector__quick + & {
+		border-top: 0;
+	}
+
+	&__head {
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		height: 48px;
+		// 16 side padding, a 24px chevron column and 8 between it and the action.
+		padding: 0 48px 0 16px;
+	}
+
+	// The whole header is the button; the action sits above it.
+	&__toggle {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		width: 100%;
+		margin: 0;
+		padding: 0 16px;
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+		color: var(--sf-text);
+		font-family: inherit;
+		text-align: start;
+		cursor: pointer;
+		transition: background-color 200ms $sf-ease;
+
+		&:hover {
+			background: var(--sf-bg-hover);
+		}
+
+		&:active {
+			transform: translateY(1px);
+		}
+
+		&:focus-visible {
+			outline: $sf-focus;
+			outline-offset: -2px;
+		}
+	}
+
+	&__title {
+		font-size: 14px;
+		font-weight: var(--sf-weight-semibold);
+		line-height: 20px;
+	}
+
+	&__badge {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 20px;
+		height: 20px;
+		padding: 0 4px;
+		border-radius: 10px;
+		background: var(--sf-brand);
+		color: #fff;
+		font-size: 12px;
+		font-weight: var(--sf-weight-semibold);
+		line-height: 16px;
+	}
+
+	&__dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: var(--sf-warning);
+	}
+
+	&__chevron {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		width: 24px;
+		height: 24px;
+		margin-inline-start: auto;
+		color: var(--sf-text);
+		transition: transform 300ms $sf-ease;
+
+		svg {
+			fill: none;
+		}
+	}
+
+	&.is-open &__chevron {
+		transform: rotate(180deg);
+	}
+
+	&__action {
+		position: relative;
+		z-index: 1;
+		min-height: 32px;
+		margin: 0 8px 0 0;
+		padding: 0 8px;
+		border: 0;
+		border-radius: var(--sf-radius-sm);
+		background: transparent;
+		color: var(--sf-brand);
+		font-family: inherit;
+		font-size: 13px;
+		font-weight: var(--sf-weight-medium);
+		line-height: 20px;
+		cursor: pointer;
+		transition: background-color 200ms $sf-ease;
+
+		&:hover:not(:disabled) {
+			background: $sf-row-tint;
+			text-decoration: underline;
+		}
+
+		&:active:not(:disabled) {
+			transform: translateY(1px);
+		}
+
+		&:focus-visible {
+			outline: $sf-focus;
+			outline-offset: 2px;
+		}
+
+		&:disabled {
+			color: var(--sf-text-muted);
+			cursor: default;
+		}
+	}
+
+	&__body {
+		padding: 16px;
+		animation: sf-isec-in 300ms $sf-ease;
+
+		&[hidden] {
+			display: none;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		&__chevron {
+			transition: none;
+		}
+
+		&__body {
+			animation: sf-isec-fade 300ms linear;
+		}
+	}
+}
+
+@keyframes sf-isec-in {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@keyframes sf-isec-fade {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+
+// ── Property rows ────────────────────────────────────────────────────────────
+// Stacked: an uppercase label above a full width control. Inline: the label
+// on the left, the control right-aligned. A row that holds the focus gets a
+// faint accent background; it reaches 8px past the content so the content
+// edges stay at 16px.
+.sf-prow {
+	position: relative;
+	margin: 0 -8px;
+	padding: 0 8px;
+	border-radius: var(--sf-radius-sm);
+	transition: background-color 200ms $sf-ease;
+
+	&:focus-within {
+		background: $sf-row-tint;
+	}
+
+	// Spacing between controls: 16, but an inline row is already 40px tall.
+	& + & {
+		margin-top: 16px;
+	}
+
+	&--inline + &--inline {
+		margin-top: 0;
+	}
+
+	// An inline row that holds an input (a number): 4px above and below, so
+	// the boxes of two such rows are 8px apart.
+	&--field {
+		padding-top: 4px;
+		padding-bottom: 4px;
+	}
+
+	&--inline + &--stacked,
+	&--stacked + &--inline {
+		margin-top: 8px;
+	}
+
+	&--stacked {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		padding-top: 4px;
+		padding-bottom: 4px;
+	}
+
+	&--inline {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: center;
+		column-gap: 12px;
+		min-height: 40px;
+	}
+
+	// A control with its own label (an add-on's, the chained levels): the row
+	// only gives it width and spacing.
+	&--bare {
+		display: block;
+		min-height: 0;
+
+		.components-base-control__label,
+		.components-input-control__label,
+		.components-base-control .components-base-control__label {
+			display: block;
+			margin-bottom: 8px;
+			font-size: 12px;
+			font-weight: var(--sf-weight-medium);
+			line-height: 16px;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
+			color: $sf-label-ink;
+		}
+
+		.components-base-control {
+			margin-bottom: 16px;
+		}
+
+		.components-base-control__help {
+			font-size: 12px;
+			line-height: 16px;
+			color: var(--sf-text-muted);
+		}
+	}
+
+	&__head {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		min-width: 0;
+	}
+
+	&__label {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		min-width: 0;
+		margin: 0;
+		font-size: 13px;
+		line-height: 20px;
+		color: var(--sf-text-secondary);
+		overflow-wrap: anywhere;
+	}
+
+	&--stacked &__label {
+		font-size: 12px;
+		font-weight: var(--sf-weight-medium);
+		line-height: 16px;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: $sf-label-ink;
+	}
+
+	// The text of a row label: 11px, 16px line, one ink for every label.
+	&__label-text {
+		font-size: 11px;
+		line-height: 16px;
+		color: $sf-label-ink;
+	}
+
+	// A quick row keeps the plain row label even when it is stacked.
+	&--quick &__label {
+		font-size: 13px;
+		font-weight: 400;
+		line-height: 20px;
+		letter-spacing: 0;
+		text-transform: none;
+		color: var(--sf-text-secondary);
+	}
+
+	&__icon {
+		display: inline-flex;
+		flex-shrink: 0;
+		color: var(--sf-text-muted);
+
+		svg {
+			width: 16px;
+			height: 16px;
+			fill: none;
+		}
+	}
+
+	&__value {
+		min-width: 0;
+	}
+
+	&--inline > &__value {
+		justify-self: end;
+	}
+
+	// The help text is in the page for a screen reader, not drawn: the info
+	// button after the label shows it in a tooltip.
+	&__help {
+		@include sf-sr-only;
+	}
+
+	&__note {
+		margin: 8px 0 0;
+		font-size: 12px;
+		line-height: 16px;
+		color: var(--sf-text-muted);
+
+		&.is-error {
+			color: var(--sf-danger);
+		}
+	}
+
+	// Text, number and area inputs. (`& &__input` outranks wp-admin's
+	// input[type="text"] rules.)
+	& &__input {
+		box-sizing: border-box;
+		width: 100%;
+		height: 36px;
+		min-height: 36px;
+		margin: 0;
+		padding: 0 12px;
+		border: 1px solid var(--sf-border-strong);
+		border-radius: var(--sf-radius-sm);
+		background: var(--sf-bg-surface);
+		box-shadow: none;
+		font-family: inherit;
+		font-size: 13px;
+		line-height: 20px;
+		color: var(--sf-text);
+		transition: border-color 200ms $sf-ease, background-color 200ms $sf-ease;
+
+		&::placeholder {
+			color: var(--sf-text-muted);
+			opacity: 1;
+		}
+
+		&:hover:not(:disabled):not(:focus) {
+			border-color: var(--sf-text-secondary);
+			background: var(--sf-bg-hover);
+		}
+
+		&:focus {
+			border-color: var(--sf-brand);
+			outline: $sf-focus;
+			outline-offset: 2px;
+			box-shadow: none;
+		}
+
+		&:disabled {
+			opacity: 0.6;
+		}
+
+		&--area {
+			display: block;
+			height: auto;
+			min-height: 60px;
+			padding: 8px 12px;
+			resize: none;
+			overflow: hidden;
+		}
+
+		// A full width list of lines (Lines control).
+		&--box {
+			height: auto;
+			padding: 8px 12px;
+			resize: vertical;
+		}
+
+		&--number {
+			width: 88px;
+			text-align: right;
+			font-variant-numeric: tabular-nums;
+		}
+	}
+
+	&--stacked &__input--number {
+		width: 100%;
+	}
+
+	&__number {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	&__unit {
+		flex-shrink: 0;
+		font-size: 13px;
+		line-height: 20px;
+		color: var(--sf-text-muted);
+	}
+
+	// Toggle row: the switch, then the state text.
+	&__toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	&__state {
+		font-size: 13px;
+		line-height: 20px;
+		color: var(--sf-text-muted);
+	}
+}
+
+// The info button after a label, and its tooltip.
+.sf-help {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 24px;
+	height: 24px;
+	margin: -4px 0;
+	padding: 0;
+	border: 0;
+	border-radius: var(--sf-radius-sm);
+	background: transparent;
+	color: var(--sf-text-muted);
+	cursor: pointer;
+	transition: background-color 200ms $sf-ease, color 200ms $sf-ease;
+
+	svg {
+		width: 16px;
+		height: 16px;
+		fill: none;
+	}
+
+	&:hover {
+		background: var(--sf-bg-muted);
+		color: var(--sf-text);
+	}
+
+	&:active svg {
+		transform: translateY(1px);
+	}
+
+	&:focus-visible {
+		outline: $sf-focus;
+		outline-offset: 0;
+		color: var(--sf-text);
+	}
+}
+
+.sf-help-tip {
+	position: fixed;
+	z-index: 1000001;
+	box-sizing: border-box;
+	max-width: 240px;
+	padding: 8px;
+	border-radius: var(--sf-radius-sm);
+	background: var(--sf-text);
+	color: #fff;
+	font-family: var(--sf-font-sans);
+	font-size: 12px;
+	font-weight: 400;
+	font-style: normal;
+	line-height: 16px;
+	letter-spacing: 0;
+	text-transform: none;
+	overflow-wrap: break-word;
+	pointer-events: none;
+	opacity: 0;
+	transform: translateY(4px);
+	transition: opacity 200ms $sf-ease, transform 200ms $sf-ease;
+
+	&.is-below {
+		transform: translateY(-4px);
+	}
+
+	&.is-in {
+		opacity: 1;
+		transform: none;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		transition: opacity 200ms linear;
+		transform: none;
+
+		&.is-below {
+			transform: none;
+		}
+	}
+}
+
+// The switch: 36 x 18, grey track and white knob; accent track when on.
+.components-form-toggle.sf-toggle {
+	flex-shrink: 0;
+	margin: 0;
+
+	.components-form-toggle__track {
+		width: 36px;
+		height: 18px;
+		border: 0;
+		border-radius: 9px;
+		background: var(--sf-border-strong);
+		box-sizing: border-box;
+		transition: background-color 200ms $sf-ease;
+	}
+
+	.components-form-toggle__thumb {
+		top: 3px;
+		left: 3px;
+		width: 12px;
+		height: 12px;
+		border: 0;
+		background: #fff;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+		box-sizing: border-box;
+		transition: transform 200ms $sf-ease;
+	}
+
+	&:hover:not(.is-disabled) .components-form-toggle__track {
+		background: var(--sf-text-secondary);
+	}
+
+	&.is-checked .components-form-toggle__track,
+	&.is-checked:hover:not(.is-disabled) .components-form-toggle__track {
+		background: var(--sf-brand);
+	}
+
+	&.is-checked .components-form-toggle__thumb {
+		transform: translateX(18px);
+	}
+
+	&:focus-within .components-form-toggle__track {
+		outline: $sf-focus;
+		outline-offset: 2px;
+	}
+
+	&.is-disabled {
+		opacity: 0.6;
+	}
+}
+
+// Short choices (2 to 4) as equal squares, like the heading level picker in
+// core: the selected one bordered and bold.
+.sf-seg {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	max-width: 100%;
+
+	&__option {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 32px;
+		height: 32px;
+		margin: 0;
+		padding: 0 8px;
+		border: 1px solid transparent;
+		border-radius: var(--sf-radius-sm);
+		font-size: 13px;
+		font-weight: var(--sf-weight-medium);
+		line-height: 20px;
+		color: var(--sf-text-secondary);
+		cursor: pointer;
+		white-space: nowrap;
+		transition: background-color 200ms $sf-ease, color 200ms $sf-ease, border-color 200ms $sf-ease;
+
+		&:hover:not(.is-on):not(.is-disabled) {
+			background: var(--sf-bg-muted);
+			color: var(--sf-text);
+		}
+
+		&:active:not(.is-disabled) {
+			transform: translateY(1px);
+		}
+
+		&.is-on {
+			border-color: var(--sf-brand);
+			background: #fff;
+			color: var(--sf-text);
+			font-weight: var(--sf-weight-semibold);
+		}
+
+		&.is-disabled {
+			opacity: 0.6;
+			cursor: default;
+		}
+
+		// The outline is for the keyboard only. A mouse selection keeps the one
+		// 1px border; with the keyboard the outline sits 2px outside it.
+		&:has(.sf-seg__input:focus-visible) {
+			outline: $sf-focus;
+			outline-offset: 2px;
+		}
+	}
+
+	& &__input {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		margin: 0;
+		opacity: 0;
+		cursor: inherit;
+	}
+
+	// The Width row: seven equal squares across the full width.
+	&--fill {
+		display: flex;
+		flex-wrap: nowrap;
+		gap: 4px;
+		width: 100%;
+	}
+
+	&--fill &__option {
+		flex: 1 1 0;
+		min-width: 0;
+		padding: 0;
+	}
+}
+
+// A native select, full width, with a chevron.
+.sf-chip-select {
+	position: relative;
+	display: flex;
+	align-items: center;
+	width: 100%;
+
+	& &__input {
+		box-sizing: border-box;
+		width: 100%;
+		height: 36px;
+		min-height: 36px;
+		margin: 0;
+		padding: 0 36px 0 12px;
+		border: 1px solid var(--sf-border-strong);
+		border-radius: var(--sf-radius-sm);
+		background: var(--sf-bg-surface);
+		box-shadow: none;
+		font-family: inherit;
+		font-size: 13px;
+		line-height: 20px;
+		color: var(--sf-text);
+		cursor: pointer;
+		appearance: none;
+		-webkit-appearance: none;
+		text-overflow: ellipsis;
+		transition: border-color 200ms $sf-ease, background-color 200ms $sf-ease;
+
+		&:hover:not(:disabled):not(:focus) {
+			border-color: var(--sf-text-secondary);
+			background: var(--sf-bg-hover);
+		}
+
+		&:focus {
+			border-color: var(--sf-brand);
+			outline: $sf-focus;
+			outline-offset: 2px;
+			box-shadow: none;
+		}
+
+		&:disabled {
+			opacity: 0.6;
+			cursor: default;
+		}
+	}
+
+	&__chevron {
+		position: absolute;
+		right: 12px;
+		display: inline-flex;
+		color: var(--sf-text);
+		pointer-events: none;
+
+		svg {
+			fill: none;
+		}
+	}
+}
+
+// A read-only value shown as a chip that can be clicked (Visibility).
+.sf-chip {
+	min-height: 32px;
+	margin: 0;
+	padding: 0 12px;
+	border: 1px solid transparent;
+	border-radius: var(--sf-radius-sm);
+	background: var(--sf-bg-muted);
+	color: var(--sf-text);
+	font-family: inherit;
+	font-size: 13px;
+	line-height: 20px;
+	cursor: pointer;
+	transition: background-color 200ms $sf-ease, border-color 200ms $sf-ease;
+
+	&:hover {
+		border-color: var(--sf-border-strong);
+	}
+
+	&:active {
+		transform: translateY(1px);
+	}
+
+	&:focus-visible {
+		outline: $sf-focus;
+		outline-offset: 2px;
+	}
+}
+
 // ── Choices editor ───────────────────────────────────────────────────────────
+// One bordered box: a 40px row per choice (drag handle, default mark, text,
+// remove) and a last 40px row to add one.
 .sf-options {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
 
-	&__toolbar {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 8px;
-
-		.components-toggle-control {
-			margin: 0;
-		}
+	&__box {
+		overflow: hidden;
+		border: 1px solid var(--sf-border-strong);
+		border-radius: var(--sf-radius-lg);
+		background: var(--sf-bg-surface);
 	}
 
 	&__list {
 		display: flex;
 		flex-direction: column;
-		gap: 4px;
 		margin: 0;
 		padding: 0;
 		list-style: none;
@@ -360,11 +1189,21 @@
 	&__row {
 		display: flex;
 		align-items: center;
-		gap: 4px;
+		gap: 8px;
 		margin: 0;
-		padding: 2px;
-		border-radius: var(--sf-radius-sm);
+		padding: 0 8px 0 4px;
+		height: 40px;
+		border-bottom: 1px solid var(--sf-border-subtle);
 		background: var(--sf-bg-surface);
+		transition: background-color 200ms $sf-ease;
+
+		&:hover {
+			background: var(--sf-bg-hover);
+		}
+
+		&:focus-within {
+			background: $sf-row-tint;
+		}
 
 		&.is-dragging {
 			z-index: 2;
@@ -382,23 +1221,24 @@
 		align-items: center;
 		justify-content: center;
 		flex-shrink: 0;
-		width: 20px;
+		width: 24px;
 		height: 32px;
 		padding: 0;
 		border: 0;
+		border-radius: var(--sf-radius-sm);
 		background: transparent;
 		color: var(--sf-text-subtle);
 		cursor: grab;
-		opacity: 0.5;
+		opacity: 0.7;
 		touch-action: none;
 
 		svg {
-			fill: none;
+			fill: currentColor;
 		}
 
 		&:focus-visible {
-			outline: none;
-			box-shadow: var(--sf-shadow-focus);
+			outline: $sf-focus;
+			outline-offset: -2px;
 			opacity: 1;
 		}
 	}
@@ -418,7 +1258,7 @@
 		cursor: pointer;
 
 		&.is-multiple {
-			border-radius: 3px;
+			border-radius: var(--sf-radius-xs);
 		}
 
 		&.is-checked {
@@ -431,9 +1271,13 @@
 			stroke-width: 3;
 		}
 
+		&:active {
+			transform: translateY(1px);
+		}
+
 		&:focus-visible {
-			outline: none;
-			box-shadow: var(--sf-shadow-focus);
+			outline: $sf-focus;
+			outline-offset: 2px;
 		}
 	}
 
@@ -470,6 +1314,7 @@
 		min-width: 0;
 	}
 
+	// Borderless inside the box; the focus outline shows which one is edited.
 	&__input[type='text'] {
 		flex: 1 1 0;
 		min-width: 0;
@@ -477,21 +1322,24 @@
 		min-height: 32px;
 		margin: 0;
 		padding: 0 8px;
-		border: 1px solid var(--sf-border);
-		border-radius: var(--sf-radius-control);
-		font-size: var(--sf-text-sm);
+		border: 1px solid transparent;
+		border-radius: var(--sf-radius-sm);
+		background: transparent;
+		font-size: 13px;
+		line-height: 20px;
+		color: var(--sf-text);
 		box-shadow: none;
 
 		&:focus {
 			border-color: var(--sf-brand);
-			box-shadow: 0 0 0 1px var(--sf-brand);
-			outline: none;
+			outline: $sf-focus;
+			outline-offset: -2px;
+			box-shadow: none;
 		}
-
 	}
 
 	&__attribute {
-		flex: 0 0 72px;
+		flex: 0 0 64px;
 	}
 
 	&__input--attribute {
@@ -499,10 +1347,12 @@
 		height: 32px;
 		min-height: 32px;
 		margin: 0;
-		padding: 0 6px;
-		border: 1px solid var(--sf-border);
-		border-radius: var(--sf-radius-control);
-		font-size: var(--sf-text-sm);
+		padding: 0 8px;
+		border: 1px solid transparent;
+		border-radius: var(--sf-radius-sm);
+		background: var(--sf-bg-muted);
+		font-size: 13px;
+		line-height: 20px;
 		font-variant-numeric: tabular-nums;
 		box-shadow: none;
 		-moz-appearance: textfield;
@@ -512,19 +1362,26 @@
 
 		&:focus {
 			border-color: var(--sf-brand);
-			box-shadow: 0 0 0 1px var(--sf-brand);
-			outline: none;
+			outline: $sf-focus;
+			outline-offset: -2px;
+			box-shadow: none;
 		}
 	}
 
 	&__input--value[type='text'] {
 		font-family: var(--sf-font-mono);
 		font-size: 12px;
+		line-height: 16px;
 		color: var(--sf-text-secondary);
+		background: var(--sf-bg-muted);
 	}
 
 	&__remove.components-button {
 		flex-shrink: 0;
+		width: 24px;
+		min-width: 24px;
+		height: 24px;
+		padding: 0;
 		color: var(--sf-text-subtle);
 
 		svg {
@@ -534,14 +1391,54 @@
 		&:hover:not(:disabled) {
 			color: var(--sf-danger);
 		}
+
+		&:focus-visible {
+			outline: $sf-focus;
+			outline-offset: 2px;
+			box-shadow: none;
+		}
 	}
 
-	&__add.components-button {
-		align-self: flex-start;
-		margin-top: 4px;
+	// The last row of the box.
+	&__add {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		width: 100%;
+		height: 40px;
+		margin: 0;
+		padding: 0 12px 0 32px;
+		border: 0;
+		background: transparent;
+		font-family: inherit;
+		font-size: 13px;
+		line-height: 20px;
+		color: var(--sf-text-secondary);
+		text-align: start;
+		cursor: pointer;
+		transition: background-color 200ms $sf-ease, color 200ms $sf-ease;
 
 		svg {
 			fill: none;
+		}
+
+		&:hover:not(:disabled) {
+			background: var(--sf-bg-hover);
+			color: var(--sf-brand);
+		}
+
+		&:active:not(:disabled) {
+			transform: translateY(1px);
+		}
+
+		&:focus-visible {
+			outline: $sf-focus;
+			outline-offset: -2px;
+		}
+
+		&:disabled {
+			cursor: default;
+			opacity: 0.6;
 		}
 	}
 
@@ -559,7 +1456,13 @@
 		textarea {
 			font-family: var(--sf-font-mono);
 			font-size: 12px;
+			line-height: 16px;
 		}
+	}
+
+	&__bulk-actions {
+		display: flex;
+		gap: 8px;
 	}
 }
 
@@ -613,13 +1516,6 @@
 		border-radius: var(--sf-radius-sm);
 		font-family: var(--sf-font-mono);
 	}
-}
-
-// Step setting (2.3.1): sits above the field's general settings.
-.sf-field-inspector__step-setting {
-	margin-bottom: 16px;
-	padding-bottom: 16px;
-	border-bottom: 1px solid var(--sf-gray-100, #f0f0f1);
 }
 
 
@@ -876,7 +1772,7 @@
 	border-radius: 999px;
 	background: var(--sf-bg-surface);
 	color: var(--sf-text-muted);
-	font-size: 11px;
+	font-size: 12px;
 	font-weight: 600;
 }
 
@@ -1080,4 +1976,114 @@
 	align-self: flex-start;
 	width: auto;
 	justify-content: center;
+}
+
+// ── Logic section: the rule editor inside the panel ─────────────────────────
+// Rule cards are bordered boxes 12px apart. Inside a card the action select
+// and the match line are stacked controls with the uppercase label, and each
+// condition is one grid: field, operator and value in the first column, the
+// remove button in a fixed 32px column.
+.sf-logic-editor--panel {
+	// Stated here as well as in LogicEditor.scss: the panel must not depend on
+	// the editor's base rule surviving the stylesheet concatenation.
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+
+	.sf-logic-editor__empty {
+		margin: 0;
+		padding: 12px;
+		border: 1px dashed var(--sf-border-strong);
+		border-radius: var(--sf-radius-lg);
+		font-size: 12px;
+		line-height: 16px;
+		color: var(--sf-text-muted);
+	}
+
+	.sf-logic-editor__action {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+
+		.components-base-control__label,
+		.components-input-control__label.components-input-control__label {
+			margin: 0;
+			font-size: 12px;
+			font-weight: var(--sf-weight-medium);
+			line-height: 16px;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
+			color: $sf-label-ink;
+		}
+	}
+
+	.sf-logic-editor__group {
+		gap: 12px;
+		padding: 12px;
+		border: 1px solid var(--sf-border);
+		border-radius: var(--sf-radius-lg);
+		background: var(--sf-bg-surface);
+	}
+
+	.sf-logic-editor__match-note {
+		font-size: 12px;
+		font-weight: var(--sf-weight-medium);
+		line-height: 16px;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: $sf-label-ink;
+	}
+
+	.sf-logic-editor__rule {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 32px;
+		column-gap: 8px;
+		row-gap: 8px;
+		align-items: center;
+		padding: 0;
+		border-radius: 0;
+		background: transparent;
+
+		& + & {
+			padding-top: 12px;
+			border-top: 1px solid var(--sf-border-subtle);
+		}
+
+		// The field row joins the grid, so every select is the same width.
+		> .sf-logic-editor__rule-row {
+			display: contents;
+		}
+
+		> * {
+			grid-column: 1;
+			min-width: 0;
+		}
+
+		> .sf-logic-editor__rule-row > * {
+			grid-column: 1;
+			min-width: 0;
+		}
+
+		> .sf-logic-editor__rule-row > .sf-logic-editor__remove {
+			grid-column: 2;
+			grid-row: 1;
+			width: 32px;
+			min-width: 32px;
+			height: 32px;
+			padding: 0;
+			justify-content: center;
+		}
+
+		.components-select-control__input,
+		.components-text-control__input {
+			width: 100%;
+			min-height: 32px;
+			font-size: 13px;
+		}
+	}
+
+	.sf-logic-editor__add-rule {
+		align-self: flex-start;
+		font-size: 13px;
+	}
 }

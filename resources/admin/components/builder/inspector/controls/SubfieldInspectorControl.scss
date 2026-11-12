@@ -18,8 +18,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: 6px;
-		min-height: 38px;
+		gap: 8px;
+		min-height: 40px;
 
 		// Override WP ToggleControl bottom margin so the row stays compressed
 		.components-toggle-control {
@@ -34,9 +34,10 @@
 
 	&__fixed-label {
 		flex: 1;
-		font-size: var(--sf-text-sm);
+		font-size: 13px;
+		line-height: 20px;
 		font-weight: 500;
-		color: var(--sf-gray-700);
+		color: var(--sf-text);
 	}
 
 	&__chevron {
@@ -63,10 +64,10 @@
 	}
 
 	&__body {
-		padding-bottom: 10px;
+		padding-bottom: 16px;
 		display: flex;
 		flex-direction: column;
-		gap: 2px;
+		gap: 16px;
 
 		.components-base-control {
 			margin-bottom: 4px;
@@ -75,5 +76,53 @@
 		.components-text-control__input {
 			font-size: var(--sf-text-sm);
 		}
+	}
+}
+
+// The settings sheet: a sub-field is a toggle, its name and a chevron on one
+// line, and its Label and Placeholder open as two property rows.
+.sf-subfield-ctrl--row {
+	margin: 0;
+
+	.sf-subfield-ctrl__row {
+		padding: 0;
+		border-bottom: 0;
+	}
+
+	.sf-subfield-ctrl__header {
+		gap: 8px;
+		min-height: 36px;
+	}
+
+	// A part that is always on has no switch: indent it to the names beside one.
+	.sf-subfield-ctrl__fixed-label {
+		padding-left: 52px;
+	}
+
+	.sf-subfield-ctrl__name,
+	.sf-subfield-ctrl__fixed-label {
+		flex: 1 1 auto;
+		min-width: 0;
+		font-size: var(--sf-text-sm);
+		font-weight: 400;
+		color: var(--sf-text);
+		overflow-wrap: anywhere;
+	}
+
+	.sf-subfield-ctrl__chevron {
+		width: 28px;
+		height: 28px;
+		border-radius: var(--sf-radius-sm);
+		color: var(--sf-text-muted);
+
+		&:hover {
+			color: var(--sf-text);
+			background: var(--sf-bg-muted);
+		}
+	}
+
+	.sf-subfield-ctrl__body {
+		padding: 0 0 8px 40px;
+		gap: 0;
 	}
 }

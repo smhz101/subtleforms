@@ -17,6 +17,7 @@ import { TreeContext } from '../context/TreeContext';
 import CONTROL_REGISTRY, { getControlComponent } from './controlRegistry';
 import { PanelSection } from '../../../ui';
 import { resolveControls } from './controlSections';
+import { getInspectorControl } from '../../../../shared/extend';
 import { compositeSubfields } from '../../../../shared/compositeParts';
 
 import './DynamicInspectorPanel.scss';
@@ -70,9 +71,32 @@ function formFields( tree, field ) {
 }
 
 /**
- * Renders a single inspector control bound to a field value.
+ * Control types that draw themselves as a property row (label column and
+ * value column) when given `layout="row"`. Any other type, including every
+ * control an add-on registers, keeps its own markup and is drawn full width.
  */
-function ControlRenderer( { ctrl, field, onUpdate, isReadOnly } ) {
+const ROW_TYPES = [
+	'text',
+	'textarea',
+	'number',
+	'checkbox',
+	'boolean',
+	'toggle',
+	'select',
+	'radio',
+	'options',
+	'subfield',
+	'lines',
+	'mask_try',
+];
+
+/**
+ * Renders a single inspector control bound to a field value.
+ *
+ * `override` replaces the label or placeholder the PHP definition gives,
+ * for a panel that names a setting more briefly (Rules: "If empty").
+ */
+function ControlRenderer( { ctrl, field, onUpdate, isReadOnly, override } ) {
 	// Outside the builder (tests, previews) there is no tree.
 	const tree = useContext( TreeContext );
 	// PHP uses `name` as the schema key; support `key` as a future alias
@@ -96,16 +120,32 @@ function ControlRenderer( { ctrl, field, onUpdate, isReadOnly } ) {
 
 	const value = field[ fieldKey ] ?? '';
 
+	const isAddOn = ! CONTROL_REGISTRY[ ctrl.type ] || ctrl.type === 'pro_notice';
+	const isRowType = ! isAddOn && ROW_TYPES.includes( ctrl.type ) && ! getInspectorControl( ctrl.type );
+
 	const props = {
-		label: ctrl.label || fieldKey,
+		label: override?.label || ctrl.label || fieldKey,
 		help: ctrl.help || undefined,
-		placeholder: ctrl.placeholder || undefined,
+		placeholder: override?.placeholder || ctrl.placeholder || undefined,
 		disabled: isReadOnly,
 		value,
 		onChange: ( newValue ) => onUpdate( { [ fieldKey ]: newValue } ),
 	};
 
 	// Pass type-specific extra props from the PHP control definition
+	if ( isRowType ) {
+		props.layout = 'row';
+		if ( ctrl.wide ) props.wide = true;
+	}
+	if ( ctrl.type === 'number' && ctrl.unit ) {
+		props.unit = ctrl.unit;
+	}
+	if ( [ 'checkbox', 'boolean', 'toggle' ].includes( ctrl.type ) ) {
+		const on = ctrl.onText ?? ( typeof ctrl.on === 'string' ? ctrl.on : undefined );
+		const off = ctrl.offText ?? ( typeof ctrl.off === 'string' ? ctrl.off : undefined );
+		if ( on ) props.onText = on;
+		if ( off ) props.offText = off;
+	}
 	if ( ctrl.type === 'number' ) {
 		if ( ctrl.min !== undefined ) props.min = ctrl.min;
 		if ( ctrl.max !== undefined ) props.max = ctrl.max;
@@ -135,7 +175,17 @@ function ControlRenderer( { ctrl, field, onUpdate, isReadOnly } ) {
 		props.formFields = formFields( tree, field );
 	}
 
-	return <ControlComponent { ...props } />;
+	if ( isRowType ) {
+		return <ControlComponent { ...props } />;
+	}
+
+	// A control this panel cannot lay out as a row (a registered add-on
+	// control, the chained levels summary): full width, keeping its own label.
+	return (
+		<div className="sf-prow sf-prow--wide sf-prow--bare">
+			<ControlComponent { ...props } />
+		</div>
+	);
 }
 
 /**
@@ -150,6 +200,8 @@ function DynamicInspectorPanel( {
 	onUpdate,
 	isReadOnly = false,
 	sections = null,
+	pick = null,
+	overrides = null,
 	showEmpty = true,
 } ) {
 	const { fieldDefinitions } = useConfig();
@@ -163,9 +215,10 @@ function DynamicInspectorPanel( {
 		() =>
 			resolveControls( fieldDefinitions?.[ field?.type ] )
 				.filter( ( ctrl ) => ! sections || sections.includes( ctrl.section ) )
+				.filter( ( ctrl ) => ! pick || pick( ctrl ) )
 				// Sections become panels in the inspector, not inline headings.
 				.map( ( { section, ...ctrl } ) => ctrl ), // eslint-disable-line no-unused-vars
-		[ fieldDefinitions, field?.type, sections ]
+		[ fieldDefinitions, field?.type, sections, pick ]
 	);
 
 	const groups = useMemo( () => groupControls( controls ), [ controls ] );
@@ -208,6 +261,7 @@ function DynamicInspectorPanel( {
 									field={ field }
 									onUpdate={ onUpdate }
 									isReadOnly={ isReadOnly }
+									override={ overrides?.[ ctrl.key ?? ctrl.name ] }
 								/>
 							) ) }
 						</PanelSection>
@@ -221,6 +275,7 @@ function DynamicInspectorPanel( {
 						field={ field }
 						onUpdate={ onUpdate }
 						isReadOnly={ isReadOnly }
+						override={ overrides?.[ ctrl.key ?? ctrl.name ] }
 					/>
 				) );
 			} ) }

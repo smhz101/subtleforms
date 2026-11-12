@@ -2,13 +2,13 @@
 	display: flex;
 	flex-direction: column;
 	gap: 0;
+	// Rows space themselves (see .sf-prow).
 
-	// Collapse default bottom margin on WP base controls so our gap handles spacing
+	// Controls an add-on draws itself keep WP's markup: tidy its spacing.
 	.components-base-control {
 		margin-bottom: var( --sf-space-3, 12px );
 	}
 
-	// Last control in a flat group needs no extra bottom margin
 	> .components-base-control:last-child {
 		margin-bottom: 0;
 	}

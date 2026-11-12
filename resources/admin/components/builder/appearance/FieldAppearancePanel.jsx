@@ -1,21 +1,13 @@
 import {
   Button,
-  PanelBody,
   ToggleControl,
   __experimentalToggleGroupControl as ToggleGroupControl,
   __experimentalToggleGroupControlOption as ToggleGroupControlOption,
   __experimentalToggleGroupControlOptionIcon as ToggleGroupControlOptionIcon,
 } from '@wordpress/components';
 import { __, sprintf, _n } from '@wordpress/i18n';
-import {
-  FIELD_TOKENS,
-  FIELD_LAYOUT,
-  resolvedToken,
-  formAppearanceStyle,
-  formAppearanceClasses,
-} from '../../../../shared/appearance';
-import FieldRenderer from '../../../../frontend/components/FieldRenderer';
-import PreviewFrame from '../../form-preview/PreviewFrame';
+import { FIELD_TOKENS, FIELD_LAYOUT, resolvedToken } from '../../../../shared/appearance';
+import InspectorSection from '../inspector/InspectorSection';
 import AppearanceControls from './AppearanceControls';
 import { optionLabel } from './labels';
 import './FieldAppearancePanel.scss';
@@ -24,9 +16,8 @@ import './FieldAppearancePanel.scss';
  * Per-field style overrides.
  *
  * Everything here overrides the form's Appearance for this one field. Unset
- * controls show the value inherited from the form, and a live sample at the
- * top renders the field with the real public stylesheet, so a change is seen
- * the moment it is made rather than only in the Preview tab.
+ * controls show the value inherited from the form. The field itself is on the
+ * canvas and in Preview, so the panel draws no sample of it.
  */
 
 const SPACING = [
@@ -48,7 +39,27 @@ const ALIGN_LABELS = {
   right: __( 'Right', 'subtleforms' ),
 };
 
-const FRACTIONS = { 100: __( 'Full', 'subtleforms' ), 75: '¾', 66: '⅔', 50: '½', 33: '⅓', 25: '¼' };
+export const FRACTIONS = { 100: __( 'Full', 'subtleforms' ), 75: '¾', 66: '⅔', 50: '½', 33: '⅓', 25: '¼' };
+
+/**
+ * The appearance object after one setting changes: an empty value clears the
+ * key. Shared by this panel and the Width quick row of the settings sheet, so
+ * both save the same shape.
+ *
+ * @param {Object} appearance Current appearance overrides.
+ * @param {string} key        Setting.
+ * @param {*}      value      New value.
+ * @return {Object} Next appearance.
+ */
+export function nextAppearance( appearance, key, value ) {
+  const next = { ...appearance };
+  if ( value === '' || value === undefined || value === null || value === false ) {
+    delete next[ key ];
+  } else {
+    next[ key ] = value;
+  }
+  return next;
+}
 
 function WidthPicker( { value, onChange, disabled } ) {
   const options = [ { value: '', label: __( 'Auto', 'subtleforms' ) }, ...FIELD_LAYOUT.widths ];
@@ -78,22 +89,51 @@ function WidthPicker( { value, onChange, disabled } ) {
   );
 }
 
-export default function FieldAppearancePanel( { field, onUpdate, formAppearance, isReadOnly = false } ) {
-  const appearance = field?.config?.appearance || field?.appearance || {};
-  const overrideCount = Object.values( appearance ).filter(
+export function fieldAppearanceOf( field ) {
+  return field?.config?.appearance || field?.appearance || {};
+}
+
+export function overrideCountOf( field ) {
+  return Object.values( fieldAppearanceOf( field ) ).filter(
     ( v ) => v !== '' && v !== undefined && v !== null && v !== false
   ).length;
+}
+
+/**
+ * "N overrides on this field" with a Clear action. Sits at the top of the
+ * Styles tab, above every section, so it reads as the tab's status line.
+ */
+export function FieldOverrideStatus( { field, onUpdate, isReadOnly = false } ) {
+  const overrideCount = overrideCountOf( field );
+  if ( overrideCount < 1 ) {
+    return null;
+  }
+  return (
+    <div className='sf-field-appearance__status' role='status'>
+      <span>
+        { sprintf(
+          /* translators: %d: number of overrides */
+          _n( '%d override on this field', '%d overrides on this field', overrideCount, 'subtleforms' ),
+          overrideCount
+        ) }
+      </span>
+      { ! isReadOnly && (
+        <Button variant='link' size='small' onClick={ () => onUpdate( { appearance: {} } ) }>
+          { __( 'Clear', 'subtleforms' ) }
+        </Button>
+      ) }
+    </div>
+  );
+}
+
+export default function FieldAppearancePanel( { field, onUpdate, formAppearance, isReadOnly = false, hideWidth = false } ) {
+  const appearance = fieldAppearanceOf( field );
 
   const setValue = ( key, value ) => {
     if ( isReadOnly ) {
       return;
     }
-    const next = { ...appearance };
-    if ( value === '' || value === undefined || value === null || value === false ) {
-      delete next[ key ];
-    } else {
-      next[ key ] = value;
-    }
+    const next = nextAppearance( appearance, key, value );
     onUpdate( { appearance: next } );
   };
 
@@ -108,42 +148,10 @@ export default function FieldAppearancePanel( { field, onUpdate, formAppearance,
     borderWidth: resolvedToken( formAppearance, 'borderWidth' ),
   };
 
-  // Sample: the real public field, with the form's look and this field's
-  // overrides, inside the public stylesheet.
-  const sampleField = {
-    ...field,
-    config: { ...( field?.config ?? field ), appearance },
-  };
-
   return (
     <div className='sf-field-appearance'>
-      <div className='sf-field-appearance__sample'>
-        <PreviewFrame title={ __( 'Field sample', 'subtleforms' ) } className='sf-field-appearance__frame'>
-          <SampleForm appearance={ formAppearance }>
-            <FieldRenderer field={ sampleField } values={ {} } onChange={ () => {} } errors={ {} } />
-          </SampleForm>
-        </PreviewFrame>
-      </div>
-
-      <div className='sf-field-appearance__status'>
-        <span>
-          { overrideCount
-            ? sprintf(
-                /* translators: %d: number of overrides */
-                _n( '%d override on this field', '%d overrides on this field', overrideCount, 'subtleforms' ),
-                overrideCount
-              )
-            : __( 'Following the form’s Appearance', 'subtleforms' ) }
-        </span>
-        { overrideCount > 0 && ! isReadOnly && (
-          <Button variant='link' size='small' onClick={ () => onUpdate( { appearance: {} } ) }>
-            { __( 'Clear', 'subtleforms' ) }
-          </Button>
-        ) }
-      </div>
-
       {(field?.type === 'phone' || field?.type === 'tel') && field?.enableCountryCode && (
-        <PanelBody title={ __( 'Phone', 'subtleforms' ) } initialOpen className='sf-field-appearance__panel'>
+        <InspectorSection id='style-phone' title={ __( 'Phone', 'subtleforms' ) }>
           <ToggleControl
             label={ __( 'Show flags', 'subtleforms' ) }
             help={ __( 'Show or hide the flag beside each country in the dial-code list.', 'subtleforms' ) }
@@ -151,15 +159,19 @@ export default function FieldAppearancePanel( { field, onUpdate, formAppearance,
             disabled={ isReadOnly }
             onChange={ (on) => onUpdate( { appearance: { ...appearance, showFlags: on } } ) }
           />
-        </PanelBody>
+        </InspectorSection>
       )}
 
-      <PanelBody title={ __( 'Layout', 'subtleforms' ) } initialOpen className='sf-field-appearance__panel'>
-        <p className='sf-field-appearance__label'>{ __( 'Width', 'subtleforms' ) }</p>
-        <WidthPicker value={ appearance.width } onChange={ ( v ) => setValue( 'width', v ) } disabled={ isReadOnly } />
-        <p className='sf-field-appearance__help'>
-          { __( 'Narrower fields sit side by side and stack on phones.', 'subtleforms' ) }
-        </p>
+      <InspectorSection id='style-layout' title={ __( 'Layout', 'subtleforms' ) }>
+        { ! hideWidth && (
+          <>
+            <p className='sf-field-appearance__label'>{ __( 'Width', 'subtleforms' ) }</p>
+            <WidthPicker value={ appearance.width } onChange={ ( v ) => setValue( 'width', v ) } disabled={ isReadOnly } />
+            <p className='sf-field-appearance__help'>
+              { __( 'Narrower fields sit side by side and stack on phones.', 'subtleforms' ) }
+            </p>
+          </>
+        ) }
 
         <ToggleGroupControl
           __nextHasNoMarginBottom
@@ -198,13 +210,13 @@ export default function FieldAppearancePanel( { field, onUpdate, formAppearance,
         </div>
 
         { /* 2.3.2: hiding the label is the Field label visibility setting
-             on the Settings tab (one setting, also used by the form default). */ }
+             under Label (one setting, also used by the form default). */ }
         <p className='sf-field-appearance__note'>
-          { __( 'To hide the label, use Field label visibility on the Settings tab.', 'subtleforms' ) }
+          { __( 'To hide the label, use Field label visibility under Label.', 'subtleforms' ) }
         </p>
-      </PanelBody>
+      </InspectorSection>
 
-      <PanelBody title={ __( 'Colours', 'subtleforms' ) } initialOpen className='sf-field-appearance__panel'>
+      <InspectorSection id='style-colours' title={ __( 'Colours', 'subtleforms' ) }>
         <AppearanceControls
           tokens={ FIELD_TOKENS.filter( ( t ) => t.group === 'color' ) }
           values={ appearance }
@@ -214,9 +226,9 @@ export default function FieldAppearancePanel( { field, onUpdate, formAppearance,
           layout='swatches'
           inheritLabel={ __( 'Form', 'subtleforms' ) }
         />
-      </PanelBody>
+      </InspectorSection>
 
-      <PanelBody title={ __( 'Text & shape', 'subtleforms' ) } initialOpen={ false } className='sf-field-appearance__panel'>
+      <InspectorSection id='style-text-shape' title={ __( 'Text & shape', 'subtleforms' ) }>
         <AppearanceControls
           tokens={ FIELD_TOKENS.filter( ( t ) => t.group === 'type' || t.group === 'shape' ) }
           values={ appearance }
@@ -225,20 +237,7 @@ export default function FieldAppearancePanel( { field, onUpdate, formAppearance,
           disabled={ isReadOnly }
           inheritLabel={ __( 'Form', 'subtleforms' ) }
         />
-      </PanelBody>
-    </div>
-  );
-}
-
-/**
- * Minimal form root so the sample inherits the form's tokens and variants.
- */
-function SampleForm( { appearance, children } ) {
-  return (
-    <div
-      className={ `subtleforms subtleforms--sample ${ formAppearanceClasses( appearance ) }` }
-      style={ { ...formAppearanceStyle( appearance ), maxWidth: 'none', width: '100%', boxShadow: 'none', padding: 14, margin: 0 } }>
-      <div className='subtleforms-fields' style={ { display: 'block' } }>{ children }</div>
+      </InspectorSection>
     </div>
   );
 }

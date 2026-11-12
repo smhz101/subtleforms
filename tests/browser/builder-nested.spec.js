@@ -8,7 +8,7 @@
  * the same.
  */
 const { test, expect } = require('@playwright/test');
-const { adminApi, cleanup, loginPage, openBuilder } = require('./helpers');
+const { adminApi, cleanup, loginPage, openBuilder, openPanel } = require('./helpers');
 
 let client;
 const created = [];
@@ -158,11 +158,11 @@ for (const container of CONTAINERS) {
     });
     await expect(childChrome).toHaveClass(/is-selected/);
     await expect(inspectorTitle(page)).not.toHaveText(/Repeat|Group|Column/i);
-    // Every input-like child has Validation and Logic tabs.
-    await expect(page.getByRole('tab', { name: /Validation/ })).toBeVisible();
-    await expect(page.getByRole('tab', { name: /Logic/ })).toBeVisible();
-    await page.getByRole('tab', { name: /Validation/ }).click();
-    await expect(page.locator('.sf-field-inspector__tab-content')).toBeVisible();
+    // Every input-like child has Rules and Logic sections.
+    await expect(page.locator('.sf-isec[data-section="rules"] .sf-isec__toggle')).toBeVisible();
+    await expect(page.locator('.sf-isec[data-section="logic"] .sf-isec__toggle')).toBeVisible();
+    await openPanel(page, 'Rules');
+    await expect(page.locator('.sf-isec[data-section="rules"] .sf-isec__body')).toBeVisible();
 
     // Keyboard: focus another child (or the same one after deselecting) and press Enter.
     await page.keyboard.press('Escape');
@@ -187,7 +187,7 @@ test('editing a child does not change the parent (QA-10)', async ({ page }) => {
   await loginPage(page);
   await openBuilder(page, form.id);
   await page.locator('.sf-field-chrome', { hasText: 'Number of shares' }).click();
-  await page.getByRole('tab', { name: /Validation/ }).click();
+  await openPanel(page, 'Rules');
   await page.getByRole('checkbox', { name: /Required/ }).first().check();
   await saveDraft(page);
   const [rep] = await draftFields(form.id);

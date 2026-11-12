@@ -101,12 +101,14 @@
 		}
 	}
 
+	// The panel scrolls inside itself (its header, tabs and footer stay put).
 	&__inspector {
+		display: flex;
+		flex-direction: column;
 		min-height: 0;
-		overflow-y: auto;
+		overflow: hidden;
 		background: var(--sf-bg-surface);
 		border-left: 1px solid var(--sf-border-subtle);
-		scrollbar-width: thin;
 	}
 
 	@media (max-width: 1199px) {
@@ -124,7 +126,7 @@
 		}
 
 		&.has-selection .sf-form-editor__inspector {
-			display: block;
+			display: flex;
 		}
 	}
 

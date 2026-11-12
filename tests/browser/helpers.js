@@ -179,7 +179,27 @@ module.exports.useBundleOverride = useBundleOverride;
  * Open a collapsed inspector panel (for example Appearance, 2.3.3) if needed.
  */
 async function openPanel(page, title) {
-  const toggle = page.locator('.sf-field-inspector .components-panel__body-toggle', { hasText: title }).first();
+  // Settings is the default tab; Styles holds the appearance controls.
+  const wanted = String(title).toLowerCase() === 'styles' ? 'styles' : 'settings';
+  const tab = page.locator(`.sf-field-inspector .sf-itabs__tab[id$="-tab-${wanted}"]`).first();
+  if ((await tab.count()) && (await tab.getAttribute('aria-selected')) !== 'true') {
+    await tab.click();
+  }
+  if (wanted === 'styles') {
+    // Every section starts closed: the Styles tab opens all of them.
+    for (let i = 0; i < 12; i++) {
+      const closed = page.locator('.sf-field-inspector .sf-isec__toggle[aria-expanded="false"]');
+      if (!(await closed.count())) break;
+      await closed.first().click();
+    }
+    return;
+  }
+  // The settings panel is one sheet of collapsible sections. The older group
+  // names map to the section that holds their controls now.
+  const ALIASES = { display: 'content', general: 'content', field: 'content', validation: 'rules', conditions: 'logic' };
+  const key = String(title).toLowerCase();
+  const id = ALIASES[key] || key;
+  const toggle = page.locator(`.sf-field-inspector .sf-isec[data-section="${id}"] .sf-isec__toggle`).first();
   if ((await toggle.count()) && (await toggle.getAttribute('aria-expanded')) === 'false') {
     await toggle.click();
   }

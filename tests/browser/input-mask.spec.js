@@ -1,7 +1,7 @@
 /**
  * 2.8.0: input masks on Text, Number and Phone fields.
  *
- * - Builder: the Validation tab has an Input mask select, a Pattern box for
+ * - Builder: the Rules section has an Input mask select, a Pattern box for
  *   Custom, a Try it box that applies the mask, and Save as.
  * - Front end: the field formats as the visitor types, shows the format as
  *   placeholder and hint (linked with aria-describedby), the mask code is
@@ -10,7 +10,7 @@
  */
 const fs = require('fs');
 const { test, expect } = require('@playwright/test');
-const { adminApi, publishForm, cleanup, entries, loginPage, openBuilder, waitForForm, spamToken } = require('./helpers');
+const { adminApi, openPanel, publishForm, cleanup, entries, loginPage, openBuilder, waitForForm, spamToken } = require('./helpers');
 
 const SHOTS = process.env.SF_SHOTS || 'test-results/shots/input-mask';
 let client;
@@ -183,33 +183,33 @@ test('builder: choose a mask, try it, and it is saved on the field', async ({ pa
   await openBuilder(page, form.id);
   await page.locator('.subtleforms-builder-canvas .sf-field-chrome').first().click();
   const inspector = page.locator('.sf-field-inspector');
-  await inspector.getByRole('tab', { name: 'Validation' }).click();
+  await openPanel(page, 'Rules');
 
-  const select = inspector.getByLabel('Input mask');
+  const select = inspector.getByLabel('Input mask', { exact: true });
   await expect(select).toHaveValue('');
   await expect(inspector.getByLabel('Pattern', { exact: true })).toHaveCount(0);
-  await expect(inspector.getByLabel('Try it')).toHaveCount(0);
+  await expect(inspector.getByLabel('Try it', { exact: true })).toHaveCount(0);
   const options = await select.locator('option').allTextContents();
   expect(options).toEqual(['None', 'Phone', 'Date DD/MM/YYYY', 'Date MM/DD/YYYY', 'Date YYYY-MM-DD', 'Time HH:MM (24-hour)', 'Postcode or ZIP (US)', 'Custom']);
 
   await select.selectOption('date_dmy');
-  await expect(inspector.getByLabel('Try it')).toBeVisible();
-  await expect(inspector.getByLabel('Save as')).toHaveCount(0);
-  await inspector.getByLabel('Try it').click();
+  await expect(inspector.getByLabel('Try it', { exact: true })).toBeVisible();
+  await expect(inspector.getByLabel('Save as', { exact: true })).toHaveCount(0);
+  await inspector.getByLabel('Try it', { exact: true }).click();
   await page.keyboard.type('31122026');
-  await expect(inspector.getByLabel('Try it')).toHaveValue('31/12/2026');
+  await expect(inspector.getByLabel('Try it', { exact: true })).toHaveValue('31/12/2026');
 
   await select.selectOption('custom');
   await expect(inspector.getByText('9 is a digit, A is a letter, * is a letter or digit.', { exact: false })).toBeVisible();
   await inspector.getByLabel('Pattern', { exact: true }).fill('AA-9999');
-  await inspector.getByLabel('Save as').selectOption('digits');
-  const tryIt = inspector.getByLabel('Try it');
+  await inspector.getByLabel('Save as', { exact: true }).selectOption('digits');
+  const tryIt = inspector.getByLabel('Try it', { exact: true });
   await tryIt.fill('');
   await tryIt.click();
   await page.keyboard.type('ab12345');
   await expect(tryIt).toHaveValue('ab-1234');
   await page.screenshot({ path: `${SHOTS}/builder-validation-tab.png` });
-  await inspector.getByLabel('Save as').scrollIntoViewIfNeeded();
+  await inspector.getByLabel('Save as', { exact: true }).scrollIntoViewIfNeeded();
   await page.screenshot({ path: `${SHOTS}/builder-validation-tab-scrolled.png` });
 
   await page.locator('.sf-builder-header-bar__publish-arrow').click();

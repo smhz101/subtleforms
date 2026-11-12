@@ -11,56 +11,47 @@
 	display: flex;
 	flex-direction: column;
 
-	&__sample {
-		padding: 12px 16px;
-		border-bottom: 1px solid var(--sf-border-subtle);
-		background:
-			linear-gradient(45deg, var(--sf-bg-subtle) 25%, transparent 25%, transparent 75%, var(--sf-bg-subtle) 75%) 0 0 / 12px 12px,
-			linear-gradient(45deg, var(--sf-bg-subtle) 25%, transparent 25%, transparent 75%, var(--sf-bg-subtle) 75%) 6px 6px / 12px 12px,
-			var(--sf-bg-surface);
-	}
-
-	&__frame {
-		border-radius: var(--sf-radius-md);
-		box-shadow: 0 0 0 1px var(--sf-border-subtle);
-	}
-
 	&__status {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: 8px;
-		padding: 10px 16px;
+		padding: 12px 16px;
 		border-bottom: 1px solid var(--sf-border-subtle);
 		font-size: 12px;
+		line-height: 16px;
 		color: var(--sf-text-muted);
 	}
 
-	&__panel.components-panel__body {
-		border-top: 0;
-		border-bottom: 1px solid var(--sf-border-subtle);
-
-		> .components-panel__body-title .components-panel__body-toggle {
-			padding: 14px 16px;
-			font-size: var(--sf-text-sm);
-			font-weight: var(--sf-weight-semibold);
-		}
-
-		&.is-opened {
-			padding: 0 16px 16px;
-
-			> .components-panel__body-title { margin: 0 -16px 4px; }
-		}
-
-		.components-toggle-group-control,
+	// Inside a section of the Styles tab: Alignment, Space above and Space
+	// below sit 12px apart; a toggle keeps 16px.
+	.sf-isec__body {
+		.components-toggle-group-control { margin-bottom: 12px; }
 		.components-toggle-control { margin-bottom: 16px; }
 
+		// Uppercase 12/16 labels over the controls, as in the rest of the panel.
 		.components-base-control__label,
 		.components-input-control__label.components-input-control__label {
 			font-size: 12px;
 			font-weight: var(--sf-weight-medium);
-			text-transform: none;
-			color: var(--sf-text);
+			line-height: 16px;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
+			color: #303030;
+		}
+
+		// A segmented control takes the outline from the keyboard only, never
+		// from a mouse selection, so the selected border stays single.
+		.components-toggle-group-control-option-base:focus,
+		.components-toggle-group-control-option-base:focus-visible {
+			outline: none;
+			box-shadow: none;
+		}
+
+		.components-toggle-group-control:has(input:focus-visible),
+		.components-toggle-group-control:has(button:focus-visible) {
+			outline: 2px solid var(--sf-brand);
+			outline-offset: 2px;
 		}
 	}
 
@@ -68,20 +59,24 @@
 		margin: 0 0 8px;
 		font-size: 12px;
 		font-weight: var(--sf-weight-medium);
-		color: var(--sf-text);
+		line-height: 16px;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: #303030;
 	}
 
 	&__help {
-		margin: 6px 0 16px;
+		margin: 8px 0 16px;
 		font-size: 12px;
+		line-height: 16px;
 		color: var(--sf-text-muted);
 	}
 
+	// Space above and Space below: one block under the other.
 	&__stack {
 		display: flex;
 		flex-direction: column;
 	}
-
 }
 
 // ── Width picker ────────────────────────────────────────────────────────────
@@ -103,14 +98,20 @@
 
 		&:hover:not(:disabled) { border-color: var(--sf-text-subtle); }
 
+		// Selected: one 1px accent border on a white square. The outline is for
+		// the keyboard only and sits outside it.
 		&.is-active {
 			border-color: var(--sf-brand);
-			box-shadow: inset 0 0 0 1px var(--sf-brand);
+			background: #fff;
+			box-shadow: none;
 		}
 
+		&:focus { outline: none; }
+
 		&:focus-visible {
-			outline: none;
-			box-shadow: var(--sf-shadow-focus);
+			outline: 2px solid var(--sf-brand);
+			outline-offset: 2px;
+			box-shadow: none;
 		}
 	}
 
@@ -136,7 +137,7 @@
 	&__option.is-active &__fill { background: var(--sf-brand); }
 
 	&__label {
-		font-size: 11px;
+		font-size: 12px;
 		line-height: 1;
 		color: var(--sf-text-secondary);
 	}
@@ -146,4 +147,49 @@
 	margin: 0;
 	font-size: 12px;
 	color: var(--sf-text-secondary, #757575);
+}
+
+// The shared appearance controls, sized for the field panel: nothing below
+// 12px, borders as visible as the other inputs, the same focus outline.
+.sf-field-appearance {
+	.sf-appearance-group__title {
+		font-size: 12px;
+		line-height: 16px;
+	}
+
+	.sf-color-token__value {
+		font-size: 12px;
+		line-height: 16px;
+	}
+
+	.sf-color-token__label {
+		font-size: 13px;
+		line-height: 20px;
+	}
+
+	// The swatch button: the surface colour for a border at rest and on hover,
+	// a slightly darker one for the keyboard, no heavy outline.
+	.sf-color-token__toggle {
+		border-color: var(--sf-bg-surface);
+		border-radius: var(--sf-radius-sm);
+		transition: border-color 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms cubic-bezier(0.22, 1, 0.36, 1);
+
+		&:hover:not(:disabled) {
+			border-color: var(--sf-bg-surface);
+			background: var(--sf-bg-hover);
+		}
+
+		&:active:not(:disabled) {
+			transform: translateY(1px);
+		}
+
+		// Keyboard focus: the darker border is the indicator. The panel's
+		// global focus rule is !important, so this one has to be as well.
+		&:focus-visible:not(:disabled) {
+			border-color: #d4d4d4;
+			border-color: color-mix(in srgb, var(--sf-bg-surface), #000 12%);
+			outline: none !important;
+			box-shadow: none !important;
+		}
+	}
 }

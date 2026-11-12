@@ -98,7 +98,7 @@ test.describe('builder without the add-on', () => {
 
       // Field with advanced logic: the rules are kept and named as ignored, no link.
       await page.locator('.sf-field-chrome', { hasText: 'Nickname' }).first().click();
-      await page.getByRole('tab', { name: /Logic/ }).click();
+      await openPanel(page, 'Logic');
       const editor = page.locator('.sf-field-inspector .sf-logic-editor');
       await expect(editor).toContainText('ignored');
       await expect(editor).not.toContainText(/Pro\b|upgrade/i);
