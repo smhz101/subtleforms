@@ -144,6 +144,7 @@ final class Plugin {
 		\SubtleForms\Support\SpamDefaults::register();
 		\SubtleForms\Support\ImportOffer::register();
 		\SubtleForms\Support\ThemeStyles::register();
+		\SubtleForms\Admin\ThemePreviewAssets::register();
 
 		// Allow other plugins/themes to hook in
 		do_action( 'subtleforms/loaded', $this );
