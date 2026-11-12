@@ -20,10 +20,11 @@ export default function Segmented( { options, value, onChange, labelId, ariaLabe
 	const current = String( value ?? '' );
 	return (
 		<div
-			className={ `sf-seg${ className ? ` ${ className }` : '' }` }
+			className={ `sf-seg${ disabled ? ' is-disabled' : '' }${ className ? ` ${ className }` : '' }` }
 			role="radiogroup"
 			aria-labelledby={ labelId }
 			aria-label={ labelId ? undefined : ariaLabel }
+			aria-disabled={ disabled ? 'true' : undefined }
 		>
 			{ options.map( ( option ) => {
 				const checked = String( option.value ?? '' ) === current;
@@ -41,7 +42,7 @@ export default function Segmented( { options, value, onChange, labelId, ariaLabe
 							checked={ checked }
 							disabled={ disabled }
 							aria-label={ option.short ? option.label : undefined }
-							onChange={ () => onChange( option.value ) }
+							onChange={ () => ! disabled && onChange( option.value ) }
 						/>
 						<span className="sf-seg__text">{ option.short || option.label }</span>
 					</label>

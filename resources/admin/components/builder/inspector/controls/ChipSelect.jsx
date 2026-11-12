@@ -21,8 +21,9 @@ export default function ChipSelect( { id, options = [], value, onChange, helpId,
 				className="sf-chip-select__input"
 				value={ value ?? '' }
 				disabled={ disabled }
+				aria-disabled={ disabled ? 'true' : undefined }
 				aria-describedby={ helpId }
-				onChange={ ( event ) => onChange( event.target.value ) }
+				onChange={ ( event ) => ! disabled && onChange( event.target.value ) }
 				{ ...rest }
 			>
 				{ options.map( ( option ) => (
