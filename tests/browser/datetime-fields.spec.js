@@ -75,3 +75,72 @@ test('in the date and time picker the time columns sit beside the calendar, not 
   expect(boxes.time.x).toBeGreaterThanOrEqual(boxes.calendar.x + boxes.calendar.width - 1);
   expect(boxes.time.x + boxes.time.width).toBeLessThanOrEqual(boxes.menu.x + boxes.menu.width + 1);
 });
+
+// ---- Picker CSS is plugin UI and loads on its own (#109) -------------------
+
+const THEME = { appearance: { preset: 'theme', tokens: { fontFamily: 'inherit', colorBackground: 'transparent' }, variants: {} } };
+let themeForm;
+let textOnly;
+
+test.describe('theme forms and the picker stylesheet', () => {
+  test.beforeAll(async () => {
+    themeForm = await publishForm(client, {
+      title: `Theme picker ${Date.now()}`,
+      metadata: THEME,
+      fields: [
+        { id: 't1', key: 'name', type: 'text', label: 'Name' },
+        { id: 't2', key: 'topic', type: 'select', label: 'Topic', options: [{ label: 'Sales', value: 'sales' }, { label: 'Support', value: 'support' }] },
+        { id: 't3', key: 'visit', type: 'date', label: 'Visit date' },
+      ],
+    });
+    textOnly = await publishForm(client, {
+      title: `Theme text ${Date.now()}`,
+      metadata: THEME,
+      fields: [{ id: 'x1', key: 'name', type: 'text', label: 'Name' }],
+    });
+  });
+
+  test.afterAll(async () => {
+    await cleanup(client, themeForm);
+    await cleanup(client, textOnly);
+  });
+
+  test('a theme form loads layout lines and picker.css, not the main stylesheet', async ({ page }) => {
+    await page.goto(themeForm.url);
+    await waitForForm(page);
+    const sheets = await page.evaluate(() => [...document.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.href));
+    expect(sheets.some((href) => /build\/frontend\/picker\.css/.test(href))).toBe(true);
+    expect(sheets.some((href) => /build\/frontend\/index\.jsx\.css/.test(href))).toBe(false);
+    expect(await page.locator('style#subtleforms-frontend-layout-inline-css').count()).toBe(1);
+  });
+
+  test('a theme form with only text fields loads no picker.css', async ({ page }) => {
+    await page.goto(textOnly.url);
+    await waitForForm(page);
+    const sheets = await page.evaluate(() => [...document.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.href));
+    expect(sheets.some((href) => /picker\.css/.test(href))).toBe(false);
+  });
+
+  test('the dropdown on a theme form is drawn once: no native select beside the custom trigger (#109)', async ({ page }) => {
+    await page.goto(themeForm.url);
+    await waitForForm(page);
+    const field = page.locator('.subtleforms-field', { has: page.locator('#subtleforms-field-topic') });
+    const boxes = await field.evaluate((el) => [...el.querySelectorAll('select, .subtleforms-picker__trigger')].map((node) => {
+      const r = node.getBoundingClientRect();
+      const style = getComputedStyle(node);
+      return { tag: node.tagName, w: r.width, h: r.height, clipped: style.clip, position: style.position };
+    }));
+    const visible = boxes.filter((box) => box.w > 2 && box.h > 2);
+    expect(visible).toHaveLength(1);
+    expect(visible[0].tag).toBe('BUTTON');
+  });
+
+  test('the calendar on a theme form is a seven column grid', async ({ page }) => {
+    await page.goto(themeForm.url);
+    await waitForForm(page);
+    await page.locator('#subtleforms-field-visit').click();
+    await expect(page.locator('[role="dialog"]')).toBeVisible();
+    const xs = await page.evaluate(() => [...document.querySelector('.subtleforms-picker__week').querySelectorAll('[role="gridcell"]')].map((c) => Math.round(c.getBoundingClientRect().x)));
+    expect(new Set(xs).size).toBe(7);
+  });
+});

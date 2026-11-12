@@ -677,6 +677,16 @@ class AdminMenu {
 			// layout lines. The preview loads the same, so the two cannot drift.
 			'layoutCss'      => FrontendAssets::layoutCss(),
 			'plainTypes'     => FrontendAssets::plainTypes(),
+			// The picker stylesheet every form with a dropdown, country, date,
+			// time or date and time field loads, and the types that need it (2.9.0).
+			'pickerCss'      => file_exists( SUBTLEFORMS_PLUGIN_DIR . 'build/frontend/picker.css' )
+				? add_query_arg(
+					'ver',
+					(string) filemtime( SUBTLEFORMS_PLUGIN_DIR . 'build/frontend/picker.css' ),
+					SUBTLEFORMS_PLUGIN_URL . 'build/frontend/picker.css'
+				)
+				: '',
+			'pickerTypes'    => FrontendAssets::pickerTypes(),
 			'i18n'           => array(
 				'confirmDelete' => __( 'Are you sure you want to delete this item?', 'subtleforms' ),
 				'error'         => __( 'An error occurred. Please try again.', 'subtleforms' ),

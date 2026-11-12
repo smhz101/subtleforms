@@ -5,7 +5,7 @@
  */
 
 // Frontend component styles will be imported here
-@use '../components/fields/Picker';
+// The picker (dropdown, country, date, time) has its own stylesheet, picker.css.
 @use '../components/fields/ChainedSelect';
 
 // ─── Accessibility utilities ──────────────────────────────────────────────────

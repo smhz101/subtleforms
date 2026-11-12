@@ -54,9 +54,9 @@ const PLUGIN_ATTR = 'data-sf-plugin-css';
  * was there. The key makes a repeat call with the same choice a no-op, so the
  * frame is not repainted for nothing.
  */
-function applyPluginCss( doc, plain, conversational, addLink ) {
+function applyPluginCss( doc, plain, conversational, addLink, picker = false ) {
   const admin = window.subtleformsAdmin || {};
-  const plan = pluginCssPlan( plain, conversational, admin );
+  const plan = pluginCssPlan( plain, conversational, admin, picker );
   const key = JSON.stringify( plan );
   if ( doc.documentElement.getAttribute( 'data-sf-plugin-key' ) === key ) {
     return;
@@ -106,18 +106,25 @@ function addStyle( doc, css, id ) {
  * @param {boolean} plain          The page prints only the layout lines.
  * @param {boolean} conversational Conversational form.
  * @param {Object}  admin          window.subtleformsAdmin.
+ * @param {boolean} picker         The form has a picker, which the page styles
+ *                                 with picker.css whichever look the form has
+ *                                 (2.9.0).
  * @return {{kind: string, value: string}[]} Nodes to add, in order.
  */
-export function pluginCssPlan( plain, conversational, admin = {} ) {
+export function pluginCssPlan( plain, conversational, admin = {}, picker = false ) {
+  const extra = picker && admin.pickerCss ? [ { kind: 'link', value: admin.pickerCss } ] : [];
   if ( plain && admin.layoutCss ) {
-    return [ { kind: 'style', value: admin.layoutCss } ];
+    return [ { kind: 'style', value: admin.layoutCss }, ...extra ];
   }
-  return ( admin.frontendStyles ?? [] )
-    .filter( ( href ) => conversational || ! /conversational\.css/.test( href ) )
-    .map( ( href ) => ( { kind: 'link', value: href } ) );
+  return [
+    ...( admin.frontendStyles ?? [] )
+      .filter( ( href ) => conversational || ! /conversational\.css/.test( href ) )
+      .map( ( href ) => ( { kind: 'link', value: href } ) ),
+    ...extra,
+  ];
 }
 
-export default function PreviewFrame( { children, title, className, conversational = false, plain = false, scheme = 'light' } ) {
+export default function PreviewFrame( { children, title, className, conversational = false, plain = false, picker = false, scheme = 'light' } ) {
   const iframeRef = useRef( null );
   const [ mountNode, setMountNode ] = useState( null );
   const [ height, setHeight ] = useState( 320 );
@@ -127,6 +134,8 @@ export default function PreviewFrame( { children, title, className, conversation
   schemeRef.current = scheme;
   const plainRef = useRef( plain );
   plainRef.current = plain;
+  const pickerRef = useRef( picker );
+  pickerRef.current = picker;
 
   // Populate the iframe document once it exists, then hand React a mount point.
   // It is built again when the theme's data arrives after the fallback.
@@ -202,7 +211,7 @@ export default function PreviewFrame( { children, title, className, conversation
 
     // Added before the scheme rule so the page around the form stays last.
     addStyle( doc, schemeCss( schemeRef.current ), 'sf-preview-scheme' );
-    applyPluginCss( doc, plainRef.current, conversational, addLink );
+    applyPluginCss( doc, plainRef.current, conversational, addLink, pickerRef.current );
 
 
     // The wrappers a theme's templates put around page content.
@@ -252,9 +261,9 @@ export default function PreviewFrame( { children, title, className, conversation
   useEffect( () => {
     const doc = iframeRef.current?.contentDocument;
     if ( doc && doc.head && doc.getElementById( 'sf-preview-scheme' ) ) {
-      applyPluginCss( doc, plain, conversational, null );
+      applyPluginCss( doc, plain, conversational, null, picker );
     }
-  }, [ plain, conversational, mountNode ] );
+  }, [ plain, picker, conversational, mountNode ] );
 
   // Light or Dark page around the form: only the frame's own root changes.
   useEffect( () => {

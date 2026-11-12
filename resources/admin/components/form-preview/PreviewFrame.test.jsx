@@ -33,6 +33,7 @@ function render( assets, props = {} ) {
     frontendStyles: [ 'https://site.test/build/frontend/index.jsx.css', 'https://site.test/assets/css/conversational.css' ],
     layoutCss: '.subtleforms-fields{display:flex}',
     plainTypes: [ 'text', 'email', 'select' ],
+    pickerCss: 'https://site.test/build/frontend/picker.css',
   };
   const container = document.createElement( 'div' );
   document.body.appendChild( container );
@@ -103,6 +104,22 @@ describe( 'which plugin CSS the frame loads', () => {
     expect( pluginCssPlan( true, false, admin ) ).toEqual( [ { kind: 'style', value: '.l{}' } ] );
     expect( pluginCssPlan( false, false, admin ) ).toEqual( [ { kind: 'link', value: 'a/index.jsx.css' } ] );
     expect( pluginCssPlan( false, true, admin ).map( ( i ) => i.value ) ).toEqual( [ 'a/index.jsx.css', 'a/conversational.css' ] );
+  } );
+
+  it( 'adds picker.css for a form with a picker, plain or not, and leaves it out otherwise', () => {
+    const admin = { frontendStyles: [ 'a/index.jsx.css' ], layoutCss: '.l{}', pickerCss: 'a/picker.css' };
+    expect( pluginCssPlan( true, false, admin, true ) ).toEqual( [ { kind: 'style', value: '.l{}' }, { kind: 'link', value: 'a/picker.css' } ] );
+    expect( pluginCssPlan( false, false, admin, true ) ).toEqual( [ { kind: 'link', value: 'a/index.jsx.css' }, { kind: 'link', value: 'a/picker.css' } ] );
+    expect( pluginCssPlan( true, false, admin, false ) ).toEqual( [ { kind: 'style', value: '.l{}' } ] );
+    expect( pluginCssPlan( true, false, { layoutCss: '.l{}' }, true ) ).toEqual( [ { kind: 'style', value: '.l{}' } ] );
+  } );
+
+  it( 'loads layout lines and picker.css for a plain theme form with a picker', () => {
+    const ui = render( BLOCK, { plain: true, picker: true } );
+    expect( pluginNodes( ui.doc ) ).toEqual( [ '.subtleforms-fields{display:flex}', 'https://site.test/build/frontend/picker.css' ] );
+    ui.rerender( { plain: true, picker: false } );
+    expect( pluginNodes( ui.doc ) ).toEqual( [ '.subtleforms-fields{display:flex}' ] );
+    ui.unmount();
   } );
 
   it( 'injects only the layout CSS for a plain theme form', () => {

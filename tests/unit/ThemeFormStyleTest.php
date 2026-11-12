@@ -46,6 +46,25 @@ final class ThemeFormStyleTest extends TestCase {
 		$this->assertFalse( FrontendAssets::isPlainThemeForm( $this->schema( $theme, array( array( 'type' => 'dropdown', 'key' => 'choice' ) ) ) ) );
 	}
 
+	public function test_date_time_and_datetime_are_plain_fields_on_a_theme_form(): void {
+		$theme = array( 'preset' => 'theme' );
+		foreach ( array( 'date', 'time', 'datetime' ) as $type ) {
+			$this->assertTrue( FrontendAssets::isPlainThemeForm( $this->schema( $theme, array( array( 'type' => 'text', 'key' => 'n' ), array( 'type' => $type, 'key' => 'when' ) ) ) ), $type );
+			$this->assertContains( $type, FrontendAssets::plainTypes() );
+		}
+	}
+
+	public function test_a_form_needs_the_picker_stylesheet_when_it_has_a_picker_field(): void {
+		foreach ( array( 'select', 'dropdown', 'country', 'date', 'time', 'datetime' ) as $type ) {
+			$this->assertTrue( FrontendAssets::needsPickerCss( $this->schema( array(), array( array( 'type' => 'text', 'key' => 'n' ), array( 'type' => $type, 'key' => 'x' ) ) ) ), $type );
+		}
+		// Nested in a group, a column and a step.
+		$this->assertTrue( FrontendAssets::needsPickerCss( $this->schema( array(), array( array( 'type' => 'group', 'fields' => array( array( 'type' => 'date', 'key' => 'd' ) ) ) ) ) ) );
+		$this->assertTrue( FrontendAssets::needsPickerCss( array( 'steps' => array( array( 'fields' => array( array( 'type' => 'time', 'key' => 't' ) ) ) ) ) ) );
+		$this->assertFalse( FrontendAssets::needsPickerCss( $this->schema( array(), array( array( 'type' => 'text', 'key' => 'n' ), array( 'type' => 'textarea', 'key' => 'm' ) ) ) ) );
+		$this->assertFalse( FrontendAssets::needsPickerCss( null ) );
+	}
+
 	public function test_widgets_and_step_forms_keep_the_stylesheet(): void {
 		$theme = array( 'preset' => 'theme' );
 		$this->assertFalse( FrontendAssets::isPlainThemeForm( $this->schema( $theme, array( array( 'type' => 'signature', 'key' => 's' ) ) ) ) );

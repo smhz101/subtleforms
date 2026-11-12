@@ -15,7 +15,7 @@
 .subtleforms--input-filled .subtleforms-input,
 .subtleforms--input-filled .subtleforms-textarea,
 .subtleforms--input-filled .subtleforms-select,
-.subtleforms--input-filled .subtleforms-picker__trigger {
+.subtleforms.subtleforms--input-filled .subtleforms-picker__trigger {
 	background-color: var(--subtleforms-color-bg-subtle, #f4f5f7);
 	border-color: transparent;
 }
@@ -23,7 +23,7 @@
 .subtleforms--input-filled .subtleforms-input:focus,
 .subtleforms--input-filled .subtleforms-textarea:focus,
 .subtleforms--input-filled .subtleforms-select:focus,
-.subtleforms--input-filled .subtleforms-picker__trigger:focus-visible {
+.subtleforms.subtleforms--input-filled .subtleforms-picker__trigger:focus-visible {
 	background-color: var(--subtleforms-color-bg, #fff);
 	border-color: var(--subtleforms-color-border-focus);
 }
@@ -31,7 +31,7 @@
 .subtleforms--input-underlined .subtleforms-input,
 .subtleforms--input-underlined .subtleforms-textarea,
 .subtleforms--input-underlined .subtleforms-select,
-.subtleforms--input-underlined .subtleforms-picker__trigger {
+.subtleforms.subtleforms--input-underlined .subtleforms-picker__trigger {
 	border-width: 0 0 var(--subtleforms-border-width, 1px) 0;
 	border-radius: 0;
 	padding-left: 0;
@@ -42,7 +42,7 @@
 .subtleforms--input-underlined .subtleforms-input:focus,
 .subtleforms--input-underlined .subtleforms-textarea:focus,
 .subtleforms--input-underlined .subtleforms-select:focus,
-.subtleforms--input-underlined .subtleforms-picker__trigger:focus-visible {
+.subtleforms.subtleforms--input-underlined .subtleforms-picker__trigger:focus-visible {
 	box-shadow: 0 1px 0 0 var(--subtleforms-color-border-focus);
 }
 
