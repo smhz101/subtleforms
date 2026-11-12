@@ -119,7 +119,7 @@ export function fieldGroups(schema) {
     if (fieldHasMask(node)) {
       groups.add('mask');
     }
-    if ((group === 'geo' && (node.type === 'country' || fieldConfig(node).enableCountryCode)) && flagsOn(fieldConfig(node).showFlags)) {
+    if ((group === 'geo' && (node.type === 'country' || node.type === 'address_group' || fieldConfig(node).enableCountryCode)) && flagsOn(fieldConfig(node).showFlags)) {
       groups.add('flags');
     }
     ['fields', 'children', 'columns'].forEach((key) => walk(node[key]));

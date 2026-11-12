@@ -1079,6 +1079,7 @@ function renderInput(
                     placeholder={__('Select Country', 'subtleforms')}
                     invalid={invalid}
                     describedBy={invalid ? `${inputId}-error` : undefined}
+                    flagImages={flagsOn(config.showFlags)}
                   />
                 ) : (
                   <input

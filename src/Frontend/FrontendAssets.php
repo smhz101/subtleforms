@@ -383,7 +383,7 @@ final class FrontendAssets {
 			$config = is_array( $node['config'] ?? null ) ? $node['config'] : array();
 			$phonePicker = ( 'phone' === $type || 'tel' === $type ) && ( ! empty( $node['enableCountryCode'] ) || ! empty( $config['enableCountryCode'] ) );
 			// Country flags: one more lazy group, only for a field that asks (2.7.2).
-			if ( ( $phonePicker || 'country' === $type ) && self::wantsFlags( $node, $config ) ) {
+			if ( ( $phonePicker || 'country' === $type || 'address_group' === $type ) && self::wantsFlags( $node, $config ) ) {
 				$groups['flags'] = true;
 			}
 			// Input mask (2.8.0): one more lazy group, only for a field that asks.
@@ -422,7 +422,7 @@ final class FrontendAssets {
 	}
 
 	/**
-	 * Whether a Phone or Country field asks for country flags. Off unless the
+	 * Whether a Phone, Country or Address field asks for country flags. Off unless the
 	 * setting is a true boolean (or the "1"/"true" a saved form may hold).
 	 *
 	 * @param array<string, mixed> $node   Field node.
