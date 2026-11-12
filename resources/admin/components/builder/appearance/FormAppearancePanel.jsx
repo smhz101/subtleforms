@@ -160,6 +160,9 @@ function PresetCard( { preset, name, isActive, isModified, onApply, disabled } )
           checked={ isActive }
           disabled={ disabled }
           onChange={ onApply }
+          // A checked radio does not emit change, so an edited active preset
+          // is reapplied from the click.
+          onClick={ isActive ? onApply : undefined }
         />
         <span className='sf-pcard__face'>
           <PresetMock preset={ preset } />
