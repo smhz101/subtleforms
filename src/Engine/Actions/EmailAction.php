@@ -85,14 +85,14 @@ final class EmailAction implements ActionInterface {
 		// the site send mail to it.
 		$recipientAnswers = self::recipientAnswers( $textPayload, $schema );
 		$to      = is_string( $to ) ? \SubtleForms\Support\MergeTags::render( $to, array( 'answers' => $recipientAnswers ) + $mergeContext, false ) : $to;
-		$subject = is_string( $subject ) ? \SubtleForms\Support\MergeTags::render( $subject, array( 'answers' => $textPayload ) + $mergeContext, false ) : $subject;
+		$subject = is_string( $subject ) ? \SubtleForms\Support\MergeTags::render( $subject, array( 'answers' => $textPayload, 'raw' => $payload ) + $mergeContext, false ) : $subject;
 		// A subject is one line, whatever the answers merged into it hold.
 		$subject = is_string( $subject ) ? trim( (string) preg_replace( '/[\r\n]+/', ' ', $subject ) ) : $subject;
 		// An HTML email keeps the line breaks typed into the message itself.
 		if ( $isHtml && ! preg_match( '/<(p|br|div|table|ul|ol|h[1-6])\b/i', (string) $body ) ) {
 			$body = nl2br( (string) $body );
 		}
-		$body    = \SubtleForms\Support\MergeTags::render( (string) $body, array( 'answers' => $bodyPayload ) + $mergeContext, $isHtml );
+		$body    = \SubtleForms\Support\MergeTags::render( (string) $body, array( 'answers' => $bodyPayload, 'raw' => $payload ) + $mergeContext, $isHtml );
 
 		if ( empty( $to ) || ! is_string( $to ) ) {
 			// Nothing to do; record failure but don't throw to avoid breaking other steps.
@@ -164,8 +164,8 @@ final class EmailAction implements ActionInterface {
 		$replyTo = \SubtleForms\Support\ReplyTo::apply(
 			$headers,
 			is_string( $settings['replyTo'] ?? null ) ? $settings['replyTo'] : '',
-			static function ( string $text ) use ( $textPayload, $mergeContext ): string {
-				return \SubtleForms\Support\MergeTags::render( $text, array( 'answers' => $textPayload ) + $mergeContext, false );
+			static function ( string $text ) use ( $textPayload, $payload, $mergeContext ): string {
+				return \SubtleForms\Support\MergeTags::render( $text, array( 'answers' => $textPayload, 'raw' => $payload ) + $mergeContext, false );
 			}
 		);
 		$headers = $replyTo['headers'];

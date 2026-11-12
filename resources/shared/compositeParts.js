@@ -95,6 +95,20 @@ export function compositeDataParts(type) {
 }
 
 /**
+ * The answer keys to read for a part name (`street`, `postal`): its `value`
+ * key, then its `alias`. Registered parts are included. Empty for an unknown
+ * part or type.
+ *
+ * @param {string} type Field type.
+ * @param {string} part Part name.
+ * @return {string[]} Keys.
+ */
+export function compositeValueKeys(type, part) {
+  const def = defs(type).find((d) => d.part === part);
+  return def ? [def.value, def.alias].filter(Boolean) : [];
+}
+
+/**
  * Every answer key a type keeps: the value and alias of each part, data parts
  * included.
  *

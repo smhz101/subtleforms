@@ -77,6 +77,7 @@ final class WebhookAction implements ActionInterface {
 						'entry_id'   => (string) ( $context->getMeta( 'submission_id', '' ) ),
 						'entry'      => $entry_values,
 						'raw'        => Webhooks::rawAnswers( $schema, $answers ),
+						'fields'     => \SubtleForms\Support\FieldMapper::fields( $schema ),
 					)
 				);
 				$body = (string) wp_json_encode( $decoded );
@@ -161,7 +162,7 @@ final class WebhookAction implements ActionInterface {
 	 *
 	 * @param mixed $value Decoded JSON.
 	 * @param array $answers Field key to answer.
-	 * @param array $context form_title, entry_id, entry (values for {{entry:name}}) and raw (answers for {{raw:key}}).
+	 * @param array $context form_title, entry_id, entry (values for {{entry:name}}), raw (answers for {{raw:key}} and for merge tag parts) and fields (FieldMapper::fields(), for part names).
 	 * @return mixed
 	 */
 	public static function fillCustomPayload( $value, array $answers, array $context = array() ) {
@@ -198,6 +199,15 @@ final class WebhookAction implements ActionInterface {
 			'form_title' => (string) ( $context['form_title'] ?? '' ),
 			'entry_id'   => (string) ( $context['entry_id'] ?? '' ),
 		);
+		// The stored answers (secret fields already left out) let
+		// {{field:key:part}} and the subtleforms/merge_tags/value filter see
+		// the whole answer; `fields` names the composite type for part names.
+		if ( isset( $context['raw'] ) && is_array( $context['raw'] ) ) {
+			$merge['raw'] = $context['raw'];
+		}
+		if ( isset( $context['fields'] ) && is_array( $context['fields'] ) ) {
+			$merge['fields'] = $context['fields'];
+		}
 		return \SubtleForms\Support\MergeTags::render( $value, $merge, false );
 	}
 

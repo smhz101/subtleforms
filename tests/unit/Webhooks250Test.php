@@ -192,6 +192,23 @@ final class Webhooks250Test extends TestCase {
 		$this->assertSame( array( 'n' => 'Ann', 'f' => 'Contact' ), $filled );
 	}
 
+	public function test_field_parts_and_the_value_filter_read_the_stored_answer(): void {
+		$GLOBALS['sf_test_filters'] = array();
+		$raw    = array( 'addr' => array( 'street_address' => '1 Main', 'city' => 'Lahore', 'lat' => '31.5' ) );
+		$fields = \SubtleForms\Support\FieldMapper::fields( array( 'fields' => array( array( 'key' => 'addr', 'type' => 'address_group', 'label' => 'Address' ) ) ) );
+		$tpl    = array( 'city' => '{{field:addr:city}}', 'street' => '{field:addr:street}', 'none' => '{{field:addr:nope}}', 'map' => '{{field:addr:map_url}}' );
+		$filled = WebhookAction::fillCustomPayload( $tpl, array(), array( 'raw' => $raw, 'fields' => $fields ) );
+		$this->assertSame( array( 'city' => 'Lahore', 'street' => '1 Main', 'none' => '', 'map' => '' ), $filled );
+
+		$GLOBALS['sf_test_filters']['subtleforms/merge_tags/value'] = static function ( $custom, $key, $part, $value ) {
+			return 'map_url' === $part && is_array( $value ) ? 'lat=' . $value['lat'] : null;
+		};
+		$filled = WebhookAction::fillCustomPayload( $tpl, array(), array( 'raw' => $raw, 'fields' => $fields ) );
+		$this->assertSame( 'lat=31.5', $filled['map'] );
+		$this->assertSame( 'Lahore', $filled['city'] );
+		$GLOBALS['sf_test_filters'] = array();
+	}
+
 	public function test_raw_tag_keeps_a_list_a_list_and_never_offers_secrets(): void {
 		$raw    = Webhooks::rawAnswers( $this->schema(), $this->answers() );
 		$filled = WebhookAction::fillCustomPayload(

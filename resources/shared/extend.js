@@ -363,6 +363,10 @@ export function getLogicEditor() {
  *                           `component` receives { submission, meta }.
  *   submission.actions      Entry screen header, extra buttons: { component, order }.
  *                           `component` receives { submission }.
+ *   entry.answer.after      Entry screen, under each answer in the answers list (not
+ *                           repeater cells): { component, order }. `component` receives
+ *                           { fieldKey, value, field, fieldType, submission } and may
+ *                           return null. `field` is the field's schema node.
  *
  * @param {string} slot Slot name.
  * @param {string} id   Unique id within the slot.
