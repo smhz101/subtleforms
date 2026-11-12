@@ -42,6 +42,12 @@ export const queryKeys = {
     integrations: () => [...queryKeys.settings.all, 'integrations'],
   },
 
+  // Appearance
+  appearance: {
+    all: ['appearance'],
+    themeAssets: () => [...queryKeys.appearance.all, 'theme-assets'],
+  },
+
   // Dashboard
   dashboard: {
     all: ['dashboard'],

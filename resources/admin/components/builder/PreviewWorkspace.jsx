@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from '@wordpress/element';
-import { Button, Notice } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import FormPreviewBody from '../form-preview/FormPreviewBody';
 import FormAppearancePanel from './appearance/FormAppearancePanel';
-import { appearanceBackdrop, previewBreakpoints } from '../../../shared/appearance';
+import { getPreset, previewBreakpoints } from '../../../shared/appearance';
 import { previewFrame, previewScale } from '../../../shared/previewScale';
 import Icon from '../../ui/Icon';
 import './PreviewWorkspace.scss';
@@ -32,6 +32,23 @@ function viewportWidths() {
 
 const widths = viewportWidths();
 
+export const SCHEME_STORAGE_KEY = 'sf-preview-scheme';
+
+const SCHEMES = [
+  { id: 'light', label: __( 'Light', 'subtleforms' ), icon: Icon.Sun },
+  { id: 'dark', label: __( 'Dark', 'subtleforms' ), icon: Icon.Moon },
+];
+
+/** The canvas the person chose in this browser, or null when they have not chosen. */
+function readScheme() {
+  try {
+    const saved = window.localStorage.getItem( SCHEME_STORAGE_KEY );
+    return saved === 'light' || saved === 'dark' ? saved : null;
+  } catch ( e ) {
+    return null;
+  }
+}
+
 const VIEWPORTS = [
   { id: 'desktop', label: __( 'Desktop', 'subtleforms' ), icon: Icon.Desktop, width: widths.desktop },
   { id: 'tablet', label: __( 'Tablet', 'subtleforms' ), icon: Icon.Tablet, width: widths.tablet },
@@ -49,6 +66,20 @@ export default function PreviewWorkspace( {
   const [ showControls, setShowControls ] = useState( true );
   const [ scale, setScale ] = useState( 1 );
   const [ stageHeight, setStageHeight ] = useState( 0 );
+  // Light or Dark page around the form. Nothing is stored until the person
+  // chooses; until then a form made for a dark page (a preset with a backdrop)
+  // is shown on a dark one. It never touches the form's own appearance.
+  const [ chosenScheme, setChosenScheme ] = useState( readScheme );
+  const presetWantsDark = !! getPreset( schema?.metadata?.appearance?.preset )?.backdrop;
+  const scheme = chosenScheme || ( presetWantsDark ? 'dark' : 'light' );
+  const chooseScheme = ( next ) => {
+    setChosenScheme( next );
+    try {
+      window.localStorage.setItem( SCHEME_STORAGE_KEY, next );
+    } catch ( e ) {
+      // Storage is blocked: the canvas still switches.
+    }
+  };
   const canvasRef = useRef( null );
   const formRef = useRef( null );
 
@@ -106,6 +137,36 @@ export default function PreviewWorkspace( {
           } ) }
         </div>
 
+        <div className='sf-preview-workspace__tools'>
+          <div
+            className='sf-preview-workspace__viewports sf-preview-workspace__schemes'
+            role='group'
+            aria-label={ __( 'Canvas', 'subtleforms' ) }>
+            { SCHEMES.map( ( option ) => {
+              const SchemeIcon = option.icon;
+              return (
+                <button
+                  key={ option.id }
+                  type='button'
+                  className={ `sf-preview-workspace__viewport sf-preview-workspace__scheme${ option.id === scheme ? ' is-active' : '' }` }
+                  aria-pressed={ option.id === scheme }
+                  aria-label={ sprintf(
+                    /* translators: %s: Light or Dark */
+                    __( '%s canvas', 'subtleforms' ),
+                    option.label
+                  ) }
+                  title={ sprintf(
+                    /* translators: %s: light or dark */
+                    __( 'Show the page around the form as %s', 'subtleforms' ),
+                    option.label.toLowerCase()
+                  ) }
+                  onClick={ () => chooseScheme( option.id ) }>
+                  <SchemeIcon size={ 16 } aria-hidden='true' />
+                  <span>{ option.label }</span>
+                </button>
+              );
+            } ) }
+          </div>
         <Button
           variant='tertiary'
           onClick={ () => setShowControls( ( open ) => ! open ) }
@@ -114,6 +175,7 @@ export default function PreviewWorkspace( {
             ? __( 'Hide styling', 'subtleforms' )
             : __( 'Show styling', 'subtleforms' ) }
         </Button>
+        </div>
       </div>
 
       <div
@@ -122,7 +184,8 @@ export default function PreviewWorkspace( {
         }` }>
         <div className='sf-preview-workspace__canvas' ref={ canvasRef }>
           <div
-            className='sf-preview-workspace__stage'
+            className={ `sf-preview-workspace__stage is-${ scheme }` }
+            data-scheme={ scheme }
             style={ {
               width: `${ frame.stageWidth }px`,
               ...( stageHeight ? { height: `${ stageHeight }px` } : {} ),
@@ -134,15 +197,12 @@ export default function PreviewWorkspace( {
                 width: `${ active.width }px`,
                 transform: `scale(${ scale })`,
                 transformOrigin: frame.origin,
-                // A form made for a dark footer is previewed on one (2.3.0).
-                ...( appearanceBackdrop( schema?.metadata?.appearance )
-                  ? { background: appearanceBackdrop( schema?.metadata?.appearance ), padding: '24px' }
-                  : {} ),
               } }>
               <FormPreviewBody
                 schema={ schema }
                 formId={ formId }
                 isDirty={ isDirty }
+                scheme={ scheme }
               />
             </div>
           </div>
@@ -152,27 +212,6 @@ export default function PreviewWorkspace( {
           <aside
             className='sf-preview-workspace__controls'
             aria-label={ __( 'Form styling', 'subtleforms' ) }>
-            <h2 className='sf-preview-workspace__controls-title'>
-              { __( 'Appearance', 'subtleforms' ) }
-            </h2>
-            <p className='sf-preview-workspace__controls-hint'>
-              { __(
-                'Changes show in the canvas immediately. Publish to put them on your site.',
-                'subtleforms'
-              ) }
-            </p>
-
-            { isReadOnly && (
-              <Notice status='info' isDismissible={ false }>
-                <p>
-                  { __(
-                    'Styling is read-only here.',
-                    'subtleforms'
-                  ) }
-                </p>
-              </Notice>
-            ) }
-
             <FormAppearancePanel
               schema={ schema }
               onChange={ onChange }

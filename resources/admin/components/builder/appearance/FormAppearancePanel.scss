@@ -1,258 +1,402 @@
 /**
- * Form appearance, preset gallery with live mock-ups, and a Custom mode with
- * every token grouped into collapsible sections.
+ * The Preview screen's Appearance panel. The shell, tabs, sections and rows
+ * are the field settings panel's own (FieldInspector.scss); this file adds the
+ * preset cards, their miniature, and the few rows that panel does not have.
+ *
+ * Type scale: 12/16 caption, 13/20 control text, 14/20 section titles, 16/24
+ * header. Spacing 4, 8, 12, 16, 24. Radius 4 for controls, 8 for cards.
+ * Motion: opacity and transform only.
  */
 
-.sf-form-appearance {
-	display: flex;
-	flex-direction: column;
-	gap: 16px;
+$sf-ease: cubic-bezier(0.22, 1, 0.36, 1);
+$sf-focus: 2px solid var(--sf-brand);
+
+.sf-appearance-panel {
+	// The footer holds one link on the left.
+	.sf-field-inspector__footer {
+		justify-content: flex-start;
+	}
 
 	&__presets,
 	&__custom {
 		display: flex;
 		flex-direction: column;
-		gap: 12px;
 	}
 
-	&__confirm.components-notice { margin: 0; }
+	&__presets {
+		gap: 16px;
+		padding: 16px;
+	}
+
+	&__caption {
+		margin: 0;
+		font-size: 12px;
+		line-height: 16px;
+		color: var(--sf-text-muted);
+	}
+
+	&__custom > .sf-appearance-panel__caption,
+	&__base {
+		padding: 12px 16px 0;
+	}
+
+	&__base {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		padding-bottom: 12px;
+
+		.sf-appearance-panel__caption {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 0;
+		}
+	}
+
+	&__custom > .sf-appearance-panel__caption {
+		padding: 0 16px 12px;
+	}
+
+	&__link,
+	.components-button.is-link.sf-appearance-panel__reset {
+		padding: 0;
+		border: 0;
+		background: none;
+		font-size: 13px;
+		line-height: 20px;
+		color: var(--sf-brand);
+		text-decoration: none;
+		cursor: pointer;
+
+		&:hover:not(:disabled) {
+			text-decoration: underline;
+		}
+
+		&:focus-visible {
+			outline: $sf-focus;
+			outline-offset: 2px;
+			box-shadow: none;
+		}
+
+		&:disabled {
+			color: var(--sf-text-muted);
+			cursor: default;
+		}
+	}
+
+	// "More" under the plain controls of a section.
+	&__more {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		margin: 4px 0 0;
+		padding: 0;
+		border: 0;
+		background: none;
+		font-size: 13px;
+		line-height: 20px;
+		color: var(--sf-brand);
+		cursor: pointer;
+
+		&:hover {
+			text-decoration: underline;
+		}
+
+		&:focus-visible {
+			outline: $sf-focus;
+			outline-offset: 2px;
+		}
+	}
+
+	&__more-chevron {
+		width: 6px;
+		height: 6px;
+		border-right: 1.5px solid currentColor;
+		border-bottom: 1.5px solid currentColor;
+		transform: translateY(-1px) rotate(45deg);
+		transition: transform 200ms $sf-ease;
+	}
+
+	&__more[aria-expanded='true'] &__more-chevron {
+		transform: translateY(1px) rotate(-135deg);
+	}
+
+	// A question waiting for an answer sits above the footer on both tabs.
+	&__confirm {
+		flex: none;
+		padding: 8px 16px;
+		border-top: 1px solid var(--sf-border-subtle);
+		background: var(--sf-bg-surface);
+
+		.components-notice {
+			margin: 0;
+			font-size: 13px;
+		}
+
+		p {
+			margin: 0;
+		}
+	}
 
 	&__confirm-actions {
 		display: flex;
 		gap: 8px;
 		margin-top: 8px;
 	}
+}
 
-	&__to-custom {
+// ── Rows of the Custom tab ──────────────────────────────────────────────────
+.sf-arow {
+	&__line {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
-		gap: 12px;
-		width: 100%;
-		padding: 12px 14px;
-		border: 1px dashed var(--sf-border-strong);
-		border-radius: var(--sf-radius-md);
-		background: transparent;
-		text-align: start;
-		font-size: 12px;
-		color: var(--sf-text-muted);
-		cursor: pointer;
-
-		strong {
-			display: block;
-			margin-bottom: 2px;
-			font-size: var(--sf-text-sm);
-			color: var(--sf-text);
-		}
-
-		&:hover {
-			border-color: var(--sf-brand);
-			color: var(--sf-text-secondary);
-		}
+		gap: 4px;
 	}
 
-	&__base {
-		margin: 0;
-		font-size: 12px;
-		color: var(--sf-text-muted);
-	}
-
-	// Sections sit flush inside the sidebar, like the block inspector.
-	&__panel.components-panel__body {
-		margin: 0 -24px;
-		border-top: 1px solid var(--sf-border-subtle);
-		border-bottom: 0;
-
-		> .components-panel__body-title .components-panel__body-toggle {
-			padding: 14px 24px;
-			font-size: var(--sf-text-sm);
-			font-weight: var(--sf-weight-semibold);
-		}
-
-		&.is-opened {
-			padding: 0 24px 20px;
-
-			> .components-panel__body-title { margin: 0 -24px 4px; }
-		}
-
-		.components-toggle-group-control { margin-bottom: 0; }
-	}
-
-	&__variant { margin-bottom: 16px !important; }
-
-	&__panel .components-base-control__label,
-	&__panel .components-input-control__label.components-input-control__label,
-	&__variant .components-base-control__label {
-		font-size: 12px;
-		font-weight: var(--sf-weight-medium);
-		text-transform: none;
-		color: var(--sf-text);
-	}
-
-	&__footer {
-		display: flex;
-		justify-content: space-between;
-		gap: 8px;
-		padding-top: 12px;
-		border-top: 1px solid var(--sf-border-subtle);
-	}
-}
-
-// ── Preset gallery ──────────────────────────────────────────────────────────
-.sf-preset-gallery {
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 10px;
-}
-
-.sf-preset-tile {
-	display: flex;
-	flex-direction: column;
-	gap: 6px;
-	min-width: 0;
-	padding: 0;
-	border: 0;
-	background: transparent;
-	text-align: start;
-	cursor: pointer;
-
-	&__name {
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		padding: 0 2px;
-		font-size: 12px;
-		font-weight: var(--sf-weight-medium);
-		color: var(--sf-text);
-	}
-
-	&__badge {
-		display: inline-flex;
-		align-items: center;
-		height: 16px;
-		padding: 0 6px;
-		border-radius: var(--sf-radius-full);
-		background: var(--sf-warning-bg);
-		font-size: 10px;
-		font-weight: var(--sf-weight-medium);
-		color: var(--sf-text-secondary);
-	}
-
-	.sf-preset-mock {
-		box-shadow: inset 0 0 0 1px var(--sf-border);
-		transition: box-shadow var(--sf-duration-fast) var(--sf-ease);
-	}
-
-	&:hover .sf-preset-mock { box-shadow: inset 0 0 0 1px var(--sf-text-subtle); }
-
-	&.is-active .sf-preset-mock {
-		box-shadow: inset 0 0 0 1px var(--sf-border), 0 0 0 2px var(--sf-brand);
-	}
-
-	&:focus-visible {
-		outline: none;
-
-		.sf-preset-mock { box-shadow: var(--sf-shadow-focus); }
-	}
-
-	&:disabled { cursor: default; opacity: 0.7; }
-}
-
-// A tiny form drawn with the preset's own values.
-.sf-preset-mock {
-	display: flex;
-	flex-direction: column;
-	gap: 5px;
-	height: 112px;
-	padding: 12px;
-	overflow: hidden;
-	border-radius: var(--sf-radius-md);
-
-	&__label {
-		width: 46%;
-		height: 4px;
-		border-radius: 2px;
-		opacity: 0.85;
-
-		&--short { width: 30%; margin-top: 3px; }
-	}
-
-	&__input {
-		height: 16px;
-		border-style: solid;
-		box-sizing: border-box;
-	}
-
-	&__button {
-		width: 42%;
-		height: 15px;
-		margin-top: auto;
-		border: 1.5px solid;
-		box-sizing: border-box;
-
-		&--center { align-self: center; }
-		&--right { align-self: flex-end; }
-		&--full { width: 100%; }
-	}
-}
-
-.sf-preset-mock--theme {
-	background:
-		linear-gradient(135deg, transparent 46%, var(--sf-border) 46%, var(--sf-border) 54%, transparent 54%),
-		var(--sf-bg-subtle);
-	border: 1px dashed var(--sf-border-strong, var(--sf-border));
-}
-
-.sf-form-appearance__inherit {
-	margin: 0 0 var(--sf-space-4);
-}
-
-// ── Custom styling controls (2.7.2) ─────────────────────────────────────────
-.sf-form-appearance__advanced-toggle { margin: 4px 0; }
-
-.sf-style-control {
-	display: flex;
-	align-items: flex-end;
-	gap: 4px;
-	min-width: 0;
-
-	&__body {
+	&__control {
 		flex: 1 1 auto;
 		min-width: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 6px;
 	}
 
 	&__reset.components-button {
-		flex: 0 0 auto;
-		margin-bottom: 4px;
+		flex: none;
+		width: 32px;
+		min-width: 32px;
+		height: 32px;
+		padding: 0;
+		justify-content: center;
 		color: var(--sf-text-muted);
-	}
 
-	&:not(.is-set) &__reset.components-button { opacity: 0.35; }
+		svg {
+			width: 16px;
+			height: 16px;
+		}
+
+		&:hover:not(:disabled) {
+			color: var(--sf-text);
+		}
+
+		&:focus-visible {
+			outline: $sf-focus;
+			outline-offset: 2px;
+			box-shadow: none;
+		}
+	}
 
 	&__sizes {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 4px;
+		margin-top: 8px;
+
+		.sf-chip.is-on {
+			background: var(--sf-brand);
+			border-color: var(--sf-brand);
+			color: #fff;
+		}
+	}
+
+	&__error {
+		margin: 4px 0 0;
+		font-size: 12px;
+		line-height: 16px;
+		color: var(--sf-danger);
 	}
 }
 
-// Colours sit two to a row; the reset button stays beside its chip.
-.sf-appearance-group--swatches .sf-style-control {
-	align-items: center;
-	&__reset.components-button { margin-bottom: 0; }
+// The colour chip as a stacked row control: a 36px bordered button.
+.sf-arow .sf-color-token {
+	width: 100%;
+
+	&__toggle {
+		min-height: 36px;
+		padding: 4px 8px;
+		border-radius: var(--sf-radius-sm);
+
+		&:focus-visible {
+			outline: $sf-focus;
+			outline-offset: 2px;
+			box-shadow: none;
+		}
+	}
+
+	&__chip {
+		width: 20px;
+		height: 20px;
+	}
+
+	&__value {
+		font-family: inherit;
+		font-size: 13px;
+		line-height: 20px;
+		color: var(--sf-text);
+	}
 }
 
-.sf-form-appearance__contrast {
-	margin: 4px 0 0;
-	padding: 8px 10px;
-	border-inline-start: 3px solid var(--sf-warning, #b26200);
-	background: var(--sf-bg-subtle);
-	font-size: 12px;
-	line-height: 1.45;
-	color: var(--sf-text);
+// ── Preset cards ────────────────────────────────────────────────────────────
+.sf-pgrid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 12px;
 }
 
-.sf-form-appearance__fonts-note { margin: 0 0 8px; }
+.sf-pcard {
+	position: relative;
+	min-width: 0;
+
+	&__label {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		box-sizing: border-box;
+		height: 100%;
+		padding: 8px;
+		border: 1px solid var(--sf-border);
+		border-radius: 8px;
+		background: #fff;
+		cursor: pointer;
+		transition: border-color 200ms $sf-ease;
+
+		&:hover {
+			border-color: var(--sf-text-subtle);
+		}
+	}
+
+	// The real radio input, drawn by the card around it.
+	&__input {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+
+	&__face {
+		position: relative;
+		display: block;
+		border-radius: 4px;
+	}
+
+	&__input:focus-visible + &__face {
+		outline: $sf-focus;
+		outline-offset: 2px;
+	}
+
+	&.is-active &__label,
+	&.is-active &__label:hover {
+		border-color: var(--sf-brand);
+	}
+
+	&__check {
+		position: absolute;
+		top: 4px;
+		right: 4px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		background: var(--sf-brand);
+		color: #fff;
+		opacity: 0;
+		transform: scale(0.8);
+		transition: opacity 200ms $sf-ease, transform 200ms $sf-ease;
+	}
+
+	&.is-active &__check {
+		opacity: 1;
+		transform: none;
+	}
+
+	&__name {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		min-height: 20px;
+		padding-right: 24px;
+		font-size: 13px;
+		font-weight: var(--sf-weight-medium);
+		line-height: 20px;
+		color: var(--sf-text);
+	}
+
+	&__edited {
+		display: inline-flex;
+		align-items: center;
+		height: 16px;
+		padding: 0 4px;
+		border-radius: 4px;
+		background: var(--sf-bg-muted);
+		font-size: 12px;
+		font-weight: 400;
+		line-height: 16px;
+		color: var(--sf-text-secondary);
+	}
+
+	// The help button sits on the name row, outside the label.
+	&__help {
+		position: absolute;
+		right: 12px;
+		bottom: 12px;
+		display: inline-flex;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		&__label,
+		&__check {
+			transition: opacity 200ms linear;
+			transform: none;
+		}
+	}
+}
+
+// ── The miniature: the preset's own tokens, painted ─────────────────────────
+.sf-pmock {
+	display: flex;
+	flex-direction: column;
+	gap: var(--sf-pmock-gap, 6px);
+	box-sizing: border-box;
+	height: 96px;
+	padding: 8px;
+	overflow: hidden;
+	border-radius: 4px;
+	box-shadow: inset 0 0 0 1px rgba(17, 24, 39, 0.08);
+	pointer-events: none;
+
+	&__label {
+		display: block;
+		font-size: 12px;
+		line-height: 1;
+		white-space: nowrap;
+	}
+
+	&__input {
+		display: block;
+		flex: none;
+		box-sizing: border-box;
+		width: 100%;
+	}
+
+	&__button {
+		display: block;
+		flex: none;
+		box-sizing: border-box;
+		width: 44%;
+		height: 16px;
+	}
+}
+
+// "Inherit from theme" has no look of its own: a dashed card with a slash.
+.sf-pmock--theme {
+	background:
+		linear-gradient(135deg, transparent 46%, var(--sf-border) 46%, var(--sf-border) 54%, transparent 54%),
+		var(--sf-bg-subtle) !important;
+	box-shadow: inset 0 0 0 1px var(--sf-border);
+}

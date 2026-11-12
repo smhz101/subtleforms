@@ -12,6 +12,7 @@ namespace SubtleForms\Admin;
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
+use SubtleForms\Frontend\FrontendAssets;
 use SubtleForms\Support\Capabilities;
 use SubtleForms\Support\Settings;
 use SubtleForms\Support\Helpers;
@@ -672,6 +673,10 @@ class AdminMenu {
 					)
 				)
 			),
+			// What the page prints for a form that inherits the theme: only these
+			// layout lines. The preview loads the same, so the two cannot drift.
+			'layoutCss'      => FrontendAssets::layoutCss(),
+			'plainTypes'     => FrontendAssets::plainTypes(),
 			'i18n'           => array(
 				'confirmDelete' => __( 'Are you sure you want to delete this item?', 'subtleforms' ),
 				'error'         => __( 'An error occurred. Please try again.', 'subtleforms' ),

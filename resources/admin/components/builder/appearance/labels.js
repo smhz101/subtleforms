@@ -90,49 +90,45 @@ export const OPTION_LABELS = {
 };
 
 export const PRESET_LABELS = {
-  default: {
-    label: __( 'Default', 'subtleforms' ),
-    description: __( 'Inherits the plugin defaults. Neutral and unopinionated.', 'subtleforms' ),
+  theme: {
+    label: __( 'Inherit from theme', 'subtleforms' ),
+    description: __( 'Uses the active theme\'s type, colours and content width. Nothing here overrides the theme unless you set it.', 'subtleforms' ),
   },
-  minimal: {
-    label: __( 'Minimal', 'subtleforms' ),
-    description: __( 'Underlined inputs, generous spacing, no chrome.', 'subtleforms' ),
+  default: {
+    label: __( 'Clean', 'subtleforms' ),
+    description: __( 'The plugin defaults. Neutral outlined fields and a solid button.', 'subtleforms' ),
   },
   soft: {
     label: __( 'Soft', 'subtleforms' ),
-    description: __( 'Filled fields, rounded corners, gentle contrast.', 'subtleforms' ),
+    description: __( 'Filled fields with no border, rounded corners and a pill button.', 'subtleforms' ),
   },
   bordered: {
     label: __( 'Bordered', 'subtleforms' ),
-    description: __( 'Strong outlines and tight spacing. Reads as a form.', 'subtleforms' ),
+    description: __( 'Heavy square outlines and an outlined button. Reads as a form.', 'subtleforms' ),
   },
-  dark: {
-    label: __( 'Dark', 'subtleforms' ),
-    description: __( 'For dark page backgrounds. Light text on deep ink.', 'subtleforms' ),
+  editorial: {
+    label: __( 'Editorial', 'subtleforms' ),
+    description: __( 'Serif type, light labels and underlined fields. Suits writing and service sites.', 'subtleforms' ),
   },
   compact: {
     label: __( 'Compact', 'subtleforms' ),
-    description: __( 'Small type and tight rows. Suits long forms.', 'subtleforms' ),
+    description: __( 'Small type and tight rows in teal. Suits long forms.', 'subtleforms' ),
   },
   rounded: {
     label: __( 'Rounded', 'subtleforms' ),
-    description: __( 'Pill buttons and soft rounded fields. Friendly and modern.', 'subtleforms' ),
+    description: __( 'Large corners, tall fields and a sky blue accent. Friendly and modern.', 'subtleforms' ),
   },
   classic: {
     label: __( 'Classic', 'subtleforms' ),
-    description: __( 'Serif type on warm paper. Suits editorial and service sites.', 'subtleforms' ),
+    description: __( 'Bold labels, square-ish fields and a blue button. Familiar and clear.', 'subtleforms' ),
   },
-  bold: {
-    label: __( 'Bold', 'subtleforms' ),
-    description: __( 'High-contrast accent and heavy labels. Built to convert.', 'subtleforms' ),
+  dark: {
+    label: __( 'Dark', 'subtleforms' ),
+    description: __( 'For dark pages. Light text on deep blue with a soft blue button.', 'subtleforms' ),
   },
-  'dark-surface': {
-    label: __( 'Dark surface', 'subtleforms' ),
-    description: __( 'Sits on a dark footer or hero without a card of its own.', 'subtleforms' ),
-  },
-  theme: {
-    label: __( 'Inherit from theme', 'subtleforms' ),
-    description: __( 'Uses the active theme\'s type, colours and content width.', 'subtleforms' ),
+  contrast: {
+    label: __( 'High contrast', 'subtleforms' ),
+    description: __( 'Black on white with heavy borders and bold labels. Easiest to read.', 'subtleforms' ),
   },
 };
 

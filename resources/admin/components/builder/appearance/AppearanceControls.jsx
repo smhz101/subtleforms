@@ -41,7 +41,7 @@ const SWATCHES = [
  * stored as the theme's variable, so the form follows the theme if the theme
  * changes. Any other colour is stored as a hex value.
  */
-export function ColorToken( { label, value, inherited, onChange, disabled, inheritLabel } ) {
+export function ColorToken( { label, value, inherited, onChange, disabled, inheritLabel, id, hideLabel = false, describedBy } ) {
   const theme = useThemeStyles();
   const themeColors = ( theme?.palette || [] ).map( ( c ) => ( { name: c.name, color: c.color, slug: c.slug } ) );
   const groups = [
@@ -66,8 +66,10 @@ export function ColorToken( { label, value, inherited, onChange, disabled, inher
       renderToggle={ ( { isOpen, onToggle } ) => (
         <button
           type='button'
-          className={ `sf-color-token__toggle${ value ? ' is-set' : '' }` }
+          id={ id }
+          className={ `sf-color-token__toggle${ value ? ' is-set' : '' }${ hideLabel ? ' is-bare' : '' }` }
           aria-expanded={ isOpen }
+          aria-describedby={ describedBy }
           disabled={ disabled }
           onClick={ onToggle }
           aria-label={ sprintf(
@@ -80,7 +82,7 @@ export function ColorToken( { label, value, inherited, onChange, disabled, inher
             { ! shown && <span className='sf-color-token__none' /> }
           </span>
           <span className='sf-color-token__text'>
-            <span className='sf-color-token__label'>{ label }</span>
+            { ! hideLabel && <span className='sf-color-token__label'>{ label }</span> }
             <span className='sf-color-token__value'>
               { named ? named.name : value ? value.toUpperCase() : inheritLabel }
             </span>

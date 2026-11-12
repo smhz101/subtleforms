@@ -135,6 +135,10 @@ import {
   Ellipsis,
   Download,
   StarOff,
+  Paintbrush,
+  Sun,
+  Moon,
+  SwatchBook,
 } from 'lucide-react';
 
 /**
@@ -313,6 +317,10 @@ const Icon = {
   Ellipsis,
   Download,
   StarOff,
+  Paintbrush,
+  Sun,
+  Moon,
+  SwatchBook,
 };
 
 // Export both named and default

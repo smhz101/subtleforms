@@ -14,7 +14,7 @@ describe('builder names (UX2-13)', () => {
   const inspector = read('FieldInspector.jsx');
   // The inspector is one sheet (2.9.0): no tabs, only sections.
   const sections = labels(inspector, /<InspectorSection\s+id='[a-z]+'\s+title=\{__\('([^']+)'/g);
-  const previewPanels = labels(read('PreviewWorkspace.jsx'), /\{ __\( '([^']+)', 'subtleforms' \) \}/g);
+  const previewPanels = labels(read('appearance/FormAppearancePanel.jsx'), /<strong className='sf-field-inspector__title'>\{ __\( '([^']+)', 'subtleforms' \) \}/g);
 
   // The two icon tabs of the panel (settings and styles).
   const tabs = labels(read('inspector/InspectorTabs.jsx'), /label: __\( '([^']+)'/g);

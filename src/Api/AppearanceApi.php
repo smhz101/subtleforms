@@ -13,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use SubtleForms\Admin\ThemePreviewAssets;
 use SubtleForms\Support\FeatureGate;
 use SubtleForms\Support\ThemeStyles;
 use WP_REST_Request;
@@ -52,6 +53,15 @@ final class AppearanceApi {
 				'permission_callback' => array( $this, 'check_read_permission' ),
 			)
 		);
+		register_rest_route(
+			self::NAMESPACE,
+			'/appearance/theme-assets',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_theme_assets' ),
+				'permission_callback' => array( $this, 'check_read_permission' ),
+			)
+		);
 	}
 
 	/**
@@ -66,5 +76,19 @@ final class AppearanceApi {
 			return $limited;
 		}
 		return ApiResponse::success( ThemeStyles::get() );
+	}
+
+	/**
+	 * GET /appearance/theme-assets: what a page of the active theme loads, for the preview frame.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response
+	 */
+	public function get_theme_assets( WP_REST_Request $request ): WP_REST_Response {
+		$limited = $this->guardRateLimit( $request );
+		if ( $limited ) {
+			return $limited;
+		}
+		return ApiResponse::success( ThemePreviewAssets::collect() );
 	}
 }

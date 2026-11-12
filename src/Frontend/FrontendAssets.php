@@ -207,6 +207,16 @@ final class FrontendAssets {
 	);
 
 	/**
+	 * Field types a theme form can use without any plugin CSS. The builder
+	 * preview reads this list so it decides like the page does (2.9.0).
+	 *
+	 * @return string[]
+	 */
+	public static function plainTypes(): array {
+		return self::PLAIN_TYPES;
+	}
+
+	/**
 	 * Enqueue the form stylesheet and tell WordPress which file to use on a
 	 * right-to-left site (2.7.1).
 	 */
