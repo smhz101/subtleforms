@@ -88,7 +88,7 @@ describe('loading', () => {
     await act(async () => {
       await mod.loadGroup('date');
     });
-    expect(container.querySelector('.subtleforms-picker__trigger')).not.toBeNull();
+    expect(container.querySelector('.subtleforms-picker__input')).not.toBeNull();
     expect(container.querySelector('.subtleforms-field-loading')).toBeNull();
     act(() => root.unmount());
     container.remove();

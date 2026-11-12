@@ -56,7 +56,7 @@ describe( 'Picker.scss contract', () => {
   it( 'scopes every rule under .subtleforms-picker', () => {
     const css = scss.replace( /\/\*[\s\S]*?\*\//g, '' ).replace( /\/\/.*$/gm, '' );
     // Top level selector lists: each selector starts with .subtleforms-picker.
-    const rules = css.match( /^[^\s@}\/][^{;]*\{/gm ) || [];
+    const rules = css.match( /^[^\s@}/][^{;]*\{/gm ) || [];
     rules.forEach( ( rule ) => {
       const head = rule.slice( 0, -1 );
       if ( /^(@|\.subtleforms-picker|\.subtleforms-picker\.)/.test( head.trim() ) ) {

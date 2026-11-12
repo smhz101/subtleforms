@@ -82,10 +82,13 @@ describe.each(WIDTHS)('width %s', (width) => {
         expect(control.required).toBe(true);
       }
       if (sample.check.picker) {
-        expect(control.tagName).toBe('BUTTON');
-        // The trigger is a combobox and carries aria-required; the fallback control carries required.
+        // The select-like pickers use a button trigger, the date and time pickers a text input.
+        expect(control.tagName).toBe(['date', 'time', 'datetime'].includes(sample.type) ? 'INPUT' : 'BUTTON');
+        // The control is a combobox and carries aria-required; the fallback control carries required.
         expect(control.getAttribute('aria-required')).toBe('true');
-        expect(wrapper.querySelector('select[required], input[required]')).not.toBeNull();
+        if (!['date', 'time', 'datetime'].includes(sample.type)) {
+          expect(wrapper.querySelector('select[required], input[required]')).not.toBeNull();
+        }
       }
       if (sample.check.placeholder) {
         if (control.tagName === 'SELECT') {
@@ -109,9 +112,10 @@ describe.each(WIDTHS)('width %s', (width) => {
         expect(select.options.length).toBeGreaterThan(240);
       }
 
-      // Every control is named (bug 11).
+      // Every control is named (bug 11). The typed picker input is the one
+      // exception: the hidden input beside it carries the name and the ISO value.
       const unnamed = Array.from(wrapper.querySelectorAll('input, select, textarea')).filter(
-        (c) => c.type !== 'button' && !c.name
+        (c) => c.type !== 'button' && !c.name && !c.classList.contains('subtleforms-picker__input')
       );
       expect(unnamed).toHaveLength(0);
       unmount();

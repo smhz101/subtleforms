@@ -38,6 +38,7 @@ function key(target, name, init = {}) {
 }
 
 const click = (el) => act(() => el.click());
+const openPicker = (container) => click(container.querySelector('.subtleforms-picker__open'));
 
 describe('time picker (FLD2-05)', () => {
   function setup(props = {}) {
@@ -51,7 +52,7 @@ describe('time picker (FLD2-05)', () => {
 
   test('opening moves focus into the dialog, onto the hour column', () => {
     const { container, trigger, unmount } = setup();
-    click(trigger);
+    openPicker(container);
     const dialog = container.querySelector('[role="dialog"]');
     expect(dialog).not.toBeNull();
     expect(trigger.getAttribute('aria-controls')).toBe(dialog.id);
@@ -63,7 +64,7 @@ describe('time picker (FLD2-05)', () => {
 
   test('each column is one tab stop and the arrows, Home and End move inside it', () => {
     const { container, trigger, unmount } = setup({ value: '09:30' });
-    click(trigger);
+    openPicker(container);
     const hours = container.querySelector('[role="listbox"][aria-label="Hour"]');
     const stops = hours.querySelectorAll('[tabindex="0"]');
     expect(stops).toHaveLength(1);
@@ -84,7 +85,7 @@ describe('time picker (FLD2-05)', () => {
 
   test('Enter and Space pick the focused hour and minute', () => {
     const { container, trigger, onChange, unmount } = setup({ value: '09:30' });
-    click(trigger);
+    openPicker(container);
     key(document.activeElement, 'ArrowDown');
     key(document.activeElement, 'Enter');
     expect(onChange).toHaveBeenLastCalledWith('10:30');
@@ -103,7 +104,7 @@ describe('time picker (FLD2-05)', () => {
 
   test('Escape closes the dialog and returns focus to the trigger', () => {
     const { container, trigger, unmount } = setup();
-    click(trigger);
+    openPicker(container);
     key(document.activeElement, 'Escape');
     expect(container.querySelector('[role="dialog"]')).toBeNull();
     expect(document.activeElement).toBe(trigger);
@@ -126,7 +127,7 @@ describe('date picker (FLD2-05)', () => {
       <DateTimeField mode='date' inputId='d1' name='d' value='2025-03-31' onChange={onChange} format='Y-m-d' />
     );
     const trigger = container.querySelector('#d1');
-    click(trigger);
+    openPicker(container);
     expect(document.activeElement.getAttribute('role')).toBe('gridcell');
     expect(document.activeElement.getAttribute('aria-label')).toMatch(/31/);
 
@@ -146,22 +147,37 @@ describe('date picker (FLD2-05)', () => {
       <DateTimeField mode='datetime' inputId='dt1' name='dt' value='' onChange={() => {}} />
     );
     const trigger = container.querySelector('#dt1');
-    click(trigger);
+    openPicker(container);
     expect(container.querySelector('[role="dialog"]').contains(document.activeElement)).toBe(true);
     key(document.activeElement, 'Escape');
     expect(document.activeElement).toBe(trigger);
     unmount();
   });
 
-  test('a day outside min and max can be reached but not picked', () => {
+  test('arrows skip days outside min and max and stop at the edge', () => {
     const onChange = jest.fn();
     const { container, unmount } = mount(
       <DateTimeField mode='date' inputId='d2' name='d' value='2025-03-10' min='2025-03-10' max='2025-03-20' onChange={onChange} />
     );
-    click(container.querySelector('#d2'));
+    openPicker(container);
+    expect(document.activeElement.getAttribute('aria-selected')).toBe('true');
     key(document.activeElement, 'ArrowLeft');
-    expect(document.activeElement.getAttribute('aria-disabled')).toBe('true');
-    key(document.activeElement, 'Enter');
+    expect(document.activeElement.textContent).toBe('10');
+    key(document.activeElement, 'ArrowRight');
+    expect(document.activeElement.textContent).toBe('11');
+    key(document.activeElement, 'End');
+    expect(document.activeElement.getAttribute('aria-disabled')).toBeNull();
+    unmount();
+  });
+
+  test('a disabled day is not picked by click or Enter', () => {
+    const onChange = jest.fn();
+    const { container, unmount } = mount(
+      <DateTimeField mode='date' inputId='d3' name='d' value='2025-03-10' min='2025-03-10' max='2025-03-20' onChange={onChange} />
+    );
+    openPicker(container);
+    const off = [...container.querySelectorAll('[role="gridcell"]')].find((cell) => cell.getAttribute('aria-disabled') === 'true');
+    click(off);
     expect(onChange).not.toHaveBeenCalled();
     unmount();
   });

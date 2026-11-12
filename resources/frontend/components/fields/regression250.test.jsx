@@ -93,44 +93,41 @@ describe('calendar month and year jump and locale (FLD2-15)', () => {
     const view = mount(
       <DateTimeField mode='date' inputId='d1' name='d' value={value} onChange={() => {}} format='Y-m-d' />
     );
-    click(view.container.querySelector('#d1'));
+    click(view.container.querySelector('.subtleforms-picker__open'));
     return view;
   };
 
-  test('the month and year lists jump the calendar', () => {
+  test('the title opens a month grid and a year grid that jump the calendar', () => {
     const { container, unmount } = openDate();
     const grid = () => container.querySelector('[role="grid"]');
     expect(grid().getAttribute('aria-label')).toMatch(/March 2025/);
 
-    const month = container.querySelector('select.subtleforms-picker__month');
-    const year = container.querySelector('select.subtleforms-picker__year');
-    expect(month.options).toHaveLength(12);
-    // A date of birth is up to 120 years back.
-    expect(Number(year.options[0].value)).toBe(2025 - 120);
-
-    act(() => {
-      const setter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set;
-      setter.call(month, '5');
-      month.dispatchEvent(new Event('change', { bubbles: true }));
-    });
+    click(container.querySelector('.subtleforms-picker__title'));
+    expect(grid().getAttribute('aria-label')).toBe('2025');
+    expect(grid().querySelectorAll('[role="gridcell"]')).toHaveLength(12);
+    const june = [...grid().querySelectorAll('[role="gridcell"]')].find((cell) => cell.textContent === 'Jun');
+    click(june);
     expect(grid().getAttribute('aria-label')).toMatch(/June 2025/);
 
-    act(() => {
-      const setter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set;
-      setter.call(year, '1990');
-      year.dispatchEvent(new Event('change', { bubbles: true }));
-    });
-    expect(grid().getAttribute('aria-label')).toMatch(/June 1990/);
+    click(container.querySelector('.subtleforms-picker__title'));
+    click(container.querySelector('.subtleforms-picker__title'));
+    const years = [...grid().querySelectorAll('[role="gridcell"]')];
+    expect(years).toHaveLength(12);
+    click(years.find((cell) => cell.textContent === '2022'));
+    expect(grid().getAttribute('aria-label')).toBe('2022');
+    click([...grid().querySelectorAll('[role="gridcell"]')][0]);
+    expect(grid().getAttribute('aria-label')).toMatch(/January 2022/);
     unmount();
   });
 
   test('month names follow the site language', () => {
     window.subtleformsFrontend = { locale: 'de-DE', weekStartsOn: 1 };
     const { container, unmount } = openDate();
-    const names = [...container.querySelectorAll('select.subtleforms-picker__month option')].map((o) => o.textContent);
-    expect(names[0]).toBe('Januar');
-    expect(names[2]).toBe('März');
     expect(container.querySelector('[role="grid"]').getAttribute('aria-label')).toMatch(/März 2025/);
+    click(container.querySelector('.subtleforms-picker__title'));
+    const names = [...container.querySelectorAll('[role="gridcell"]')].map((o) => o.textContent);
+    expect(names[0]).toMatch(/^Jan/);
+    expect(names[2]).toMatch(/^Mär/);
     unmount();
   });
 });

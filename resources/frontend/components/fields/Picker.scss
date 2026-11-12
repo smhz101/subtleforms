@@ -78,6 +78,50 @@
 	border-color: var(--subtleforms-color-error, #b3261e);
 }
 
+// Date, time and date and time: the visible control is a real text input, so
+// the theme or the preset styles it like every other input. This file only
+// makes room for the icon button, which sits inside the wrapper.
+.subtleforms-picker .subtleforms-picker__input {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	margin-block: 0;
+	padding-inline-end: 48px;
+	text-overflow: ellipsis;
+}
+
+.subtleforms-picker .subtleforms-picker__open {
+	@include picker-reset;
+	@include picker-focus;
+	position: absolute;
+	top: 50%;
+	inset-inline-end: 6px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 2px;
+	width: 36px;
+	// A theme that gives inputs no padding leaves a field shorter than 36px:
+	// the button then takes the field's height instead of spilling out of it.
+	height: min(36px, 100%);
+	border-radius: min(var(--subtleforms-picker-radius), 8px);
+	color: var(--subtleforms-picker-muted);
+	transform: translateY(-50%);
+
+	&:hover { color: var(--subtleforms-picker-accent); }
+
+	&:disabled {
+		cursor: default;
+		opacity: 0.5;
+	}
+
+	.subtleforms-picker__glyph {
+		width: 14px;
+		height: 14px;
+		color: inherit;
+	}
+}
+
 .subtleforms-picker.is-preview,
 .subtleforms-picker.is-preview * {
 	pointer-events: none;
@@ -167,6 +211,10 @@
 .subtleforms-picker .subtleforms-picker__tick,
 .subtleforms-picker .subtleforms-picker__day,
 .subtleforms-picker .subtleforms-picker__nav,
+.subtleforms-picker .subtleforms-picker__title,
+.subtleforms-picker .subtleforms-picker__close,
+.subtleforms-picker .subtleforms-picker__cell,
+.subtleforms-picker .subtleforms-picker__primary-button,
 .subtleforms-picker .subtleforms-picker__text-button {
 	@include picker-reset;
 	@include picker-focus;
@@ -239,10 +287,75 @@
 	margin-bottom: 8px;
 }
 
-.subtleforms-picker .subtleforms-picker__month,
-.subtleforms-picker .subtleforms-picker__year {
-	font: inherit;
+.subtleforms-picker .subtleforms-picker__title {
+	flex: 1;
+	padding: 6px 8px;
+	border-radius: min(var(--subtleforms-picker-radius), 8px);
+	font-size: 14px;
 	font-weight: 600;
+	text-align: center;
+
+	&:hover:not(.subtleforms-picker__title--static) { background: color-mix(in srgb, var(--subtleforms-picker-accent) 10%, transparent); }
+}
+
+.subtleforms-picker .subtleforms-picker__title--static { cursor: default; }
+
+.subtleforms-picker .subtleforms-picker__nav[aria-disabled='true'] {
+	cursor: default;
+	opacity: 0.35;
+}
+
+.subtleforms-picker .subtleforms-picker__close {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	margin-inline-start: 4px;
+	border-radius: min(var(--subtleforms-picker-radius), 8px);
+
+	&:hover { background: color-mix(in srgb, var(--subtleforms-picker-accent) 10%, transparent); }
+}
+
+// Month and year grids: three or four columns of large targets.
+.subtleforms-picker .subtleforms-picker__months,
+.subtleforms-picker .subtleforms-picker__years {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.subtleforms-picker .subtleforms-picker__row {
+	display: grid;
+	gap: 4px;
+}
+
+.subtleforms-picker .subtleforms-picker__months .subtleforms-picker__row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.subtleforms-picker .subtleforms-picker__years .subtleforms-picker__row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.subtleforms-picker .subtleforms-picker__cell {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 48px;
+	border-radius: min(var(--subtleforms-picker-radius), 8px);
+	font-size: 14px;
+
+	&.is-today { box-shadow: inset 0 0 0 1px var(--subtleforms-picker-accent); }
+
+	&.is-selected {
+		background: var(--subtleforms-picker-accent);
+		color: var(--subtleforms-picker-on-accent);
+	}
+
+	&:hover:not([aria-disabled='true']):not(.is-selected) {
+		background: color-mix(in srgb, var(--subtleforms-picker-accent) 10%, transparent);
+	}
+
+	&[aria-disabled='true'] {
+		cursor: default;
+		opacity: 0.4;
+	}
 }
 
 .subtleforms-picker .subtleforms-picker__nav {
@@ -364,6 +477,30 @@
 	border-top: 1px solid var(--subtleforms-picker-border);
 }
 
+.subtleforms-picker .subtleforms-picker__footer-actions {
+	display: flex;
+	gap: 8px;
+}
+
+.subtleforms-picker .subtleforms-picker__primary-button {
+	padding: 6px 16px;
+	border-radius: min(var(--subtleforms-picker-radius), 8px);
+	background: var(--subtleforms-picker-accent);
+	color: var(--subtleforms-picker-on-accent);
+	font-size: 13px;
+	font-weight: 600;
+
+	&[aria-disabled='true'] {
+		cursor: default;
+		opacity: 0.4;
+	}
+}
+
+.subtleforms-picker .subtleforms-picker__text-button[aria-disabled='true'] {
+	cursor: default;
+	opacity: 0.4;
+}
+
 .subtleforms-picker .subtleforms-picker__text-button {
 	padding: 4px;
 	color: var(--subtleforms-picker-accent);
@@ -376,6 +513,9 @@
 @media (max-width: 520px) {
 	.subtleforms-picker .subtleforms-picker__panel { flex-direction: column; }
 	.subtleforms-picker .subtleforms-picker__menu--calendar { width: 100%; }
+	.subtleforms-picker .subtleforms-picker__calendar { width: 100%; }
+	.subtleforms-picker .subtleforms-picker__columns { height: 160px; }
+	.subtleforms-picker .subtleforms-picker__column { flex: 1; width: auto; }
 }
 
 // The native control that carries the value into a plain HTML post and gives

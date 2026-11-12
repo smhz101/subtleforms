@@ -103,7 +103,7 @@ for (const width of WIDTHS) {
         // Every control has a stable name (bug 11).
         const unnamed = await wrapper.evaluate((el) =>
           Array.from(el.querySelectorAll('input, select, textarea'))
-            .filter((c) => c.type !== 'button' && c.type !== 'submit' && !c.name)
+            .filter((c) => c.type !== 'button' && c.type !== 'submit' && !c.name && !c.classList.contains('subtleforms-picker__input'))
             .map((c) => c.id || c.className)
         );
         expect(unnamed, `${key} unnamed controls`).toEqual([]);

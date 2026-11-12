@@ -782,6 +782,7 @@ function renderInput(
           onChange={onChange}
           placeholder={placeholder}
           format={config.format}
+          customFormat={config.customFormat}
           min={config.minDate}
           max={config.maxDate}
           required={required}
