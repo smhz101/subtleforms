@@ -45,6 +45,7 @@ final class ThemePreviewAssets {
 	public static function register(): void {
 		add_action( 'switch_theme', array( self::class, 'flush' ) );
 		add_action( 'customize_save_after', array( self::class, 'flush' ) );
+		add_action( 'save_post_wp_global_styles', array( self::class, 'flush' ) );
 		add_action( 'upgrader_process_complete', array( self::class, 'flush' ) );
 	}
 

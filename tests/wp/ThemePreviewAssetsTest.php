@@ -154,11 +154,16 @@ final class ThemePreviewAssetsTest extends TestCase {
 		ThemePreviewAssets::collect();
 		$this->assertSame( 2, $this->runs );
 
+		// Site Editor global styles saves (colours, type, layout).
+		do_action( 'save_post_wp_global_styles', 0 );
+		ThemePreviewAssets::collect();
+		$this->assertSame( 3, $this->runs );
+
 		// Core hooks its own handlers onto this action; load the classes they name.
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 		do_action( 'upgrader_process_complete', null, array() );
 		ThemePreviewAssets::collect();
-		$this->assertSame( 3, $this->runs );
+		$this->assertSame( 4, $this->runs );
 	}
 
 	public function test_the_route_returns_the_same_data_to_an_admin_only(): void {
