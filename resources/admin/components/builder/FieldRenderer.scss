@@ -1429,11 +1429,11 @@
 		position: relative;
 		display: flex;
 		align-items: center;
+	}
 
-		.sf-field-renderer__input {
-			width: 100%;
-			padding-inline-start: 36px;
-		}
+	.sf-composite-field__flagged .sf-field-renderer__input {
+		width: 100%;
+		padding-inline-start: 40px;
 	}
 
 	&__flag {
