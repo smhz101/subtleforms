@@ -118,7 +118,11 @@ function ControlRenderer( { ctrl, field, onUpdate, isReadOnly, override } ) {
 		}
 	}
 
-	const value = field[ fieldKey ] ?? '';
+	// A setting never saved shows the control's `default`. Display only: the
+	// field is not changed until the user changes the control. Only
+	// `undefined` means never saved; '', false and 0 are saved values.
+	const saved = field[ fieldKey ];
+	const value = saved === undefined && ctrl.default !== undefined ? ctrl.default : saved ?? '';
 
 	const isAddOn = ! CONTROL_REGISTRY[ ctrl.type ] || ctrl.type === 'pro_notice';
 	const isRowType = ! isAddOn && ROW_TYPES.includes( ctrl.type ) && ! getInspectorControl( ctrl.type );
@@ -127,7 +131,8 @@ function ControlRenderer( { ctrl, field, onUpdate, isReadOnly, override } ) {
 		label: override?.label || ctrl.label || fieldKey,
 		help: ctrl.help || undefined,
 		placeholder: override?.placeholder || ctrl.placeholder || undefined,
-		disabled: isReadOnly,
+		// Read-only mode, or a control an add-on defines as not usable yet.
+		disabled: isReadOnly || ctrl.disabled === true,
 		value,
 		onChange: ( newValue ) => onUpdate( { [ fieldKey ]: newValue } ),
 	};

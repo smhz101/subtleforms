@@ -1039,7 +1039,7 @@ $sf-row-tint: color-mix(in srgb, var(--sf-brand) 4%, transparent);
 
 		&.is-disabled {
 			opacity: 0.6;
-			cursor: default;
+			cursor: not-allowed;
 		}
 
 		// The outline is for the keyboard only. A mouse selection keeps the one
