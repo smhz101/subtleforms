@@ -582,7 +582,7 @@ export function siteWeekStart() {
 }
 
 export function dayName(date, locale) {
-  return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+  return new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(date);
 }
 
 export function monthCells(cursor, weekStartsOn = 0) {

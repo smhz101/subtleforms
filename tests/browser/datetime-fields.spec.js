@@ -5,7 +5,8 @@
  * step of that work.
  */
 const { test, expect } = require('@playwright/test');
-const { adminApi, publishForm, cleanup, waitForForm, entries } = require('./helpers');
+const AxeBuilder = require('@axe-core/playwright').default;
+const { adminApi, publishForm, cleanup, waitForForm, entries, loginPage, openBuilder } = require('./helpers');
 
 let client;
 let form;
@@ -272,5 +273,118 @@ test.describe('the date, time and date and time control', () => {
     await expect(page.locator('[role="dialog"]')).toHaveCount(0);
     await expect(page.locator('#subtleforms-field-visit')).toBeFocused();
     await expect(page.locator('#subtleforms-field-visit')).toHaveValue(/^\d{2}\/\d{2}\/\d{4}$/);
+  });
+});
+
+// ---- Limits, mobile, accessibility and Preview ------------------------------
+
+let limitForm;
+
+test.describe('limits, small screens, axe and Preview', () => {
+  test.beforeAll(async () => {
+    limitForm = await publishForm(client, {
+      title: `Date limits ${Date.now()}`,
+      metadata: THEME,
+      fields: [
+        { id: 'l1', key: 'visit', type: 'date', label: 'Visit date', config: { minDate: '+1 day', maxDate: '+10 days', disabledWeekdays: [0, 6] } },
+        { id: 'l2', key: 'slot', type: 'time', label: 'Slot', config: { minTime: '09:00', maxTime: '17:00', minuteStep: 30 } },
+        { id: 'l3', key: 'when', type: 'datetime', label: 'When' },
+      ],
+    });
+  });
+
+  test.afterAll(async () => {
+    await cleanup(client, limitForm);
+  });
+
+  test('arrows skip days outside the earliest and latest date and on unavailable weekdays', async ({ page }) => {
+    await page.goto(limitForm.url);
+    await waitForForm(page);
+    await page.locator('#subtleforms-field-visit').focus();
+    await page.keyboard.press('ArrowDown');
+    await expect(page.locator('[role="dialog"]')).toBeVisible();
+    const focused = page.locator('[role="gridcell"][tabindex="0"]');
+    await expect(focused).toBeFocused();
+    // The focus starts on a day that can be picked, never on today.
+    expect(await focused.getAttribute('aria-disabled')).toBeNull();
+    for (let i = 0; i < 12; i += 1) {
+      await page.keyboard.press('ArrowRight');
+      await expect(focused).toBeFocused();
+      expect(await focused.getAttribute('aria-disabled')).toBeNull();
+      const label = await focused.getAttribute('aria-label');
+      expect(label).not.toMatch(/Saturday|Sunday/);
+    }
+    // Disabled days exist in the grid and carry aria-disabled.
+    expect(await page.locator('[role="gridcell"][aria-disabled="true"]').count()).toBeGreaterThan(5);
+  });
+
+  test('the times outside the range are disabled and the server names the range', async ({ page }) => {
+    await page.goto(limitForm.url);
+    await waitForForm(page);
+    await page.locator('#subtleforms-field-slot').click();
+    const hours = page.locator('[role="listbox"][aria-label="Hour"] [role="option"]');
+    await expect(hours.nth(8)).toHaveAttribute('aria-disabled', 'true');
+    await expect(hours.nth(9)).not.toHaveAttribute('aria-disabled', 'true');
+    await expect(hours.nth(18)).toHaveAttribute('aria-disabled', 'true');
+    const minutes = page.locator('[role="listbox"][aria-label="Minute"] [role="option"]');
+    await expect(minutes).toHaveCount(2);
+    await page.keyboard.press('Escape');
+    await page.locator('#subtleforms-field-slot').fill('20:00');
+    await page.locator('#subtleforms-field-slot').blur();
+    await page.waitForTimeout(4500);
+    await page.getByRole('button', { name: /submit/i }).click();
+    await expect(page.getByText('Pick a time between 09:00 and 17:00.')).toBeVisible();
+  });
+
+  test('at 390 wide the popover fits the column and has a close button', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(limitForm.url);
+    await waitForForm(page);
+    await page.locator('#subtleforms-field-when').click();
+    const dialog = page.locator('[role="dialog"]');
+    await expect(dialog).toBeVisible();
+    const box = await dialog.boundingBox();
+    const column = await page.locator('.subtleforms-form-container').boundingBox();
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(390);
+    expect(box.width).toBeLessThanOrEqual(column.width + 2);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+    await expect(page.getByRole('button', { name: 'Close' })).toBeVisible();
+    await expect(dialog.getByText('Time', { exact: true })).toBeVisible();
+  });
+
+  for (const [field, label] of [['visit', 'date'], ['slot', 'time'], ['when', 'date and time']]) {
+    test(`axe finds nothing on the open ${label} popover`, async ({ page }) => {
+      await page.goto(limitForm.url);
+      await waitForForm(page);
+      await page.locator(`#subtleforms-field-${field}`).click();
+      await expect(page.locator('[role="dialog"]')).toBeVisible();
+      const results = await new AxeBuilder({ page })
+        .include('.subtleforms-form-container')
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+        .analyze();
+      expect(results.violations.map((v) => ({ id: v.id, nodes: v.nodes.slice(0, 2).map((n) => n.target.join(' ')) }))).toEqual([]);
+    });
+  }
+
+  test('the Preview screen shows the styled picker for a theme form', async ({ page }) => {
+    await loginPage(page);
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await openBuilder(page, limitForm.id);
+    await page.locator('#sf-builder-view-preview').click();
+    await page.locator('.sf-preview-workspace__form').waitFor({ timeout: 30000 });
+    const frame = page.frameLocator('iframe.sf-form-preview__frame');
+    await frame.locator('#subtleforms-field-when').waitFor();
+    await frame.locator('#subtleforms-field-when').click();
+    const dialog = frame.locator('[role="dialog"]');
+    await expect(dialog).toBeVisible();
+    const look = await dialog.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return { bg: cs.backgroundColor, radius: cs.borderTopLeftRadius, shadow: cs.boxShadow };
+    });
+    expect(look.bg).toBe('rgb(255, 255, 255)');
+    expect(look.shadow).not.toBe('none');
+    const xs = await frame.locator('.subtleforms-picker__week').first().locator('[role="gridcell"]').evaluateAll((cells) => cells.map((c) => Math.round(c.getBoundingClientRect().x)));
+    expect(new Set(xs).size).toBe(7);
   });
 });
