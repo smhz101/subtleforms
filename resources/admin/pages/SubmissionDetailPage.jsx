@@ -19,6 +19,7 @@ import { apiClient } from '../data';
 import Icon from '../ui/Icon';
 import { isSafeHref } from '../components/integrations/ConnectionSteps';
 import ExtensionSlot from '../components/ExtensionSlot';
+import { getSlotItems } from '../../shared/extend';
 import './SubmissionDetailPage.scss';
 
 // ─── Pipeline timeline helpers ──────────────────────────────────────────────
@@ -698,12 +699,14 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
   // Field types, so answers can be shown the way they were typed.
   const fieldTypes = {};
   const repeaterNodes = {};
+  const fieldNodes = {};
   ( function collect( list ) {
     ( list || [] ).forEach( ( f ) => {
       if ( ! f || typeof f !== 'object' ) return;
       const k = f.config?.key || f.key;
       if ( k ) {
         fieldTypes[ k ] = f.type;
+        fieldNodes[ k ] = f;
       }
       // A Repeater's children are answered inside its groups.
       if ( f.type === 'repeat_container' ) {
@@ -933,6 +936,22 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
                         ) : (
                           <span className={ `sf-answers__text${ fieldTypes[ key ] === 'textarea' ? ' sf-answers__text--multiline' : '' }` }>{ displayText( submission.display, key, value ) }</span>
                         ) }
+                        { /* Add-ons draw more under the answer (slot entry.answer.after). */ }
+                        <div className='sf-answers__after'>
+                          { getSlotItems( 'entry.answer.after' ).map( ( item ) => {
+                            const Item = item.component;
+                            return (
+                              <Item
+                                key={ item.id }
+                                fieldKey={ key }
+                                value={ value }
+                                field={ fieldNodes[ key ] || null }
+                                fieldType={ fieldTypes[ key ] || '' }
+                                submission={ submission }
+                              />
+                            );
+                          } ) }
+                        </div>
                       </dd>
                     </div>
                   );

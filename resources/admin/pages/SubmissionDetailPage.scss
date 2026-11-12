@@ -767,3 +767,12 @@ $pipe-status-colors: (
 		grid-template-columns: minmax(0, 1fr);
 	}
 }
+
+// Room for what an add-on draws under an answer; nothing when it draws none.
+.sf-answers__after {
+  margin-top: 8px;
+
+  &:empty {
+    display: none;
+  }
+}
