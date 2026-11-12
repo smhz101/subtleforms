@@ -697,6 +697,48 @@ export function isPureTheme( appearance ) {
 }
 
 /**
+ * Whether the page would print only the layout lines for this form: the
+ * same test as FrontendAssets::isPlainThemeForm(). It inherits the theme
+ * untouched, is a single page and uses only field types a theme styles. The
+ * list of types comes from the server (window.subtleformsAdmin.plainTypes), so
+ * the two sides share it.
+ *
+ * @param {Object}   schema     Form schema.
+ * @param {string[]} plainTypes Field types that need no plugin CSS.
+ * @return {boolean} True when the page loads no plugin stylesheet for it.
+ */
+export function isPlainThemeForm( schema, plainTypes ) {
+  const appearance = schema?.metadata?.appearance;
+  if ( ! Array.isArray( plainTypes ) || ! isPureTheme( appearance ) ) {
+    return false;
+  }
+  if ( appearance?.variants?.layout === 'inline' ) {
+    return false;
+  }
+  const type = String( schema?.metadata?.type || '' ).toLowerCase();
+  if ( ! [ '', 'regular', 'standard', 'single', 'default' ].includes( type ) ) {
+    return false;
+  }
+  const walk = ( node ) => {
+    if ( ! node || typeof node !== 'object' ) {
+      return true;
+    }
+    if ( Array.isArray( node ) ) {
+      return node.every( walk );
+    }
+    const nodeType = String( node.type || '' );
+    if ( nodeType !== '' && ! plainTypes.includes( nodeType ) ) {
+      return false;
+    }
+    const config = node.config && typeof node.config === 'object' ? node.config : {};
+    return [ 'fields', 'children', 'columns', 'steps' ].every(
+      ( key ) => walk( node[ key ] ) && walk( config[ key ] )
+    );
+  };
+  return walk( schema?.steps ) && walk( schema?.fields );
+}
+
+/**
  * Style object for one field wrapper.
  *
  * Redeclaring the same custom properties the form set means everything inside

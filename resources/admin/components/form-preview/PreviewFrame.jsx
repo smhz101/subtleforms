@@ -47,6 +47,41 @@ export function schemeCss( scheme ) {
 /** Longest wait for the theme's stylesheets before the preview settles its padding. */
 const SETTLE_MS = 2500;
 
+const PLUGIN_ATTR = 'data-sf-plugin-css';
+
+/**
+ * Put the plugin's CSS in the frame, before the scheme rule, replacing what
+ * was there. The key makes a repeat call with the same choice a no-op, so the
+ * frame is not repainted for nothing.
+ */
+function applyPluginCss( doc, plain, conversational, addLink ) {
+  const admin = window.subtleformsAdmin || {};
+  const plan = pluginCssPlan( plain, conversational, admin );
+  const key = JSON.stringify( plan );
+  if ( doc.documentElement.getAttribute( 'data-sf-plugin-key' ) === key ) {
+    return;
+  }
+  doc.documentElement.setAttribute( 'data-sf-plugin-key', key );
+  doc.head.querySelectorAll( `[${ PLUGIN_ATTR }]` ).forEach( ( node ) => node.remove() );
+  const before = doc.getElementById( 'sf-preview-scheme' );
+  plan.forEach( ( item ) => {
+    let node;
+    if ( item.kind === 'style' ) {
+      node = doc.createElement( 'style' );
+      node.textContent = item.value;
+    } else {
+      node = doc.createElement( 'link' );
+      node.rel = 'stylesheet';
+      node.href = item.value;
+      if ( addLink ) {
+        addLink.watch( node );
+      }
+    }
+    node.setAttribute( PLUGIN_ATTR, '' );
+    doc.head.insertBefore( node, before );
+  } );
+}
+
 function addStyle( doc, css, id ) {
   if ( ! css ) {
     return null;
@@ -60,7 +95,29 @@ function addStyle( doc, css, id ) {
   return el;
 }
 
-export default function PreviewFrame( { children, title, className, conversational = false, scheme = 'light' } ) {
+/**
+ * Which plugin CSS the page would print for this form, as a list of nodes.
+ *
+ * A form that inherits the theme untouched gets only the layout lines the
+ * frontend inlines (FrontendAssets::layoutCss()); every other form gets the
+ * full stylesheet. The conversational layout's file styles every submit button,
+ * so only a conversational form gets it, as on the site (2.7.2).
+ *
+ * @param {boolean} plain          The page prints only the layout lines.
+ * @param {boolean} conversational Conversational form.
+ * @param {Object}  admin          window.subtleformsAdmin.
+ * @return {{kind: string, value: string}[]} Nodes to add, in order.
+ */
+export function pluginCssPlan( plain, conversational, admin = {} ) {
+  if ( plain && admin.layoutCss ) {
+    return [ { kind: 'style', value: admin.layoutCss } ];
+  }
+  return ( admin.frontendStyles ?? [] )
+    .filter( ( href ) => conversational || ! /conversational\.css/.test( href ) )
+    .map( ( href ) => ( { kind: 'link', value: href } ) );
+}
+
+export default function PreviewFrame( { children, title, className, conversational = false, plain = false, scheme = 'light' } ) {
   const iframeRef = useRef( null );
   const [ mountNode, setMountNode ] = useState( null );
   const [ height, setHeight ] = useState( 320 );
@@ -68,6 +125,8 @@ export default function PreviewFrame( { children, title, className, conversation
   const assets = useMemo( () => data || fallbackThemeAssets(), [ data ] );
   const schemeRef = useRef( scheme );
   schemeRef.current = scheme;
+  const plainRef = useRef( plain );
+  plainRef.current = plain;
 
   // Populate the iframe document once it exists, then hand React a mount point.
   // It is built again when the theme's data arrives after the fallback.
@@ -134,23 +193,17 @@ export default function PreviewFrame( { children, title, className, conversation
       watch( link );
       doc.head.appendChild( link );
     };
+    addLink.watch = watch;
 
     ( assets.stylesheets || [] ).forEach( addLink );
     addStyle( doc, assets.fontFaces );
     addStyle( doc, assets.globalCss );
     addStyle( doc, assets.inlineCss );
 
-    const styles = window.subtleformsAdmin?.frontendStyles ?? [];
-    styles.forEach( ( href ) => {
-      // The conversational layout's file styles every submit button, so only
-      // a conversational form gets it, as on the site (2.7.2).
-      if ( ! conversational && /conversational\.css/.test( href ) ) {
-        return;
-      }
-      addLink( href );
-    } );
-
+    // Added before the scheme rule so the page around the form stays last.
     addStyle( doc, schemeCss( schemeRef.current ), 'sf-preview-scheme' );
+    applyPluginCss( doc, plainRef.current, conversational, addLink );
+
 
     // The wrappers a theme's templates put around page content.
     doc.body.className = bodyClass;
@@ -194,6 +247,14 @@ export default function PreviewFrame( { children, title, className, conversation
       setMountNode( null );
     };
   }, [ assets, conversational ] );
+
+  // Another preset: swap the plugin CSS in place, no rebuild of the frame.
+  useEffect( () => {
+    const doc = iframeRef.current?.contentDocument;
+    if ( doc && doc.head && doc.getElementById( 'sf-preview-scheme' ) ) {
+      applyPluginCss( doc, plain, conversational, null );
+    }
+  }, [ plain, conversational, mountNode ] );
 
   // Light or Dark page around the form: only the frame's own root changes.
   useEffect( () => {
