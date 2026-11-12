@@ -33,7 +33,7 @@ import {
 
 import { restFetch, restUrl, restNonce } from '../utils/restFetch';
 import { createSpamTokenSource } from '../utils/spamToken';
-import { fillConfirmation } from '../../shared/confirmationTags';
+import { fillConfirmation, fieldTypesOf } from '../../shared/confirmationTags';
 import { messageParagraphs } from '../../shared/safeLinks';
 import ConfirmationText from './ConfirmationText';
 import { classicFieldInputs } from '../utils/classicFields';
@@ -885,6 +885,7 @@ export default function FormRenderer({
               values: { ...flatValues, ...(typeof values === 'object' && values ? values : {}) },
               formTitle: schema?.metadata?.title || '',
               entryId: result?.data?.submission_id || '',
+              fieldTypes: fieldTypesOf(schema),
               encode,
             });
           const globalRedirect = window.subtleformsFrontend?.redirectUrl || '';
@@ -1039,6 +1040,7 @@ export default function FormRenderer({
           values: { ...flattenToPathMap(outcome.values), ...outcome.values },
           formTitle: schema?.metadata?.title || '',
           entryId: outcome.submissionId || '',
+          fieldTypes: fieldTypesOf(schema),
           encode,
         });
       const ownMessage = conf.type === 'message' && conf.message;
