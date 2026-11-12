@@ -1,0 +1,24 @@
+{
+  "note": "Shared by the PHP format test (AnswerFormatter, English locale, UTC) and the Jest test of formatPhp and parseTyped. Each row: a PHP format, a stored value (Y-m-d H:i) and the text both sides must write. roundTrip rows must also parse back to the stored value.",
+  "vectors": [
+    { "format": "Y-m-d", "mode": "date", "value": "2026-11-13 14:30", "expected": "2026-11-13", "roundTrip": true },
+    { "format": "d/m/Y", "mode": "date", "value": "2026-11-13 14:30", "expected": "13/11/2026", "roundTrip": true },
+    { "format": "m/d/Y", "mode": "date", "value": "2026-11-13 14:30", "expected": "11/13/2026", "roundTrip": true },
+    { "format": "d.m.Y", "mode": "date", "value": "2026-11-13 14:30", "expected": "13.11.2026", "roundTrip": true },
+    { "format": "j F Y", "mode": "date", "value": "2026-11-13 14:30", "expected": "13 November 2026", "roundTrip": true },
+    { "format": "D, j M Y", "mode": "date", "value": "2026-11-13 14:30", "expected": "Fri, 13 Nov 2026", "roundTrip": true },
+    { "format": "l jS F y", "mode": "date", "value": "2026-01-02 09:05", "expected": "Friday 2nd January 26", "roundTrip": true },
+    { "format": "jS", "mode": "date", "value": "2026-01-23 09:05", "expected": "23rd", "roundTrip": false },
+    { "format": "n/j/y", "mode": "date", "value": "2026-03-04 09:05", "expected": "3/4/26", "roundTrip": true },
+    { "format": "\\D\\a\\y: d", "mode": "date", "value": "2026-03-04 09:05", "expected": "Day: 04", "roundTrip": false },
+    { "format": "H:i", "mode": "time", "value": "2026-11-13 14:30", "expected": "14:30", "roundTrip": true },
+    { "format": "g:i A", "mode": "time", "value": "2026-11-13 14:30", "expected": "2:30 PM", "roundTrip": true },
+    { "format": "g:i a", "mode": "time", "value": "2026-11-13 09:05", "expected": "9:05 am", "roundTrip": true },
+    { "format": "h:i A", "mode": "time", "value": "2026-11-13 00:15", "expected": "12:15 AM", "roundTrip": true },
+    { "format": "G:i", "mode": "time", "value": "2026-11-13 07:00", "expected": "7:00", "roundTrip": true },
+    { "format": "Y-m-d H:i", "mode": "datetime", "value": "2026-11-13 14:30", "expected": "2026-11-13 14:30", "roundTrip": true },
+    { "format": "d/m/Y H:i", "mode": "datetime", "value": "2026-11-13 14:30", "expected": "13/11/2026 14:30", "roundTrip": true },
+    { "format": "m/d/Y g:i A", "mode": "datetime", "value": "2026-11-13 14:30", "expected": "11/13/2026 2:30 PM", "roundTrip": true },
+    { "format": "j F Y, g:i A", "mode": "datetime", "value": "2026-11-13 14:30", "expected": "13 November 2026, 2:30 PM", "roundTrip": true }
+  ]
+}

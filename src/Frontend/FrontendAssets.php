@@ -151,6 +151,9 @@ final class FrontendAssets {
 				 */
 				'lang'           => sanitize_key( (string) apply_filters( 'subtleforms/frontend/language', '' ) ),
 				'weekStartsOn'   => (int) get_option( 'start_of_week', 0 ),
+				// Settings > General formats, for a date field set to the site format (2.9.0).
+				'dateFormat'     => (string) get_option( 'date_format', 'F j, Y' ),
+				'timeFormat'     => (string) get_option( 'time_format', 'g:i a' ),
 				// Default-value tokens {user_email} and {user_name} (2.0).
 				'user'           => is_user_logged_in()
 					? array(

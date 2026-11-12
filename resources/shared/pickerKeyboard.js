@@ -34,9 +34,10 @@ export function moveGrid(index, key, columns = 7, total = Number.POSITIVE_INFINI
 /**
  * The date a calendar key press moves to, or null when the key is not a
  * calendar key. Arrows move a day or a week, Home and End go to the start
- * and end of the week, PageUp and PageDown to the same day a month away.
+ * and end of the week, PageUp and PageDown to the same day a month away (a
+ * year with `byYear`, the Shift variants).
  */
-export function moveDate(date, key, weekStartsOn = 0) {
+export function moveDate(date, key, weekStartsOn = 0, byYear = false) {
   const year = date.getFullYear();
   const month = date.getMonth();
   const day = date.getDate();
@@ -56,9 +57,13 @@ export function moveDate(date, key, weekStartsOn = 0) {
       return new Date(year, month, day + (6 - ((date.getDay() - startOn + 7) % 7)));
     case 'PageUp':
     case 'PageDown': {
-      const target = month + (key === 'PageUp' ? -1 : 1);
-      const lastDay = new Date(year, target + 1, 0).getDate();
-      return new Date(year, target, Math.min(day, lastDay));
+      // Shift moves a year, otherwise a month; a day that does not exist in
+      // the target month lands on its last day.
+      const sign = key === 'PageUp' ? -1 : 1;
+      const target = byYear ? month : month + sign;
+      const targetYear = byYear ? year + sign : year;
+      const lastDay = new Date(targetYear, target + 1, 0).getDate();
+      return new Date(targetYear, target, Math.min(day, lastDay));
     }
     default:
       return null;

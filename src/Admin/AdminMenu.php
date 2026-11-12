@@ -638,6 +638,9 @@ class AdminMenu {
 			'cloudflareNotice' => self::cloudflare_notice(),
 			// Today in the site's time zone (Y-m-d), the end of the Reports date range.
 			'siteToday'      => wp_date( 'Y-m-d' ),
+			// Settings > General formats, for date fields set to the site format (2.9.0).
+			'dateFormat'     => (string) get_option( 'date_format', 'F j, Y' ),
+			'timeFormat'     => (string) get_option( 'time_format', 'g:i a' ),
 			// The Pro page on subtleforms.com, for the Upgrade page.
 			'upgradeUrl'     => self::upgrade_url( 'menu' ),
 			// Addresses of the admin screens that connection instructions link to (2.8.1).
