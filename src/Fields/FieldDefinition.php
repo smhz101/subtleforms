@@ -82,6 +82,15 @@ final class FieldDefinition {
 	 *   ['type' => 'text', 'name' => 'placeholder', 'label' => 'Placeholder'],
 	 *   ['type' => 'number', 'name' => 'min', 'label' => 'Minimum Value'],
 	 * ]
+	 * Any key is passed to the browser. The inspector reads these besides
+	 * type, name, label and help:
+	 * - default: shown as the value while the setting has never been saved
+	 *   (only an undefined value counts as never saved). It is display only
+	 *   and is not written into the field until the user changes the control.
+	 *   A toggle with 'default' => true shows on until it is saved off.
+	 * - placeholder: hint text of a text, textarea or number control.
+	 * - disabled: true draws the control unusable, for a setting that cannot
+	 *   be used yet. The help text stays available to explain why.
 	 */
 	public $inspectorControls;
 
