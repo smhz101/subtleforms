@@ -7,6 +7,10 @@
  * All inputs are read-only: this is a layout preview, not a live form.
  */
 
+import { fieldConfig } from '../../../shared/fieldConfig';
+import { flagsOn } from '../../../shared/flagsOn';
+import FlagIcon from '../../../frontend/components/fields/FlagIcon';
+
 const DEFAULTS = {
 	street:  { enabled: true,  label: 'Street Address',        placeholder: '' },
 	street2: { enabled: false, label: 'Street Address Line 2', placeholder: 'Apt, Suite, etc.' },
@@ -26,23 +30,32 @@ function getSub( fields, key ) {
 	};
 }
 
-function SubInput( { sub, cls } ) {
+function SubInput( { sub, cls, flag } ) {
 	return (
 		<div className={ `${ cls }__col` }>
 			<div className={ `${ cls }__sub-label` }>{ sub.label }</div>
-			<input
-				type='text'
-				placeholder={ sub.placeholder || sub.label }
-				className='sf-field-renderer__input'
-				readOnly
-				tabIndex='-1'
-			/>
+			<div className={ flag ? `${ cls }__flagged` : undefined }>
+				{ flag && (
+					<span className={ `${ cls }__flag` } aria-hidden='true'>
+						<FlagIcon code={ flag } eager />
+					</span>
+				) }
+				<input
+					type='text'
+					placeholder={ sub.placeholder || sub.label }
+					className='sf-field-renderer__input'
+					readOnly
+					tabIndex='-1'
+				/>
+			</div>
 		</div>
 	);
 }
 
 export default function AddressFieldRenderer( { field } ) {
 	const { fields } = field || {};
+	// A sample flag stands beside the Country placeholder when the option is on.
+	const flagOn = flagsOn( fieldConfig( field ).showFlags );
 	const cls = 'sf-composite-field';
 
 	const street  = getSub( fields, 'street' );
@@ -76,7 +89,7 @@ export default function AddressFieldRenderer( { field } ) {
 			{ ( postal.enabled || country.enabled ) && (
 				<div className={ `${ cls }__row` }>
 					{ postal.enabled  && <SubInput sub={ postal }  cls={ cls } /> }
-					{ country.enabled && <SubInput sub={ country } cls={ cls } /> }
+					{ country.enabled && <SubInput sub={ country } cls={ cls } flag={ flagOn ? 'US' : '' } /> }
 				</div>
 			) }
 		</div>
