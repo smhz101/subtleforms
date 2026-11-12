@@ -7,6 +7,8 @@
  *   {all_fields}   every answer with its label (secret fields left out)
  *   {field:key}    the answer to one field, by field key
  *   {key}          the same, shorthand (kept for forms built before 2.3)
+ *   {field:key:part}  one part of a composite answer, for example
+ *                     {field:address:city}; empty when the part is missing
  *   {form_title}   the form's title
  *   {entry_id}     the entry number
  *   {site_name}    the site title
@@ -98,20 +100,55 @@ final class MergeTags {
 				return $escape( $context['date'] ?? self::now() );
 		}
 
-		$key = strpos( $name, 'field:' ) === 0 ? substr( $name, 6 ) : $name;
-		if ( $key !== '' && array_key_exists( $key, $answers ) ) {
-			$value = $answers[ $key ];
-			if ( is_array( $value ) ) {
-				$type  = self::compositeType( $key, $context );
-				$value = '' !== $type
-					? self::compositeText( $value, $type )
-					: implode( ', ', array_map( 'strval', array_filter( $value, 'is_scalar' ) ) );
+		$prefixed = strpos( $name, 'field:' ) === 0;
+		$ref      = $prefixed ? substr( $name, 6 ) : $name;
+		$colon    = strpos( $ref, ':' );
+		// A field key cannot hold a colon, so everything after the first one is the part.
+		$key  = false === $colon ? $ref : substr( $ref, 0, $colon );
+		$part = false === $colon ? '' : substr( $ref, $colon + 1 );
+		$has  = '' !== $key && array_key_exists( $key, $answers );
+
+		if ( '' !== $key && ( $prefixed || $has ) ) {
+			$value = $has ? $answers[ $key ] : null;
+
+			if ( function_exists( 'apply_filters' ) ) {
+				/**
+				 * Compute the value of a field tag. Return a string to use it
+				 * as the tag's value (escaped like any other value in HTML
+				 * mail), or null to let the plugin resolve the tag.
+				 *
+				 * @since 2.9.0
+				 *
+				 * @param string|null $custom  Null.
+				 * @param string      $key     Field key.
+				 * @param string      $part    The part after the second colon, or '' for a plain {field:key} tag.
+				 * @param mixed       $value   The stored answer, or null when there is none.
+				 * @param array       $context Merge context (see render()).
+				 */
+				$custom = apply_filters( 'subtleforms/merge_tags/value', null, $key, $part, $value, $context );
+				if ( is_string( $custom ) ) {
+					return $escape( $custom );
+				}
 			}
-			return (string) $value;
+
+			if ( '' !== $part ) {
+				$scalar = is_array( $value ) && isset( $value[ $part ] ) && is_scalar( $value[ $part ] ) ? $value[ $part ] : '';
+				return $escape( (string) $scalar );
+			}
+
+			if ( $has ) {
+				if ( is_array( $value ) ) {
+					$type  = self::compositeType( $key, $context );
+					$value = '' !== $type
+						? self::compositeText( $value, $type )
+						: implode( ', ', array_map( 'strval', array_filter( $value, 'is_scalar' ) ) );
+				}
+				return (string) $value;
+			}
 		}
 
 		// {field:key} of a field that was left empty or hidden: nothing.
-		if ( strpos( $name, 'field:' ) === 0 ) {
+		if ( $prefixed ) {
 			return '';
 		}
 
