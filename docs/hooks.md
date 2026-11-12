@@ -348,6 +348,16 @@ Picture choice, several files per upload field, advanced conditional logic and f
 
 Without Pro, a saved `picture_choice` is shown, checked and stored as a radio group, or as a multiple choice when `allowMultiple` is true. A saved multi-file upload accepts one file, and a request that posts more is refused with "You can attach up to 1 file". Nothing in the saved form JSON is changed.
 
+### Country flags on the Address field (2.9.0)
+
+This plugin holds the flag code and draws a flag beside each country in the Address field's Country sub-field, but it ships no control for it. An add-on switches it on:
+
+- Declare the feature name `address_flags` in the `subtleforms/addon/features` filter (`ExtensionPoints::ADDRESS_FLAGS`). The plugin sends the declared names to the builder as `subtleformsAdmin.addonFeatures` and to a live form as `subtleformsFrontend.addonFeatures`, and `addonProvides( 'address_flags' )` reads them.
+- Store a true boolean under the key `showFlags` on the `address_group` field (the key the Phone and Country fields already use). An add-on adds its own checkbox for it with `subtleforms/fields/inspector_controls`. A control that should show only while the Country part is drawn can use `'showWhen' => array( 'enable_country' => array( true, 1, '1', '' ) )`; the inspector resolves `enable_country` from the sub-field rows first.
+- Without the declaration an address with `showFlags: true` still shows the two-letter code and loads no flag files. With it, the flag files load only for pages that have an address with the option on. Entries and exports are unchanged: the stored value stays the ISO code.
+
+The level stays 3: this is an addition, so an add-on detects it by checking `ExtensionPoints::has( 'address_flags' )` before it declares the feature.
+
 ### Parts of the Address field (PHP and JavaScript, 2.9.0)
 
 `subtleforms/fields/composite_parts` receives the built-in parts of `name_group` or `address_group` and the type. Return the list with your parts appended. Only appended parts are used: the built-in parts cannot be replaced, changed or removed, and a part whose `part`, `value` or `alias` is already taken is ignored. The result is read once per request.

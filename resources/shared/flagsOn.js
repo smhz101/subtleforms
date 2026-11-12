@@ -1,7 +1,7 @@
 /** Country flags setting (2.7.2), kept apart so the main bundle stays small. */
 
 /**
- * Whether a Phone or Country field setting asks for flags. Mirrors
+ * Whether a Phone, Country or Address field setting asks for flags. Mirrors
  * FrontendAssets::wantsFlags() on the server.
  *
  * @param {*} value Saved `showFlags` value.

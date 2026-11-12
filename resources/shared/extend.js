@@ -411,11 +411,14 @@ export function runFormMountHooks(context) {
 
 /**
  * Features an active add-on provides (names from the PHP ExtensionPoints
- * class), as sent to the admin in `subtleformsAdmin.addonFeatures`.
+ * class), as sent to the admin in `subtleformsAdmin.addonFeatures` and to a
+ * live form in `subtleformsFrontend.addonFeatures`.
  */
 export function addonProvides(feature) {
-  const list = root.subtleformsAdmin && root.subtleformsAdmin.addonFeatures;
-  return Array.isArray(list) && list.includes(feature);
+  // The builder reads them from the admin data, a live form from its own.
+  const admin = root.subtleformsAdmin && root.subtleformsAdmin.addonFeatures;
+  const front = root.subtleformsFrontend && root.subtleformsFrontend.addonFeatures;
+  return (Array.isArray(admin) && admin.includes(feature)) || (Array.isArray(front) && front.includes(feature));
 }
 
 /**

@@ -18,7 +18,7 @@ import CONTROL_REGISTRY, { getControlComponent } from './controlRegistry';
 import { PanelSection } from '../../../ui';
 import { resolveControls } from './controlSections';
 import { getInspectorControl } from '../../../../shared/extend';
-import { compositeSubfields } from '../../../../shared/compositeParts';
+import { compositeSubfields, compositeParts, hasParts } from '../../../../shared/compositeParts';
 
 import './DynamicInspectorPanel.scss';
 
@@ -110,9 +110,16 @@ function ControlRenderer( { ctrl, field, onUpdate, isReadOnly, override } ) {
 	// A control can name the settings that decide whether it is shown:
 	// `showWhen: { inputMask: [ 'custom' ] }` shows it only for those values.
 	if ( ctrl.showWhen && typeof ctrl.showWhen === 'object' ) {
-		const visible = Object.entries( ctrl.showWhen ).every( ( [ name, allowed ] ) =>
-			Array.isArray( allowed ) ? allowed.includes( field[ name ] ?? '' ) : ( field[ name ] ?? '' ) === allowed
-		);
+		const visible = Object.entries( ctrl.showWhen ).every( ( [ name, allowed ] ) => {
+			let current = field[ name ] ?? '';
+			// `enable_<part>` on a Name or Address field means the part is
+			// drawn now: read the sub-field rows first, the older flag last.
+			const part = /^enable_(\w+)$/.exec( name );
+			if ( part && hasParts( field?.type ) ) {
+				current = compositeParts( field.type, field ).some( ( p ) => p.part === part[ 1 ] );
+			}
+			return Array.isArray( allowed ) ? allowed.includes( current ) : current === allowed;
+		} );
 		if ( ! visible ) {
 			return null;
 		}

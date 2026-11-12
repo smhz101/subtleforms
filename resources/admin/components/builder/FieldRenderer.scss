@@ -1424,6 +1424,26 @@
 		}
 	}
 
+	// Country sub-field with flags on: the flag sits at the start of the input.
+	&__flagged {
+		position: relative;
+		display: flex;
+		align-items: center;
+	}
+
+	.sf-composite-field__flagged .sf-field-renderer__input {
+		width: 100%;
+		padding-inline-start: 40px;
+	}
+
+	&__flag {
+		position: absolute;
+		inset-inline-start: 10px;
+		display: inline-flex;
+		align-items: center;
+		pointer-events: none;
+	}
+
 	// Sub-field label sits flush under the main label, keep it clearly
 	// subordinate: smaller, lighter, no bold weight.
 	&__sub-label {

@@ -18,6 +18,7 @@ import { lazy, Suspense, useState } from '@wordpress/element';
 import { fieldConfig } from '../../../shared/fieldConfig';
 import { structuralType } from '../../../shared/formType';
 import { flagsOn } from '../../../shared/flagsOn';
+import { addonProvides } from '../../../shared/extend';
 
 const LOADERS = {
   date: () => import(/* webpackChunkName: "field-date" */ './DateTimeField'),
@@ -119,7 +120,7 @@ export function fieldGroups(schema) {
     if (fieldHasMask(node)) {
       groups.add('mask');
     }
-    if ((group === 'geo' && (node.type === 'country' || fieldConfig(node).enableCountryCode)) && flagsOn(fieldConfig(node).showFlags)) {
+    if ((group === 'geo' && (node.type === 'country' || (node.type === 'address_group' && addonProvides('address_flags')) || fieldConfig(node).enableCountryCode)) && flagsOn(fieldConfig(node).showFlags)) {
       groups.add('flags');
     }
     ['fields', 'children', 'columns'].forEach((key) => walk(node[key]));
