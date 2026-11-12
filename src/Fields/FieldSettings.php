@@ -174,7 +174,7 @@ final class FieldSettings {
 	 *
 	 * @var array<int, string>
 	 */
-	const DEFAULTABLE = array( 'text', 'email', 'number', 'phone', 'tel', 'url', 'textarea', 'dropdown', 'select', 'radio', 'country', 'date', 'time', 'range_slider', 'scale' );
+	const DEFAULTABLE = array( 'text', 'email', 'number', 'phone', 'tel', 'url', 'textarea', 'dropdown', 'select', 'radio', 'country', 'range_slider', 'scale' );
 
 	/**
 	 * Decorate every registered definition.
