@@ -75,12 +75,22 @@
 	color: var(--subtleforms-color-text);
 	background: transparent;
 	border: 0;
-	border-radius: 0;
+	/* The corners only show on a form that paints its own background. */
+	border-radius: var(--subtleforms-radius-md, 0);
 	box-shadow: none;
 	/* No padding of its own (2.4.1): the form lines up with the content around
-	   it, and the space between fields comes from the field gap. */
-	padding: 0;
+	   it, and the space between fields comes from the field gap. A form with a
+	   background of its own sets --subtleforms-form-padding (2.9.0). */
+	padding: var(--subtleforms-form-padding, 0);
 	box-sizing: border-box;
+}
+
+/* Narrow screens: at most 16px. A unitless 0 is invalid inside min(), which
+   falls back to no padding, as intended for a transparent form. */
+@media (max-width: 480px) {
+	.subtleforms {
+		padding: min(var(--subtleforms-form-padding, 0px), 16px);
+	}
 }
 
 .subtleforms *,

@@ -4,6 +4,7 @@ import {
   getPreset,
   resolvedToken,
   FONT_STACKS,
+  formAppearanceStyle,
 } from './appearance';
 import { contrastRatio, MIN_CONTRAST } from '../admin/components/builder/appearance/contrast';
 import { contrastIssues } from '../admin/components/builder/appearance/themeColors';
@@ -85,5 +86,19 @@ describe( 'presets from 2.8', () => {
 
   it( 'still returns undefined for an id that never existed', () => {
     expect( getPreset( 'nope' ) ).toBeUndefined();
+  } );
+} );
+
+describe( 'form padding variable', () => {
+  const styleOf = ( id ) => formAppearanceStyle( { preset: id, tokens: getPreset( id ).tokens } );
+
+  it( 'is 0 for a transparent form and 24px for one with its own background', () => {
+    expect( styleOf( 'theme' )[ '--subtleforms-form-padding' ] ).toBe( '0' );
+    expect( styleOf( 'dark' )[ '--subtleforms-form-padding' ] ).toBe( '24px' );
+    expect( styleOf( 'contrast' )[ '--subtleforms-form-padding' ] ).toBe( '24px' );
+  } );
+
+  it( 'is not written when no background is set', () => {
+    expect( formAppearanceStyle( { tokens: { colorPrimary: '#ff0000' } } ) ).not.toHaveProperty( '--subtleforms-form-padding' );
   } );
 } );

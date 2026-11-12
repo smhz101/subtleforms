@@ -578,6 +578,14 @@ export function formAppearanceStyle( appearance ) {
         ( TOKEN_VALUES[ key ] && TOKEN_VALUES[ key ][ value ] ) || String( value );
     }
   } );
+  // A form that paints its own background gets inner padding so the content
+  // does not touch the edge of the box. A transparent form keeps none, so a
+  // theme's own spacing is undisturbed (2.9.0). Not a saved key: derived here.
+  const bg = appearance?.tokens?.colorBackground;
+  if ( isSet( bg ) ) {
+    style[ '--subtleforms-form-padding' ] =
+      String( bg ).trim().toLowerCase() === 'transparent' ? '0' : '24px';
+  }
   const width = appearance?.variants?.width;
 
   // Only when the user set Form width (presets never write variants.width).
