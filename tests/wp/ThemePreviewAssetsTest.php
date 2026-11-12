@@ -154,6 +154,8 @@ final class ThemePreviewAssetsTest extends TestCase {
 		ThemePreviewAssets::collect();
 		$this->assertSame( 2, $this->runs );
 
+		// Core hooks its own handlers onto this action; load the classes they name.
+		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 		do_action( 'upgrader_process_complete', null, array() );
 		ThemePreviewAssets::collect();
 		$this->assertSame( 3, $this->runs );
