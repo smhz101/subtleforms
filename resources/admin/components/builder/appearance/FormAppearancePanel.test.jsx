@@ -11,7 +11,7 @@ import FormAppearancePanel from './FormAppearancePanel';
 import { FORM_PRESETS, getPreset } from '../../../../shared/appearance';
 import { setThemeStylesForTests } from '../../../data/themeStyles';
 import { GROUPS } from './tokenDefs';
-import { VARIANT_LABELS } from './labels';
+import { PRESET_LABELS, VARIANT_LABELS } from './labels';
 import fixture from './__fixtures__/custom-controls-2.8.json';
 
 jest.mock( '../../../data/apiClient', () => ( { apiClient: { get: jest.fn( () => Promise.reject( new Error( 'offline' ) ) ) } } ) );
@@ -183,6 +183,25 @@ describe( 'the Presets tab', () => {
     click( radios().find( ( r ) => r.value === 'classic' ) );
     click( [ ...document.querySelectorAll( '.sf-appearance-panel__confirm button' ) ].find( ( b ) => b.textContent === 'Apply preset' ) );
     expect( latest.metadata.appearance.preset ).toBe( 'classic' );
+    ui.unmount();
+  } );
+
+  it( 'lets an edited active preset be reapplied from its own card', () => {
+    const ui = mount( { preset: 'soft', tokens: { ...getPreset( 'soft' ).tokens, radius: '3px' }, variants: { input: 'filled', button: 'solid', buttonAlign: 'left' } } );
+    click( radios().find( ( r ) => r.value === 'soft' ) );
+    expect( document.body.textContent ).toContain( 'Applying “Soft” replaces the custom styling on this form.' );
+    click( [ ...document.querySelectorAll( '.sf-appearance-panel__confirm button' ) ].find( ( b ) => b.textContent === 'Apply preset' ) );
+    expect( latest.metadata.appearance.tokens.radius ).toBe( getPreset( 'soft' ).tokens.radius );
+    ui.unmount();
+  } );
+
+  it( 'names every card from the translated labels, in the catalogue order', () => {
+    const ui = mount( { preset: 'default', tokens: {}, variants: {} } );
+    const names = [ ...document.querySelectorAll( '.sf-pcard__name' ) ].map( ( n ) => n.textContent.replace( 'edited', '' ).trim() );
+    expect( names ).toEqual( FORM_PRESETS.map( ( p ) => p.label ) );
+    FORM_PRESETS.forEach( ( p ) => {
+      expect( PRESET_LABELS[ p.id ].description ).toBe( p.description );
+    } );
     ui.unmount();
   } );
 
