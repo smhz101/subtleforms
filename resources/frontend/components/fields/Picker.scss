@@ -421,6 +421,11 @@
 
 	&.is-outside { color: var(--subtleforms-picker-muted); }
 
+	&.is-today:not(.is-selected) {
+		box-shadow: inset 0 0 0 1px var(--subtleforms-picker-accent);
+		font-weight: 600;
+	}
+
 	&.is-selected,
 	&[aria-pressed='true'] {
 		background: var(--subtleforms-picker-accent);
@@ -554,6 +559,7 @@
 @media (max-width: 520px) {
 	.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__panel { flex-direction: column; }
 	.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu--calendar { width: 100%; }
+	.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu--datetime.is-stacked { width: 100%; }
 	.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__calendar { width: 100%; }
 	.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__column { flex: 1; width: auto; }
 }

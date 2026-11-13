@@ -288,9 +288,14 @@ export default function PreviewFrame( { children, title, className, conversation
         return;
       }
       const cs = view.getComputedStyle( body );
-      const next = Math.ceil(
+      let next = Math.ceil(
         body.getBoundingClientRect().height + ( parseFloat( cs.marginTop ) || 0 ) + ( parseFloat( cs.marginBottom ) || 0 )
       );
+      // An open picker hangs below the form without adding to its height: keep it in view.
+      const menu = body.querySelector( '.subtleforms-picker__menu' );
+      if ( menu ) {
+        next = Math.max( next, Math.ceil( menu.getBoundingClientRect().bottom + ( view.scrollY || 0 ) ) + 16 );
+      }
       if ( next > 0 ) {
         setHeight( next );
       }
@@ -308,7 +313,13 @@ export default function PreviewFrame( { children, title, className, conversation
     const observer = new Observer( measure );
     observer.observe( mountNode );
     observer.observe( doc.body );
-    return () => observer.disconnect();
+    const Mutations = view?.MutationObserver ?? window.MutationObserver;
+    const mutations = Mutations ? new Mutations( measure ) : null;
+    mutations?.observe( doc.body, { childList: true, subtree: true } );
+    return () => {
+      observer.disconnect();
+      mutations?.disconnect();
+    };
   }, [ mountNode, children ] );
 
   return (

@@ -580,6 +580,17 @@ class AdminMenu {
 			SUBTLEFORMS_VERSION
 		);
 
+		// The picker styles: the builder canvas draws the real picker controls.
+		if ( file_exists( SUBTLEFORMS_PLUGIN_DIR . 'build/frontend/picker.css' ) ) {
+			wp_enqueue_style(
+				'subtleforms-admin-picker',
+				SUBTLEFORMS_PLUGIN_URL . 'build/frontend/picker.css',
+				array( 'subtleforms-components' ),
+				(string) filemtime( SUBTLEFORMS_PLUGIN_DIR . 'build/frontend/picker.css' )
+			);
+			wp_style_add_data( 'subtleforms-admin-picker', 'rtl', 'replace' );
+		}
+
 		// Main admin JS (built bundle at build/admin/admin.js)
 		$asset_file = SUBTLEFORMS_PLUGIN_DIR . 'build/admin/admin.asset.php';
 		if ( file_exists( $asset_file ) ) {

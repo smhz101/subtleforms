@@ -155,8 +155,11 @@ function TimeColumn({ label, options, selected, onPick, isDisabled }) {
   const listRef = useRef(null);
   const typed = useRef({ text: '', at: 0 });
   const selectedIndex = options.findIndex((option) => option.value === selected);
-  const [focusIndex, setFocusIndex] = useState(Math.max(0, selectedIndex));
   const off = (index) => !!isDisabled && !!options[index] && isDisabled(options[index].value);
+  // With nothing chosen the column rests on the first row that can be picked.
+  const firstEnabled = Math.max(0, options.findIndex((_option, index) => !off(index)));
+  const restIndex = selectedIndex >= 0 ? selectedIndex : firstEnabled;
+  const [focusIndex, setFocusIndex] = useState(restIndex);
 
   useEffect(() => {
     if (selectedIndex >= 0) {
@@ -167,7 +170,7 @@ function TimeColumn({ label, options, selected, onPick, isDisabled }) {
   // The selected row sits in the middle of the column when it opens.
   useEffect(() => {
     const list = listRef.current;
-    const row = list?.children[Math.max(0, selectedIndex)];
+    const row = list?.children[restIndex];
     if (list && row) {
       list.scrollTop = row.offsetTop - (list.clientHeight - row.offsetHeight) / 2;
     }
@@ -596,6 +599,10 @@ export default function DateTimeField({
     new Intl.DateTimeFormat(locale, { month: 'short' }).format(new Date(2024, month, 1))
   ));
   const todayDate = new Date();
+  // The month or year of the chosen day, shown as selected in the month and year views.
+  const chosenDay = parseIsoDate(dateValue);
+  const isChosen = (year, month) => !!chosenDay && chosenDay.getFullYear() === year
+    && (month === undefined || chosenDay.getMonth() === month);
   const monthOutOfRange = (year, month) => {
     const first = toIsoDate(new Date(year, month, 1));
     const last = toIsoDate(new Date(year, month + 1, 0));
@@ -841,9 +848,9 @@ export default function DateTimeField({
                                 key={month}
                                 type='button'
                                 role='gridcell'
-                                className={`subtleforms-picker__cell${isCurrent ? ' is-today' : ''}${cursor.getMonth() === month ? ' is-selected' : ''}`}
+                                className={`subtleforms-picker__cell${isCurrent ? ' is-today' : ''}${isChosen(cursor.getFullYear(), month) ? ' is-selected' : ''}`}
                                 aria-disabled={off || undefined}
-                                aria-selected={cursor.getMonth() === month}
+                                aria-selected={isChosen(cursor.getFullYear(), month)}
                                 aria-current={isCurrent ? 'date' : undefined}
                                 tabIndex={cursor.getMonth() === month ? 0 : -1}
                                 onClick={() => {
@@ -885,9 +892,9 @@ export default function DateTimeField({
                                 key={year}
                                 type='button'
                                 role='gridcell'
-                                className={`subtleforms-picker__cell${todayDate.getFullYear() === year ? ' is-today' : ''}${cursor.getFullYear() === year ? ' is-selected' : ''}`}
+                                className={`subtleforms-picker__cell${todayDate.getFullYear() === year ? ' is-today' : ''}${isChosen(year) ? ' is-selected' : ''}`}
                                 aria-disabled={off || undefined}
-                                aria-selected={cursor.getFullYear() === year}
+                                aria-selected={isChosen(year)}
                                 aria-current={todayDate.getFullYear() === year ? 'date' : undefined}
                                 tabIndex={cursor.getFullYear() === year ? 0 : -1}
                                 onClick={() => {

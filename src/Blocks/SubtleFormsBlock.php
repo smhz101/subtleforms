@@ -259,6 +259,16 @@ final class SubtleFormsBlock {
 			SUBTLEFORMS_VERSION
 		);
 		wp_style_add_data( 'subtleforms-frontend-preview', 'rtl', 'replace' );
+		// Pickers (dropdown, date and time) have their own stylesheet since 2.9.0.
+		if ( file_exists( SUBTLEFORMS_PLUGIN_DIR . 'build/frontend/picker.css' ) ) {
+			wp_enqueue_style(
+				'subtleforms-frontend-preview-picker',
+				SUBTLEFORMS_PLUGIN_URL . 'build/frontend/picker.css',
+				array( 'subtleforms-frontend-preview' ),
+				SUBTLEFORMS_VERSION
+			);
+			wp_style_add_data( 'subtleforms-frontend-preview-picker', 'rtl', 'replace' );
+		}
 	}
 
 	/**
