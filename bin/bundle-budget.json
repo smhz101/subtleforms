@@ -18,7 +18,7 @@
     "files": [
       "picker.css"
     ],
-    "measuredGzipBytes": 2391,
+    "measuredGzipBytes": 2449,
     "limitGzipBytes": 3000,
     "withBaseLimitGzipBytes": 52500,
     "note": "2.9.0: picker.css is loaded only for forms with a dropdown, country, address, date or time field. A form with a picker downloads the base bundle plus this file, so the two together are held to withBaseLimitGzipBytes (the 2.8 base of 50318 plus 2.9 picker polish)."
