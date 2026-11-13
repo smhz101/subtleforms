@@ -179,6 +179,12 @@ class AnswerFormatterTest extends TestCase {
 		// Defaults, and values that are not ISO dates, are kept as they are.
 		$this->assertSame( '2026-06-15 14:30', AnswerFormatter::text( '2026-06-15T14:30', array( 'type' => 'datetime' ) ) );
 		$this->assertSame( 'next week', AnswerFormatter::text( 'next week', array( 'type' => 'date', 'format' => 'd/m/Y' ) ) );
+		// 2.9.0: the "site" and "custom" format choices are resolved, never passed to the date function as words.
+		$this->assertSame( 'June 15, 2026', AnswerFormatter::text( '2026-06-15', array( 'type' => 'date', 'format' => 'site' ) ) );
+		$this->assertSame( '2:30 pm', AnswerFormatter::text( '14:30', array( 'type' => 'time', 'format' => 'site' ) ) );
+		$this->assertSame( 'June 15, 2026, 2:30 pm', AnswerFormatter::text( '2026-06-15T14:30', array( 'type' => 'datetime', 'format' => 'site' ) ) );
+		$this->assertSame( '15 June 2026', AnswerFormatter::text( '2026-06-15', array( 'type' => 'date', 'format' => 'custom', 'customFormat' => 'j F Y' ) ) );
+		$this->assertSame( '2026-06-15', AnswerFormatter::text( '2026-06-15', array( 'type' => 'date', 'format' => 'custom', 'customFormat' => '' ) ) );
 
 		$schema = array( 'fields' => array( array( 'type' => 'date', 'key' => 'day', 'label' => 'Day', 'format' => 'd/m/Y' ) ) );
 		$this->assertSame( array( 'day' => '15/06/2026' ), $this->answersByKey( $schema, array( 'day' => '2026-06-15' ) ) );

@@ -12,6 +12,7 @@ import {
   resolveDateLimit,
   resolveFormat,
   siteLocale,
+  siteNow,
   splitFormat,
   toIsoDate,
 } from './dateTime';
@@ -50,7 +51,7 @@ function showTime(value, config, mode) {
  * @param {string} mode   date or datetime.
  * @param {Date}   [now]  Today, for tests.
  */
-export function dateLimitMessage(date, config = {}, mode = 'date', now = new Date()) {
+export function dateLimitMessage(date, config = {}, mode = 'date', now = siteNow()) {
   const min = resolveDateLimit(config.minDate, now);
   const max = resolveDateLimit(config.maxDate, now);
   if (min && date < min) {

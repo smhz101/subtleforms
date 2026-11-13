@@ -13,6 +13,7 @@ import {
   resolveDateLimit,
   resolveFormat,
   siteLocale,
+  siteNow,
   siteWeekStart,
   parseTime,
   splitDateTime,
@@ -129,7 +130,7 @@ function clockMinutes(clock) {
 }
 
 /** The current time rounded up to the step, as H:i, or null past midnight. */
-function nowRounded(step, from = new Date()) {
+function nowRounded(step, from = siteNow()) {
   const size = normalizeStep(step);
   const total = Math.ceil((from.getHours() * 60 + from.getMinutes()) / size) * size;
   if (total >= 24 * 60) {
@@ -330,7 +331,7 @@ export default function DateTimeField({
 
   // Dates that cannot be picked: outside the earliest and latest date, before
   // today when "No past dates" is on, or on a disabled weekday.
-  const todayIso = toIsoDate(new Date());
+  const todayIso = toIsoDate(siteNow());
   const resolvedMin = resolveDateLimit(min);
   const minIso = disablePast && (!resolvedMin || resolvedMin < todayIso) ? todayIso : resolvedMin;
   const maxIso = resolveDateLimit(max);
@@ -344,7 +345,7 @@ export default function DateTimeField({
     if (selected) {
       return selected;
     }
-    const today = new Date();
+    const today = siteNow();
     if (!isDisabled(today)) {
       return today;
     }
@@ -368,7 +369,7 @@ export default function DateTimeField({
     if (!wantsDate || (defaultMode === 'now' && mode === 'date') || (defaultMode === 'today' && mode === 'time')) {
       return;
     }
-    const today = new Date();
+    const today = siteNow();
     if (mode === 'time') {
       onChange(nowRounded(minuteStep, today));
     } else if (!isDisabled(today)) {
@@ -376,7 +377,7 @@ export default function DateTimeField({
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const [cursor, setCursor] = useState(() => parseIsoDate(dateValue) || new Date());
+  const [cursor, setCursor] = useState(() => parseIsoDate(dateValue) || siteNow());
   const [view, setView] = useState('days');
   const [yearStart, setYearStart] = useState(0);
   const [compact, setCompact] = useState(false);
@@ -410,7 +411,7 @@ export default function DateTimeField({
   const emitTime = (hours, minutes) => {
     const clock = toTime(hours, minutes);
     if (mode === 'datetime') {
-      emit(joinDateTime(dateValue || toIsoDate(new Date()), clock));
+      emit(joinDateTime(dateValue || toIsoDate(siteNow()), clock));
       return;
     }
     emit(clock);
@@ -509,7 +510,7 @@ export default function DateTimeField({
   const minClock = (() => {
     const base = clockMinutes(minTime);
     const nowClock = disablePast && mode === 'datetime' && dateValue === todayIso
-      ? clockMinutes(toTime(new Date().getHours(), new Date().getMinutes()))
+      ? clockMinutes(toTime(siteNow().getHours(), siteNow().getMinutes()))
       : null;
     return base === null ? nowClock : (nowClock === null ? base : Math.max(base, nowClock));
   })();
@@ -594,11 +595,11 @@ export default function DateTimeField({
     }
   };
 
-  const todayAllowed = !isDisabled(new Date());
+  const todayAllowed = !isDisabled(siteNow());
   const monthNames = Array.from({ length: 12 }, (_, month) => (
     new Intl.DateTimeFormat(locale, { month: 'short' }).format(new Date(2024, month, 1))
   ));
-  const todayDate = new Date();
+  const todayDate = siteNow();
   // The month or year of the chosen day, shown as selected in the month and year views.
   const chosenDay = parseIsoDate(dateValue);
   const isChosen = (year, month) => !!chosenDay && chosenDay.getFullYear() === year
@@ -962,7 +963,7 @@ export default function DateTimeField({
                   title={todayAllowed ? undefined : __('Today is outside the allowed dates', 'subtleforms')}
                   onClick={() => {
                     if (todayAllowed) {
-                      pickDay(new Date(), false);
+                      pickDay(siteNow(), false);
                     }
                   }}>
                   {__('Today', 'subtleforms')}

@@ -199,6 +199,42 @@ export function siteFormats() {
 }
 
 /**
+ * The current moment on the site's clock, as a Date whose local year, month,
+ * day, hours and minutes are the site's wall clock (Settings > General >
+ * Timezone), so "today" and "now" in a limit or a default mean the same day
+ * the server checks against (DateRules::today). Without a site timezone it is
+ * the visitor's own clock.
+ *
+ * @param {Date} [at] The instant to read, for tests.
+ * @return {Date}
+ */
+export function siteNow(at = new Date()) {
+  const source = (typeof window !== 'undefined' && (window.subtleformsFrontend || window.subtleformsAdmin)) || {};
+  const zone = typeof source.timezone === 'string' ? source.timezone.trim() : '';
+  if (!zone) {
+    return at;
+  }
+  let wall = null;
+  const offset = /^([+-])(\d{1,2}):?(\d{2})?$/.exec(zone);
+  if (offset) {
+    const minutes = (Number(offset[2]) * 60 + Number(offset[3] || 0)) * (offset[1] === '-' ? -1 : 1);
+    const shifted = new Date(at.getTime() + minutes * 60000);
+    wall = [shifted.getUTCFullYear(), shifted.getUTCMonth(), shifted.getUTCDate(), shifted.getUTCHours(), shifted.getUTCMinutes()];
+  } else {
+    try {
+      const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: zone, hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric',
+      }).formatToParts(at);
+      const get = (type) => Number(parts.find((part) => part.type === type)?.value);
+      wall = [get('year'), get('month') - 1, get('day'), get('hour'), get('minute')];
+    } catch (e) {
+      return at;
+    }
+  }
+  return new Date(wall[0], wall[1], wall[2], wall[3], wall[4]);
+}
+
+/**
  * The PHP format a field presents its value with: its own format, the site
  * setting (`site`) or the text typed under Custom format (`custom`). A value
  * that is none of these is a format typed by hand in a saved 2.8 form and is
@@ -518,7 +554,7 @@ export function parseTyped(text, mode, format, locale = siteLocale()) {
  * @param {Date}   [today]
  * @return {string}
  */
-export function resolveDateLimit(value, today = new Date()) {
+export function resolveDateLimit(value, today = siteNow()) {
   const text = String(value || '').trim().toLowerCase();
   if (!text) {
     return '';

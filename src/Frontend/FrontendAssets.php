@@ -154,6 +154,7 @@ final class FrontendAssets {
 				// Settings > General formats, for a date field set to the site format (2.9.0).
 				'dateFormat'     => (string) get_option( 'date_format', 'F j, Y' ),
 				'timeFormat'     => (string) get_option( 'time_format', 'g:i a' ),
+				'timezone'       => wp_timezone_string(),
 				// Default-value tokens {user_email} and {user_name} (2.0).
 				'user'           => is_user_logged_in()
 					? array(
