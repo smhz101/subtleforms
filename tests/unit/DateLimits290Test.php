@@ -60,7 +60,7 @@ final class DateLimits290Test extends TestCase {
 
 	public function test_the_validator_enforces_weekdays_and_past_dates(): void {
 		$field = array( 'key' => 'when', 'type' => 'date', 'config' => array( 'disabledWeekdays' => array( 0 ) ) );
-		$this->assertSame( 'Sundays are not available.', $this->validate( $field, '2025-03-16' )['errors']['when'] );
+		$this->assertSame( 'Not available on a Sunday.', $this->validate( $field, '2025-03-16' )['errors']['when'] );
 		$this->assertTrue( $this->validate( $field, '2025-03-17' )['valid'] );
 
 		$past = array( 'key' => 'when', 'type' => 'date', 'config' => array( 'disablePast' => true ) );

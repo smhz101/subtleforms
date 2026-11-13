@@ -70,7 +70,7 @@ export function dateLimitMessage(date, config = {}, mode = 'date', now = siteNow
   if (day && blocked.includes(day.getDay())) {
     const name = new Intl.DateTimeFormat(siteLocale(), { weekday: 'long' }).format(day);
     // translators: %s: weekday name, for example Monday.
-    return sprintf(__('%ss are not available.', 'subtleforms'), name);
+    return sprintf(__('Not available on a %s.', 'subtleforms'), name);
   }
   return '';
 }

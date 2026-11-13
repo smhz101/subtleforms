@@ -217,7 +217,7 @@ final class DateRules {
 			$weekday = (int) gmdate( 'w', (int) strtotime( $date . ' 12:00:00 UTC' ) );
 			if ( in_array( $weekday, $blocked, true ) ) {
 				/* translators: %s: weekday name, for example Monday. */
-				return sprintf( __( '%ss are not available.', 'subtleforms' ), self::wpDate( 'l', $date . ' 12:00:00' ) );
+				return sprintf( __( 'Not available on a %s.', 'subtleforms' ), self::wpDate( 'l', $date . ' 12:00:00' ) );
 			}
 		}
 		return null;
