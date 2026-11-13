@@ -782,8 +782,17 @@ function renderInput(
           onChange={onChange}
           placeholder={placeholder}
           format={config.format}
+          customFormat={config.customFormat}
+          label={field.label}
           min={config.minDate}
           max={config.maxDate}
+          disablePast={config.disablePast === true}
+          disabledWeekdays={config.disabledWeekdays}
+          firstDay={config.firstDay}
+          minuteStep={config.minuteStep}
+          minTime={config.minTime}
+          maxTime={config.maxTime}
+          defaultMode={config.defaultMode}
           required={required}
           readOnly={config.readOnly === true}
           describedBy={describedBy}

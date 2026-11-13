@@ -580,6 +580,17 @@ class AdminMenu {
 			SUBTLEFORMS_VERSION
 		);
 
+		// The picker styles: the builder canvas draws the real picker controls.
+		if ( file_exists( SUBTLEFORMS_PLUGIN_DIR . 'build/frontend/picker.css' ) ) {
+			wp_enqueue_style(
+				'subtleforms-admin-picker',
+				SUBTLEFORMS_PLUGIN_URL . 'build/frontend/picker.css',
+				array( 'subtleforms-components' ),
+				(string) filemtime( SUBTLEFORMS_PLUGIN_DIR . 'build/frontend/picker.css' )
+			);
+			wp_style_add_data( 'subtleforms-admin-picker', 'rtl', 'replace' );
+		}
+
 		// Main admin JS (built bundle at build/admin/admin.js)
 		$asset_file = SUBTLEFORMS_PLUGIN_DIR . 'build/admin/admin.asset.php';
 		if ( file_exists( $asset_file ) ) {
@@ -638,6 +649,10 @@ class AdminMenu {
 			'cloudflareNotice' => self::cloudflare_notice(),
 			// Today in the site's time zone (Y-m-d), the end of the Reports date range.
 			'siteToday'      => wp_date( 'Y-m-d' ),
+			// Settings > General formats, for date fields set to the site format (2.9.0).
+			'dateFormat'     => (string) get_option( 'date_format', 'F j, Y' ),
+			'timeFormat'     => (string) get_option( 'time_format', 'g:i a' ),
+			'timezone'       => wp_timezone_string(),
 			// The Pro page on subtleforms.com, for the Upgrade page.
 			'upgradeUrl'     => self::upgrade_url( 'menu' ),
 			// Addresses of the admin screens that connection instructions link to (2.8.1).
@@ -677,6 +692,16 @@ class AdminMenu {
 			// layout lines. The preview loads the same, so the two cannot drift.
 			'layoutCss'      => FrontendAssets::layoutCss(),
 			'plainTypes'     => FrontendAssets::plainTypes(),
+			// The picker stylesheet every form with a dropdown, country, date,
+			// time or date and time field loads, and the types that need it (2.9.0).
+			'pickerCss'      => file_exists( SUBTLEFORMS_PLUGIN_DIR . 'build/frontend/picker.css' )
+				? add_query_arg(
+					'ver',
+					(string) filemtime( SUBTLEFORMS_PLUGIN_DIR . 'build/frontend/picker.css' ),
+					SUBTLEFORMS_PLUGIN_URL . 'build/frontend/picker.css'
+				)
+				: '',
+			'pickerTypes'    => FrontendAssets::pickerTypes(),
 			'i18n'           => array(
 				'confirmDelete' => __( 'Are you sure you want to delete this item?', 'subtleforms' ),
 				'error'         => __( 'An error occurred. Please try again.', 'subtleforms' ),

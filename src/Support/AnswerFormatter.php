@@ -23,6 +23,8 @@
 
 namespace SubtleForms\Support;
 
+use SubtleForms\Engine\DateRules;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -41,16 +43,6 @@ final class AnswerFormatter {
 	 * Field types that store a yes/no answer.
 	 */
 	private const YES_NO_TYPES = array( 'consent', 'checkbox', 'toggle' );
-
-	/**
-	 * Default display formats by field type (the field definitions' defaults).
-	 */
-	private const DATE_FORMATS = array(
-		'date'     => 'Y-m-d',
-		'time'     => 'H:i',
-		'datetime' => 'Y-m-d H:i',
-	);
-
 
 	/**
 	 * The name of a field in outputs: its admin label when set, else its
@@ -679,8 +671,15 @@ final class AnswerFormatter {
 	 */
 	private static function date( string $value, string $type, array $field ): string {
 		$value  = trim( $value );
-		$format = EntryValues::attr( $field, 'format' );
-		$format = is_string( $format ) && '' !== trim( $format ) ? trim( $format ) : self::DATE_FORMATS[ $type ];
+		// The field's format may be a preset, "site" or "custom" (2.9.0), or the
+		// free text a 2.8 field saved: DateRules reads all of them.
+		$format = DateRules::format(
+			array(
+				'format'       => EntryValues::attr( $field, 'format' ),
+				'customFormat' => EntryValues::attr( $field, 'customFormat' ),
+			),
+			$type
+		);
 
 		$patterns = array(
 			'date'     => '/^\d{4}-\d{2}-\d{2}$/',

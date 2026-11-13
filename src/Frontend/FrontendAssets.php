@@ -151,6 +151,10 @@ final class FrontendAssets {
 				 */
 				'lang'           => sanitize_key( (string) apply_filters( 'subtleforms/frontend/language', '' ) ),
 				'weekStartsOn'   => (int) get_option( 'start_of_week', 0 ),
+				// Settings > General formats, for a date field set to the site format (2.9.0).
+				'dateFormat'     => (string) get_option( 'date_format', 'F j, Y' ),
+				'timeFormat'     => (string) get_option( 'time_format', 'g:i a' ),
+				'timezone'       => wp_timezone_string(),
 				// Default-value tokens {user_email} and {user_name} (2.0).
 				'user'           => is_user_logged_in()
 					? array(
@@ -196,6 +200,9 @@ final class FrontendAssets {
 		'password',
 		'textarea',
 		'select',
+		'date',
+		'time',
+		'datetime',
 		'radio',
 		'multiple_choice',
 		'checkbox',
@@ -216,6 +223,89 @@ final class FrontendAssets {
 	 */
 	public static function plainTypes(): array {
 		return self::PLAIN_TYPES;
+	}
+
+	/** Handle of the picker stylesheet (2.9.0). */
+	public const PICKER_HANDLE = 'subtleforms-frontend-picker';
+
+	/**
+	 * Field types drawn with the plugin's own picker: the dropdown and country
+	 * lists, the date, time and date and time calendars. They have no native
+	 * control for a theme to style, so a form with one loads picker.css
+	 * whichever look the form has (2.9.0, #109).
+	 */
+	private const PICKER_TYPES = array(
+		'select',
+		'dropdown',
+		'country',
+		'address_group',
+		'date',
+		'time',
+		'datetime',
+	);
+
+	/**
+	 * Field types that need the picker stylesheet. The builder preview reads
+	 * this list so it decides like the page does (2.9.0).
+	 *
+	 * @return string[]
+	 */
+	public static function pickerTypes(): array {
+		return self::PICKER_TYPES;
+	}
+
+	/**
+	 * Whether a form has a field drawn with the plugin's picker.
+	 *
+	 * @param array<string, mixed>|null $schema Active schema.
+	 */
+	public static function needsPickerCss( ?array $schema ): bool {
+		if ( ! is_array( $schema ) ) {
+			return false;
+		}
+		$found = false;
+		$walk  = static function ( $node ) use ( &$walk, &$found ): void {
+			if ( $found || ! is_array( $node ) ) {
+				return;
+			}
+			if ( array_is_list( $node ) ) {
+				foreach ( $node as $child ) {
+					$walk( $child );
+				}
+				return;
+			}
+			if ( in_array( (string) ( $node['type'] ?? '' ), self::PICKER_TYPES, true ) ) {
+				$found = true;
+				return;
+			}
+			$config = is_array( $node['config'] ?? null ) ? $node['config'] : array();
+			foreach ( array( 'fields', 'children', 'columns', 'steps' ) as $key ) {
+				$walk( $node[ $key ] ?? null );
+				$walk( $config[ $key ] ?? null );
+			}
+		};
+		$walk( $schema['steps'] ?? null );
+		$walk( $schema['fields'] ?? null );
+		return $found;
+	}
+
+	/**
+	 * Enqueue the picker stylesheet, once. It is plugin UI and stands on its
+	 * own: the main stylesheet does not contain it (2.9.0).
+	 */
+	private static function enqueuePickerStyle(): void {
+		if ( wp_style_is( self::PICKER_HANDLE, 'enqueued' ) || wp_style_is( self::PICKER_HANDLE, 'done' ) ) {
+			return;
+		}
+		$file = SUBTLEFORMS_PLUGIN_DIR . 'build/frontend/picker.css';
+		wp_enqueue_style(
+			self::PICKER_HANDLE,
+			SUBTLEFORMS_PLUGIN_URL . 'build/frontend/picker.css',
+			array(),
+			file_exists( $file ) ? (string) filemtime( $file ) : SUBTLEFORMS_VERSION
+		);
+		wp_style_add_data( self::PICKER_HANDLE, 'rtl', 'replace' );
+		self::printLateIfNeeded();
 	}
 
 	/**
@@ -320,6 +410,9 @@ final class FrontendAssets {
 			self::$themeFormSeen = true;
 		} else {
 			self::$styledFormSeen = true;
+		}
+		if ( self::needsPickerCss( $schema ) ) {
+			self::enqueuePickerStyle();
 		}
 		if ( self::$styledFormSeen ) {
 			if ( ! wp_style_is( self::HANDLE, 'enqueued' ) && ! wp_style_is( self::HANDLE, 'done' ) ) {

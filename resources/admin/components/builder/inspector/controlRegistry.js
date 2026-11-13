@@ -15,6 +15,9 @@ import SubfieldInspectorControl from './controls/SubfieldInspectorControl';
 import LinesInspectorControl from './controls/LinesInspectorControl';
 import MaskTryControl from './controls/MaskTryControl';
 import PanelSelectInspectorControl from './controls/PanelSelectInspectorControl';
+import DateInspectorControl from './controls/DateInspectorControl';
+import TimeInspectorControl from './controls/TimeInspectorControl';
+import WeekdaysInspectorControl from './controls/WeekdaysInspectorControl';
 import ChainedLevelsControl from './controls/ChainedLevelsControl';
 import { getInspectorControl } from '../../../../shared/extend';
 
@@ -31,6 +34,9 @@ import { getInspectorControl } from '../../../../shared/extend';
  *   select   → dropdown select (requires options: [{value, label}])
  *   radio    → select fallback (renders as dropdown)
  *   options  → add/remove/edit list of choice options
+ *   date     → a date or a relative date such as +7 days
+ *   time     → a 24-hour time
+ *   weekdays → seven day chips, a list of day numbers
  *   subfield → composite sub-field config (toggle + label + placeholder per sub-field)
  */
 const CONTROL_REGISTRY = {
@@ -48,6 +54,9 @@ const CONTROL_REGISTRY = {
 	chained_levels: ChainedLevelsControl,
 	mask_try: MaskTryControl,
 	panel_select: PanelSelectInspectorControl,
+	date: DateInspectorControl,
+	time: TimeInspectorControl,
+	weekdays: WeekdaysInspectorControl,
 };
 
 /**

@@ -419,6 +419,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           mode={type}
           placeholder={placeholder}
           format={fieldConfig(field).format}
+          customFormat={fieldConfig(field).customFormat}
           min={fieldConfig(field).minDate}
           max={fieldConfig(field).maxDate}
           preview={!interactive}

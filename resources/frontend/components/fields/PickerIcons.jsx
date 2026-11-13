@@ -23,3 +23,11 @@ export function ClockIcon() {
     </svg>
   );
 }
+
+export function CloseIcon() {
+  return (
+    <svg className='subtleforms-picker__glyph' viewBox='0 0 20 20' width='16' height='16' aria-hidden='true'>
+      <path d='M5.5 5.5 14.5 14.5M14.5 5.5 5.5 14.5' fill='none' stroke='currentColor' strokeWidth='1.6' strokeLinecap='round' />
+    </svg>
+  );
+}

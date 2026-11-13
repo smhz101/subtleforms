@@ -112,11 +112,11 @@ final class FieldValidatorTest extends TestCase {
 
 		$before = $this->validate( $schema, array( 'when' => '2024-05-31' ) );
 		$this->assertFalse( $before['valid'] );
-		$this->assertSame( 'Date must be on or after 2024-06-01.', $before['errors']['when'] );
+		$this->assertSame( 'Pick a date on or after 2024-06-01.', $before['errors']['when'] );
 
 		$after = $this->validate( $schema, array( 'when' => '2024-07-01' ) );
 		$this->assertFalse( $after['valid'] );
-		$this->assertSame( 'Date must be on or before 2024-06-30.', $after['errors']['when'] );
+		$this->assertSame( 'Pick a date on or before 2024-06-30.', $after['errors']['when'] );
 	}
 
 	public function test_number_rejects_off_step_value() {

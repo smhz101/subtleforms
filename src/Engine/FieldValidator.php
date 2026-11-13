@@ -577,7 +577,7 @@ final class FieldValidator {
 			case 'date':
 				return $this->validateDate( $value, $field );
 			case 'time':
-				return $this->validateTime( $value );
+				return $this->validateTime( $value, $field );
 			case 'datetime':
 				return $this->validateDateTime( $value, $field );
 			case 'rating':
@@ -987,11 +987,28 @@ final class FieldValidator {
 	 * @param mixed $value Value.
 	 * @return string|null
 	 */
-	private function validateTime( $value ) {
+	private function validateTime( $value, array $field = array() ) {
 		if ( $this->isEmpty( $value ) ) {
 			return null;
 		}
-		return self::isClockTime( $value ) ? null : __( 'Please enter a valid time.', 'subtleforms' );
+		if ( ! self::isClockTime( $value ) ) {
+			return __( 'Please enter a valid time.', 'subtleforms' );
+		}
+		return DateRules::timeMessage( (string) $value, $this->dateConfig( $field ), 'time' );
+	}
+
+	/**
+	 * The settings of a date or time field that the limits read.
+	 *
+	 * @param array $field Field.
+	 * @return array<string, mixed>
+	 */
+	private function dateConfig( array $field ): array {
+		$config = array();
+		foreach ( array( 'format', 'customFormat', 'minDate', 'maxDate', 'disablePast', 'disabledWeekdays', 'minTime', 'maxTime' ) as $name ) {
+			$config[ $name ] = $this->attr( $field, $name );
+		}
+		return $config;
 	}
 
 	/**
@@ -1011,7 +1028,11 @@ final class FieldValidator {
 		if ( ! self::isIsoDate( $date ) || ( null !== $time && ! self::isClockTime( $time ) ) ) {
 			return __( 'Please enter a valid date and time.', 'subtleforms' );
 		}
-		return $this->validateDateBounds( $date, $field );
+		$message = $this->validateDateBounds( $date, $field, 'datetime' );
+		if ( null === $message && null !== $time ) {
+			$message = DateRules::timeMessage( $time, $this->dateConfig( $field ), 'datetime' );
+		}
+		return $message;
 	}
 
 	/**
@@ -1488,7 +1509,8 @@ final class FieldValidator {
 	}
 
 	/**
-	 * Reject a date outside the field's min and max.
+	 * Reject a date outside the field's limits (earliest, latest, no past
+	 * dates, unavailable weekdays). See DateRules.
 	 *
 	 * HTML min/max do not run: the form uses noValidate.
 	 *
@@ -1496,25 +1518,11 @@ final class FieldValidator {
 	 * @param array $field Field.
 	 * @return string|null
 	 */
-	private function validateDateBounds( $value, array $field ) {
+	private function validateDateBounds( $value, array $field, string $mode = 'date' ) {
 		if ( $this->isEmpty( $value ) || ! is_string( $value ) || ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $value ) ) {
 			return null;
 		}
-
-		$min = $this->attr( $field, 'minDate' );
-		$max = $this->attr( $field, 'maxDate' );
-
-		if ( is_string( $min ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $min ) && $value < $min ) {
-			/* translators: %s: earliest allowed date */
-			return sprintf( __( 'Date must be on or after %s.', 'subtleforms' ), $min );
-		}
-
-		if ( is_string( $max ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $max ) && $value > $max ) {
-			/* translators: %s: latest allowed date */
-			return sprintf( __( 'Date must be on or before %s.', 'subtleforms' ), $max );
-		}
-
-		return null;
+		return DateRules::dateMessage( $value, $this->dateConfig( $field ), $mode );
 	}
 
 	/**

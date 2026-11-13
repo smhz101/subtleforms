@@ -770,6 +770,22 @@ $sf-row-tint: color-mix(in srgb, var(--sf-brand) 4%, transparent);
 		}
 	}
 
+	// A quiet text link under a value, such as "Use a relative date".
+	& &__link {
+		all: unset;
+		box-sizing: border-box;
+		margin-top: 4px;
+		border-radius: var(--sf-radius-sm);
+		color: var(--sf-brand, #3858e9);
+		font-size: 12px;
+		line-height: 20px;
+		cursor: pointer;
+
+		&:hover:not(:disabled) { text-decoration: underline; }
+		&:focus-visible { outline: 2px solid var(--sf-brand, #3858e9); outline-offset: 2px; }
+		&:disabled { cursor: default; opacity: 0.5; }
+	}
+
 	// Text, number and area inputs. (`& &__input` outranks wp-admin's
 	// input[type="text"] rules.)
 	& &__input {

@@ -1,0 +1,37 @@
+{
+  "date": [
+    { "today": "2025-03-15", "config": { "minDate": "2025-03-10" }, "value": "2025-03-09", "message": "Pick a date on or after 2025-03-10." },
+    { "today": "2025-03-15", "config": { "minDate": "2025-03-10" }, "value": "2025-03-10", "message": "" },
+    { "today": "2025-03-15", "config": { "maxDate": "2025-03-20" }, "value": "2025-03-21", "message": "Pick a date on or before 2025-03-20." },
+    { "today": "2025-03-15", "config": { "minDate": "today" }, "value": "2025-03-14", "message": "Pick a date on or after 2025-03-15." },
+    { "today": "2025-03-15", "config": { "minDate": "today" }, "value": "2025-03-15", "message": "" },
+    { "today": "2025-03-15", "config": { "minDate": "tomorrow" }, "value": "2025-03-15", "message": "Pick a date on or after 2025-03-16." },
+    { "today": "2025-03-15", "config": { "maxDate": "+7 days" }, "value": "2025-03-23", "message": "Pick a date on or before 2025-03-22." },
+    { "today": "2025-03-15", "config": { "maxDate": "+7 days" }, "value": "2025-03-22", "message": "" },
+    { "today": "2025-03-15", "config": { "minDate": "-1 month" }, "value": "2025-02-14", "message": "Pick a date on or after 2025-02-15." },
+    { "today": "2025-03-15", "config": { "maxDate": "+1 year" }, "value": "2026-03-16", "message": "Pick a date on or before 2026-03-15." },
+    { "today": "2025-03-15", "config": { "minDate": "2 weeks ago" }, "value": "2025-02-28", "message": "Pick a date on or after 2025-03-01." },
+    { "today": "2025-03-15", "config": { "minDate": "not a date" }, "value": "1999-01-01", "message": "" },
+    { "today": "2025-03-15", "config": { "disablePast": true }, "value": "2025-03-14", "message": "Pick a later date." },
+    { "today": "2025-03-15", "config": { "disablePast": true }, "value": "2025-03-15", "message": "" },
+    { "today": "2025-03-15", "config": { "disabledWeekdays": [0, 6] }, "value": "2025-03-16", "message": "Not available on a Sunday." },
+    { "today": "2025-03-15", "config": { "disabledWeekdays": [0, 6] }, "value": "2025-03-22", "message": "Not available on a Saturday." },
+    { "today": "2025-03-15", "config": { "disabledWeekdays": [0, 6] }, "value": "2025-03-17", "message": "" },
+    { "today": "2025-03-15", "config": { "minDate": "2025-03-10", "format": "d/m/Y" }, "value": "2025-03-09", "message": "Pick a date on or after 10/03/2025." },
+    { "today": "2025-03-15", "config": { "maxDate": "2025-03-20", "format": "custom", "customFormat": "j F Y" }, "value": "2025-03-21", "message": "Pick a date on or before 20 March 2025." },
+    { "today": "2025-03-15", "config": { "minDate": "2025-03-10", "format": "Y-m-d" }, "value": "2025-03-09", "message": "Pick a date on or after 2025-03-10." }
+  ],
+  "datetime": [
+    { "today": "2025-03-15", "config": { "minDate": "2025-03-10", "format": "d/m/Y H:i" }, "value": "2025-03-09", "message": "Pick a date on or after 10/03/2025." }
+  ],
+  "time": [
+    { "config": { "minTime": "09:00", "maxTime": "17:30" }, "mode": "time", "value": "08:59", "message": "Pick a time between 09:00 and 17:30." },
+    { "config": { "minTime": "09:00", "maxTime": "17:30" }, "mode": "time", "value": "17:31", "message": "Pick a time between 09:00 and 17:30." },
+    { "config": { "minTime": "09:00", "maxTime": "17:30" }, "mode": "time", "value": "09:00", "message": "" },
+    { "config": { "minTime": "09:00", "maxTime": "17:30" }, "mode": "time", "value": "17:30", "message": "" },
+    { "config": { "minTime": "09:00" }, "mode": "time", "value": "08:00", "message": "Pick a time between 09:00 and 23:59." },
+    { "config": { "maxTime": "12:00" }, "mode": "time", "value": "13:00", "message": "Pick a time between 00:00 and 12:00." },
+    { "config": { "minTime": "09:00", "maxTime": "17:30", "format": "g:i A" }, "mode": "time", "value": "18:00", "message": "Pick a time between 9:00 AM and 5:30 PM." },
+    { "config": { "minTime": "09:00", "maxTime": "17:30", "format": "d/m/Y g:i A" }, "mode": "datetime", "value": "18:00", "message": "Pick a time between 9:00 AM and 5:30 PM." }
+  ]
+}

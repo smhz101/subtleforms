@@ -2,7 +2,7 @@ import { __ } from '@wordpress/i18n';
 import FormRenderer from '../../../frontend/components/FormRenderer';
 import FormErrorBoundary from '../../../frontend/components/FormErrorBoundary';
 import PreviewFrame from './PreviewFrame';
-import { isPlainThemeForm } from '../../../shared/appearance';
+import { isPlainThemeForm, needsPickerCss } from '../../../shared/appearance';
 
 /**
  * The builder preview.
@@ -39,6 +39,7 @@ export default function FormPreviewBody( { schema, formId = null, isDirty = fals
         className='sf-form-preview__frame'
         conversational={ String( schema.metadata?.type || '' ).toLowerCase() === 'conversational' }
         plain={ isPlainThemeForm( schema, window.subtleformsAdmin?.plainTypes ) }
+        picker={ needsPickerCss( schema, window.subtleformsAdmin?.pickerTypes ) }
         scheme={ scheme }
         title={ __( 'Form preview', 'subtleforms' ) }>
         <FormErrorBoundary>

@@ -754,31 +754,63 @@ final class CoreFields {
 				kind: 'input',
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
-					'format'  => 'Y-m-d',
-					'minDate' => null,
-					'maxDate' => null,
+					'format'           => 'site',
+					'customFormat'     => '',
+					'firstDay'         => 'site',
+					'minDate'          => null,
+					'maxDate'          => null,
+					'disablePast'      => false,
+					'disabledWeekdays' => array(),
+					'defaultMode'      => 'none',
 				),
-				inspectorControls: array(
+				inspectorControls: array_merge(
+					self::dateTimeLabelControls(),
 					array(
-						'type'  => 'text',
-						'name'  => 'label',
-						'label' => __( 'Label', 'subtleforms' ),
+						array(
+							'type'    => 'select',
+							'name'    => 'format',
+							'label'   => __( 'Date format', 'subtleforms' ),
+							'help'    => __( 'How the date reads in the field. The saved value is always the same.', 'subtleforms' ),
+							'section' => 'appearance',
+							'options' => self::dateFormatOptions(),
+						),
+						array(
+							'type'     => 'text',
+							'name'     => 'customFormat',
+							'label'    => __( 'Custom format', 'subtleforms' ),
+							'help'     => __( 'PHP date format letters, for example d/m/Y.', 'subtleforms' ),
+							'section'  => 'appearance',
+							'showWhen' => array( 'format' => array( 'custom' ) ),
+						),
+						array(
+							'type'    => 'select',
+							'name'    => 'firstDay',
+							'label'   => __( 'First day of the week', 'subtleforms' ),
+							'help'    => __( 'Which day the calendar starts its weeks on.', 'subtleforms' ),
+							'section' => 'appearance',
+							'options' => self::firstDayOptions(),
+						),
 					),
+					self::dateLimitControls(),
 					array(
-						'type'  => 'text',
-						'name'  => 'format',
-						'label' => __( 'Date Format', 'subtleforms' ),
-					),
-					array(
-						'type'  => 'text',
-						'name'  => 'minDate',
-						'label' => __( 'Min Date', 'subtleforms' ),
-					),
-					array(
-						'type'  => 'text',
-						'name'  => 'maxDate',
-						'label' => __( 'Max Date', 'subtleforms' ),
-					),
+						array(
+							'type'    => 'select',
+							'name'    => 'defaultMode',
+							'label'   => __( 'Default value', 'subtleforms' ),
+							'help'    => __( 'Today fills the field when the form opens with no value.', 'subtleforms' ),
+							'section' => 'general',
+							'options' => array(
+								array(
+									'value' => 'none',
+									'label' => __( 'None', 'subtleforms' ),
+								),
+								array(
+									'value' => 'today',
+									'label' => __( 'Today', 'subtleforms' ),
+								),
+							),
+						),
+					)
 				),
 				meta: array( 'category' => 'regular' ),
 			)
@@ -793,19 +825,53 @@ final class CoreFields {
 				kind: 'input',
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
-					'format' => 'H:i',
+					'format'       => 'H:i',
+					'customFormat' => '',
+					'minuteStep'   => 15,
+					'minTime'      => null,
+					'maxTime'      => null,
+					'defaultMode'  => 'none',
 				),
-				inspectorControls: array(
+				inspectorControls: array_merge(
+					self::dateTimeLabelControls(),
 					array(
-						'type'  => 'text',
-						'name'  => 'label',
-						'label' => __( 'Label', 'subtleforms' ),
+						array(
+							'type'    => 'select',
+							'name'    => 'format',
+							'label'   => __( 'Time format', 'subtleforms' ),
+							'help'    => __( 'How the time reads in the field. The saved value is always 24-hour, like 14:30.', 'subtleforms' ),
+							'section' => 'appearance',
+							'options' => self::timeFormatOptions(),
+						),
+						array(
+							'type'     => 'text',
+							'name'     => 'customFormat',
+							'label'    => __( 'Custom format', 'subtleforms' ),
+							'help'     => __( 'PHP date format letters, for example H:i.', 'subtleforms' ),
+							'section'  => 'appearance',
+							'showWhen' => array( 'format' => array( 'custom' ) ),
+						),
 					),
+					self::timeLimitControls(),
 					array(
-						'type'  => 'text',
-						'name'  => 'format',
-						'label' => __( 'Time Format', 'subtleforms' ),
-					),
+						array(
+							'type'    => 'select',
+							'name'    => 'defaultMode',
+							'label'   => __( 'Default value', 'subtleforms' ),
+							'help'    => __( 'Now fills the field with the current time, rounded up to the minute step.', 'subtleforms' ),
+							'section' => 'general',
+							'options' => array(
+								array(
+									'value' => 'none',
+									'label' => __( 'None', 'subtleforms' ),
+								),
+								array(
+									'value' => 'now',
+									'label' => __( 'Now', 'subtleforms' ),
+								),
+							),
+						),
+					)
 				),
 				meta: array( 'category' => 'regular' ),
 			)
@@ -820,19 +886,67 @@ final class CoreFields {
 				kind: 'input',
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
-					'format' => 'Y-m-d H:i',
+					'format'           => 'site',
+					'customFormat'     => '',
+					'firstDay'         => 'site',
+					'minDate'          => null,
+					'maxDate'          => null,
+					'disablePast'      => false,
+					'disabledWeekdays' => array(),
+					'minuteStep'       => 15,
+					'minTime'          => null,
+					'maxTime'          => null,
+					'defaultMode'      => 'none',
 				),
-				inspectorControls: array(
+				inspectorControls: array_merge(
+					self::dateTimeLabelControls(),
 					array(
-						'type'  => 'text',
-						'name'  => 'label',
-						'label' => __( 'Label', 'subtleforms' ),
+						array(
+							'type'    => 'select',
+							'name'    => 'format',
+							'label'   => __( 'Date and time format', 'subtleforms' ),
+							'help'    => __( 'How the date and time read in the field. The saved value is always like 2025-03-31T14:30.', 'subtleforms' ),
+							'section' => 'appearance',
+							'options' => self::dateTimeFormatOptions(),
+						),
+						array(
+							'type'     => 'text',
+							'name'     => 'customFormat',
+							'label'    => __( 'Custom format', 'subtleforms' ),
+							'help'     => __( 'PHP date format letters, for example d/m/Y H:i.', 'subtleforms' ),
+							'section'  => 'appearance',
+							'showWhen' => array( 'format' => array( 'custom' ) ),
+						),
+						array(
+							'type'    => 'select',
+							'name'    => 'firstDay',
+							'label'   => __( 'First day of the week', 'subtleforms' ),
+							'help'    => __( 'Which day the calendar starts its weeks on.', 'subtleforms' ),
+							'section' => 'appearance',
+							'options' => self::firstDayOptions(),
+						),
 					),
+					self::dateLimitControls(),
+					self::timeLimitControls(),
 					array(
-						'type'  => 'text',
-						'name'  => 'format',
-						'label' => __( 'DateTime Format', 'subtleforms' ),
-					),
+						array(
+							'type'    => 'select',
+							'name'    => 'defaultMode',
+							'label'   => __( 'Default value', 'subtleforms' ),
+							'help'    => __( 'Now fills the field with today and the current time, rounded up to the minute step.', 'subtleforms' ),
+							'section' => 'general',
+							'options' => array(
+								array(
+									'value' => 'none',
+									'label' => __( 'None', 'subtleforms' ),
+								),
+								array(
+									'value' => 'now',
+									'label' => __( 'Now', 'subtleforms' ),
+								),
+							),
+						),
+					)
 				),
 				meta: array( 'category' => 'regular' ),
 			)
@@ -1874,5 +1988,219 @@ final class CoreFields {
 		}
 		$permalink = get_permalink( $page_id );
 		return is_string( $permalink ) ? $permalink : '';
+	}
+
+	/**
+	 * Label and placeholder controls shared by the date and time fields.
+	 * Help text is added to every input by FieldSettings.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function dateTimeLabelControls(): array {
+		return array(
+			array(
+				'type'    => 'text',
+				'name'    => 'label',
+				'label'   => __( 'Label', 'subtleforms' ),
+				'help'    => __( 'The question shown above the field.', 'subtleforms' ),
+				'section' => 'general',
+			),
+			array(
+				'type'    => 'text',
+				'name'    => 'placeholder',
+				'label'   => __( 'Placeholder', 'subtleforms' ),
+				'help'    => __( 'Shown while the field is empty. Leave it blank to show an example of the format.', 'subtleforms' ),
+				'section' => 'appearance',
+			),
+		);
+	}
+
+	/**
+	 * Earliest and latest date, no past dates and disabled weekdays.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function dateLimitControls(): array {
+		return array(
+			array(
+				'type'    => 'date',
+				'name'    => 'minDate',
+				'label'   => __( 'Earliest date', 'subtleforms' ),
+				'help'    => __( 'A date, or a relative date such as today or +7 days.', 'subtleforms' ),
+				'section' => 'general',
+			),
+			array(
+				'type'    => 'date',
+				'name'    => 'maxDate',
+				'label'   => __( 'Latest date', 'subtleforms' ),
+				'help'    => __( 'A date, or a relative date such as +1 year.', 'subtleforms' ),
+				'section' => 'general',
+			),
+			array(
+				'type'    => 'toggle',
+				'name'    => 'disablePast',
+				'label'   => __( 'No past dates', 'subtleforms' ),
+				'help'    => __( 'Days before today cannot be picked.', 'subtleforms' ),
+				'section' => 'general',
+			),
+			array(
+				'type'    => 'weekdays',
+				'name'    => 'disabledWeekdays',
+				'label'   => __( 'Unavailable weekdays', 'subtleforms' ),
+				'help'    => __( 'Turn on the days of the week that cannot be picked.', 'subtleforms' ),
+				'section' => 'general',
+			),
+		);
+	}
+
+	/**
+	 * Minute step, earliest and latest time.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function timeLimitControls(): array {
+		$steps = array();
+		foreach ( array( 1, 5, 10, 15, 30, 60 ) as $minutes ) {
+			$steps[] = array(
+				'value' => (string) $minutes,
+				/* translators: %d: number of minutes. */
+				'label' => sprintf( _n( '%d minute', '%d minutes', $minutes, 'subtleforms' ), $minutes ),
+			);
+		}
+		return array(
+			array(
+				'type'    => 'select',
+				'name'    => 'minuteStep',
+				'label'   => __( 'Minute step', 'subtleforms' ),
+				'help'    => __( 'The minutes offered in the time list.', 'subtleforms' ),
+				'section' => 'general',
+				'options' => $steps,
+			),
+			array(
+				'type'    => 'time',
+				'name'    => 'minTime',
+				'label'   => __( 'Earliest time', 'subtleforms' ),
+				'help'    => __( 'Times before this cannot be picked.', 'subtleforms' ),
+				'section' => 'general',
+			),
+			array(
+				'type'    => 'time',
+				'name'    => 'maxTime',
+				'label'   => __( 'Latest time', 'subtleforms' ),
+				'help'    => __( 'Times after this cannot be picked.', 'subtleforms' ),
+				'section' => 'general',
+			),
+		);
+	}
+
+	/**
+	 * One format choice with a live example built from the site clock.
+	 *
+	 * @param string $format PHP date format.
+	 * @return array{value: string, label: string}
+	 */
+	private static function formatChoice( string $format ): array {
+		$stamp = 1743415800; // 2025-03-31 10:30 UTC, a Monday.
+		$text  = function_exists( 'wp_date' ) ? wp_date( $format, $stamp ) : gmdate( $format, $stamp );
+		return array(
+			'value' => $format,
+			'label' => sprintf( '%1$s (%2$s)', $format, (string) $text ),
+		);
+	}
+
+	/**
+	 * The "site" and "custom" choices that end every format list.
+	 *
+	 * @param string $siteLabel Label of the site choice.
+	 * @return array<int, array{value: string, label: string}>
+	 */
+	private static function formatTail( string $siteLabel ): array {
+		return array(
+			array(
+				'value' => 'site',
+				'label' => $siteLabel,
+			),
+			array(
+				'value' => 'custom',
+				'label' => __( 'Custom', 'subtleforms' ),
+			),
+		);
+	}
+
+	/**
+	 * Date format presets.
+	 *
+	 * @return array<int, array{value: string, label: string}>
+	 */
+	private static function dateFormatOptions(): array {
+		$options = array_map( array( self::class, 'formatChoice' ), array( 'Y-m-d', 'd/m/Y', 'm/d/Y', 'd.m.Y', 'j F Y', 'D, j M Y' ) );
+		$site    = (string) get_option( 'date_format', 'F j, Y' );
+		return array_merge(
+			$options,
+			self::formatTail(
+				/* translators: %s: the site date format with an example. */
+				sprintf( __( 'Site setting (%s)', 'subtleforms' ), self::formatChoice( $site )['label'] )
+			)
+		);
+	}
+
+	/**
+	 * Time format presets.
+	 *
+	 * @return array<int, array{value: string, label: string}>
+	 */
+	private static function timeFormatOptions(): array {
+		$options = array_map( array( self::class, 'formatChoice' ), array( 'H:i', 'g:i A' ) );
+		$site    = (string) get_option( 'time_format', 'g:i a' );
+		return array_merge(
+			$options,
+			self::formatTail(
+				/* translators: %s: the site time format with an example. */
+				sprintf( __( 'Site setting (%s)', 'subtleforms' ), self::formatChoice( $site )['label'] )
+			)
+		);
+	}
+
+	/**
+	 * Date and time format presets.
+	 *
+	 * @return array<int, array{value: string, label: string}>
+	 */
+	private static function dateTimeFormatOptions(): array {
+		$options = array_map( array( self::class, 'formatChoice' ), array( 'Y-m-d H:i', 'd/m/Y H:i', 'm/d/Y g:i A', 'j F Y, g:i A' ) );
+		$site    = (string) get_option( 'date_format', 'F j, Y' ) . ', ' . (string) get_option( 'time_format', 'g:i a' );
+		return array_merge(
+			$options,
+			self::formatTail(
+				/* translators: %s: the site date and time format with an example. */
+				sprintf( __( 'Site setting (%s)', 'subtleforms' ), self::formatChoice( $site )['label'] )
+			)
+		);
+	}
+
+	/**
+	 * First day of the week choices.
+	 *
+	 * @return array<int, array{value: string, label: string}>
+	 */
+	private static function firstDayOptions(): array {
+		return array(
+			array(
+				'value' => 'site',
+				'label' => __( 'Site setting', 'subtleforms' ),
+			),
+			array(
+				'value' => '0',
+				'label' => __( 'Sunday', 'subtleforms' ),
+			),
+			array(
+				'value' => '1',
+				'label' => __( 'Monday', 'subtleforms' ),
+			),
+			array(
+				'value' => '6',
+				'label' => __( 'Saturday', 'subtleforms' ),
+			),
+		);
 	}
 }

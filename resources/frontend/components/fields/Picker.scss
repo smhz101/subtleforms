@@ -1,27 +1,69 @@
-/*! inherit: keep-start (custom menu or one-question layout: no native control for a theme to style) */
-// Shared menu controls for dropdown, country, date, time and date-time.
+/*! inherit: keep-file */
+// Picker styles: dropdown, country, date, time and date and time.
+//
+// This is plugin UI, not form styling, so it is built into its own file
+// (build/frontend/picker.css) that loads for every form with a picker, also a
+// form that inherits the theme (2.9.0, #109). It stands on its own: it reads a
+// few --subtleforms-picker-* tokens, each with a fallback that looks right on
+// any page, and every rule is scoped under .subtleforms-picker so no selector
+// names input, select, button or label by element alone. The buttons inside
+// the popover are reset with `all: unset`, so a theme's button rules (a dark
+// fill, an uppercase label, a hover colour) cannot reach them. The class is
+// repeated three times in every selector so the rules out-rank a theme
+// selector such as Twenty Twenty-One's
+// `button:not(:hover):not(:active):not(.has-background)`.
+
+@mixin picker-reset {
+	all: unset;
+	box-sizing: border-box;
+	cursor: pointer;
+}
+
+@mixin picker-focus {
+	&:focus-visible {
+		outline: 2px solid var(--subtleforms-picker-accent);
+		outline-offset: 2px;
+	}
+}
+
 .subtleforms-picker {
+	// The surface is explicit, so the text on it is chosen with it: a page that
+	// is dark on the outside still gets a readable popover.
+	--subtleforms-picker-surface: var(--subtleforms-color-surface, #fff);
+	--subtleforms-picker-text: var(--subtleforms-color-text, #1e1e1e);
+	--subtleforms-picker-muted: var(--subtleforms-color-text-light, color-mix(in srgb, var(--subtleforms-picker-text) 70%, transparent));
+	--subtleforms-picker-border: var(--subtleforms-color-border, color-mix(in srgb, var(--subtleforms-picker-text) 18%, transparent));
+	--subtleforms-picker-accent: var(--subtleforms-color-primary, var(--subtleforms-picker-text));
+	--subtleforms-picker-on-accent: var(--subtleforms-button-text, #fff);
+	--subtleforms-picker-radius: var(--subtleforms-radius-md, 8px);
+	--subtleforms-picker-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+
 	position: relative;
 	width: 100%;
 }
 
-.subtleforms-picker__trigger {
+@supports not (color: color-mix(in srgb, red 50%, blue)) {
+	.subtleforms-picker {
+		--subtleforms-picker-muted: var(--subtleforms-color-text-light, #5b6270);
+		--subtleforms-picker-border: var(--subtleforms-color-border, #c9ccd3);
+	}
+}
+
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__trigger {
+	@include picker-reset;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: 8px;
 	width: 100%;
 	padding: var(--subtleforms-input-padding-y, 10px) var(--subtleforms-input-padding-x, 12px);
-	border: var(--subtleforms-border-width, 1px) var(--subtleforms-border-style, solid) var(--subtleforms-color-border);
-	border-radius: var(--subtleforms-radius-md, 4px);
+	border: var(--subtleforms-border-width, 1px) var(--subtleforms-border-style, solid) var(--subtleforms-picker-border);
+	border-radius: var(--subtleforms-picker-radius);
 	background: var(--subtleforms-color-bg-subtle, transparent);
-	color: var(--subtleforms-input-text, var(--subtleforms-color-text));
+	color: var(--subtleforms-input-text, inherit);
 	font: inherit;
-	font-family: inherit;
-	font-size: var(--subtleforms-input-size, var(--subtleforms-font-size-base, 1rem));
 	line-height: var(--subtleforms-line-height, 1.5);
 	text-align: start;
-	cursor: pointer;
 
 	&:disabled {
 		cursor: default;
@@ -30,13 +72,57 @@
 
 	&:focus-visible {
 		outline: none;
-		border-color: var(--subtleforms-color-primary, var(--sf-blue-500, #4f5bd5));
-		box-shadow: var(--subtleforms-shadow-focus, 0 0 0 3px rgba(79, 91, 213, 0.28));
+		border-color: var(--subtleforms-picker-accent);
+		box-shadow: 0 0 0 2px var(--subtleforms-picker-surface), 0 0 0 4px var(--subtleforms-picker-accent);
 	}
 }
 
-.subtleforms-picker.is-invalid .subtleforms-picker__trigger {
+.subtleforms-picker.subtleforms-picker.is-invalid .subtleforms-picker__trigger {
 	border-color: var(--subtleforms-color-error, #b3261e);
+}
+
+// Date, time and date and time: the visible control is a real text input, so
+// the theme or the preset styles it like every other input. This file only
+// makes room for the icon button, which sits inside the wrapper.
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__input {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	margin-block: 0;
+	padding-inline-end: 48px;
+	text-overflow: ellipsis;
+}
+
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__open {
+	@include picker-reset;
+	@include picker-focus;
+	position: absolute;
+	top: 50%;
+	inset-inline-end: 6px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 2px;
+	width: 36px;
+	// A theme that gives inputs no padding leaves a field shorter than 36px:
+	// the button then takes the field's height instead of spilling out of it.
+	height: min(36px, 100%);
+	border-radius: min(var(--subtleforms-picker-radius), 8px);
+	color: var(--subtleforms-picker-muted);
+	transform: translateY(-50%);
+
+	&:hover { color: var(--subtleforms-picker-accent); }
+
+	&:disabled {
+		cursor: default;
+		opacity: 0.5;
+	}
+
+	.subtleforms-picker__glyph {
+		width: 14px;
+		height: 14px;
+		color: inherit;
+	}
 }
 
 .subtleforms-picker.is-preview,
@@ -44,275 +130,426 @@
 	pointer-events: none;
 }
 
-.subtleforms-picker__value,
-.subtleforms-picker__placeholder {
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__value,
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__placeholder {
 	display: inline-flex;
 	align-items: center;
 	gap: 8px;
 	min-width: 0;
 }
 
-.subtleforms-picker__placeholder {
-	color: var(--subtleforms-color-text-light, var(--sf-gray-400, #8c8f94));
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__placeholder {
+	color: var(--subtleforms-picker-muted);
 }
 
-.subtleforms-picker__glyph {
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__glyph {
 	display: inline-flex;
 	align-items: center;
 	flex: 0 0 auto;
-	color: var(--subtleforms-color-text-light, var(--sf-gray-400, #8c8f94));
+	color: var(--subtleforms-picker-muted);
 }
 
-.subtleforms-picker__icons {
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__icons {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
 }
 
-.subtleforms-picker__flag {
-	font-size: 16px;
-	line-height: 1;
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__flag {
 	display: inline-flex;
 	align-items: center;
 	flex: none;
+	font-size: 16px;
+	line-height: 1;
 }
 
-.subtleforms-picker__menu {
+// The popover is a control, not prose: the theme's body size does not apply.
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu {
 	position: absolute;
 	z-index: 40;
 	top: calc(100% + 4px);
 	left: 0;
 	right: 0;
-	padding: 6px;
-	border: 1px solid var(--subtleforms-color-border);
-	border-radius: var(--subtleforms-radius-md, 8px);
-	background: var(--subtleforms-color-surface, var(--subtleforms-color-bg-subtle, #fff));
-	box-shadow: var(--subtleforms-shadow-md, 0 8px 24px rgba(19, 20, 23, 0.12));
+	box-sizing: border-box;
+	padding: 8px;
+	border: 1px solid var(--subtleforms-picker-border);
+	border-radius: var(--subtleforms-picker-radius);
+	background: var(--subtleforms-picker-surface);
+	box-shadow: var(--subtleforms-picker-shadow);
+	color: var(--subtleforms-picker-text);
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: 400;
+	line-height: 20px;
+	letter-spacing: normal;
+	text-align: start;
+	text-transform: none;
+	animation: subtleforms-picker-in 160ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.subtleforms-picker__search {
-	width: 100%;
-	margin: 0 0 6px;
-	padding: 8px 10px;
-	border: 1px solid var(--subtleforms-color-border, #d8dbe2);
-	border-radius: 6px;
-	background: var(--subtleforms-color-bg-subtle, #f4f5f7);
-	font: inherit;
-	font-size: 14px;
-
-	&:focus {
-		outline: none;
-		border-color: var(--subtleforms-color-primary, #4f5bd5);
+@keyframes subtleforms-picker-in {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
 	}
 }
 
-.subtleforms-picker__list {
+@media (prefers-reduced-motion: reduce) {
+	.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu { animation: none; }
+}
+
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__search {
+	all: unset;
+	box-sizing: border-box;
+	display: block;
+	width: 100%;
+	margin: 0 0 8px;
+	padding: 8px 12px;
+	border: 1px solid var(--subtleforms-picker-border);
+	border-radius: var(--subtleforms-picker-radius);
+	background: transparent;
+	color: inherit;
+	font: inherit;
+
+	&:focus-visible {
+		outline: 2px solid var(--subtleforms-picker-accent);
+		outline-offset: 2px;
+	}
+}
+
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__list {
 	max-height: 240px;
 	overflow: auto;
 }
 
-.subtleforms-picker__option,
-.subtleforms-picker__tick,
-.subtleforms-picker__day,
-.subtleforms-picker__nav,
-.subtleforms-picker__text-button {
-	border: 0;
-	background: transparent;
-	color: inherit;
-	font: inherit;
-	cursor: pointer;
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__option,
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__tick,
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__day,
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__nav,
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__title,
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__close,
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__cell,
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__primary-button,
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__text-button {
+	@include picker-reset;
+	@include picker-focus;
 }
 
-.subtleforms-picker__option {
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__option {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	width: 100%;
-	padding: 8px 10px;
-	border-radius: 6px;
+	padding: 8px 12px;
+	border-radius: min(var(--subtleforms-picker-radius), 8px);
 	text-align: start;
 
 	&[data-active='true'],
 	&:hover {
-		background: var(--subtleforms-color-bg-subtle, var(--sf-bg-muted, #f4f5f7));
+		background: color-mix(in srgb, var(--subtleforms-picker-accent) 10%, transparent);
 	}
 
 	&[aria-selected='true'] {
-		background: color-mix(in srgb, var(--subtleforms-color-primary, #4f5bd5) 12%, white);
+		background: color-mix(in srgb, var(--subtleforms-picker-accent) 16%, transparent);
 	}
 }
 
-.subtleforms-picker__option-label {
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__option-label {
 	flex: 1 1 auto;
 	min-width: 0;
 }
 
-.subtleforms-picker__meta {
-	color: var(--subtleforms-color-text-light, #5b6270);
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__meta {
+	color: var(--subtleforms-picker-muted);
 	font-size: 12px;
 	font-variant-numeric: tabular-nums;
 }
 
-.subtleforms-picker__divider {
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__divider {
 	display: block;
 	height: 1px;
 	margin: 4px 8px;
-	background: var(--subtleforms-color-border, #d8dbe2);
+	background: var(--subtleforms-picker-border);
 }
 
-.subtleforms-picker__empty {
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__empty {
 	margin: 0;
-	padding: 10px;
-	color: var(--subtleforms-color-text-light, #5b6270);
-	font-size: 13px;
+	padding: 12px;
+	color: var(--subtleforms-picker-muted);
+	font-size: 14px;
 }
 
-.subtleforms-picker__menu--calendar {
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu--calendar {
 	right: auto;
 	width: max-content;
 	max-width: min(100vw - 32px, 460px);
 	padding: 12px;
-	border: 1px solid var(--subtleforms-color-border);
-	border-radius: var(--subtleforms-radius-md, 8px);
-	background: var(--subtleforms-color-surface, var(--subtleforms-color-bg-subtle, #fff));
 }
 
-.subtleforms-picker__panel {
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__panel {
 	display: flex;
 	gap: 12px;
 }
 
-.subtleforms-picker__calendar {
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__calendar {
 	width: 252px;
 }
 
-.subtleforms-picker__calendar-bar {
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__calendar-bar {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	margin-bottom: 8px;
 }
 
-.subtleforms-picker__month {
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__title {
+	flex: 1;
+	padding: 6px 8px;
+	border-radius: min(var(--subtleforms-picker-radius), 8px);
 	font-size: 14px;
 	font-weight: 600;
+	text-align: center;
+
+	&:hover:not(.subtleforms-picker__title--static) { background: color-mix(in srgb, var(--subtleforms-picker-accent) 10%, transparent); }
 }
 
-.subtleforms-picker__nav {
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__title--static { cursor: default; }
+
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__nav[aria-disabled='true'] {
+	cursor: default;
+	opacity: 0.35;
+}
+
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__close {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 28px;
-	height: 28px;
-	border-radius: 6px;
+	width: 32px;
+	height: 32px;
+	margin-inline-start: 4px;
+	border-radius: min(var(--subtleforms-picker-radius), 8px);
+
+	&:hover { background: color-mix(in srgb, var(--subtleforms-picker-accent) 10%, transparent); }
+}
+
+// Month and year grids: three or four columns of large targets.
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__months,
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__years {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__row {
+	display: grid;
+	gap: 4px;
+}
+
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__months .subtleforms-picker__row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__years .subtleforms-picker__row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__cell {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 48px;
+	border-radius: min(var(--subtleforms-picker-radius), 8px);
+	font-size: 14px;
+
+	&.is-today { box-shadow: inset 0 0 0 1px var(--subtleforms-picker-accent); }
+
+	&.is-selected {
+		background: var(--subtleforms-picker-accent);
+		color: var(--subtleforms-picker-on-accent);
+	}
+
+	&:hover:not([aria-disabled='true']):not(.is-selected) {
+		background: color-mix(in srgb, var(--subtleforms-picker-accent) 10%, transparent);
+	}
+
+	&[aria-disabled='true'] {
+		cursor: default;
+		opacity: 0.4;
+	}
+}
+
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__nav {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border-radius: min(var(--subtleforms-picker-radius), 8px);
 
 	svg { transform: rotate(90deg); }
 
 	&--next svg { transform: rotate(-90deg); }
 
-	&:hover { background: var(--subtleforms-color-bg-subtle, #f4f5f7); }
+	&:hover { background: color-mix(in srgb, var(--subtleforms-picker-accent) 10%, transparent); }
 }
 
-.subtleforms-picker__weekdays,
-.subtleforms-picker__days {
-	display: grid;
-	grid-template-columns: repeat(7, 1fr);
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__days {
+	display: flex;
+	flex-direction: column;
 	gap: 2px;
 }
 
-.subtleforms-picker__weekdays {
+// The weekday header and every week are rows of their own (role="row"), each a
+// seven column grid, so the seven day cells of a week sit on one line.
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__weekdays,
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__week {
+	display: grid;
+	grid-template-columns: repeat(7, minmax(0, 1fr));
+	gap: 2px;
+}
+
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__weekdays {
 	margin-bottom: 4px;
-	color: var(--subtleforms-color-text-light, #5b6270);
-	font-size: 11px;
+	color: var(--subtleforms-picker-muted);
+	font-size: 12px;
 	text-align: center;
 }
 
-.subtleforms-picker__day {
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__day {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	min-width: 36px;
-	min-height: 36px;
 	height: 36px;
-	border-radius: 6px;
-	font-size: 13px;
+	border-radius: min(var(--subtleforms-picker-radius), 999px);
+	font-size: 14px;
 
-	&.is-outside { color: var(--subtleforms-color-text-light, #8c8f94); }
+	&.is-outside { color: var(--subtleforms-picker-muted); }
+
+	&.is-today:not(.is-selected) {
+		box-shadow: inset 0 0 0 1px var(--subtleforms-picker-accent);
+		font-weight: 600;
+	}
 
 	&.is-selected,
 	&[aria-pressed='true'] {
-		background: var(--subtleforms-color-primary, #4f5bd5);
-		color: #fff;
+		background: var(--subtleforms-picker-accent);
+		color: var(--subtleforms-picker-on-accent);
 	}
 
-	&:hover:not(:disabled):not([aria-disabled='true']):not(.is-selected) {
-		background: var(--subtleforms-color-bg-subtle, #f4f5f7);
+	&:hover:not([aria-disabled='true']):not(.is-selected) {
+		background: color-mix(in srgb, var(--subtleforms-picker-accent) 10%, transparent);
 	}
 
-	&:disabled,
 	&[aria-disabled='true'] {
 		cursor: default;
-		opacity: 0.35;
+		opacity: 0.4;
 	}
 }
 
-.subtleforms-picker__time {
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__time {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
 }
 
-.subtleforms-picker__columns {
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__columns {
 	display: flex;
 	gap: 4px;
-	height: 220px;
+	height: 198px;
 }
 
-.subtleforms-picker__column {
-	width: 52px;
-	overflow: auto;
-	border: 1px solid var(--subtleforms-color-border, #d8dbe2);
-	border-radius: 6px;
+// 5.5 rows of 36px show, with the rows fading out at the top and bottom.
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__column {
+	width: 56px;
+	overflow-y: auto;
+	scrollbar-width: none;
+	border: 1px solid var(--subtleforms-picker-border);
+	border-radius: min(var(--subtleforms-picker-radius), 8px);
+	-webkit-mask-image: linear-gradient(to bottom, transparent, #000 14px, #000 calc(100% - 14px), transparent);
+	mask-image: linear-gradient(to bottom, transparent, #000 14px, #000 calc(100% - 14px), transparent);
+
+	&::-webkit-scrollbar { display: none; }
 }
 
-.subtleforms-picker__tick {
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__heading {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--subtleforms-picker-muted);
+}
+
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu--datetime .subtleforms-picker__panel { gap: 16px; }
+
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu--datetime.is-stacked .subtleforms-picker__panel { flex-direction: column; }
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu--datetime.is-stacked .subtleforms-picker__column { flex: 1; width: auto; }
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu--datetime.is-stacked { width: 284px; }
+
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__tick {
 	display: block;
 	width: 100%;
-	padding: 6px 0;
-	font-size: 13px;
+	height: 36px;
+	box-sizing: border-box;
+	padding: 0;
+	line-height: 36px;
+	font-size: 14px;
 	font-variant-numeric: tabular-nums;
 	text-align: center;
 
 	&.is-selected {
-		background: color-mix(in srgb, var(--subtleforms-color-primary, #4f5bd5) 14%, white);
+		background: var(--subtleforms-picker-accent);
+		color: var(--subtleforms-picker-on-accent);
 		font-weight: 600;
 	}
 
-	&:hover { background: var(--subtleforms-color-bg-subtle, #f4f5f7); }
+	&:hover:not(.is-selected):not([aria-disabled='true']) { background: color-mix(in srgb, var(--subtleforms-picker-accent) 10%, transparent); }
+
+	&[aria-disabled='true'] {
+		cursor: default;
+		opacity: 0.4;
+	}
 }
 
-.subtleforms-picker__meridiem {
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__meridiem {
 	display: flex;
 	gap: 4px;
 
 	.subtleforms-picker__tick {
-		border: 1px solid var(--subtleforms-color-border, #d8dbe2);
-		border-radius: 6px;
+		border: 1px solid var(--subtleforms-picker-border);
+		border-radius: min(var(--subtleforms-picker-radius), 8px);
 	}
 }
 
-.subtleforms-picker__footer {
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__footer {
 	display: flex;
 	justify-content: space-between;
 	gap: 8px;
 	margin-top: 8px;
 	padding-top: 8px;
-	border-top: 1px solid var(--subtleforms-color-border, #e6e8ee);
+	border-top: 1px solid var(--subtleforms-picker-border);
 }
 
-.subtleforms-picker__text-button {
-	padding: 4px 2px;
-	color: var(--subtleforms-color-primary, #4f5bd5);
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__footer-actions {
+	display: flex;
+	gap: 8px;
+}
+
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__primary-button {
+	padding: 6px 16px;
+	border-radius: min(var(--subtleforms-picker-radius), 8px);
+	background: var(--subtleforms-picker-accent);
+	color: var(--subtleforms-picker-on-accent);
+	font-size: 13px;
+	font-weight: 600;
+
+	&[aria-disabled='true'] {
+		cursor: default;
+		opacity: 0.4;
+	}
+}
+
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__text-button[aria-disabled='true'] {
+	cursor: default;
+	opacity: 0.4;
+}
+
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__text-button {
+	padding: 4px;
+	color: var(--subtleforms-picker-accent);
 	font-size: 13px;
 	font-weight: 600;
 
@@ -320,11 +557,16 @@
 }
 
 @media (max-width: 520px) {
-	.subtleforms-picker__panel { flex-direction: column; }
-	.subtleforms-picker__menu--calendar { width: 100%; }
+	.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__panel { flex-direction: column; }
+	.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu--calendar { width: 100%; }
+	.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu--datetime.is-stacked { width: 100%; }
+	.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__calendar { width: 100%; }
+	.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__column { flex: 1; width: auto; }
 }
 
-.subtleforms-picker__fallback {
+// The native control that carries the value into a plain HTML post and gives
+// a screen reader its label; it never shows.
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__fallback {
 	position: absolute;
 	width: 1px;
 	height: 1px;
@@ -335,5 +577,3 @@
 	white-space: nowrap;
 	border: 0;
 }
-
-/*! inherit: keep-end */

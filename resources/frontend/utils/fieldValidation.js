@@ -360,22 +360,18 @@ function rawValidateField(field, value, defaults = {}) {
   if (type === 'color_picker' && !/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(value).trim())) {
     return __('Please enter a colour as a hex value, such as #336699.', 'subtleforms');
   }
-  if (type === 'date' && isIsoDate(value)) {
-    const minDate = config.minDate;
-    const maxDate = config.maxDate;
-    if (isIsoDate(minDate) && value < minDate) {
-      return sprintf(
-        /* translators: %s: earliest allowed date */
-        __('Date must be on or after %s.', 'subtleforms'),
-        minDate
-      );
-    }
-    if (isIsoDate(maxDate) && value > maxDate) {
-      return sprintf(
-        /* translators: %s: latest allowed date */
-        __('Date must be on or before %s.', 'subtleforms'),
-        maxDate
-      );
+  // The limits of a date or time (DateRules::dateMessage and timeMessage).
+  // Their code is in the date file, which a form with these fields has
+  // downloaded; the server checks the same rules.
+  if (['date', 'time', 'datetime'].includes(type) && typeof value === 'string') {
+    const limits = loadedGroup('date');
+    if (limits) {
+      const [datePart, timePart] = type === 'time' ? ['', value] : value.split(/[T ]/, 2);
+      const message = (isIsoDate(datePart) ? limits.dateLimitMessage(datePart, config, type) : '')
+        || (type !== 'date' && timePart !== undefined ? limits.timeLimitMessage(timePart, config, type) : '');
+      if (message) {
+        return message;
+      }
     }
   }
 

@@ -168,12 +168,12 @@ test('special fields load their code and still work', async ({ page }) => {
 
   // Date picker opens and picks a day.
   const date = page.locator('.subtleforms-field-date .subtleforms-picker, .subtleforms-picker').first();
-  await date.locator('.subtleforms-picker__trigger').click();
+  await date.locator('.subtleforms-picker__input').click();
   const calendar = page.locator('.subtleforms-picker__menu--calendar');
   await expect(calendar).toBeVisible();
   await page.screenshot({ path: `${SHOTS}/date-open.png` });
   await calendar.locator('.subtleforms-picker__day:not(.is-outside)').nth(14).click();
-  await expect(date.locator('.subtleforms-picker__value')).toBeVisible();
+  await expect(date.locator('.subtleforms-picker__input')).toHaveValue(/\d/);
 
   // Phone country list searches and switches the code.
   await page.locator('.subtleforms-phone__trigger').click();
@@ -297,7 +297,7 @@ test('field code still loads when a speed plugin moves the main script', async (
   });
   await page.goto(form.url);
   await formReady(page);
-  await expect(page.locator('.subtleforms-picker__trigger')).toBeVisible();
+  await expect(page.locator('.subtleforms-picker__input')).toBeVisible();
   expect(combined).toHaveLength(1);
   expect(seen.assets.some((u) => /build\/frontend\/frontend\.js/.test(u))).toBe(false);
   // Loaded from the plugin's build folder, not from the cache folder.

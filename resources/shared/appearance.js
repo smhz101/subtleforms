@@ -739,6 +739,39 @@ export function isPlainThemeForm( schema, plainTypes ) {
 }
 
 /**
+ * Whether a form has a field drawn with the plugin's picker (dropdown, country,
+ * date, time, date and time): the same test as
+ * FrontendAssets::needsPickerCss(). Such a form loads picker.css whichever
+ * look it has. The types come from the server
+ * (window.subtleformsAdmin.pickerTypes).
+ *
+ * @param {Object}   schema      Form schema.
+ * @param {string[]} pickerTypes Field types with a picker.
+ * @return {boolean} True when the page loads the picker stylesheet for it.
+ */
+export function needsPickerCss( schema, pickerTypes ) {
+  if ( ! Array.isArray( pickerTypes ) ) {
+    return false;
+  }
+  const walk = ( node ) => {
+    if ( ! node || typeof node !== 'object' ) {
+      return false;
+    }
+    if ( Array.isArray( node ) ) {
+      return node.some( walk );
+    }
+    if ( pickerTypes.includes( String( node.type || '' ) ) ) {
+      return true;
+    }
+    const config = node.config && typeof node.config === 'object' ? node.config : {};
+    return [ 'fields', 'children', 'columns', 'steps' ].some(
+      ( key ) => walk( node[ key ] ) || walk( config[ key ] )
+    );
+  };
+  return walk( schema?.steps ) || walk( schema?.fields );
+}
+
+/**
  * Style object for one field wrapper.
  *
  * Redeclaring the same custom properties the form set means everything inside

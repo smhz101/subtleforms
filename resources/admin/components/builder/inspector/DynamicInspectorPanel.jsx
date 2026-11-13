@@ -88,6 +88,9 @@ const ROW_TYPES = [
 	'subfield',
 	'lines',
 	'mask_try',
+	'date',
+	'time',
+	'weekdays',
 ];
 
 /**

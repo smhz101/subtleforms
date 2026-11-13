@@ -56,6 +56,32 @@ if (total > limit) {
   );
 }
 
+// Forms with a picker also download picker.css (2.9.0); count it, alone and with the base.
+if (budget.picker) {
+  let pickerTotal = 0;
+  const pickerRows = [];
+  for (const file of budget.picker.files) {
+    const full = path.join(dir, file);
+    if (!fs.existsSync(full)) {
+      console.error(`Missing ${path.relative(root, full)}. Build first: npm run build:frontend`);
+      process.exit(1);
+    }
+    const buffer = fs.readFileSync(full);
+    const gz = gzipSize(buffer);
+    pickerTotal += gz;
+    pickerRows.push(`  ${file.padEnd(18)} ${String(buffer.length).padStart(8)} bytes, ${String(gz).padStart(7)} gzip`);
+  }
+  console.log('Picker stylesheet (forms with a picker):');
+  console.log(pickerRows.join('\n'));
+  console.log(`  ${'with the base'.padEnd(18)} ${String(total + pickerTotal).padStart(32)} gzip, limit ${budget.picker.withBaseLimitGzipBytes}`);
+  if (pickerTotal > budget.picker.limitGzipBytes) {
+    problems.push(`picker.css is ${pickerTotal} bytes gzip, over its ${budget.picker.limitGzipBytes} byte limit. Raise it in bin/bundle-budget.json and say why.`);
+  }
+  if (total + pickerTotal > budget.picker.withBaseLimitGzipBytes) {
+    problems.push(`A form with a picker downloads ${total + pickerTotal} bytes gzip, over the ${budget.picker.withBaseLimitGzipBytes} byte limit in bin/bundle-budget.json.`);
+  }
+}
+
 const main = fs.readFileSync(path.join(dir, 'frontend.js'), 'utf8');
 for (const marker of budget.base.mustNotContain) {
   if (main.includes(marker)) {

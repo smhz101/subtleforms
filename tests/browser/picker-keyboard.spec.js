@@ -47,7 +47,7 @@ test('the time picker is usable from the keyboard only', async ({ page }) => {
   const trigger = page.locator('#subtleforms-field-when_time');
   await expect(trigger).toHaveAttribute('aria-required', 'true');
   await trigger.focus();
-  await page.keyboard.press('Enter');
+  await page.keyboard.press('ArrowDown');
   const dialog = page.locator('[role="dialog"]');
   await expect(dialog).toBeVisible();
   // Focus is already inside, on the hour column.
@@ -55,12 +55,12 @@ test('the time picker is usable from the keyboard only', async ({ page }) => {
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('Enter');
-  await expect(trigger).toContainText('02:');
+  await expect(trigger).toHaveValue(/^02:/);
   await page.keyboard.press('ArrowRight');
   await expect(page.locator('[role="listbox"][aria-label="Minute"] [tabindex="0"]')).toBeFocused();
   await page.keyboard.press('End');
   await page.keyboard.press('Space');
-  await expect(trigger).toContainText('02:59');
+  await expect(trigger).toHaveValue('02:45');
   await page.screenshot({ path: `${SHOTS}/bugs-time-picker-keyboard-focus.png`, clip: await clipOf(page, trigger, dialog) });
   expect(await axeOpen(page)).toEqual([]);
   // Tab order inside the dialog: hour, minute, Clear.
@@ -92,9 +92,8 @@ test('the date and time picker moves focus into the calendar and back on Escape'
   await expect(page.locator('[role="gridcell"][tabindex="0"]')).toBeFocused();
   expect(await page.locator('[role="gridcell"][tabindex="0"]').getAttribute('aria-label')).not.toBe(before);
   await page.keyboard.press('Enter');
-  await expect(trigger).toContainText(/\d/);
-  // The dialog stays open to set the time; one Tab leaves the calendar grid for the hours.
-  await page.keyboard.press('Tab');
+  await expect(trigger).toHaveValue(/\d/);
+  // The dialog stays open to set the time and Enter on a day moves focus to the hours.
   await expect(page.locator('[role="listbox"][aria-label="Hour"] [tabindex="0"]')).toBeFocused();
   await page.screenshot({ path: `${SHOTS}/bugs-datetime-picker-keyboard-focus.png`, clip: await clipOf(page, trigger, dialog) });
   expect(await axeOpen(page)).toEqual([]);

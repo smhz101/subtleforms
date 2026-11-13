@@ -10,6 +10,7 @@ import {
   FORM_PRESETS,
   isPureTheme,
   formScopeClass,
+  needsPickerCss,
 } from './appearance';
 
 describe( 'formAppearanceStyle', () => {
@@ -358,5 +359,22 @@ describe( 'tokens become variables (2.7.2)', () => {
     expect( isPureTheme( { ...base, tokens: { ...base.tokens, labelSize: '14px' } } ) ).toBe( false );
     expect( isPureTheme( { ...base, customCss: '.a{b:c}' } ) ).toBe( true );
     expect( formScopeClass( 7 ) ).toBe( 'subtleforms-form-7' );
+  } );
+} );
+
+describe( 'needsPickerCss decides like the page', () => {
+  const types = [ 'select', 'dropdown', 'country', 'address_group', 'date', 'time', 'datetime' ];
+
+  it( 'is true when any field, also a nested one, has a picker', () => {
+    expect( needsPickerCss( { fields: [ { type: 'text' }, { type: 'date' } ] }, types ) ).toBe( true );
+    expect( needsPickerCss( { fields: [ { type: 'group', fields: [ { type: 'time' } ] } ] }, types ) ).toBe( true );
+    expect( needsPickerCss( { steps: [ { fields: [ { type: 'select' } ] } ] }, types ) ).toBe( true );
+    expect( needsPickerCss( { fields: [ { type: 'columns', config: { columns: [ { fields: [ { type: 'datetime' } ] } ] } } ] }, types ) ).toBe( true );
+  } );
+
+  it( 'is false for text-only forms and when the server list is missing', () => {
+    expect( needsPickerCss( { fields: [ { type: 'text' }, { type: 'textarea' } ] }, types ) ).toBe( false );
+    expect( needsPickerCss( { fields: [ { type: 'date' } ] }, undefined ) ).toBe( false );
+    expect( needsPickerCss( null, types ) ).toBe( false );
   } );
 } );
