@@ -68,7 +68,13 @@ describe( 'Picker.scss contract', () => {
 
   it( 'lays out the weekday header and every week as a seven column row', () => {
     expect( scss ).toMatch( /\.subtleforms-picker__week\s*\{[^}]*grid-template-columns: repeat\( ?7/ );
-    expect( scss ).toMatch( /\.subtleforms-picker__weekdays,\s*\.subtleforms-picker \.subtleforms-picker__week/ );
+    expect( scss ).toMatch( /\.subtleforms-picker__weekdays,\s*\.subtleforms-picker(\.subtleforms-picker)* \.subtleforms-picker__week/ );
+  } );
+
+  it( 'out-ranks a theme button rule: every picker selector is three classes deep before its own class', () => {
+    // Twenty Twenty-One paints `button:not(:hover):not(:active):not(.has-background)`, which counts as (0,3,1).
+    expect( scss ).toContain( '.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__trigger' );
+    expect( scss ).not.toMatch( /^\.subtleforms-picker \.subtleforms-picker__/m );
   } );
 
   it( 'does not hard-code a 42px trigger min-height', () => {

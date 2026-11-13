@@ -318,6 +318,19 @@ test.describe('limits, small screens, axe and Preview', () => {
     expect(await page.locator('[role="gridcell"][aria-disabled="true"]').count()).toBeGreaterThan(5);
   });
 
+  test('no picker button takes the theme button fill, on a form that inherits the theme', async ({ page }) => {
+    await page.goto(limitForm.url);
+    await waitForForm(page);
+    await page.locator('#subtleforms-field-when').click();
+    await expect(page.locator('[role="dialog"]')).toBeVisible();
+    const fills = await page.evaluate(() => [...document.querySelectorAll('.subtleforms-picker__open, .subtleforms-picker__nav, .subtleforms-picker__title, .subtleforms-picker__tick:not(.is-selected), .subtleforms-picker__text-button')]
+      .map((b) => ({ cls: b.className, bg: getComputedStyle(b).backgroundColor })));
+    expect(fills.length).toBeGreaterThan(10);
+    for (const fill of fills) {
+      expect(fill.bg, fill.cls).toBe('rgba(0, 0, 0, 0)');
+    }
+  });
+
   test('the times outside the range are disabled and the server names the range', async ({ page }) => {
     await page.goto(limitForm.url);
     await waitForForm(page);
