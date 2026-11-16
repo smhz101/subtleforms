@@ -1383,16 +1383,14 @@ class AdminMenu {
 			$title = Helpers::normalize_string( $title );
 		}
 
-		// Ensure other globals are strings
-		if ( $parent_file === null ) {
-			$parent_file = '';
-		} else {
+		// Leave $parent_file and $submenu_file alone when WordPress has not set
+		// them: menu-header.php checks isset( $submenu_file ), so turning null
+		// into '' tells WordPress that no submenu item is current and breaks
+		// the highlight for every plugin's menu, not just SubtleForms.
+		if ( null !== $parent_file ) {
 			$parent_file = Helpers::normalize_string( $parent_file );
 		}
-
-		if ( $submenu_file === null ) {
-			$submenu_file = '';
-		} else {
+		if ( null !== $submenu_file ) {
 			$submenu_file = Helpers::normalize_string( $submenu_file );
 		}
 	}
