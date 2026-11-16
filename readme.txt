@@ -4,7 +4,7 @@ Tags: form builder, contact form, multi-step form, conversational form, forms
 Requires at least: 6.6
 Tested up to: 7.2
 Requires PHP: 8.1
-Stable tag: 2.8.1
+Stable tag: 2.9.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -228,6 +228,17 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 6. The form preview with appearance presets.
 
 == Changelog ==
+
+= 2.9.0 - 2026-11-16 =
+* New: Tabs and Accordion layout containers let you group fields into tabs or collapsible sections, with errors in a closed tab or section opened and focused on submit.
+* New: Add-ons can show country flags in the Address field: Free draws the flags when an add-on declares the address_flags feature and the field has showFlags on, and loads flag images only for forms that use it.
+* New: Add-ons can draw under each answer on the entry screen, and email and confirmation text can use parts of an address or name answer, such as {field:address:city}.
+* Change: Add-ons can add parts to the Address field and draw it around the built-in one, the Address field now stores only its own parts, and the validate_value filter now runs for the Name and Address fields.
+* Change: The Appearance panel in Preview now looks like the field settings panel, with Presets and Custom tabs and ten new themes (Clean, Soft, Bordered, Editorial, Compact, Rounded, Classic, Dark and High contrast beside Inherit from theme), the preview loads what your theme loads so Inherit from theme looks like your site, and a Light and Dark switch changes the page around the form.
+* Change: The Date, Time and Date & time fields now use a typed input with an icon button instead of a button, so a theme styles them like any other field. The calendar has month and year views and skips days that cannot be picked, the time list steps by a minute step you choose, and the formats are presets with an example instead of free text. New options: first day of the week, earliest and latest date (a date or a relative date such as +7 days), no past dates, unavailable weekdays, earliest and latest time, and a default of today or now. The limits are checked on the server and in the browser with the same messages. Saved values do not change: dates stay Y-m-d, times H:i and date and times Y-m-dTH:i. A saved relative minimum such as today is now enforced on the server too.
+* Change: The field settings panel in the form builder is one scrolling sheet of property rows instead of four tabs, with Required, Width and Visibility at the top.
+* Fix: The field settings panel now shows a control's default until it is saved, shows placeholders on number settings, and disables a setting that an add-on marks as disabled.
+* Fix: The pickers on a form that uses the theme look (dropdown, country, address, date and time) now load their own small stylesheet, picker.css, so they no longer show up unstyled or twice next to the theme's own select. The stylesheet is only loaded for forms that have a picker. (#109)
 
 = 2.8.1 - 2026-11-09 =
 * New: HubSpot is built in: connect a HubSpot service key (a legacy private app access token also works) under Settings, Integrations, CRM, then switch HubSpot on for a form to create or update a contact for each entry, with field mapping, custom properties, a consent checkbox and a line in each entry's activity log with an Open in HubSpot link.
