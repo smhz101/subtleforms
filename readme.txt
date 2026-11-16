@@ -162,12 +162,31 @@ Watch the tutorials on [YouTube](https://www.youtube.com/@subtleforms), read the
 
 == External services ==
 
-SubtleForms works without any external service. Each service below is used only after a site administrator turns it on, and only for that site's forms. Entries marked as spam are never sent.
+SubtleForms works without any external service. Each service below is used only after a site administrator turns it on, and only for that site's forms.
 
-* **Google reCAPTCHA**, **hCaptcha**, **Cloudflare Turnstile** (spam checks): the form page loads the provider's script, and on submit the site sends the response token and the visitor's IP address to the provider's verify address (google.com/recaptcha, hcaptcha.com, challenges.cloudflare.com). Google [terms](https://policies.google.com/terms) and [privacy](https://policies.google.com/privacy); hCaptcha [terms](https://www.hcaptcha.com/terms) and [privacy](https://www.hcaptcha.com/privacy); Cloudflare [terms](https://www.cloudflare.com/website-terms/) and [privacy](https://www.cloudflare.com/privacypolicy/).
-* **Mailchimp** (api.mailchimp.com), **Brevo** (api.brevo.com), **Kit** (api.kit.com): after an entry is saved, the site sends the email address, the answers the administrator mapped, tags and subscription status. Mailchimp [terms](https://mailchimp.com/legal/terms/) and [privacy](https://www.intuit.com/privacy/statement/); Brevo [terms](https://www.brevo.com/legal/termsofuse/) and [privacy](https://www.brevo.com/legal/privacypolicy/); Kit [terms](https://kit.com/terms) and [privacy](https://kit.com/privacy).
-* **HubSpot** (api.hubapi.com): after an entry is saved, the site sends the email address and the answers the administrator mapped to create or update a contact. [Terms](https://legal.hubspot.com/terms-of-service) and [privacy](https://legal.hubspot.com/privacy-policy).
-* **Webhooks**: each entry is sent as JSON only to the URL the administrator enters.
+= Google reCAPTCHA =
+
+Spam check. The form page loads the script from google.com, and on submit the site sends the response token and the visitor's IP address to https://www.google.com/recaptcha/api/siteverify. [Terms of Service](https://policies.google.com/terms), [Privacy Policy](https://policies.google.com/privacy).
+
+= hCaptcha =
+
+Spam check. The form page loads the script from js.hcaptcha.com, and on submit the site sends the response token and the visitor's IP address to https://hcaptcha.com/siteverify. [Terms of Service](https://www.hcaptcha.com/terms), [Privacy Policy](https://www.hcaptcha.com/privacy).
+
+= Cloudflare Turnstile =
+
+Spam check. The form page loads the script from challenges.cloudflare.com, and on submit the site sends the response token and the visitor's IP address to https://challenges.cloudflare.com/turnstile/v0/siteverify. [Terms of Use](https://www.cloudflare.com/website-terms/), [Privacy Policy](https://www.cloudflare.com/privacypolicy/).
+
+= Mailchimp, Brevo and Kit =
+
+After an entry is saved, the site sends the email address, the answers the administrator mapped, tags and subscription status to the connected service: https://<data center>.api.mailchimp.com, https://api.brevo.com or https://api.kit.com. Mailchimp [Terms of Use](https://mailchimp.com/legal/terms/), [Privacy Policy](https://www.intuit.com/privacy/statement/); Brevo [Terms of Use](https://www.brevo.com/legal/termsofuse/), [Privacy Policy](https://www.brevo.com/legal/privacypolicy/); Kit [Terms of Service](https://kit.com/terms), [Privacy Policy](https://kit.com/privacy).
+
+= HubSpot =
+
+After an entry is saved, the site sends the email address and the answers the administrator mapped to https://api.hubapi.com to create or update a contact. [Terms of Service](https://legal.hubspot.com/terms-of-service), [Privacy Policy](https://legal.hubspot.com/privacy-policy).
+
+= Webhooks =
+
+Each entry is sent as JSON only to the URL the administrator enters.
 
 == Screenshots ==
 
