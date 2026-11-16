@@ -72,6 +72,7 @@ class AdminMenu {
 		add_filter( 'submenu_file', array( $this, 'fix_submenu_file' ) );
 
 		add_action( 'admin_menu', array( $this, 'pin_menu_order' ), 99 );
+		add_action( 'admin_print_footer_scripts', array( self::class, 'upgrade_link_script' ) );
 		add_action(
 			'admin_menu',
 			function () {
@@ -534,7 +535,31 @@ class AdminMenu {
 			$head[] = $item;
 		}
 		ksort( $tail );
-		$submenu['subtleforms'] = array_merge( $head, array_values( $tail ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Reorders this plugin's own submenu.
+		$items = array_merge( $head, array_values( $tail ) );
+		// The Upgrade item links straight to the Pro page on subtleforms.com.
+		// WordPress prints a submenu slug that is not a registered page as the
+		// link itself, so the URL replaces the slug here, after the page is
+		// registered (old links to the page keep working). The admin footer
+		// script opens it in a new tab.
+		foreach ( $items as $i => $item ) {
+			if ( isset( $item[2] ) && self::UPGRADE_SLUG === $item[2] ) {
+				$items[ $i ][2] = self::upgrade_url( 'menu' );
+			}
+		}
+		$submenu['subtleforms'] = $items; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Reorders this plugin's own submenu.
+	}
+
+	/**
+	 * Open the Upgrade menu item in a new tab. WordPress has no target
+	 * attribute for menu items, so the footer sets it on the link.
+	 */
+	public static function upgrade_link_script(): void {
+		if ( ! self::show_upgrade_item() ) {
+			return;
+		}
+		wp_print_inline_script_tag(
+			'document.querySelectorAll("#adminmenu .sf-menu-upgrade").forEach(function(s){var a=s.closest("a");if(a){a.target="_blank";a.rel="noopener noreferrer";}});'
+		);
 	}
 
 	/**

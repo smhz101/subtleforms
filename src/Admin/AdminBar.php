@@ -114,7 +114,11 @@ final class AdminBar {
 					'parent' => self::NODE,
 					'id'     => self::NODE . '-upgrade',
 					'title'  => '<span class="sf-ab-upgrade">' . AdminMenu::upgrade_label() . '</span>',
-					'href'   => admin_url( 'admin.php?page=' . AdminMenu::UPGRADE_SLUG ),
+					'href'   => AdminMenu::upgrade_url( 'admin-bar' ),
+					'meta'   => array(
+						'target' => '_blank',
+						'rel'    => 'noopener noreferrer',
+					),
 				)
 			);
 		}
