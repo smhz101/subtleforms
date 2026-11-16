@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: SubtleForms 2.9.0\n"
+"Project-Id-Version: SubtleForms 2.9.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/subtleforms\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-16T03:42:44+00:00\n"
+"POT-Creation-Date: 2026-11-16T10:44:20+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -17,8 +17,8 @@ msgstr ""
 #. Plugin Name of the plugin
 #. Author of the plugin
 #: subtleforms.php
-#: src/Admin/AdminMenu.php:823
-#: src/Admin/AdminMenu.php:1374
+#: src/Admin/AdminMenu.php:821
+#: src/Admin/AdminMenu.php:1372
 #: resources/admin/components/AdminFooter.jsx:27
 #: resources/blocks/form/edit.jsx:214
 #: resources/blocks/form/edit.jsx:389
@@ -58,7 +58,7 @@ msgstr ""
 
 #. translators: %s: number of unread entries.
 #: src/Admin/AdminBar.php:69
-#: src/Admin/AdminMenu.php:210
+#: src/Admin/AdminMenu.php:211
 #: src/Admin/DashboardWidget.php:156
 #, php-format
 msgid "%s unread entry"
@@ -67,9 +67,9 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: src/Admin/AdminBar.php:90
-#: src/Admin/AdminMenu.php:218
-#: src/Admin/AdminMenu.php:410
-#: resources/admin/app/AdminApp.jsx:207
+#: src/Admin/AdminMenu.php:219
+#: src/Admin/AdminMenu.php:407
+#: resources/admin/app/AdminApp.jsx:203
 #: resources/admin/components/AppNav.jsx:36
 #: resources/admin/components/TrendChart.jsx:43
 #: resources/admin/pages/SubmissionDetailPage.jsx:1188
@@ -79,40 +79,40 @@ msgid "Submissions"
 msgstr ""
 
 #: src/Admin/AdminBar.php:98
-#: src/Admin/AdminMenu.php:389
-#: src/Admin/AdminMenu.php:390
+#: src/Admin/AdminMenu.php:386
+#: src/Admin/AdminMenu.php:387
 msgid "All Forms"
 msgstr ""
 
 #: src/Admin/AdminBar.php:106
-#: src/Admin/AdminMenu.php:400
+#: src/Admin/AdminMenu.php:397
 #: src/Fields/CoreFields.php:1461
 msgid "Add New"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:81
-#: resources/admin/app/AdminApp.jsx:204
+#: src/Admin/AdminMenu.php:82
+#: resources/admin/app/AdminApp.jsx:200
 #: resources/admin/components/AppNav.jsx:20
 #: resources/admin/pages/DashboardPage.jsx:75
 #: resources/admin/pages/DashboardPage.jsx:108
 msgid "Dashboard"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:399
+#: src/Admin/AdminMenu.php:396
 msgid "Add New Form"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:420
-#: src/Admin/AdminMenu.php:421
-#: resources/admin/app/AdminApp.jsx:209
+#: src/Admin/AdminMenu.php:417
+#: src/Admin/AdminMenu.php:418
+#: resources/admin/app/AdminApp.jsx:205
 #: resources/admin/components/AppNav.jsx:47
 #: resources/admin/pages/ReportsPage.jsx:307
 msgid "Reports"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:438
-#: src/Admin/AdminMenu.php:439
-#: resources/admin/app/AdminApp.jsx:208
+#: src/Admin/AdminMenu.php:435
+#: src/Admin/AdminMenu.php:436
+#: resources/admin/app/AdminApp.jsx:204
 #: resources/admin/components/AppNav.jsx:55
 #: resources/admin/components/builder/layout/BuilderViewSwitcher.jsx:11
 #: resources/admin/pages/SettingsPage.jsx:191
@@ -121,56 +121,55 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:449
-#: src/Admin/AdminMenu.php:488
-#: src/Admin/AdminMenu.php:497
+#: src/Admin/AdminMenu.php:452
+#: src/Admin/AdminMenu.php:483
+#: src/Admin/AdminMenu.php:492
 msgid "Upgrade to Pro"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:545
-#: src/Admin/AdminMenu.php:1091
-#: src/Admin/AdminMenu.php:1104
-#: src/Admin/AdminMenu.php:1123
-#: src/Admin/AdminMenu.php:1146
-#: src/Admin/AdminMenu.php:1209
-#: src/Admin/AdminMenu.php:1219
-msgid "You do not have permission to access this page."
-msgstr ""
-
-#: src/Admin/AdminMenu.php:706
+#: src/Admin/AdminMenu.php:704
 msgid "Are you sure you want to delete this item?"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:707
+#: src/Admin/AdminMenu.php:705
 #: src/Frontend/FrontendAssets.php:140
 msgid "An error occurred. Please try again."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:708
+#: src/Admin/AdminMenu.php:706
 msgid "Action completed successfully."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1067
+#: src/Admin/AdminMenu.php:1065
 msgid "Security check failed."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1134
-#: src/Admin/AdminMenu.php:1274
+#: src/Admin/AdminMenu.php:1089
+#: src/Admin/AdminMenu.php:1102
+#: src/Admin/AdminMenu.php:1121
+#: src/Admin/AdminMenu.php:1144
+#: src/Admin/AdminMenu.php:1207
+#: src/Admin/AdminMenu.php:1217
+msgid "You do not have permission to access this page."
+msgstr ""
+
+#: src/Admin/AdminMenu.php:1132
+#: src/Admin/AdminMenu.php:1272
 msgid "Form not found."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1247
-#: src/Admin/AdminMenu.php:1269
-#: src/Admin/AdminMenu.php:1302
+#: src/Admin/AdminMenu.php:1245
+#: src/Admin/AdminMenu.php:1267
+#: src/Admin/AdminMenu.php:1300
 msgid "Invalid request."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1331
+#: src/Admin/AdminMenu.php:1329
 msgid "This screen could not be loaded."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1351
-#: src/Admin/AdminMenu.php:1356
+#: src/Admin/AdminMenu.php:1349
+#: src/Admin/AdminMenu.php:1354
 msgid "WordPress Admin"
 msgstr ""
 
@@ -4067,7 +4066,6 @@ msgstr ""
 #: src/Integrations/Registry.php:117
 #: resources/admin/components/integrations/crm/CrmFormPanel.jsx:60
 #: resources/admin/components/integrations/crm/CrmSettings.jsx:224
-#: resources/admin/pages/UpgradePage.jsx:25
 msgid "CRM"
 msgstr ""
 
@@ -5588,7 +5586,7 @@ msgstr ""
 msgid "This data is stored according to the configured data retention policy. Contact the site administrator for more information about data retention and deletion."
 msgstr ""
 
-#: resources/admin/app/AdminApp.jsx:205
+#: resources/admin/app/AdminApp.jsx:201
 #: resources/admin/components/AppNav.jsx:28
 #: resources/admin/pages/FormsPage.jsx:134
 #: resources/admin/pages/SettingsPage.jsx:27
@@ -5596,21 +5594,20 @@ msgstr ""
 msgid "Forms"
 msgstr ""
 
-#: resources/admin/app/AdminApp.jsx:206
-#: resources/admin/app/AdminApp.jsx:213
+#: resources/admin/app/AdminApp.jsx:202
+#: resources/admin/app/AdminApp.jsx:209
 msgid "Form Builder"
 msgstr ""
 
-#: resources/admin/app/AdminApp.jsx:210
-#: resources/admin/pages/UpgradePage.jsx:80
+#: resources/admin/app/AdminApp.jsx:206
 msgid "SubtleForms Pro"
 msgstr ""
 
-#: resources/admin/app/AdminApp.jsx:216
+#: resources/admin/app/AdminApp.jsx:212
 msgid "Submission Detail"
 msgstr ""
 
-#: resources/admin/app/AdminApp.jsx:244
+#: resources/admin/app/AdminApp.jsx:240
 #, js-format
 msgid "Navigated to %s"
 msgstr ""
@@ -6100,7 +6097,6 @@ msgstr ""
 #: resources/admin/components/builder/appearance/tokenDefs.js:114
 #: resources/admin/components/BuilderTour.jsx:72
 #: resources/admin/components/merge-tags/MergeTagMenu.jsx:51
-#: resources/admin/pages/UpgradePage.jsx:13
 #: resources/admin/utils/saveErrors.js:12
 #: resources/admin/utils/saveErrors.js:73
 msgid "Fields"
@@ -9860,7 +9856,6 @@ msgstr ""
 #: resources/admin/components/integrations/emailMarketing/ServiceConnection.jsx:161
 #: resources/admin/components/MoreFeaturesCard.jsx:61
 #: resources/admin/pages/SubmissionDetailPage.jsx:142
-#: resources/admin/pages/UpgradePage.jsx:88
 msgid "(opens in a new tab)"
 msgstr ""
 
@@ -10913,7 +10908,6 @@ msgid "More conditional logic options, form analytics, entry PDFs and translatio
 msgstr ""
 
 #: resources/admin/components/MoreFeaturesCard.jsx:60
-#: resources/admin/pages/UpgradePage.jsx:87
 msgid "About SubtleForms Pro"
 msgstr ""
 
@@ -13516,78 +13510,6 @@ msgstr ""
 
 #: resources/admin/pages/ToolsPage.jsx:455
 msgid "Create draft forms"
-msgstr ""
-
-#: resources/admin/pages/UpgradePage.jsx:14
-msgid "Signature, Calculation and Picture choice fields, and several files per upload field."
-msgstr ""
-
-#: resources/admin/pages/UpgradePage.jsx:19
-msgid "Payments"
-msgstr ""
-
-#: resources/admin/pages/UpgradePage.jsx:20
-msgid "Take payments with Stripe, with coupons, an order summary and an Orders screen."
-msgstr ""
-
-#: resources/admin/pages/UpgradePage.jsx:26
-msgid "Send entries to HubSpot, Salesforce, Pipedrive and Close."
-msgstr ""
-
-#: resources/admin/pages/UpgradePage.jsx:31
-msgid "Automation"
-msgstr ""
-
-#: resources/admin/pages/UpgradePage.jsx:32
-msgid "Connect forms to Zapier, Make and n8n."
-msgstr ""
-
-#: resources/admin/pages/UpgradePage.jsx:37
-msgid "Analytics"
-msgstr ""
-
-#: resources/admin/pages/UpgradePage.jsx:38
-msgid "Views, submissions and conversion rate for each form."
-msgstr ""
-
-#: resources/admin/pages/UpgradePage.jsx:43
-msgid "MCP"
-msgstr ""
-
-#: resources/admin/pages/UpgradePage.jsx:44
-msgid "An MCP server, so the AI assistants you connect can work with your forms."
-msgstr ""
-
-#: resources/admin/pages/UpgradePage.jsx:49
-msgid "PDF"
-msgstr ""
-
-#: resources/admin/pages/UpgradePage.jsx:50
-msgid "Download an entry as a PDF, or attach it to the notification email."
-msgstr ""
-
-#: resources/admin/pages/UpgradePage.jsx:55
-msgid "WooCommerce"
-msgstr ""
-
-#: resources/admin/pages/UpgradePage.jsx:56
-msgid "Send a payment form to the WooCommerce checkout."
-msgstr ""
-
-#: resources/admin/pages/UpgradePage.jsx:61
-msgid "Translation"
-msgstr ""
-
-#: resources/admin/pages/UpgradePage.jsx:62
-msgid "Register form text with WPML or Polylang and show each visitor their language."
-msgstr ""
-
-#: resources/admin/pages/UpgradePage.jsx:81
-msgid "SubtleForms Pro is a separate plugin. Everything in SubtleForms keeps working without it."
-msgstr ""
-
-#: resources/admin/pages/UpgradePage.jsx:92
-msgid "What Pro adds"
 msgstr ""
 
 #: resources/admin/templates/categories.js:8
