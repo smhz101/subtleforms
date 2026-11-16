@@ -61,15 +61,33 @@ final class PageHeaderMenuTest extends TestCase {
 	}
 
 	public function test_upgrade_item_is_after_settings_in_free(): void {
+		// Free mode, even where an add-on is active on the test site.
+		add_filter( 'subtleforms/admin/upgrade_menu_item', '__return_true' );
 		$slugs = $this->slugs();
 		$this->assertSame( 'subtleforms-settings', $slugs[ count( $slugs ) - 2 ] );
-		$this->assertSame( AdminMenu::UPGRADE_SLUG, end( $slugs ) );
+		$this->assertSame( AdminMenu::upgrade_url( 'menu' ), end( $slugs ) );
+		$this->assertStringStartsWith( 'https://subtleforms.com/pro/', end( $slugs ) );
+	}
+
+	public function test_upgrade_link_script_opens_the_item_in_a_new_tab(): void {
+		// Free mode, even where an add-on is active on the test site.
+		add_filter( 'subtleforms/admin/upgrade_menu_item', '__return_true' );
+		ob_start();
+		AdminMenu::upgrade_link_script();
+		$out = (string) ob_get_clean();
+		$this->assertStringContainsString( 'sf-menu-upgrade', $out );
+		$this->assertStringContainsString( '_blank', $out );
+
+		add_filter( 'subtleforms/admin/upgrade_menu_item', '__return_false' );
+		ob_start();
+		AdminMenu::upgrade_link_script();
+		$this->assertSame( '', (string) ob_get_clean() );
 	}
 
 	public function test_upgrade_item_is_absent_when_the_filter_says_no(): void {
 		add_filter( 'subtleforms/admin/upgrade_menu_item', '__return_false' );
 		$slugs = $this->slugs();
-		$this->assertNotContains( AdminMenu::UPGRADE_SLUG, $slugs );
+		$this->assertNotContains( AdminMenu::upgrade_url( 'menu' ), $slugs );
 		$this->assertSame( 'subtleforms-settings', end( $slugs ) );
 	}
 
@@ -223,13 +241,17 @@ final class PageHeaderMenuTest extends TestCase {
 	}
 
 	public function test_admin_bar_has_the_upgrade_item_last_and_the_filter_removes_it(): void {
+		// Free mode, even where an add-on is active on the test site.
+		add_filter( 'subtleforms/admin/upgrade_menu_item', '__return_true' );
 		$this->asAdmin();
 		$bar  = $this->bar();
 		$node = $bar->get_node( 'subtleforms-upgrade' );
 		$this->assertNotNull( $node );
 		$this->assertSame( 'subtleforms', $node->parent );
 		$this->assertStringContainsString( 'sf-ab-upgrade', $node->title );
-		$this->assertStringContainsString( 'page=' . AdminMenu::UPGRADE_SLUG, $node->href );
+		$this->assertSame( AdminMenu::upgrade_url( 'admin-bar' ), $node->href );
+		$this->assertSame( '_blank', $node->meta['target'] ?? '' );
+		$this->assertSame( 'noopener noreferrer', $node->meta['rel'] ?? '' );
 		$children = array_keys( array_filter( $bar->get_nodes(), static fn( $n ) => 'subtleforms' === $n->parent ) );
 		$this->assertSame( 'subtleforms-upgrade', end( $children ) );
 

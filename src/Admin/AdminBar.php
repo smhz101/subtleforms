@@ -114,7 +114,11 @@ final class AdminBar {
 					'parent' => self::NODE,
 					'id'     => self::NODE . '-upgrade',
 					'title'  => '<span class="sf-ab-upgrade">' . AdminMenu::upgrade_label() . '</span>',
-					'href'   => admin_url( 'admin.php?page=' . AdminMenu::UPGRADE_SLUG ),
+					'href'   => AdminMenu::upgrade_url( 'admin-bar' ),
+					'meta'   => array(
+						'target' => '_blank',
+						'rel'    => 'noopener noreferrer',
+					),
 				)
 			);
 		}
@@ -143,11 +147,10 @@ final class AdminBar {
 			. '#wpadminbar:not(.mobile)>#wp-toolbar #wp-admin-bar-subtleforms:hover .awaiting-mod,#wpadminbar>#wp-toolbar #wp-admin-bar-subtleforms.hover .awaiting-mod,'
 			. '#wpadminbar:not(.mobile)>#wp-toolbar #wp-admin-bar-subtleforms a:focus .awaiting-mod,#wpadminbar #wp-admin-bar-subtleforms li:hover .sf-ab-count,'
 			. '#wpadminbar #wp-admin-bar-subtleforms li a:hover .sf-ab-count,#wpadminbar #wp-admin-bar-subtleforms li a:focus .sf-ab-count{color:#fff;background:#d63638;}'
-			// The upgrade item: the brand colour and star of the menu entry.
-			. $node . ' .sf-ab-upgrade{color:#8fa3ff;font-weight:600;}'
-			. $node . ' .sf-ab-upgrade::before{content:"\\f155";font:normal 13px/1 dashicons;margin-inline-end:5px;vertical-align:-1px;}'
-			. $node . ' a:hover .sf-ab-upgrade,' . $node . ' a:focus .sf-ab-upgrade{color:#fff;}'
-			. 'body.admin-color-light ' . $node . ' .sf-ab-upgrade{color:#3858e9;}'
+			// The upgrade item: the same button as the menu entry, lime with dark
+			// text, regular weight, no icon.
+			. $node . ' .sf-ab-upgrade,' . $node . ' a:hover .sf-ab-upgrade,' . $node . ' a:focus .sf-ab-upgrade{display:inline-block;padding:0 10px;border-radius:4px;background:#C6F432;color:#0E0E2C;font-weight:400;line-height:22px;}'
+			. $node . ' a:hover .sf-ab-upgrade,' . $node . ' a:focus .sf-ab-upgrade{background:#b4e01c;}'
 			. '@media screen and (max-width:782px){' . $node . '{display:block;}' . $node . ' .sf-ab-name{display:none;}'
 			. $node . ' .ab-icon{width:52px!important;height:46px!important;margin:0;text-align:center;}' . $node . ' .ab-icon::before{width:26px;height:26px;top:0;margin:10px auto 0;}'
 			. $node . ' .awaiting-mod{position:absolute;top:2px;inset-inline-start:26px;margin:0;}}';

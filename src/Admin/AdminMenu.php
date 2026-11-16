@@ -72,6 +72,7 @@ class AdminMenu {
 		add_filter( 'submenu_file', array( $this, 'fix_submenu_file' ) );
 
 		add_action( 'admin_menu', array( $this, 'pin_menu_order' ), 99 );
+		add_action( 'admin_print_footer_scripts', array( self::class, 'upgrade_link_script' ) );
 		add_action(
 			'admin_menu',
 			function () {
@@ -266,14 +267,10 @@ class AdminMenu {
 		if ( 0 !== strpos( self::menu_icon(), 'data:' ) ) {
 			$css .= $row . ' .wp-menu-image img{width:16px;height:16px;padding:9px 0 0;opacity:1;object-fit:contain;}';
 		}
-		// The upgrade item: brand-coloured text with a small star, like a menu
-		// item. The dark admin schemes get a lighter tint of the brand colour so
-		// the label keeps its contrast; the Light scheme uses the brand colour.
-		$css .= '#adminmenu .sf-menu-upgrade{color:#8fa3ff;font-weight:600;}'
-			. '#adminmenu .sf-menu-upgrade::before{content:"\\f155";font:normal 13px/1 dashicons;margin-inline-end:5px;vertical-align:-1px;}'
-			. '#adminmenu a:hover .sf-menu-upgrade,#adminmenu a:focus .sf-menu-upgrade{color:#fff;}'
-			. 'body.admin-color-light #adminmenu .sf-menu-upgrade{color:#3858e9;}'
-			. 'body.admin-color-light #adminmenu a:hover .sf-menu-upgrade,body.admin-color-light #adminmenu a:focus .sf-menu-upgrade{color:#2145d6;}';
+		// The upgrade item is a button: lime background, dark text, regular
+		// weight, no icon. Hover and focus keep the same colours in every scheme.
+		$css .= '#adminmenu .sf-menu-upgrade,#adminmenu a:hover .sf-menu-upgrade,#adminmenu a:focus .sf-menu-upgrade{display:inline-block;padding:3px 10px;border-radius:4px;background:#C6F432;color:#0E0E2C;font-weight:400;line-height:1.5;}'
+			. '#adminmenu a:hover .sf-menu-upgrade,#adminmenu a:focus .sf-menu-upgrade{background:#b4e01c;}';
 		wp_register_style( 'subtleforms-menu-icon', false, array(), SUBTLEFORMS_VERSION );
 		wp_enqueue_style( 'subtleforms-menu-icon' );
 		wp_add_inline_style( 'subtleforms-menu-icon', $css );
@@ -442,21 +439,20 @@ class AdminMenu {
 			array( $this, 'render_settings' )
 		);
 
-		// The upgrade item, after Settings, until an add-on is installed.
+		// The upgrade item, after Settings, until an add-on is installed. It is
+		// a link to the Pro page on subtleforms.com, not a page: WordPress prints
+		// a submenu slug that is not a registered page as the link itself. The
+		// footer script opens it in a new tab.
 		if ( self::show_upgrade_item() ) {
-			add_submenu_page(
-				'subtleforms',
-				__( 'Upgrade to Pro', 'subtleforms' ),
+			global $submenu;
+			$submenu['subtleforms'][] = array( // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Adds a link to this plugin's own submenu.
 				self::upgrade_menu_title(),
 				$this->caps->manage_cap(),
-				self::UPGRADE_SLUG,
-				array( $this, 'render_upgrade' )
+				self::upgrade_url( 'menu' ),
+				__( 'Upgrade to Pro', 'subtleforms' ),
 			);
 		}
 	}
-
-	/** Menu slug of the Upgrade page. */
-	public const UPGRADE_SLUG = 'subtleforms-upgrade';
 
 	/**
 	 * Whether the upgrade item is in the menu.
@@ -478,9 +474,8 @@ class AdminMenu {
 	}
 
 	/**
-	 * Menu label of the Upgrade item: a plain label in the brand colour with
-	 * a small star, drawn by menu_icon_styles(). It reads as a menu item, not
-	 * as a banner.
+	 * Menu label of the Upgrade item, drawn as a lime button with dark text
+	 * by menu_icon_styles().
 	 *
 	 * @return string HTML.
 	 */
@@ -523,7 +518,7 @@ class AdminMenu {
 		if ( empty( $submenu['subtleforms'] ) || ! is_array( $submenu['subtleforms'] ) ) {
 			return;
 		}
-		$pinned = array( 'subtleforms-settings', self::UPGRADE_SLUG );
+		$pinned = array( 'subtleforms-settings', self::upgrade_url( 'menu' ) );
 		$head   = array();
 		$tail   = array();
 		foreach ( $submenu['subtleforms'] as $item ) {
@@ -534,17 +529,21 @@ class AdminMenu {
 			$head[] = $item;
 		}
 		ksort( $tail );
-		$submenu['subtleforms'] = array_merge( $head, array_values( $tail ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Reorders this plugin's own submenu.
+		$items = array_merge( $head, array_values( $tail ) );
+		$submenu['subtleforms'] = $items; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Reorders this plugin's own submenu.
 	}
 
 	/**
-	 * Render the upgrade page.
+	 * Open the Upgrade menu item in a new tab. WordPress has no target
+	 * attribute for menu items, so the footer sets it on the link.
 	 */
-	public function render_upgrade(): void {
-		if ( ! current_user_can( $this->caps->manage_cap() ) ) {
-			wp_die( esc_html__( 'You do not have permission to access this page.', 'subtleforms' ) );
+	public static function upgrade_link_script(): void {
+		if ( ! self::show_upgrade_item() ) {
+			return;
 		}
-		$this->get_template( 'upgrade' );
+		wp_print_inline_script_tag(
+			'document.querySelectorAll("#adminmenu .sf-menu-upgrade").forEach(function(s){var a=s.closest("a");if(a){a.target="_blank";a.rel="noopener noreferrer";}});'
+		);
 	}
 
 	/**
@@ -654,7 +653,6 @@ class AdminMenu {
 			'timeFormat'     => (string) get_option( 'time_format', 'g:i a' ),
 			'timezone'       => wp_timezone_string(),
 			// The Pro page on subtleforms.com, for the Upgrade page.
-			'upgradeUrl'     => self::upgrade_url( 'menu' ),
 			// Addresses of the admin screens that connection instructions link to (2.8.1).
 			'adminUrls'      => array(
 				'forms'    => admin_url( 'admin.php?page=subtleforms-forms' ),
