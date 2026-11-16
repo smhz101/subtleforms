@@ -87,7 +87,6 @@ final class PageHeaderMenuTest extends TestCase {
 	public function test_upgrade_item_is_absent_when_the_filter_says_no(): void {
 		add_filter( 'subtleforms/admin/upgrade_menu_item', '__return_false' );
 		$slugs = $this->slugs();
-		$this->assertNotContains( AdminMenu::UPGRADE_SLUG, $slugs );
 		$this->assertNotContains( AdminMenu::upgrade_url( 'menu' ), $slugs );
 		$this->assertSame( 'subtleforms-settings', end( $slugs ) );
 	}

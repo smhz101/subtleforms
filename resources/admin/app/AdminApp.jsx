@@ -53,7 +53,6 @@ const SubmissionsPage    = lazyWithRetry(() => import(/* webpackChunkName: "page
 const SubmissionDetailPage = lazyWithRetry(() => import(/* webpackChunkName: "page-submission-detail" */ '../pages/SubmissionDetailPage'));
 const BuilderPage        = lazyWithRetry(() => import(/* webpackChunkName: "page-builder" */        '../pages/BuilderPage'));
 const ReportsPage        = lazyWithRetry(() => import(/* webpackChunkName: "page-reports" */        '../pages/ReportsPage'));
-const UpgradePage        = lazyWithRetry(() => import(/* webpackChunkName: "page-upgrade" */        '../pages/UpgradePage'));
 const CreateFormPage     = lazyWithRetry(() => import(/* webpackChunkName: "page-create-form" */    '../pages/CreateFormPage'));
 
 /**
@@ -146,9 +145,6 @@ function getInitialPath() {
 
 		case 'subtleforms-reports':
 			return '/reports';
-
-		case 'subtleforms-upgrade':
-			return '/upgrade';
 
 		default:
 			// A submenu page an add-on added (registerAdminPage).
@@ -412,14 +408,6 @@ function AppContent() {
 						element={
 							<PageErrorBoundary pageName='Reports'>
 								<ReportsPage />
-							</PageErrorBoundary>
-						}
-					/>
-					<Route
-						path='/upgrade'
-						element={
-							<PageErrorBoundary pageName='Upgrade'>
-								<UpgradePage />
 							</PageErrorBoundary>
 						}
 					/>
