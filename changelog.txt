@@ -4,6 +4,10 @@ This file keeps the full release history. readme.txt lists only the latest versi
 
 == Changelog ==
 
+= 2.9.1 - 2026-11-16 =
+* Change: The Upgrade to Pro item in the admin menu and in the admin bar is a lime button that opens the Pro page on subtleforms.com in a new tab, and the separate Upgrade to Pro page is gone.
+* Fix: The SubtleForms block icon in the editor is the same size as the other block icons.
+
 = 2.9.0 - 2026-11-16 =
 * New: Tabs and Accordion layout containers let you group fields into tabs or collapsible sections, with errors in a closed tab or section opened and focused on submit.
 * New: Add-ons can show country flags in the Address field: Free draws the flags when an add-on declares the address_flags feature and the field has showFlags on, and loads flag images only for forms that use it.
