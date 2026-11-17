@@ -461,15 +461,16 @@
    (2.9.2). Everything is inside :where(), so the rule has specificity 0,0,0
    and any theme selector, even a bare `input`, wins whatever the load order;
    it still beats the browser default, because author rules beat the user agent
-   sheet. The plugin's own pickers style themselves and are left out. */
-:where(.subtleforms.subtleforms--inherit-theme) :where(input:is([type="text"], [type="email"], [type="tel"], [type="url"], [type="number"], [type="password"], [type="search"], [type="date"], [type="time"], [type="datetime-local"]), input:not([type]), select, textarea):not(.subtleforms-picker__input, .subtleforms-picker__search) {
+   sheet. The plugin's own pickers style themselves and are left out; the :not()
+   stays inside :where() so it adds no specificity. */
+:where(.subtleforms.subtleforms--inherit-theme) :where(:is(input:is([type="text"], [type="email"], [type="tel"], [type="url"], [type="number"], [type="password"], [type="search"], [type="date"], [type="time"], [type="datetime-local"]), input:not([type]), select, textarea):not(.subtleforms-picker__input, .subtleforms-picker__search)) {
 	/*! inherit: keep */
 	padding: 0.5em 0.75em;
 	box-sizing: border-box;
 	line-height: 1.4;
 }
 
-:where(.subtleforms.subtleforms--inherit-theme) :where(input:is([type="text"], [type="email"], [type="tel"], [type="url"], [type="number"], [type="password"], [type="search"], [type="date"], [type="time"], [type="datetime-local"]), input:not([type]), select):not(.subtleforms-picker__input, .subtleforms-picker__search) {
+:where(.subtleforms.subtleforms--inherit-theme) :where(:is(input:is([type="text"], [type="email"], [type="tel"], [type="url"], [type="number"], [type="password"], [type="search"], [type="date"], [type="time"], [type="datetime-local"]), input:not([type]), select):not(.subtleforms-picker__input, .subtleforms-picker__search)) {
 	/*! inherit: keep */
 	min-height: 2.75em;
 }
