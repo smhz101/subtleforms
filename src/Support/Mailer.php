@@ -54,25 +54,88 @@ class Mailer {
         // (cid:) because most mail apps refuse data: image sources (2.3.3).
         $embedded           = self::extractInlineImages( (string) $mail_args['message'] );
         $mail_args['message'] = $embedded['html'];
-        $embed              = null;
-        if ( $embedded['images'] ) {
-            $images = $embedded['images'];
-            $embed  = static function ( $phpmailer ) use ( $images ) {
+        $images             = $embedded['images'];
+
+        // HTML mail also gets a plain text alternative, so spam filters do not
+        // score it as HTML only.
+        $text    = '';
+        $is_html = false;
+        foreach ( (array) $mail_args['headers'] as $h ) {
+            if ( is_string( $h ) && preg_match( '#^\s*content-type\s*:\s*text/html#i', $h ) ) {
+                $is_html = true;
+                break;
+            }
+        }
+        if ( $is_html ) {
+            /**
+             * Filters the plain text alternative of an HTML notification email.
+             * Return an empty string to send no alternative part.
+             *
+             * @param string $text      Plain text built from the HTML message.
+             * @param array  $mail_args Final mail arguments (to, subject, message, headers, attachments).
+             */
+            $text = (string) apply_filters( 'subtleforms/mail/plain_text', self::plainText( (string) $mail_args['message'] ), $mail_args );
+        }
+
+        $init = null;
+        if ( $images || '' !== $text ) {
+            $init = static function ( $phpmailer ) use ( $images, $text ) {
                 foreach ( $images as $cid => $image ) {
                     $phpmailer->addStringEmbeddedImage( $image['data'], $cid, $image['name'], 'base64', $image['mime'] );
                 }
+                if ( '' !== $text && empty( $phpmailer->AltBody ) ) {
+                    $phpmailer->AltBody = $text;
+                }
             };
-            add_action( 'phpmailer_init', $embed );
+            add_action( 'phpmailer_init', $init );
         }
 
-        $sent = wp_mail( $mail_args['to'], $mail_args['subject'], $mail_args['message'], $mail_args['headers'], $mail_args['attachments'] );
-
-        if ( $embed ) {
-            remove_action( 'phpmailer_init', $embed );
+        try {
+            $sent = wp_mail( $mail_args['to'], $mail_args['subject'], $mail_args['message'], $mail_args['headers'], $mail_args['attachments'] );
+        } finally {
+            if ( $init ) {
+                remove_action( 'phpmailer_init', $init );
+            }
         }
 
         // Allow filter on send result
         return (bool) apply_filters( 'subtleforms/mail/sent', $sent, $mail_args );
+    }
+
+    /**
+     * Build a plain text version of an HTML email body.
+     *
+     * @param string $html Email body.
+     * @return string
+     */
+    public static function plainText( string $html ): string {
+        $t = (string) preg_replace( '#<(style|script|head)\b[^>]*>.*?</\1\s*>#is', '', $html );
+        // Raw line breaks mean nothing in HTML (nl2br output carries one after
+        // every <br />), so only tags make lines below.
+        $t = (string) preg_replace( '/\s+/', ' ', $t );
+        $t = (string) preg_replace_callback(
+            '#<a\s[^>]*?href\s*=\s*(["\'])(.*?)\1[^>]*>(.*?)</a\s*>#is',
+            static function ( $m ) {
+                $label = trim( html_entity_decode( wp_strip_all_tags( $m[3] ), ENT_QUOTES, 'UTF-8' ) );
+                $url   = trim( html_entity_decode( $m[2], ENT_QUOTES, 'UTF-8' ) );
+                if ( ! preg_match( '#^(https?://|mailto:)#i', $url ) ) {
+                    return $label;
+                }
+                $shown = (string) preg_replace( '#^mailto:#i', '', $url );
+                if ( '' === $label ) {
+                    return $shown;
+                }
+                return ( $label === $shown || $label === $url ) ? $label : $label . ' (' . $shown . ')';
+            },
+            $t
+        );
+        $t = (string) preg_replace( '#<br\s*/?>|</(p|div|tr|li|h[1-6]|table)\s*>#i', "\n", $t );
+        $t = (string) preg_replace( '#</t[dh]\s*>#i', ' ', $t );
+        $t = html_entity_decode( wp_strip_all_tags( $t ), ENT_QUOTES, 'UTF-8' );
+        $t = str_replace( array( "\r", "\xC2\xA0" ), array( '', ' ' ), $t );
+        $t = (string) preg_replace( '/[ \t]+/', ' ', $t );
+        $t = implode( "\n", array_map( 'trim', explode( "\n", $t ) ) );
+        return trim( (string) preg_replace( "/\n{3,}/", "\n\n", $t ) );
     }
 
     /**
