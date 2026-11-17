@@ -117,4 +117,25 @@ final class SignatureTest extends TestCase {
 		$this->assertSame( 'inline', $embedded[0]['disposition'] );
 		$this->assertStringStartsWith( 'sf-inline-1-', $embedded[0]['cid'] );
 	}
+
+	public function test_mailer_sets_alt_body_for_html_only() {
+		$alt = array();
+		$spy = static function ( $phpmailer ) use ( &$alt ) {
+			$alt[] = $phpmailer->AltBody;
+		};
+		add_action( 'phpmailer_init', $spy, 99 );
+		$short_circuit = $GLOBALS['wp_filter']['pre_wp_mail'] ?? null;
+		unset( $GLOBALS['wp_filter']['pre_wp_mail'] );
+		$from = static fn() => 'site@example.com';
+		add_filter( 'wp_mail_from', $from );
+		Mailer::send( 'owner@example.com', 'Hi', '<p>Hello</p>', array( 'Content-Type: text/html; charset=UTF-8' ) );
+		Mailer::send( 'owner@example.com', 'Hi', 'Hello' );
+		remove_action( 'phpmailer_init', $spy, 99 );
+		remove_filter( 'wp_mail_from', $from );
+		if ( null !== $short_circuit ) {
+			$GLOBALS['wp_filter']['pre_wp_mail'] = $short_circuit;
+		}
+
+		$this->assertSame( array( 'Hello', '' ), $alt );
+	}
 }
