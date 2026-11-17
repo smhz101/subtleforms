@@ -227,7 +227,10 @@ final class EmailAction implements ActionInterface {
                         array(
                                 'to'               => $to,
                                 'subject'          => $subject,
-                                'body_preview'     => substr( $body, 0, 300 ),
+                                'from'             => self::fromValue( $headers, (string) network_home_url() ),
+                                'reply_to'         => self::headerValue( $headers, 'Reply-To' ),
+                                'format'           => $isHtml ? 'html' : 'text',
+                                'body_preview'     => self::previewText( $body, $isHtml ),
                                 'recipients_count' => count( $valid_recipients ),
                                 'dispatch_method'  => 'async_cron',
                                 'dispatched'       => $dispatched,
@@ -358,6 +361,66 @@ final class EmailAction implements ActionInterface {
 		$name = trim( (string) preg_replace( '/[\r\n]+/', '', (string) ( $settings['sender_name'] ?? '' ) ) );
 		$headers[] = '' !== $name ? 'From: ' . $name . ' <' . $email . '>' : 'From: ' . $email;
 		return $headers;
+	}
+
+	/**
+	 * Value of the first header with this name, or an empty string.
+	 *
+	 * @param array  $headers Header lines.
+	 * @param string $name    Header name.
+	 * @return string
+	 */
+	public static function headerValue( array $headers, string $name ): string {
+		foreach ( $headers as $header ) {
+			if ( is_string( $header ) && preg_match( '/^' . preg_quote( $name, '/' ) . '\s*:\s*(.*)$/i', $header, $m ) ) {
+				return trim( $m[1] );
+			}
+		}
+		return '';
+	}
+
+	/**
+	 * The From value for the log: the From header, else the WordPress default.
+	 * A mail plugin may still override it when the message is sent.
+	 *
+	 * @param array  $headers Header lines.
+	 * @param string $siteUrl Network home URL.
+	 * @return string
+	 */
+	public static function fromValue( array $headers, string $siteUrl ): string {
+		$from = self::headerValue( $headers, 'From' );
+		if ( '' !== $from ) {
+			return $from;
+		}
+		$host = (string) wp_parse_url( $siteUrl, PHP_URL_HOST );
+		if ( str_starts_with( strtolower( $host ), 'www.' ) ) {
+			$host = substr( $host, 4 );
+		}
+		return 'WordPress <wordpress@' . $host . '>';
+	}
+
+	/**
+	 * Readable plain text preview of an email body, at most 300 characters.
+	 *
+	 * @param string $body   Email body.
+	 * @param bool   $isHtml Whether the body is HTML.
+	 * @return string
+	 */
+	public static function previewText( string $body, bool $isHtml ): string {
+		$text = $body;
+		if ( $isHtml ) {
+			$text = preg_replace( '#<br\s*/?>|</(p|tr|div|li|h[1-6])\s*>#i', "\n", $text );
+			$text = preg_replace( '#</t[dh]\s*>#i', ' ', $text );
+			$text = wp_strip_all_tags( $text );
+			$text = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		}
+		$text = preg_replace( '/[ \t]+/', ' ', $text );
+		$text = preg_replace( '/ ?\R ?/', "\n", $text );
+		$text = trim( preg_replace( '/\n{3,}/', "\n\n", $text ) );
+		if ( mb_strlen( $text, 'UTF-8' ) > 300 ) {
+			return mb_substr( $text, 0, 300, 'UTF-8' ) . '…';
+		}
+		return $text;
 	}
 
 	private function audience( $rawTo ): string {
