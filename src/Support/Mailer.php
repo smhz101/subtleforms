@@ -110,6 +110,9 @@ class Mailer {
      */
     public static function plainText( string $html ): string {
         $t = (string) preg_replace( '#<(style|script|head)\b[^>]*>.*?</\1\s*>#is', '', $html );
+        // Raw line breaks mean nothing in HTML (nl2br output carries one after
+        // every <br />), so only tags make lines below.
+        $t = (string) preg_replace( '/\s+/', ' ', $t );
         $t = (string) preg_replace_callback(
             '#<a\s[^>]*?href\s*=\s*(["\'])(.*?)\1[^>]*>(.*?)</a\s*>#is',
             static function ( $m ) {

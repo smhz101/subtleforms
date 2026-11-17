@@ -9,7 +9,11 @@ final class MailerPlainTextTest extends TestCase {
 
 	public function test_line_breaks_and_blocks() {
 		$this->assertSame( "Hi\nthere\nNext", Mailer::plainText( '<p>Hi<br>there</p><p>Next</p>' ) );
-		$this->assertSame( "A\n\nB", Mailer::plainText( "<div>A</div>\n\n\n\n<div>B</div>" ) );
+		$this->assertSame( "A\nB", Mailer::plainText( "<div>A</div>\n\n\n\n<div>B</div>" ) );
+	}
+
+	public function test_nl2br_output_keeps_single_line_breaks() {
+		$this->assertSame( "Hello,\n\nYou received a message", Mailer::plainText( nl2br( "Hello,\n\nYou received a message" ) ) );
 	}
 
 	public function test_table_rows() {
