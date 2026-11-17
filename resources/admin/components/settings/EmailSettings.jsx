@@ -9,6 +9,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useMutation } from '@tanstack/react-query';
 import FieldError from './FieldError';
+import { bareHost, senderDomainMatches } from './senderDomain';
 
 /**
  * Email / Notification Settings Tab
@@ -25,8 +26,7 @@ export default function EmailSettings( {
 	updateSetting,
 	fieldErrors = {},
 } ) {
-	const siteDomain =
-		window.subtleformsData?.siteDomain || '';
+	const siteDomain = bareHost( window.subtleformsData?.siteDomain || '' );
 	const defaultSender = siteDomain
 		? `wordpress@${ siteDomain }`
 		: 'wordpress@example.com';
@@ -38,8 +38,7 @@ export default function EmailSettings( {
 	const senderDomain = senderEmail
 		? senderEmail.split( '@' )[ 1 ] || ''
 		: '';
-	const domainMismatch =
-		!! senderDomain && !! siteDomain && senderDomain !== siteDomain;
+	const domainMismatch = ! senderDomainMatches( senderDomain, siteDomain );
 
 	const [ testResult, setTestResult ] = useState( null ); // { ok, message }
 	// Sending a test email is an action, not a read: a mutation, never cached.
