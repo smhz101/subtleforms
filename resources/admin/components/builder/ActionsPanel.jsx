@@ -82,7 +82,7 @@ export function SenderNote() {
         __('Sent from: %s.', 'subtleforms'),
         from
       )}{' '}
-      <a href='admin.php?page=subtleforms-settings#tab=email'>
+      <a href='admin.php?page=subtleforms-settings#tab=email' target='_blank' rel='noopener noreferrer'>
         {__('Change it in Settings, Email.', 'subtleforms')}
       </a>
     </p>
