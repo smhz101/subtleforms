@@ -62,6 +62,11 @@ describe( 'inherit-theme scope', () => {
 		expect( out ).toBe( '.subtleforms-sr-only { position: absolute; height: 1px; margin: -1px; }' );
 	} );
 
+	test( 'a keep rule for theme forms stays unscoped with its padding', () => {
+		const css = ':where(.subtleforms.subtleforms--inherit-theme) :where(input, textarea) { /*! inherit: keep */ padding: 0.5em 0.75em; min-height: 2.75em; }';
+		expect( squash( run( css ) ) ).toBe( ':where(.subtleforms.subtleforms--inherit-theme) :where(input, textarea) { padding: 0.5em 0.75em; min-height: 2.75em; }' );
+	} );
+
 	test( 'rules between keep-start and keep-end stay whole, including inside @media', () => {
 		const css = '/*! inherit: keep-start (signature pad) */ .a { border: 1px solid; } @media (max-width: 1px) { .b { color: red; } } /*! inherit: keep-end */ .c { color: blue; }';
 		expect( squash( run( css ) ) ).toBe(
