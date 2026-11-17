@@ -1,0 +1,1 @@
+GH119-06,P3,Free 2.9.2,,Claude,new in 2.9.1,fixed,Free 2.9.2,GitHub issue #119 (2.9.1),HTML notification emails were sent without a plain text part,"Mailer::send() now sets an AltBody for HTML mail (filter subtleforms/mail/plain_text); mail-tester MIME_HTML_ONLY"

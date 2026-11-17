@@ -18,6 +18,7 @@ import AdminShell from '../components/AdminShell';
 import { apiClient } from '../data';
 import Icon from '../ui/Icon';
 import { isSafeHref } from '../components/integrations/ConnectionSteps';
+import EmailActionDetails from '../components/EmailActionDetails';
 import ExtensionSlot from '../components/ExtensionSlot';
 import { getSlotItems } from '../../shared/extend';
 import './SubmissionDetailPage.scss';
@@ -143,6 +144,9 @@ const PipelineStepCard = ( { step } ) => {
                   </a>
                 </p>
               ) }
+              { step.actionType === 'email' ? (
+                <EmailActionDetails data={ Object.fromEntries( Object.entries( mainEntry.data ).filter( ( [ k ] ) => ! SHOWN_AS_LINK.includes( k ) ) ) } />
+              ) : (
               <dl className='sf-pipe-data'>
                 { Object.entries( mainEntry.data ).filter( ( [ k ] ) => ! SHOWN_AS_LINK.includes( k ) ).map( ( [ k, v ] ) => (
                   <div key={ k } className='sf-pipe-data__row'>
@@ -157,6 +161,7 @@ const PipelineStepCard = ( { step } ) => {
                   </div>
                 ) ) }
               </dl>
+              ) }
             </div>
           ) }
 
