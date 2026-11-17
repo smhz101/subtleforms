@@ -97,7 +97,7 @@ final class MergeTags {
 			case 'site_name':
 				return $escape( function_exists( 'get_bloginfo' ) ? wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES ) : '' );
 			case 'admin_email':
-				return $escape( function_exists( 'get_option' ) ? (string) get_option( 'admin_email' ) : '' );
+				return $escape( self::adminEmail() );
 			case 'date':
 				return $escape( $context['date'] ?? self::now() );
 		}
@@ -265,6 +265,18 @@ final class MergeTags {
 				. '<td valign="top" style="border-bottom:1px solid #e5e7eb;color:#111827;">' . $row[1] . '</td></tr>';
 		}
 		return $out . '</table>';
+	}
+
+	/**
+	 * The admin email: the plugin setting, else the WordPress one.
+	 *
+	 * @return string
+	 */
+	private static function adminEmail(): string {
+		if ( ! function_exists( 'get_option' ) ) {
+			return '';
+		}
+		return (string) ( new Settings() )->getAdminEmail();
 	}
 
 	/**
