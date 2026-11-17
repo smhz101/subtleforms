@@ -1,6 +1,6 @@
 import { createRoot } from '@wordpress/element';
 import { act } from 'react';
-import EmailActionDetails from './EmailActionDetails';
+import EmailActionDetails, { previewForDisplay } from './EmailActionDetails';
 
 global.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -26,5 +26,12 @@ describe( 'EmailActionDetails', () => {
     const el = render( { to: 'a@x.test', body_preview: 'Hello, <br /> <br /> You received <table cellpadding="4' } );
     expect( el.textContent ).not.toContain( '<' );
     expect( el.textContent ).toContain( 'Hello,' );
+  } );
+  it( 'keeps a less-than sign in a plain text preview', () => {
+    expect( previewForDisplay( 'I <3 old tools' ) ).toBe( 'I <3 old tools' );
+  } );
+
+  it( 'drops a tag cut off at the end of an old preview', () => {
+    expect( previewForDisplay( 'Hello,<br />\n<br />\nName <table cellpadding="6" bor' ) ).toBe( 'Hello,\n\nName' );
   } );
 } );

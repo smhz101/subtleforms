@@ -407,13 +407,7 @@ final class EmailAction implements ActionInterface {
 	 * @return string
 	 */
 	public static function previewText( string $body, bool $isHtml ): string {
-		$text = $body;
-		if ( $isHtml ) {
-			$text = preg_replace( '#<br\s*/?>|</(p|tr|div|li|h[1-6])\s*>#i', "\n", $text );
-			$text = preg_replace( '#</t[dh]\s*>#i', ' ', $text );
-			$text = wp_strip_all_tags( $text );
-			$text = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
-		}
+		$text = $isHtml ? \SubtleForms\Support\Mailer::plainText( $body ) : $body;
 		$text = preg_replace( '/[ \t]+/', ' ', $text );
 		$text = preg_replace( '/ ?\R ?/', "\n", $text );
 		$text = trim( preg_replace( '/\n{3,}/', "\n\n", $text ) );

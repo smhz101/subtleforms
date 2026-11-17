@@ -2,10 +2,18 @@ import { __ } from '@wordpress/i18n';
 
 // Older logs stored the raw HTML body cut at 300 bytes; make them readable.
 export function previewForDisplay( text ) {
-  return String( text )
-    .replace( /<br\s*\/?>/gi, '\n' )
-    .replace( /<[^>]*>?/g, '' )
+  const value = String( text );
+  // Only old HTML previews are stripped; a plain text answer may hold a "<".
+  if ( ! /<\/?[a-z][^>]*>/i.test( value ) ) {
+    return value.trim();
+  }
+  return value
+    .replace( /\s+/g, ' ' )
+    .replace( /<br\s*\/?>|<\/(p|div|tr|li|h[1-6])\s*>/gi, '\n' )
+    .replace( /<[^>]*>/g, '' )
+    .replace( /<[^>]*$/, '' )
     .replace( /[ \t]+/g, ' ' )
+    .replace( / ?\n ?/g, '\n' )
     .replace( /\n{3,}/g, '\n\n' )
     .trim();
 }
