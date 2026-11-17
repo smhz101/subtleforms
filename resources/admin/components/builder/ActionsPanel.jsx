@@ -38,6 +38,7 @@ import MergeTagsHelpLink from '../merge-tags/MergeTagsHelp';
 import { insertAt } from '../merge-tags/mergeTags';
 import ConnectionTest from '../settings/extensions/ConnectionTest';
 import { normalizeWebhookUrl } from '../../utils/webhookUrl';
+import { bareHost } from '../settings/senderDomain';
 import Icon from '../../ui/Icon';
 import HeadersEditor from './webhook/HeadersEditor';
 import PayloadPicker, { currentSelection, payloadMode } from './webhook/PayloadPicker';
@@ -58,6 +59,34 @@ function normalizeActions(raw) {
     // Templates store email settings under `config` (2.3.1): show them.
     settings: a.settings ?? (a.config && typeof a.config === 'object' ? a.config : {}),
   }));
+}
+
+/**
+ * Read-only line saying who the notification mail comes from.
+ */
+export function SenderNote() {
+  const data = window.subtleformsData || {};
+  const email = (data.senderEmail || '').trim();
+  const name = (data.senderName || '').trim();
+  const from = email
+    ? (name ? `${ name } <${ email }>` : email)
+    : sprintf(
+      /* translators: %s: default sender email address */
+      __('the WordPress default (%s)', 'subtleforms'),
+      `wordpress@${ bareHost(data.siteDomain) || 'example.com' }`
+    );
+  return (
+    <p className='sf-actions-panel__sender' style={{ margin: '0 0 12px', fontSize: 12, color: 'var(--sf-text-muted, #757575)' }}>
+      {sprintf(
+        /* translators: %s: sender name and address */
+        __('Sent from: %s.', 'subtleforms'),
+        from
+      )}{' '}
+      <a href='admin.php?page=subtleforms-settings#tab=email'>
+        {__('Change it in Settings, Email.', 'subtleforms')}
+      </a>
+    </p>
+  );
 }
 
 /**
@@ -280,6 +309,8 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fie
       {/* ── Email body ── */}
       {action.type === 'email' && (
         <div className='sf-actions-panel__item-body'>
+
+          <SenderNote />
 
           <MergeTagField
             label={__('To', 'subtleforms')}
