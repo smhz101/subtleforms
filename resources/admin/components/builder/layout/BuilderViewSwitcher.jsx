@@ -48,6 +48,12 @@ export default function BuilderViewSwitcher({ value, onChange }) {
             type='button'
             role='tab'
             aria-selected={selected}
+            // The text is hidden on narrow screens, so the name and tooltip
+            // come from the label too. Only the selected view's panel is in
+            // the page, so only its tab points at it (#138).
+            aria-label={view.label}
+            title={view.label}
+            aria-controls={selected ? `sf-builder-panel-${view.key}` : undefined}
             tabIndex={selected ? 0 : -1}
             className={clsx('sf-view-switcher__item', view.className, {
               'is-active': selected,
