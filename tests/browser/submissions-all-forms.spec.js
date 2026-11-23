@@ -51,9 +51,10 @@ test('the oldest form can be found, selected and its entry listed', async ({ pag
   const option = page.getByRole('option', { name: new RegExp(`${oldTitle} \\(#${oldest.id}\\)`) });
   await expect(option).toBeVisible({ timeout: 20000 });
   await expect(page.getByRole('listbox').getByRole('option')).toHaveCount(1);
-  await page.screenshot({
-    path: '/home/claude/dist/2.9.2/free/129/form-combobox-search.png',
-  });
+  if (process.env.SF_SHOT_DIR) {
+    await page.screenshot({ path: `${process.env.SF_SHOT_DIR}/form-combobox-search.png` });
+  }
+
   await option.click();
 
   await expect(page.locator('.sf-data-table__table tbody tr')).toHaveCount(1, { timeout: 20000 });
