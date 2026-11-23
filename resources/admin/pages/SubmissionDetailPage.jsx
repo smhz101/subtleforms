@@ -20,6 +20,7 @@ import Icon from '../ui/Icon';
 import { isSafeHref } from '../components/integrations/ConnectionSteps';
 import ExtensionSlot from '../components/ExtensionSlot';
 import { getSlotItems } from '../../shared/extend';
+import { formatSiteDateTime, siteDateTitle } from '../utils/formatDate';
 import './SubmissionDetailPage.scss';
 
 // ─── Pipeline timeline helpers ──────────────────────────────────────────────
@@ -118,7 +119,7 @@ const PipelineStepCard = ( { step } ) => {
           { STATUS_LABEL[ status ] || status }
         </span>
         { mainEntry && (
-          <span className='sf-pipe-step__time'>{ mainEntry.createdAt }</span>
+          <span className='sf-pipe-step__time' title={ siteDateTitle( mainEntry.createdAt ) }>{ formatSiteDateTime( mainEntry.createdAt ) }</span>
         ) }
         { ( hasData || hasAsync ) && (
           <span className='sf-pipe-step__toggle' aria-hidden='true'>
@@ -195,7 +196,7 @@ const PipelineStepCard = ( { step } ) => {
                   </div>
                 ) }
               </dl>
-              <span className='sf-pipe-step__async-time'>{ ae.createdAt }</span>
+              <span className='sf-pipe-step__async-time' title={ siteDateTitle( ae.createdAt ) }>{ formatSiteDateTime( ae.createdAt ) }</span>
             </div>
           ) ) }
         </div>
@@ -664,17 +665,6 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
     return new Date( raw && ! /[zZ]|[+-]\d{2}:?\d{2}$/.test( raw ) ? `${ raw.replace( ' ', 'T' ) }Z` : raw );
   };
 
-  const formatAbsDate = ( iso ) => {
-    try {
-      return toDate( iso ).toLocaleDateString( undefined, {
-        year: 'numeric', month: 'short', day: 'numeric',
-        hour: '2-digit', minute: '2-digit',
-      } );
-    } catch {
-      return iso;
-    }
-  };
-
   const formatRelDate = ( iso ) => {
     try {
       const diff = Math.max( 0, Math.floor( ( Date.now() - toDate( iso ).getTime() ) / 1000 ) );
@@ -688,7 +678,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
     }
   };
 
-  const absDate = formatAbsDate( submission.created_at );
+  const absDate = formatSiteDateTime( submission.created_at );
   const relDate = formatRelDate( submission.created_at );
 
   const isUnread = parseInt( submission.is_read, 10 ) === 0;
@@ -1016,7 +1006,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
                       <tbody>
                         { displayLogs.map( ( log, idx ) => (
                           <tr key={ idx }>
-                            <td className='sf-log-table__time'>{ log.created_at }</td>
+                            <td className='sf-log-table__time' title={ siteDateTitle( log.created_at ) }>{ formatSiteDateTime( log.created_at ) }</td>
                             <td>
                               <span className={ `sf-log-level sf-log-level--${ log.level }` }>{ log.level }</span>
                             </td>
@@ -1056,7 +1046,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
                     <li key={ note.id } className='sf-notes__item'>
                       <div className='sf-notes__meta'>
                         <strong>{ note.author_name || __( 'Unknown user', 'subtleforms' ) }</strong>
-                        <span>{ formatAbsDate( note.created_at ) }</span>
+                        <span title={ siteDateTitle( note.created_at ) }>{ formatSiteDateTime( note.created_at ) }</span>
                         <Button
                           size='small'
                           isDestructive
@@ -1104,7 +1094,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
                 <dt>{ __( 'Entry', 'subtleforms' ) }</dt>
                 <dd><code>#{ submission.id }</code></dd>
                 <dt>{ __( 'Received', 'subtleforms' ) }</dt>
-                <dd title={ submission.created_at }>{ absDate }</dd>
+                <dd title={ siteDateTitle( submission.created_at ) }>{ absDate }</dd>
                 <dt>{ __( 'Submitted by', 'subtleforms' ) }</dt>
                 <dd>
                   { meta.user_id
