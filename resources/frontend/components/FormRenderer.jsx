@@ -19,6 +19,7 @@ import { formFieldDefaults, formHasRequiredFields, requiredIndicatorMark } from 
 import { debug } from '../../shared/debug';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { FormContext } from './fields/contexts';
+import { claimInstance, releaseInstance } from '../utils/formInstance';
 import { revealField } from '../utils/revealField';
 import { getFormWrappers } from '../../shared/extend';
 import { lazyField, loadFieldsFor, fieldsReadyFor } from './fields/lazyFields';
@@ -114,6 +115,26 @@ export default function FormRenderer({
     []
   );
   const honeypotName = `sf_hp_${honeypotSuffix}`;
+  // Which copy of this form is on the page: 1 for the first, 2 for the next.
+  // Claimed once per mount (a ref, so a re-render never claims again) and given
+  // back on unmount. Field ids carry it from copy 2 on (formInstance.js).
+  const instanceRef = useRef(null);
+  if (instanceRef.current === null) {
+    instanceRef.current = { formId, n: claimInstance(formId) };
+  }
+  useEffect(() => {
+    if (instanceRef.current === null) {
+      instanceRef.current = { formId, n: claimInstance(formId) };
+    }
+    return () => {
+      if (instanceRef.current) {
+        releaseInstance(instanceRef.current.formId, instanceRef.current.n);
+        instanceRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const instance = instanceRef.current ? instanceRef.current.n : 1;
   const honeypotId = `subtleforms-hp-${formId}-${honeypotSuffix}`;
 
   // Load schema (skip if preloaded)
@@ -593,8 +614,8 @@ export default function FormRenderer({
   // survives a step change (their fields are drawn again then).
   const panelState = useRef(new Map()).current;
   const formContext = useMemo(
-    () => ({ formId, preview, fieldDefaults, panelState }),
-    [formId, preview, fieldDefaults, panelState]
+    () => ({ formId, preview, fieldDefaults, panelState, instance }),
+    [formId, preview, fieldDefaults, panelState, instance]
   );
 
   // On a multi-step form, show the first step that has a field in error.
@@ -1087,6 +1108,7 @@ export default function FormRenderer({
         schema={schema}
         formId={formId}
         preview={preview}
+        instance={instance}
         onSubmit={customOnSubmit}
         spamToken={spamToken}
       />
