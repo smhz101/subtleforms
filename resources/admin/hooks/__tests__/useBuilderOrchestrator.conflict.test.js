@@ -161,4 +161,56 @@ describe('builder save conflict', () => {
 
     expect(apiPost.mock.calls[0][2]).toEqual({});
   });
+
+  describe('a refused rename', () => {
+    it('opens the conflict state instead of being ignored', async () => {
+      apiPut.mockResolvedValue({ ok: false, status: 409, body: conflictBody });
+      const { hook, dispatch } = setup();
+
+      let result;
+      await act(async () => {
+        result = await hook.result.current.putTitle('Renamed');
+      });
+
+      expect(result.conflict).toBe(true);
+      const call = dispatch.mock.calls.find(([a]) => a.type === BUILDER_ACTIONS.AUTOSAVE_ERROR);
+      expect(call[0].payload.error.isConflict).toBe(true);
+    });
+
+    it('Replace sends the rename and then the schema save, both without the version check', async () => {
+      apiPut.mockResolvedValue({ ok: false, status: 409, body: conflictBody });
+      const { hook } = setup({ conflictData: { auto: true } });
+      await act(async () => {
+        await hook.result.current.putTitle('Renamed');
+      });
+
+      apiPut.mockClear();
+      apiPut.mockResolvedValue({ ok: true, status: 200, body: {} });
+      apiPost.mockResolvedValue({ ok: true, status: 200, body: {} });
+      await act(async () => {
+        await hook.result.current.replaceWithMine();
+      });
+
+      expect(apiPut).toHaveBeenCalledWith('/forms/5', { title: 'Renamed' }, { ifMatch: false });
+      expect(apiPost.mock.calls[0][2]).toEqual({ ifMatch: false });
+      expect(apiPut.mock.invocationCallOrder[0]).toBeLessThan(apiPost.mock.invocationCallOrder[0]);
+    });
+
+    it('Reload latest version discards the rename as well', async () => {
+      apiPut.mockResolvedValue({ ok: false, status: 409, body: conflictBody });
+      const { hook } = setup({ conflictData: { auto: true } });
+      await act(async () => {
+        await hook.result.current.putTitle('Renamed');
+      });
+      act(() => hook.result.current.reloadLatest());
+
+      apiPut.mockClear();
+      apiPost.mockResolvedValue({ ok: true, status: 200, body: {} });
+      await act(async () => {
+        await hook.result.current.replaceWithMine();
+      });
+
+      expect(apiPut).not.toHaveBeenCalled();
+    });
+  });
 });

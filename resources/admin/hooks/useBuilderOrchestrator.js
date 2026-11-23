@@ -830,24 +830,65 @@ export default function useBuilderOrchestrator({
 
 	const closeConflict = useCallback(() => setShowConflict(false), []);
 
+	// Writes the server refused in the current conflict, in the order they were
+	// tried. "Replace with my changes" sends them again, "Reload latest
+	// version" drops them with the rest of this tab's changes.
+	const pendingWritesRef = useRef([]);
+
+	// Rename the form. A refused rename opens the conflict modal like any
+	// other refused save, and is kept so Replace can send it again.
+	const putTitle = useCallback(
+		async (title) => {
+			const id = currentFormId ?? formId;
+			if (!id) {
+				return { ok: false, status: 0, conflict: false };
+			}
+			const result = await apiPut(`/forms/${id}`, { title });
+			if (isConflictError({ status: result.status })) {
+				pendingWritesRef.current = [
+					...pendingWritesRef.current.filter((w) => w.type !== 'title'),
+					{ type: 'title', title },
+				];
+				dispatch({
+					type: BUILDER_ACTIONS.AUTOSAVE_ERROR,
+					payload: conflictPayload(result.body, true),
+				});
+				return { ...result, conflict: true };
+			}
+			return { ...result, conflict: false };
+		},
+		[currentFormId, formId, dispatch]
+	);
+
 	// Throw this tab's changes away and open the version on the server.
 	const reloadLatest = useCallback(() => {
 		setShowConflict(false);
+		pendingWritesRef.current = [];
 		clearFormETag(currentFormId ?? formId);
 		loadForm?.(true);
 	}, [currentFormId, formId, loadForm]);
 
 	// Send the same save again without the version check. The response brings
 	// the form's new version, which the next save then sends.
-	const replaceWithMine = useCallback(() => {
+	const replaceWithMine = useCallback(async () => {
 		const auto = !!conflictData?.auto;
 		setShowConflict(false);
+
+		const pending = pendingWritesRef.current;
+		pendingWritesRef.current = [];
+		const id = currentFormId ?? formId;
+		for (const write of pending) {
+			if (write.type === 'title') {
+				await apiPut(`/forms/${id}`, { title: write.title }, { ifMatch: false });
+			}
+		}
+
 		return performSave({
 			auto,
 			targetStatus: auto ? null : lastManualSaveRef.current.targetStatus,
 			force: true,
 		});
-	}, [conflictData, performSave]);
+	}, [conflictData, performSave, currentFormId, formId]);
 
 	// ── Public API ───────────────────────────────────────────────────────
 	return {
@@ -855,6 +896,7 @@ export default function useBuilderOrchestrator({
 		closeConflict,
 		reloadLatest,
 		replaceWithMine,
+		putTitle,
 		performSave,
 		handleSave,
 		handleUnpublish,

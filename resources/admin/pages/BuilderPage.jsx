@@ -181,6 +181,7 @@ function FormBuilderInner({
     closeConflict,
     reloadLatest,
     replaceWithMine,
+    putTitle,
     lastManualSaveRef,
     autoSaveTimeoutRef,
   } = useBuilderOrchestrator({
@@ -530,11 +531,14 @@ function FormBuilderInner({
     // Update both the schema (via autosave) and the form title (via direct API call)
     const updateTitleAsync = async () => {
       try {
-        // Update form title at the top level
+        // Update form title at the top level. A refused rename (the form
+        // changed elsewhere) opens the conflict modal, which keeps it for
+        // "Replace with my changes"; autosave waits for the answer.
         if (currentFormId) {
-          await apiPut(`/forms/${currentFormId}`, {
-            title: trimmed,
-          });
+          const renamed = await putTitle(trimmed);
+          if (renamed.conflict) {
+            return;
+          }
         }
 
         // Force autosave to persist the schema title change
