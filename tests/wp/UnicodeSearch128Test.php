@@ -134,4 +134,26 @@ final class UnicodeSearch128Test extends TestCase {
 		$this->assertSame( array(), $this->searchIds( 'محمد%' ) );
 		$this->assertSame( array(), $this->searchIds( '田_中' ) );
 	}
+
+	public function test_three_byte_charset_keeps_emoji_entries_escaped_but_searchable() {
+		global $wpdb;
+		$force = static function () {
+			return 'utf8';
+		};
+		add_filter( 'pre_get_col_charset', $force );
+		try {
+			$id = ( new SubmissionsRepository() )->create(
+				array(
+					'form_id' => $this->form,
+					'payload' => array( 'name' => "محمد \u{1F600}" ),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_get_col_charset', $force );
+		}
+		$raw = (string) $wpdb->get_var( $wpdb->prepare( "SELECT payload FROM {$wpdb->prefix}subtleforms_submissions WHERE id = %d", $id ) );
+		$this->assertStringContainsString( '\\ud83d\\ude00', $raw, 'four-byte text is escaped on a three-byte table' );
+		$this->assertContains( $id, $this->searchIds( 'محمد' ) );
+		$this->assertContains( $id, $this->searchIds( "محمد \u{1F600}" ) );
+	}
 }
