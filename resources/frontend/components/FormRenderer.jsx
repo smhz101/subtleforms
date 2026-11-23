@@ -32,7 +32,8 @@ import {
 } from '../../shared/appearance';
 
 import { restFetch, restUrl, restNonce } from '../utils/restFetch';
-import { createSpamTokenSource, msUntilMinimum } from '../utils/spamToken';
+import { createSpamTokenSource } from '../utils/spamToken';
+import useTimeTrapHold from '../utils/useTimeTrapHold';
 import { fillConfirmation, fieldTypesOf } from '../../shared/confirmationTags';
 import { messageParagraphs } from '../../shared/safeLinks';
 import ConfirmationText from './ConfirmationText';
@@ -88,24 +89,8 @@ export default function FormRenderer({
   const [spamMinSeconds, setSpamMinSeconds] = useState(
     Number(preloadedSpamMinSeconds || inline?.spamMinSeconds) || 0
   );
-  // When this form first mounted, and the timer of a submit held back until
-  // the time trap's minimum has passed (issue 126).
-  const mountedAtRef = useRef(null);
-  if (mountedAtRef.current === null) {
-    mountedAtRef.current = performance.now();
-  }
-  const holdRef = useRef({ timer: null, release: null, gone: false });
-  useEffect(() => {
-    const hold = holdRef.current;
-    hold.gone = false;
-    return () => {
-      hold.gone = true;
-      if (hold.timer) clearTimeout(hold.timer);
-      hold.timer = null;
-      if (hold.release) hold.release();
-      hold.release = null;
-    };
-  }, []);
+  // Holds a fast submit until the time trap's minimum has passed (issue 126).
+  const waitForMinimum = useTimeTrapHold(spamMinSeconds);
   const [error, setError] = useState(null);
   const [values, setValues] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -699,24 +684,8 @@ export default function FormRenderer({
       // and still answers "Thank you", so a fast visitor (autofill) would lose
       // the entry. Hold the send until the minimum has passed; the button
       // already shows its sending state (issue 126).
-      const waitMs = msUntilMinimum(
-        spamMinSeconds,
-        mountedAtRef.current,
-        performance.now()
-      );
-      if (waitMs > 0) {
-        const hold = holdRef.current;
-        await new Promise((resolve) => {
-          hold.release = resolve;
-          hold.timer = setTimeout(() => {
-            hold.timer = null;
-            hold.release = null;
-            resolve();
-          }, waitMs);
-        });
-        if (hold.gone) {
-          return;
-        }
+      if (!(await waitForMinimum())) {
+        return;
       }
 
       // Handle reCAPTCHA v3 if present
@@ -1022,7 +991,7 @@ export default function FormRenderer({
       schema,
       spamToken,
       spamTokens,
-      spamMinSeconds,
+      waitForMinimum,
     ]
   );
 
@@ -1138,6 +1107,7 @@ export default function FormRenderer({
         preview={preview}
         onSubmit={customOnSubmit}
         spamToken={spamToken}
+        spamMinSeconds={spamMinSeconds}
       />
     );
   }
