@@ -1,4 +1,4 @@
-import { moveDate, moveGrid, moveIndex, typeaheadIndex } from './pickerKeyboard';
+import { foldText, moveDate, moveGrid, moveIndex, typeaheadIndex } from './pickerKeyboard';
 
 test('typing jumps to the matching choice and arrows move a week', () => {
   expect(typeaheadIndex(['Apple', 'Banana', 'Cherry'], 'b', 0)).toBe(1);
@@ -29,4 +29,45 @@ test('column keys step, jump to the ends and stay inside the list', () => {
   expect(moveIndex(20, 'PageDown', 24)).toBe(23);
   expect(moveIndex(3, 'x', 24)).toBe(-1);
   expect(moveIndex(0, 'ArrowDown', 0)).toBe(-1);
+});
+
+describe('foldText', () => {
+  test('lower-cases and removes accents', () => {
+    expect(foldText('École')).toBe('ecole');
+    expect(foldText('Café Ñandú')).toBe('cafe nandu');
+    expect(foldText(null)).toBe('');
+    expect(foldText(undefined)).toBe('');
+    expect(foldText(42)).toBe('42');
+  });
+});
+
+describe('typeaheadIndex with longer buffers', () => {
+  const labels = Array.from({ length: 60 }, (_, i) => `Option ${i + 1}`);
+
+  test('a space and a buffer longer than eight characters still match', () => {
+    expect(typeaheadIndex(labels, 'Option 37', 0)).toBe(36);
+    expect(typeaheadIndex(labels, 'option 3', -1)).toBe(2);
+    expect(typeaheadIndex(['Branch Lahore', 'Branch Karachi'], 'branch k', 0)).toBe(1);
+  });
+
+  test('accents do not matter on either side', () => {
+    expect(typeaheadIndex(['Apple', 'École', 'Zebra'], 'e', 0)).toBe(1);
+    expect(typeaheadIndex(['Apple', 'Ecole', 'Zebra'], 'é', 0)).toBe(1);
+  });
+
+  test('the same letter again cycles through the options that start with it', () => {
+    const list = ['Apple', 'Avocado', 'Banana', 'Apricot'];
+    let at = typeaheadIndex(list, 'a', -1);
+    expect(at).toBe(0);
+    at = typeaheadIndex(list, 'a', at);
+    expect(at).toBe(1);
+    at = typeaheadIndex(list, 'a', at);
+    expect(at).toBe(3);
+    at = typeaheadIndex(list, 'a', at);
+    expect(at).toBe(0);
+  });
+
+  test('no match keeps the current index', () => {
+    expect(typeaheadIndex(labels, 'zzz', 5)).toBe(5);
+  });
 });
