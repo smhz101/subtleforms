@@ -574,3 +574,12 @@ describe('Address parts and the Fallback prop (Free 101)', () => {
     unmount();
   });
 });
+
+test( 'a Multiple choice stored the way the API save normalises `multiple: true` renders checkboxes (#140)', () => {
+  const options = [ { label: 'A', value: 'a' }, { label: 'B', value: 'b' } ];
+  const stored = { id: 'pick', key: 'pick', type: 'multiple_choice', label: 'Pick', allowMultiple: true, options };
+  const { container, unmount } = render( stored );
+  expect( container.querySelectorAll( 'input[type="checkbox"]' ) ).toHaveLength( 2 );
+  expect( container.querySelectorAll( 'input[type="radio"]' ) ).toHaveLength( 0 );
+  unmount();
+} );

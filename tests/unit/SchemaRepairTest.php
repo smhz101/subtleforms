@@ -123,4 +123,57 @@ final class SchemaRepairTest extends TestCase {
 		$fixed['metadata']        = array( 'name' => 'T' );
 		$this->assertTrue( ( new SchemaValidator() )->validate( $fixed ) );
 	}
+
+	private function choices( string $type, array $extra = array() ): array {
+		return array_merge(
+			array(
+				'id'      => 'pick',
+				'key'     => 'pick',
+				'type'    => $type,
+				'label'   => 'Pick',
+				'options' => array( array( 'label' => 'A', 'value' => 'a' ), array( 'label' => 'B', 'value' => 'b' ) ),
+			),
+			$extra
+		);
+	}
+
+	public function test_140_multiple_true_from_the_api_is_stored_as_the_checkboxes_shape(): void {
+		$schema = array(
+			'fields' => array(
+				$this->choices( 'multiple_choice', array( 'multiple' => true ) ),
+				$this->choices( 'radio', array( 'key' => 'r', 'config' => array( 'multiple' => true, 'label' => 'R' ) ) ),
+			),
+		);
+		$stored = \SubtleForms\Repositories\FormsRepository::prepareStoredSchema( $schema );
+		$mc     = $stored['fields'][0];
+		$this->assertSame( 'multiple_choice', $mc['type'] );
+		$this->assertTrue( $mc['allowMultiple'] );
+		$this->assertArrayNotHasKey( 'multiple', $mc );
+		$radio = $stored['fields'][1];
+		$this->assertSame( 'multiple_choice', $radio['type'] );
+		$this->assertTrue( $radio['allowMultiple'] );
+		$this->assertTrue( $radio['config']['allowMultiple'] );
+		$this->assertArrayNotHasKey( 'multiple', $radio['config'] );
+		$this->assertSame( 'R', $radio['config']['label'] );
+		$this->assertSame( $this->choices( 'multiple_choice' )['options'], $mc['options'] );
+	}
+
+	public function test_140_fields_that_do_not_ask_for_multiple_are_left_alone(): void {
+		$fields = array(
+			$this->choices( 'radio' ),
+			$this->choices( 'multiple_choice', array( 'multiple' => false ) ),
+			$this->choices( 'dropdown', array( 'multiple' => true ) ),
+		);
+		list( $out, $n ) = SchemaRepair::multipleToCheckboxes( $fields );
+		$this->assertSame( 0, $n );
+		$this->assertSame( $fields, $out );
+	}
+
+	public function test_140_a_nested_field_is_normalised(): void {
+		$fields = array( array( 'id' => 's', 'key' => 's', 'type' => 'step', 'children' => array( $this->choices( 'radio', array( 'multiple' => true ) ) ) ) );
+		list( $out, $n ) = SchemaRepair::multipleToCheckboxes( $fields );
+		$this->assertSame( 1, $n );
+		$this->assertSame( 'multiple_choice', $out[0]['children'][0]['type'] );
+		$this->assertTrue( $out[0]['children'][0]['allowMultiple'] );
+	}
 }
