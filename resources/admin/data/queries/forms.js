@@ -7,6 +7,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../apiClient';
 import { queryKeys } from '../queryKeys';
+import { fetchAllForms } from '../../../shared/allForms';
 
 /**
  * Fetch all forms with optional filters
@@ -20,6 +21,19 @@ export function useForms(filters = {}, options = {}) {
       return apiClient.get(path);
     },
     staleTime: 30 * 1000, // Consider fresh for 30 seconds
+    ...options,
+  });
+}
+
+/**
+ * Every form as `{ id, title }`, for pickers and filters. Walks all pages, so
+ * it is not limited to the newest 20.
+ */
+export function useAllForms(options = {}) {
+  return useQuery({
+    queryKey: [...queryKeys.forms.all, 'every'],
+    queryFn: () => fetchAllForms(),
+    staleTime: 30 * 1000,
     ...options,
   });
 }
