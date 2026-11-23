@@ -6,7 +6,7 @@
  * Purpose). A field can pick a token in the builder; with "Automatic" the
  * token is inferred from the field key, then the label.
  *
- * The token list mirrors Autocomplete::options() in src/Fields/CoreFields.php.
+ * The token list mirrors CoreFields::autocompleteTokens() in src/Fields/CoreFields.php.
  */
 
 import { __ } from '@wordpress/i18n';
