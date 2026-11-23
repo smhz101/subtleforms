@@ -45,12 +45,12 @@ final class EmailAction implements ActionInterface {
 				? array(
 					'action'  => 'email',
 					'reason'  => 'submitter_emails_off',
-					'message' => 'Submitter emails are turned off in Settings, Email.',
+					'message' => __( 'Submitter emails are turned off in Settings, Email.', 'subtleforms' ),
 				)
 				: array(
 					'action'  => 'email',
 					'reason'  => 'admin_emails_off',
-					'message' => 'Admin notifications are turned off in Settings, Email.',
+					'message' => __( 'Admin notifications are turned off in Settings, Email.', 'subtleforms' ),
 				);
 			$context->setMeta( 'action_skips', $skips );
 			return;
