@@ -126,7 +126,7 @@ export default function FormRenderer({
   useLayoutEffect(() => {
     if (preview) return undefined;
     const n = claimInstance(formId);
-    if (n !== 1) setInstance(n);
+    setInstance(n);
     return () => releaseInstance(formId, n);
   }, [formId, preview]);
   const honeypotId = `subtleforms-hp-${formId}-${honeypotSuffix}`;
