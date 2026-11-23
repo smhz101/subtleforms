@@ -562,7 +562,10 @@ function AddBar({ isReadOnly, onAddEmail, onAddWebhook, label, position = 'befor
 // ─── ActionsPanel ────────────────────────────────────────────────────────────
 
 export default function ActionsPanel({ schema, onChange, isReadOnly = false }) {
-  const actions = normalizeActions(schema?.actions);
+  // Memoised so an action saved without an id keeps the id made for it: a new
+  // id on every render remounts the card, which loses focus and the element
+  // a user or test is working with when the settings arrive.
+  const actions = useMemo(() => normalizeActions(schema?.actions), [schema?.actions]);
   const logicFields = collectLogicFields(schema?.fields || []);
   const payloadFields = useMemo(() => collectPayloadFields(schema?.fields || []), [schema?.fields]);
   const addonGroups = useMemo(() => applicableGroups(schema?.fields || []), [schema?.fields]);

@@ -61,3 +61,20 @@ test('a fixed address is not warned about when only submitter emails are off', a
   expect(notice(container)).toBeNull();
   unmount();
 });
+
+test('an action saved without an id is not remounted when the settings arrive', async () => {
+  const schema = schemaTo('{admin_email}');
+  delete schema.actions[0].id;
+  let resolve;
+  apiClient.get.mockReturnValue(new Promise((r) => { resolve = r; }));
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  await act(async () => { root.render(<ActionsPanel schema={schema} onChange={() => {}} />); });
+  const before = container.querySelector('.sf-actions-panel__item--email');
+  expect(before).toBeTruthy();
+  await act(async () => { resolve({ success: true, data: { user_confirmation_enabled: true } }); await Promise.resolve(); });
+  expect(before.isConnected).toBe(true);
+  act(() => root.unmount());
+  container.remove();
+});
