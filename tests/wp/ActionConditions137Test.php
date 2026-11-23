@@ -139,6 +139,23 @@ final class ActionConditions137Test extends TestCase {
 		$this->assertSame( $own, $first['settings']['logic'] ?? null );
 	}
 
+	public function test_moving_the_condition_keeps_settings_given_under_config(): void {
+		$formId = $this->publish( $this->fields() );
+		$action = array(
+			'id'      => 'sales_mail',
+			'type'    => 'email',
+			'enabled' => true,
+			'config'  => array( 'to' => 'sales@example.com', 'subject' => 'Sales lead', 'message' => 'Hello' ),
+			'logic'   => $this->logic(),
+		);
+		$stored = $this->saveSchemaThroughRest( $formId, array_merge( $this->schemaSaveInput( array( $action ) ), array( 'activate' => true ) ) );
+		$first  = $stored['actions'][0] ?? array();
+
+		$this->assertSame( 'sales@example.com', $first['settings']['to'] ?? null );
+		$this->assertSame( $this->logic(), $first['settings']['logic'] ?? null );
+		$this->assertArrayNotHasKey( 'logic', $first );
+	}
+
 	public function test_without_an_add_on_the_action_runs_and_the_log_says_nobody_checked(): void {
 		$action = $this->emailAction();
 		$action['settings']['logic'] = $this->logic();

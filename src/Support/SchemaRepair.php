@@ -363,7 +363,14 @@ final class SchemaRepair {
 			}
 			$top = $action['logic'];
 			unset( $action['logic'] );
-			$settings = isset( $action['settings'] ) && is_array( $action['settings'] ) ? $action['settings'] : array();
+			// The compiler prefers `settings` over `config`, so a new settings
+			// object starts from the config the action already carries.
+			$settings = array();
+			if ( isset( $action['settings'] ) && is_array( $action['settings'] ) ) {
+				$settings = $action['settings'];
+			} elseif ( isset( $action['config'] ) && is_array( $action['config'] ) ) {
+				$settings = $action['config'];
+			}
 			if ( empty( $settings['logic'] ) && ! empty( $top ) ) {
 				$settings['logic']  = $top;
 				$action['settings'] = $settings;
