@@ -64,4 +64,23 @@ final class ActivatorSpamDefaults260Test extends TestCase {
 
 		$this->assertSame( 'dismissed', $GLOBALS['sf_test_options']['subtleforms_spam_notice'] );
 	}
+
+	public function test_a_new_install_turns_submitter_emails_on(): void {
+		$GLOBALS['sf_test_options'] = array();
+
+		\SubtleForms\Activator::activate();
+
+		$this->assertTrue( $GLOBALS['sf_test_options']['subtleforms_settings']['user_confirmation_enabled'] );
+	}
+
+	public function test_activating_an_existing_site_leaves_submitter_emails_as_they_were(): void {
+		$GLOBALS['sf_test_options'] = array(
+			'subtleforms_db_version' => '2.9.1',
+			'subtleforms_settings'   => array( 'user_confirmation_enabled' => false ),
+		);
+
+		\SubtleForms\Activator::activate();
+
+		$this->assertFalse( $GLOBALS['sf_test_options']['subtleforms_settings']['user_confirmation_enabled'] );
+	}
 }
