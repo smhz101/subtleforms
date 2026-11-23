@@ -2082,3 +2082,13 @@ select.sf-field-renderer__select {
 	color: var(--sf-gray-800);
 	font-size: var(--sf-text-base);
 }
+
+.sf-field-renderer__chained-warning {
+	margin: 0.5rem 0 0;
+	padding: 0.5rem 0.75rem;
+	border-left: 3px solid var(--sf-warning);
+	background: var(--sf-warning-bg);
+	color: var(--sf-warning-strong);
+	font-size: 0.8125rem;
+	line-height: 1.4;
+}

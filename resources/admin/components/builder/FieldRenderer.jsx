@@ -14,6 +14,7 @@ import { choiceChecked, choiceShowsDefault } from '../../../shared/canvasDefault
 import { consentParts } from '../../../shared/consentLabel';
 import { toggleInitialValue, toggleIsOn } from '../../../shared/toggleState';
 import ChainedSelect from '../../../frontend/components/fields/ChainedSelect';
+import { isAnswerable } from '../../../frontend/utils/fieldValidation';
 import PhoneField from '../../../frontend/components/fields/PhoneField';
 import ChoiceSelect from '../../../frontend/components/fields/ChoiceSelect';
 import CountrySelect from '../../../frontend/components/fields/CountrySelect';
@@ -596,6 +597,11 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           selectClassName={selectClass}
           disabled={!interactive}
         />
+      )}
+      {type === 'chained_select' && !isAnswerable('chained_select', fieldConfig(field)) && (
+        <p className='sf-field-renderer__chained-warning' role='note'>
+          {__('No options yet, so this field is hidden on the live form. Add them in the field settings.', 'subtleforms')}
+        </p>
       )}
 
       {/* ── Color Picker ────────────────────────────────────────────────────── */}
