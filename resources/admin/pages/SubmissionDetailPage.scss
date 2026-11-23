@@ -564,6 +564,14 @@ $pipe-status-colors: (
 	}
 }
 
+.sf-pipe-step__skip-note {
+	font-size: var(--sf-text-sm);
+	color: var(--sf-slate-500);
+	margin: 0;
+	padding: 0 12px 10px;
+	word-break: break-word;
+}
+
 .sf-pipe-error-msg {
 	font-size: var(--sf-text-sm);
 	color: var(--sf-danger);
