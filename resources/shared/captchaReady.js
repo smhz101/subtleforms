@@ -31,19 +31,33 @@ function ownKey(field, name) {
 }
 
 /**
+ * Same rule as the server: each key falls back to Settings on its own, so a
+ * site key on the field can pair with a secret key in Settings.
+ *
  * @param {Object} field       CAPTCHA field node.
  * @param {Object} globalReady { recaptcha, hcaptcha, turnstile } booleans from Settings.
+ * @param {Object} globalKeys  { provider: { site, secret } } booleans from Settings.
  * @return {boolean}
  */
-export function captchaFieldReady(field, globalReady = window.subtleformsData?.captchaReady) {
+export function captchaFieldReady(
+  field,
+  globalReady = window.subtleformsData?.captchaReady,
+  globalKeys = window.subtleformsData?.captchaKeys
+) {
   const provider = captchaProvider(field);
   if (!provider) {
     return true;
   }
-  if (ownKey(field, 'site_key') && ownKey(field, 'secret_key')) {
+  const site = ownKey(field, 'site_key');
+  const secret = ownKey(field, 'secret_key');
+  if (site && secret) {
     return true;
   }
-  return Boolean(globalReady?.[provider]);
+  if (globalReady?.[provider]) {
+    return true;
+  }
+  const keys = globalKeys?.[provider];
+  return Boolean((site || keys?.site) && (secret || keys?.secret));
 }
 
 /**
@@ -53,7 +67,11 @@ export function captchaFieldReady(field, globalReady = window.subtleformsData?.c
  * @param {Object} globalReady Provider flags.
  * @return {Array}
  */
-export function unconfiguredCaptchaFields(fields, globalReady = window.subtleformsData?.captchaReady) {
+export function unconfiguredCaptchaFields(
+  fields,
+  globalReady = window.subtleformsData?.captchaReady,
+  globalKeys = window.subtleformsData?.captchaKeys
+) {
   const found = [];
   const walk = (nodes) => {
     if (!Array.isArray(nodes)) {
@@ -63,7 +81,7 @@ export function unconfiguredCaptchaFields(fields, globalReady = window.subtlefor
       if (!field || typeof field !== 'object') {
         return;
       }
-      if (captchaProvider(field) && !captchaFieldReady(field, globalReady)) {
+      if (captchaProvider(field) && !captchaFieldReady(field, globalReady, globalKeys)) {
         found.push(field);
       }
       walk(field.children);

@@ -54,6 +54,26 @@ describe('CAPTCHA preview status', () => {
     unmount();
   });
 
+  test('is the ready text when the field has the site key and Settings has the secret key', () => {
+    window.subtleformsData = {
+      captchaReady: { recaptcha: false },
+      captchaKeys: { recaptcha: { site: false, secret: true } },
+    };
+    const { container, unmount } = render({ id: 'c', key: 'c', type: 'recaptcha', config: { site_key: 'a' } });
+    expect(container.querySelector('.sf-captcha-preview__status').textContent).toContain(READY);
+    unmount();
+  });
+
+  test('is the warning when the field has a site key and neither has a secret key', () => {
+    window.subtleformsData = {
+      captchaReady: { recaptcha: false },
+      captchaKeys: { recaptcha: { site: true, secret: false } },
+    };
+    const { container, unmount } = render({ id: 'c', key: 'c', type: 'recaptcha', config: { site_key: 'a' } });
+    expect(container.querySelector('.sf-captcha-preview__status').textContent).toContain(WARNING);
+    unmount();
+  });
+
   test('is the ready text when the field has both keys', () => {
     window.subtleformsData = { captchaReady: {} };
     const { container, unmount } = render({ id: 'c', key: 'c', type: 'recaptcha', config: { site_key: 'a', secret_key: 'b' } });

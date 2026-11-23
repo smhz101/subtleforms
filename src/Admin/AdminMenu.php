@@ -754,11 +754,33 @@ class AdminMenu {
 				// Which providers have both keys in Settings, so the builder can say
 				// when a CAPTCHA field would be skipped on the live form (#142).
 				'captchaReady' => self::captchaReadyFlags(),
+				// Per-key flags: a field's site key can pair with a secret key from Settings.
+				'captchaKeys'  => self::captchaKeyFlags(),
 			)
 		);
 
 		// Allow extensions to enqueue their assets
 		do_action( 'subtleforms/admin_enqueue_scripts', $hook );
+	}
+
+	/**
+	 * Whether Settings holds a site key, and a secret key, for each provider.
+	 *
+	 * @return array<string, array{site: bool, secret: bool}>
+	 */
+	private static function captchaKeyFlags(): array {
+		$settings = new Settings();
+		$flags    = array();
+		foreach ( array( 'recaptcha', 'hcaptcha', 'turnstile' ) as $provider ) {
+			$site   = $settings->get( 'captcha_' . $provider . '_site_key', '' );
+			$secret = $settings->get( 'captcha_' . $provider . '_secret_key', '' );
+
+			$flags[ $provider ] = array(
+				'site'   => is_string( $site ) && '' !== trim( $site ),
+				'secret' => is_string( $secret ) && '' !== trim( $secret ),
+			);
+		}
+		return $flags;
 	}
 
 	/**
