@@ -378,18 +378,20 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
               }`
             ),
       ]);
+      // Opening an unread entry marks it read on the server. Tell the list,
+      // once, so the Unread count and the row follow (issue 130). This holds
+      // even when a newer load has replaced this one on screen: only this
+      // response says the entry was unread, and the server change happened.
+      const loaded = subData && subData.data ? subData.data : subData;
+      if (loaded && loaded.marked_read === true) {
+        onEntryUpdated?.({ ...loaded, is_read: 0 }, loaded);
+      }
       if (requestId !== requestRef.current) {
         return;
       }
 
       // ApiResponse wraps payloads in { data: ... } for consistency. Unwrap if present.
-      const loaded = subData && subData.data ? subData.data : subData;
       setSubmission(loaded);
-      // Opening an unread entry marks it read on the server. Tell the list,
-      // once, so the Unread count and the row follow (issue 130).
-      if (loaded && loaded.marked_read === true) {
-        onEntryUpdated?.({ ...loaded, is_read: 0 }, loaded);
-      }
       setLogs(
         Array.isArray(logsData)
           ? logsData

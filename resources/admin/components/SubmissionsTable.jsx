@@ -394,10 +394,12 @@ const SubmissionsTable = forwardRef(
       if (!marked.changed) {
         return;
       }
-      const before = bufferRef.current.find((row) => String(row.id) === String(readingId));
+      // Only the row's look changes here. The counts move when the entry pane
+      // hears from the server that opening the entry marked it read, which is
+      // after the server has done so (issue 130); counting here as well would
+      // count the entry twice, and ask for the counts before they changed.
       bufferRef.current = marked.rows;
       setBuffer(marked.rows);
-      onEntriesChanged?.([{ before, after: entryAfter('read', before) }]);
     }, [readingId]);
 
     const inTrash = statusFilter === 'trash';
