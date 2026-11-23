@@ -8,6 +8,7 @@ import AddressFieldRenderer from './AddressFieldRenderer';
 import { getCanvasPreview, addonProvides } from '../../../shared/extend';
 import { fieldDisplay, requiredIndicatorMark } from '../../../shared/fieldDisplay';
 import { fieldConfig } from '../../../shared/fieldConfig';
+import { captchaFieldReady, CAPTCHA_SETTINGS_URL } from '../../../shared/captchaReady';
 import { flagsOn } from '../../../shared/flagsOn';
 import { resolveMask } from '../../../shared/inputMask';
 import { choiceChecked, choiceShowsDefault } from '../../../shared/canvasDefaults';
@@ -579,9 +580,18 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
             </div>
           </div>
           <div className='sf-captcha-preview__footer'>
-            <div className='sf-captcha-preview__status'>
+            <div className={captchaFieldReady(field) ? 'sf-captcha-preview__status' : 'sf-captcha-preview__status sf-captcha-preview__status--warning'}>
               <span className='sf-captcha-preview__status-icon'><Icon.HelpCircle size={12} /></span>
-              {fieldConfig(field).site_key && fieldConfig(field).secret_key ? __('CAPTCHA will appear here on the live form', 'subtleforms') : __('Add a site key and a secret key, or this check will not run.', 'subtleforms')}
+              {captchaFieldReady(field) ? (
+                __('CAPTCHA will appear here on the live form', 'subtleforms')
+              ) : (
+                <span className='sf-captcha-preview__status-text'>
+                  {__('No keys yet, so this check is skipped on the live form.', 'subtleforms')}{' '}
+                  <a href={CAPTCHA_SETTINGS_URL}>
+                    {__('Add keys in Settings, Security & privacy', 'subtleforms')}
+                  </a>
+                </span>
+              )}
             </div>
           </div>
         </div>
