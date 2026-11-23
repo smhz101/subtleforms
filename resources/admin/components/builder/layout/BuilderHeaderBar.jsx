@@ -225,7 +225,7 @@ export function BuilderActions({
         <Button
           variant='tertiary'
           onClick={() => dispatch({ type: BUILDER_ACTIONS.UNDO_SCHEMA })}
-          disabled={!canUndo || busy}
+          disabled={!canUndo || saving}
           accessibleWhenDisabled
           className='sf-builder-header-bar__icon-button sf-builder-header-bar__undo-button'
           label={__('Undo', 'subtleforms')}
@@ -237,7 +237,7 @@ export function BuilderActions({
         <Button
           variant='tertiary'
           onClick={() => dispatch({ type: BUILDER_ACTIONS.REDO_SCHEMA })}
-          disabled={!canRedo || busy}
+          disabled={!canRedo || saving}
           accessibleWhenDisabled
           className='sf-builder-header-bar__icon-button sf-builder-header-bar__redo-button'
           label={__('Redo', 'subtleforms')}
