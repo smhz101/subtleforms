@@ -589,7 +589,9 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       )}
 
       {/* ── Chained Select ──────────────────────────────────────────────────── */}
-      {type === 'chained_select' && (
+      {/* An unconfigured Chained Select shows only the warning below, not
+          the field's own empty hint as well (#140 item 6). */}
+      {type === 'chained_select' && isAnswerable('chained_select', fieldConfig(field)) && (
         <ChainedSelect
           config={fieldConfig(field)}
           value={chainedSelections}
