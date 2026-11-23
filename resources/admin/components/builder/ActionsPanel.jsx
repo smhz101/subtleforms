@@ -62,9 +62,44 @@ function normalizeActions(raw) {
 }
 
 /**
+ * The From header a notification carries itself (imported notifications keep
+ * the original sender), or ''. EmailAction::withSender() keeps such a header
+ * instead of the Settings, Email sender, so the note must show it.
+ *
+ * @param {Array|Object|undefined} headers Email action headers: "Name: value" strings, or an object.
+ * @return {string} The From value, or ''.
+ */
+export function actionFromHeader(headers) {
+  if (Array.isArray(headers)) {
+    for (const h of headers) {
+      const m = typeof h === 'string' ? /^\s*from\s*:\s*(.+)$/i.exec(h) : null;
+      if (m && m[1].trim()) return m[1].trim();
+    }
+    return '';
+  }
+  if (headers && typeof headers === 'object') {
+    const key = Object.keys(headers).find((k) => k.trim().toLowerCase() === 'from');
+    return key ? String(headers[key] || '').trim() : '';
+  }
+  return '';
+}
+
+/**
  * Read-only line saying who the notification mail comes from.
  */
-export function SenderNote() {
+export function SenderNote({ headers } = {}) {
+  const own = actionFromHeader(headers);
+  if (own) {
+    return (
+      <p className='sf-actions-panel__sender' style={{ margin: '0 0 12px', fontSize: 12, color: 'var(--sf-text-muted, #757575)' }}>
+        {sprintf(
+          /* translators: %s: sender name and address set on this notification */
+          __('Sent from: %s, set on this notification.', 'subtleforms'),
+          own
+        )}
+      </p>
+    );
+  }
   const data = window.subtleformsData || {};
   const email = (data.senderEmail || '').trim();
   const name = (data.senderName || '').trim();
@@ -310,7 +345,7 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fie
       {action.type === 'email' && (
         <div className='sf-actions-panel__item-body'>
 
-          <SenderNote />
+          <SenderNote headers={s.headers} />
 
           <MergeTagField
             label={__('To', 'subtleforms')}
