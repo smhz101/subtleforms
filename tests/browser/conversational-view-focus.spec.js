@@ -5,7 +5,15 @@
 const { test, expect } = require('@playwright/test');
 const { adminApi, publishForm, cleanup } = require('./helpers');
 
-const SHOTS = '/home/claude/dist/2.9.2/free/139';
+const fs = require('fs');
+
+// Set SF_SHOTS_DIR to also save screenshots; CI leaves it unset.
+const SHOTS = process.env.SF_SHOTS_DIR || '';
+const shot = async (page, name) => {
+  if (!SHOTS) return;
+  fs.mkdirSync(SHOTS, { recursive: true });
+  await page.screenshot({ path: `${SHOTS}/${name}.png` });
+};
 test.use({ deviceScaleFactor: 2 });
 
 let client;
@@ -56,7 +64,7 @@ test('Enter moves the cursor to the next question', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto(form.url);
   await page.waitForSelector('.subtleforms-question-card');
-  await page.screenshot({ path: `${SHOTS}/question-1.png` });
+  await shot(page, 'question-1');
   await page.locator('.subtleforms-field-wrapper input').first().fill('Ada');
   await page.keyboard.press('Enter');
   await page.keyboard.type('ada@example.com');
@@ -65,5 +73,5 @@ test('Enter moves the cursor to the next question', async ({ page }) => {
   await page.keyboard.type('36');
   await expect(page.locator('.subtleforms-field-wrapper input').first()).toHaveValue('36');
   await page.waitForTimeout(700);
-  await page.screenshot({ path: `${SHOTS}/question-3.png` });
+  await shot(page, 'question-3');
 });
