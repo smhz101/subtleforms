@@ -383,7 +383,13 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
       }
 
       // ApiResponse wraps payloads in { data: ... } for consistency. Unwrap if present.
-      setSubmission(subData && subData.data ? subData.data : subData);
+      const loaded = subData && subData.data ? subData.data : subData;
+      setSubmission(loaded);
+      // Opening an unread entry marks it read on the server. Tell the list,
+      // once, so the Unread count and the row follow (issue 130).
+      if (loaded && loaded.marked_read === true) {
+        onEntryUpdated?.({ ...loaded, is_read: 0 }, loaded);
+      }
       setLogs(
         Array.isArray(logsData)
           ? logsData
