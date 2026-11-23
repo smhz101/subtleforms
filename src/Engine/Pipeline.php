@@ -80,6 +80,18 @@ final class Pipeline {
 					continue;
 				}
 
+				// A condition nobody checks (no add-on evaluates action logic)
+				// does not stop the action, but the log says so (#137).
+				$uncheckedNote = null;
+				if (
+					$step->action()->id() !== 'save'
+					&& is_array( $stepSettings )
+					&& ! ConditionalLogic::hasLogic( $stepSettings['logic'] ?? null, 'action' )
+					&& null !== ConditionalLogic::normalizeLogic( $stepSettings['logic'] ?? null )
+				) {
+					$uncheckedNote = __( 'Sent without checking its conditions: SubtleForms Pro, which checks them, is not active.', 'subtleforms' );
+				}
+
 				// Log start
 				$this->logEvent( $ctx, $step, 'started', null, $ts );
 
@@ -116,7 +128,7 @@ final class Pipeline {
 				}
 
 				if ( ! $found ) {
-					$this->logEvent( $ctx, $step, 'succeeded', null, time() );
+					$this->logEvent( $ctx, $step, 'succeeded', $uncheckedNote, time() );
 				}
 
 				// Clear step-specific transient meta

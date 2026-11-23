@@ -128,6 +128,7 @@ final class TransferService {
 	 * @throws \SubtleForms\Validation\ValidationException When the schema is not valid.
 	 */
 	public static function cleanSchema( array $schema ): array {
+		$schema    = \SubtleForms\Support\SchemaRepair::actionLogic( $schema );
 		$validator = new \SubtleForms\Validation\RequestValidator( array( 'schemas' => \SubtleForms\Validation\Schemas::all() ) );
 		$validated = $validator->validateOrFail( array( 'schema' => $schema ), \SubtleForms\Validation\Schemas::get( \SubtleForms\Validation\Schemas::FORM_SCHEMA_SAVE ) );
 		return is_array( $validated['schema'] ?? null ) ? $validated['schema'] : array();

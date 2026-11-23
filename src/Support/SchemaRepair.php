@@ -340,6 +340,40 @@ final class SchemaRepair {
 	}
 
 	/**
+	 * Move a condition sent on the action itself into the action's settings.
+	 *
+	 * The builder keeps a notification's "Only when" condition at
+	 * `actions[i].settings.logic`. An API client may send it as `actions[i].logic`
+	 * (the shape fields use). The schema validator has no such key on an action,
+	 * so it was dropped without a word and the notification always ran (#137).
+	 * The top level condition moves into settings when settings carry none; when
+	 * both exist, settings win. The top level key is removed either way.
+	 *
+	 * @param array $schema Schema as sent, before validation.
+	 * @return array Schema with every action's condition under `settings.logic`.
+	 * @since 2.9.2
+	 */
+	public static function actionLogic( array $schema ): array {
+		if ( ! isset( $schema['actions'] ) || ! is_array( $schema['actions'] ) ) {
+			return $schema;
+		}
+		foreach ( $schema['actions'] as $i => $action ) {
+			if ( ! is_array( $action ) || ! array_key_exists( 'logic', $action ) ) {
+				continue;
+			}
+			$top = $action['logic'];
+			unset( $action['logic'] );
+			$settings = isset( $action['settings'] ) && is_array( $action['settings'] ) ? $action['settings'] : array();
+			if ( empty( $settings['logic'] ) && ! empty( $top ) ) {
+				$settings['logic']  = $top;
+				$action['settings'] = $settings;
+			}
+			$schema['actions'][ $i ] = $action;
+		}
+		return $schema;
+	}
+
+	/**
 	 * Apply every repair, logging what changed.
 	 *
 	 * @param array $schema Schema.

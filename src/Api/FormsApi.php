@@ -694,6 +694,9 @@ final class FormsApi {
 		}
 
 		$input = $request->get_json_params();
+		if ( is_array( $input ) && isset( $input['schema'] ) && is_array( $input['schema'] ) ) {
+			$input['schema'] = SchemaRepair::actionLogic( $input['schema'] );
+		}
 		try {
 			$validator = new RequestValidator( array( 'schemas' => Schemas::all() ) );
 			$validated = $validator->validateOrFail( $input, Schemas::get( Schemas::FORM_SCHEMA_SAVE ) );
@@ -879,6 +882,9 @@ final class FormsApi {
 			}
 		}
 
+		if ( is_array( $input ) && isset( $input['schema'] ) && is_array( $input['schema'] ) ) {
+			$input['schema'] = SchemaRepair::actionLogic( $input['schema'] );
+		}
 		try {
 			Logger::debug( 'create_form - raw input: %s', print_r( $input, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			$validator = new RequestValidator( array( 'schemas' => Schemas::all() ) );
