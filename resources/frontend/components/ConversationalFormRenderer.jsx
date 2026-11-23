@@ -1,4 +1,5 @@
 import { createSpamTokenSource } from '../utils/spamToken';
+import useTimeTrapHold from '../utils/useTimeTrapHold';
 import { useState, useEffect, useCallback, useMemo, useRef } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import FieldRenderer from './FieldRenderer';
@@ -37,7 +38,10 @@ export default function ConversationalFormRenderer({
   preview = false,
   onSubmit: customOnSubmit = null,
   spamToken = '',
+  spamMinSeconds = 0,
 }) {
+  // Holds a fast submit until the time trap's minimum has passed (issue 126).
+  const waitForMinimum = useTimeTrapHold(spamMinSeconds);
   const spamTokens = useMemo(() => createSpamTokenSource(formId), [formId]);
   const primeSpamToken = useCallback(() => spamTokens.prime(spamToken), [spamTokens, spamToken]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -232,6 +236,10 @@ export default function ConversationalFormRenderer({
       setSubmitting(true);
       setSubmitError(null);
 
+      if (!(await waitForMinimum())) {
+        return;
+      }
+
       // Handle reCAPTCHA v3 if present
       const recaptchaV3Input = document.querySelector(
         '.subtleforms-recaptcha-v3'
@@ -364,7 +372,7 @@ export default function ConversationalFormRenderer({
         setSubmitting(false);
       }
     },
-    [formId, values, leafPaths, preview, customOnSubmit, hiddenFields, spamToken, spamTokens]
+    [formId, values, leafPaths, preview, customOnSubmit, hiddenFields, spamToken, spamTokens, waitForMinimum]
   );
 
   const handleSubmit = useCallback(
