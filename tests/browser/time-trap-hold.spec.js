@@ -8,6 +8,7 @@ const { adminApi, publishForm, entries, cleanup, waitForForm, BASE } = require('
 
 let client;
 let form;
+let convo;
 
 test.beforeAll(async () => {
   client = await adminApi();
@@ -18,10 +19,16 @@ test.beforeAll(async () => {
       { id: 'e', key: 'email', type: 'email', label: 'Email' },
     ],
   });
+  convo = await publishForm(client, {
+    title: `Time trap hold conversational ${Date.now()}`,
+    metadata: { type: 'conversational' },
+    fields: [{ id: 'n', key: 'name', type: 'text', label: 'Name' }],
+  });
 });
 
 test.afterAll(async () => {
   await cleanup(client, form);
+  await cleanup(client, convo);
 });
 
 test('a fast human submit is saved, not dropped', async ({ browser }) => {
@@ -40,6 +47,24 @@ test('a fast human submit is saved, not dropped', async ({ browser }) => {
 
   await expect
     .poll(async () => (await entries(client, form.id)).length, { timeout: 15000 })
+    .toBe(before + 1);
+  await context.close();
+});
+
+test('a fast human submit on a conversational form is saved, not dropped', async ({ browser }) => {
+  const context = await browser.newContext({ baseURL: BASE });
+  const page = await context.newPage();
+  const before = (await entries(client, convo.id)).length;
+
+  await page.goto(convo.url);
+  await page.waitForSelector('.subtleforms--type-conversational', { timeout: 30000 });
+  await page.getByLabel('Name').first().fill('Fast Grace');
+  await page.keyboard.press('Enter');
+  await page.getByRole('button', { name: /Submit/ }).first().click();
+
+  await expect(page.locator('.subtleforms-conversational-success')).toBeVisible({ timeout: 20000 });
+  await expect
+    .poll(async () => (await entries(client, convo.id)).length, { timeout: 15000 })
     .toBe(before + 1);
   await context.close();
 });
