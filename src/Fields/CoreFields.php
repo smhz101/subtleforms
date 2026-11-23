@@ -25,6 +25,74 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class CoreFields {
 
 	/**
+	 * Tokens a field's Autofill setting may hold ('' is Automatic). Mirrors
+	 * autocompleteOptions() in resources/shared/autocomplete.js.
+	 *
+	 * @return array<string, string> Token => label, in the order the inspector lists them.
+	 */
+	public static function autocompleteTokens(): array {
+		return array(
+			''                   => __( 'Automatic', 'subtleforms' ),
+			'off'                => __( 'Off', 'subtleforms' ),
+			'name'               => __( 'Full name', 'subtleforms' ),
+			'given-name'         => __( 'First name', 'subtleforms' ),
+			'family-name'        => __( 'Last name', 'subtleforms' ),
+			'email'              => __( 'Email', 'subtleforms' ),
+			'tel'                => __( 'Phone', 'subtleforms' ),
+			'organization'       => __( 'Company', 'subtleforms' ),
+			'organization-title' => __( 'Job title', 'subtleforms' ),
+			'street-address'     => __( 'Street address', 'subtleforms' ),
+			'address-line1'      => __( 'Address line 1', 'subtleforms' ),
+			'address-line2'      => __( 'Address line 2', 'subtleforms' ),
+			'address-level2'     => __( 'City', 'subtleforms' ),
+			'address-level1'     => __( 'State or region', 'subtleforms' ),
+			'postal-code'        => __( 'Postal code', 'subtleforms' ),
+			'country-name'       => __( 'Country', 'subtleforms' ),
+			'url'                => __( 'Website', 'subtleforms' ),
+			'bday'               => __( 'Birthday', 'subtleforms' ),
+		);
+	}
+
+	/**
+	 * The Autofill select shared by Text, Email, Website, Phone and Paragraph.
+	 *
+	 * @return array<string, mixed> Inspector control.
+	 */
+	private static function autocompleteControl(): array {
+		$options = array();
+		foreach ( self::autocompleteTokens() as $value => $label ) {
+			$options[] = array(
+				'value' => (string) $value,
+				'label' => $label,
+			);
+		}
+		return array(
+			'type'    => 'select',
+			'name'    => 'autocomplete',
+			'label'   => __( 'Autofill', 'subtleforms' ),
+			'help'    => __( 'Tells browsers and password managers what this field asks for, so they can fill it in.', 'subtleforms' ),
+			'options' => $options,
+			'section' => 'advanced',
+		);
+	}
+
+	/**
+	 * Keep a field's Autofill setting only when it is on the allow-list.
+	 *
+	 * @param array<string, mixed> $field Field node, flat or a config.
+	 * @return array<string, mixed>
+	 */
+	public static function sanitizeAutocomplete( array $field ): array {
+		if ( array_key_exists( 'autocomplete', $field ) ) {
+			$token = $field['autocomplete'];
+			if ( ! is_string( $token ) || ! array_key_exists( $token, self::autocompleteTokens() ) ) {
+				unset( $field['autocomplete'] );
+			}
+		}
+		return $field;
+	}
+
+	/**
 	 * Register core fields into the registry.
 	 *
 	 * @param FieldRegistry $registry
@@ -62,6 +130,7 @@ final class CoreFields {
 						'name'  => 'maxLength',
 						'label' => __( 'Max Length', 'subtleforms' ),
 					),
+					self::autocompleteControl(),
 				),
 				meta: array( 'category' => 'regular' ),
 			)
@@ -104,6 +173,7 @@ final class CoreFields {
 						'label' => __( 'Allow Multiple', 'subtleforms' ),
 						'help'  => __( 'Allow comma-separated email addresses', 'subtleforms' ),
 					),
+					self::autocompleteControl(),
 				),
 				meta: array( 'category' => 'regular' ),
 			)
@@ -146,6 +216,7 @@ final class CoreFields {
 						'name'  => 'maxLength',
 						'label' => __( 'Max Length', 'subtleforms' ),
 					),
+					self::autocompleteControl(),
 				),
 				meta: array( 'category' => 'regular' ),
 			)
@@ -265,6 +336,7 @@ final class CoreFields {
 							),
 						),
 					),
+					self::autocompleteControl(),
 				),
 				meta: array( 'category' => 'regular' ),
 			)
@@ -293,6 +365,7 @@ final class CoreFields {
 						'name'  => 'placeholder',
 						'label' => __( 'Placeholder', 'subtleforms' ),
 					),
+					self::autocompleteControl(),
 				),
 				meta: array( 'category' => 'regular' ),
 			)

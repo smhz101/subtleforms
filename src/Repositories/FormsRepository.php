@@ -406,6 +406,12 @@ final class FormsRepository {
 				$field['config'] = \SubtleForms\Fields\InputMask::sanitizeSettings( $field['config'] );
 			}
 
+			// Autofill setting (2.10.0): only a known token, else the setting is dropped.
+			$field = \SubtleForms\Fields\CoreFields::sanitizeAutocomplete( $field );
+			if ( isset( $field['config'] ) && is_array( $field['config'] ) ) {
+				$field['config'] = \SubtleForms\Fields\CoreFields::sanitizeAutocomplete( $field['config'] );
+			}
+
 			if ( isset( $field['config']['appearance'] ) ) {
 				$clean = \SubtleForms\Support\Appearance::sanitizeField( $field['config']['appearance'] );
 
