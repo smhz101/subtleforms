@@ -31,7 +31,7 @@ export function useForms(filters = {}, options = {}) {
  */
 export function useAllForms(options = {}) {
   return useQuery({
-    queryKey: [...queryKeys.forms.all, 'every'],
+    queryKey: [...queryKeys.forms.lists(), 'every'],
     queryFn: () => fetchAllForms(),
     staleTime: 30 * 1000,
     ...options,

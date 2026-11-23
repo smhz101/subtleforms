@@ -58,7 +58,7 @@ export async function fetchAllForms( { status, fetcher = defaultFetcher } = {} )
 	const forms = [];
 
 	for ( let page = 1; page <= MAX_FORM_PAGES; page++ ) {
-		let path = `/subtleforms/v1/forms?per_page=${ FORMS_PER_PAGE }&page=${ page }`;
+		let path = `/subtleforms/v1/forms?per_page=${ FORMS_PER_PAGE }&page=${ page }&orderby=id&order=ASC`;
 		if ( status ) {
 			path += `&status=${ encodeURIComponent( status ) }`;
 		}

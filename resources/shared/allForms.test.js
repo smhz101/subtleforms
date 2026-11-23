@@ -19,7 +19,7 @@ describe( 'fetchAllForms', () => {
 		expect( forms ).toHaveLength( 220 );
 		expect( fetcher ).toHaveBeenCalledTimes( 3 );
 		expect( fetcher.mock.calls[ 0 ][ 0 ] ).toBe(
-			'/subtleforms/v1/forms?per_page=100&page=1'
+			'/subtleforms/v1/forms?per_page=100&page=1&orderby=id&order=ASC'
 		);
 		expect( fetcher.mock.calls[ 2 ][ 0 ] ).toContain( 'page=3' );
 	} );
