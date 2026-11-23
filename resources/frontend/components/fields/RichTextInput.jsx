@@ -66,6 +66,39 @@ const sanitizeHtml = ( html ) => {
   return doc.body.innerHTML.replace( /\u200b/g, '' );
 };
 
+/**
+ * Toolbar icons: inline line icons (24 grid, 2px round stroke) so a button has
+ * no visible text for a screen reader name to disagree with.
+ */
+const ICON_PATHS = {
+  bold: <path d='M6 4h8a4 4 0 0 1 0 8H6zM6 12h9a4 4 0 0 1 0 8H6z' />,
+  italic: <path d='M19 4h-9M14 20H5M15 4 9 20' />,
+  bulleted: (
+    <path d='M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01' />
+  ),
+  numbered: (
+    <path d='M10 6h11M10 12h11M10 18h11M4 6h1v4M4 10h2M6 18H4c0-1 2-2 2-3s-1-1.5-2-1' />
+  ),
+};
+
+function ToolbarIcon( { name } ) {
+  return (
+    <svg
+      width='16'
+      height='16'
+      viewBox='0 0 24 24'
+      fill='none'
+      stroke='currentColor'
+      strokeWidth='2'
+      strokeLinecap='round'
+      strokeLinejoin='round'
+      aria-hidden='true'
+      focusable='false'>
+      { ICON_PATHS[ name ] }
+    </svg>
+  );
+}
+
 export default function RichTextInput( {
   inputId,
   name,
@@ -153,17 +186,17 @@ export default function RichTextInput( {
   };
 
   const commands = [
-    { command: 'bold', label: __( 'Bold', 'subtleforms' ), text: 'B' },
-    { command: 'italic', label: __( 'Italic', 'subtleforms' ), text: 'I' },
+    { command: 'bold', label: __( 'Bold', 'subtleforms' ), icon: 'bold' },
+    { command: 'italic', label: __( 'Italic', 'subtleforms' ), icon: 'italic' },
     {
       command: 'insertUnorderedList',
       label: __( 'Bulleted list', 'subtleforms' ),
-      text: '•',
+      icon: 'bulleted',
     },
     {
       command: 'insertOrderedList',
       label: __( 'Numbered list', 'subtleforms' ),
-      text: '1.',
+      icon: 'numbered',
     },
   ];
 
@@ -174,7 +207,7 @@ export default function RichTextInput( {
         className='subtleforms-richtext__toolbar'
         role='toolbar'
         aria-label={ __( 'Text formatting', 'subtleforms' ) }>
-        { commands.map( ( { command, label, text } ) => (
+        { commands.map( ( { command, label, icon } ) => (
           <button
             key={ command }
             type='button'
@@ -184,7 +217,7 @@ export default function RichTextInput( {
             disabled={ disabled }
             aria-label={ label }
             title={ label }>
-            <span aria-hidden='true'>{ text }</span>
+            <ToolbarIcon name={ icon } />
           </button>
         ) ) }
       </div>

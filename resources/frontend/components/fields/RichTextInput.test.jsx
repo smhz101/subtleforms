@@ -52,17 +52,17 @@ test( 'allowed formatting in the starting value is kept', () => {
   unmount();
 } );
 
-test( 'toolbar buttons are named by their label and the visible glyph is decorative', () => {
+test( 'toolbar buttons are named by their label and hold only a decorative icon', () => {
   const { container, unmount } = render( '' );
   const buttons = container.querySelectorAll( '.subtleforms-richtext__button' );
   expect( buttons ).toHaveLength( 4 );
   const names = [];
   buttons.forEach( ( button ) => {
-    const glyph = button.querySelector( 'span' );
-    expect( glyph ).not.toBeNull();
-    expect( glyph.getAttribute( 'aria-hidden' ) ).toBe( 'true' );
-    expect( glyph.textContent.length ).toBeGreaterThan( 0 );
-    expect( button.textContent ).toBe( glyph.textContent );
+    const icon = button.querySelector( 'svg' );
+    expect( icon ).not.toBeNull();
+    expect( icon.getAttribute( 'aria-hidden' ) ).toBe( 'true' );
+    expect( icon.getAttribute( 'focusable' ) ).toBe( 'false' );
+    expect( button.textContent ).toBe( '' );
     expect( button.getAttribute( 'aria-label' ) ).toBe( button.getAttribute( 'title' ) );
     names.push( button.getAttribute( 'aria-label' ) );
   } );
