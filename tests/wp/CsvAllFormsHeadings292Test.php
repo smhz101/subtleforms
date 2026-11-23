@@ -137,4 +137,19 @@ final class CsvAllFormsHeadings292Test extends TestCase {
 
 		$this->assertSame( array( 'What is it about?', 'Gone Field' ), array_slice( $this->rows( 0 )[0], 4 ) );
 	}
+
+	public function test_a_repeater_key_shared_by_two_forms_keeps_the_children_of_both(): void {
+		$repeater = static fn( array $children ): array => array(
+			array( 'id' => 'rep', 'key' => 'companies', 'type' => 'repeat_container', 'label' => 'Companies', 'min' => 1, 'max' => 3, 'children' => $children ),
+		);
+		$a = $this->publish( $repeater( array( array( 'id' => 'tk', 'key' => 'ticker', 'type' => 'text', 'label' => 'Ticker' ) ) ) );
+		$b = $this->publish( $repeater( array( array( 'id' => 'sh', 'key' => 'shares', 'type' => 'number', 'label' => 'Shares' ) ) ) );
+		$this->entry( $a, array( 'companies' => array( array( 'ticker' => 'ENGRO' ) ) ), '2026-01-02 10:00:00' );
+		$this->entry( $b, array( 'companies' => array( array( 'shares' => '25' ) ) ), '2026-01-01 10:00:00' );
+
+		$rows = $this->rows( 0 );
+		$this->assertSame( array( 'Companies: Ticker', 'Companies: Shares' ), array_slice( $rows[0], 4 ) );
+		$this->assertSame( array( 'ENGRO', '' ), array_slice( $rows[1], 4 ) );
+		$this->assertSame( array( '', '25' ), array_slice( $rows[2], 4 ) );
+	}
 }

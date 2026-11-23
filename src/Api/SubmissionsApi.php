@@ -1480,7 +1480,7 @@ final class SubmissionsApi {
 	 * One schema is read at a time, in the order the forms were first seen.
 	 * A key used by several forms gets each distinct label, joined with " / ".
 	 * A key that is a Repeater in any form uses the children of the first form
-	 * that has it. A field with no label in any form is headed by its key.
+	 * that has it, plus any child the other forms add. A field with no label in any form is headed by its key.
 	 *
 	 * @param int[] $formIds Form IDs found in the entries.
 	 * @return array{0: array<string,string>, 1: array<string,array>} Heading by key, in column order, and Repeater field by key.
@@ -1502,6 +1502,20 @@ final class SubmissionsApi {
 			foreach ( $found as $key => $field ) {
 				if ( ! isset( $repeaters[ $key ] ) ) {
 					$repeaters[ $key ] = $field;
+					continue;
+				}
+				// The same Repeater key in another form: keep the columns of the
+				// first and add the children it does not have, so no answer of
+				// the other form is dropped.
+				$have  = array_column( \SubtleForms\Support\Repeater::childFields( $repeaters[ $key ] ), 'key' );
+				$extra = array();
+				foreach ( \SubtleForms\Support\Repeater::childFields( $field ) as $child ) {
+					if ( ! in_array( $child['key'], $have, true ) ) {
+						$extra[] = $child['field'];
+					}
+				}
+				if ( $extra ) {
+					$repeaters[ $key ]['children'] = array_merge( \SubtleForms\Support\Repeater::children( $repeaters[ $key ] ), $extra );
 				}
 			}
 			unset( $labels, $found );
