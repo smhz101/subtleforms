@@ -638,7 +638,9 @@ function builderReducer(state, action) {
         ...state,
         state: nextState,
         autoSaving: false,
-        autoSaveError: error,
+        // The header and canvas print this as text, so a conflict keeps its
+        // message only; the details live in conflictData.
+        autoSaveError: error?.isConflict ? error.message : error,
         isDirty: true,
         // Set rate limit state if error is rate limited
         isRateLimited: error?.isRateLimited || false,
@@ -759,7 +761,7 @@ function builderReducer(state, action) {
         state: nextState,
         publishing: false,
         saving: false,
-        saveError: hasValidationErrors ? null : error,
+        saveError: hasValidationErrors ? null : error?.isConflict ? error.message : error,
         validationErrors: hasValidationErrors
           ? action.payload.validationErrors
           : state.validationErrors,
