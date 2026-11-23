@@ -45,6 +45,8 @@ export const BASIC_OPERATORS = [
 export const VALUELESS_OPERATORS = ['empty', 'not_empty'];
 
 const NUMERIC_RE = /^\s*[-+]?(\d+(\.\d*)?|\.\d+)\s*$/;
+const DATE_RE = /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2}))?)?$/;
+const TIME_RE = /^(\d{2}):(\d{2})(?::(\d{2}))?$/;
 const MAX_PASSES = 5;
 
 const isPlainObject = (v) =>
@@ -117,6 +119,62 @@ export function isEmptyValue(value) {
 }
 
 /**
+ * A sortable key for an ISO date with an optional time: "YYYY-MM-DD HH:MM:SS".
+ * The same format SubtleForms Pro's toDate() produces. Null when the text is
+ * not a date. Relative values such as "today" are Pro's, not handled here.
+ *
+ * @param {*} s Text to read.
+ * @return {string|null}
+ */
+function dateSortKey(s) {
+  const m = DATE_RE.exec(String(s).trim());
+  if (!m) return null;
+  return `${m[1]}-${m[2]}-${m[3]} ${m[4] || '00'}:${m[5] || '00'}:${m[6] || '00'}`;
+}
+
+/**
+ * A sortable key for a time of day: "HH:MM:SS". Null when the text is not a time.
+ *
+ * @param {*} s Text to read.
+ * @return {string|null}
+ */
+function timeSortKey(s) {
+  const m = TIME_RE.exec(String(s).trim());
+  if (!m) return null;
+  return `${m[1]}:${m[2]}:${m[3] || '00'}`;
+}
+
+/**
+ * Whether any answer is later (dir 1) or earlier (dir -1) than the rule value.
+ * Numbers compare as numbers. Otherwise date and datetime fields compare as
+ * dates and time fields as times; with no field type, the values decide.
+ *
+ * @param {Array}  items Answers.
+ * @param {string} c     The rule's value.
+ * @param {number} dir   1 for greater than, -1 for less than.
+ * @param {Object} field The field the rule reads, if known.
+ * @return {boolean}
+ */
+function orderedAny(items, c, dir, field) {
+  if (isNumeric(c)) {
+    return items.some((x) => isNumeric(x) && (parseFloat(x) - parseFloat(c)) * dir > 0);
+  }
+  const type = field && field.type ? field.type : '';
+  const asDate = type === 'date' || type === 'datetime' || type === '';
+  const asTime = type === 'time' || type === '';
+  const keys = [];
+  if (asDate && dateSortKey(c) !== null) keys.push(dateSortKey);
+  if (asTime && timeSortKey(c) !== null) keys.push(timeSortKey);
+  return keys.some((key) => {
+    const limit = key(c);
+    return items.some((x) => {
+      const k = key(x);
+      return k !== null && (k > limit ? 1 : k < limit ? -1 : 0) === dir;
+    });
+  });
+}
+
+/**
  * Whether one answer satisfies one operator.
  *
  * @param {*}      value    The answer (string, number, array, object, bool).
@@ -162,9 +220,9 @@ export function evaluateCondition(value, operator, compare, compare2, opts = {})
     case 'not_empty':
       return !isEmptyForField(value, opts.field);
     case 'greater_than':
-      return isNumeric(c) && items.some((x) => isNumeric(x) && parseFloat(x) > parseFloat(c));
+      return orderedAny(items, c, 1, opts.field);
     case 'less_than':
-      return isNumeric(c) && items.some((x) => isNumeric(x) && parseFloat(x) < parseFloat(c));
+      return orderedAny(items, c, -1, opts.field);
     default:
       return extensionCondition(value, operator, compare, compare2, opts);
   }
