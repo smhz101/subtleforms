@@ -1,10 +1,12 @@
 import { __ } from '@wordpress/i18n';
 
 // Older logs stored the raw HTML body cut at 300 bytes; make them readable.
-export function previewForDisplay( text ) {
+// New logs record a `format` and store the preview as plain text already, so
+// they are shown as written: "Alice <alice@example.com>" must stay whole.
+export function previewForDisplay( text, legacy = true ) {
   const value = String( text );
   // Only old HTML previews are stripped; a plain text answer may hold a "<".
-  if ( ! /<\/?[a-z][^>]*>/i.test( value ) ) {
+  if ( ! legacy || ! /<\/?[a-z][^>]*>/i.test( value ) ) {
     return value.trim();
   }
   return value
@@ -36,7 +38,7 @@ export default function EmailActionDetails( { data } ) {
       return v === 'html' ? __( 'HTML', 'subtleforms' ) : __( 'Plain text', 'subtleforms' );
     }
     if ( k === 'body_preview' ) {
-      return previewForDisplay( v );
+      return previewForDisplay( v, data.format === undefined );
     }
     return formatValue( v );
   };

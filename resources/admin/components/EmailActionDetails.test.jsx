@@ -34,4 +34,9 @@ describe( 'EmailActionDetails', () => {
   it( 'drops a tag cut off at the end of an old preview', () => {
     expect( previewForDisplay( 'Hello,<br />\n<br />\nName <table cellpadding="6" bor' ) ).toBe( 'Hello,\n\nName' );
   } );
+
+  it( 'shows a new log preview as written, angle brackets included', () => {
+    const el = render( { to: 'a@x.test', format: 'text', body_preview: 'Contact: Alice <alice@example.com>\nTemplate <name>' } );
+    expect( el.querySelector( '.sf-pipe-data__val--preview' ).textContent ).toBe( 'Contact: Alice <alice@example.com>\nTemplate <name>' );
+  } );
 } );
