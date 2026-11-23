@@ -46,17 +46,44 @@ test('the oldest form can be found, selected and its entry listed', async ({ pag
   await page.getByRole('button', { name: 'Filters' }).click();
 
   const combo = page.getByRole('combobox', { name: 'Form' });
+  const shot = async (name) => {
+    if (process.env.SF_SHOT_DIR) {
+      await page.screenshot({ path: `${process.env.SF_SHOT_DIR}/${name}.png` });
+    }
+  };
+  await expect(combo).toBeVisible();
+  await shot('form-combobox-closed');
   await combo.click();
   await combo.fill(oldTitle);
   const option = page.getByRole('option', { name: new RegExp(`${oldTitle} \\(#${oldest.id}\\)`) });
   await expect(option).toBeVisible({ timeout: 20000 });
   await expect(page.getByRole('listbox').getByRole('option')).toHaveCount(1);
-  if (process.env.SF_SHOT_DIR) {
-    await page.screenshot({ path: `${process.env.SF_SHOT_DIR}/form-combobox-search.png` });
-  }
+  await shot('form-combobox-search');
 
   await option.click();
 
   await expect(page.locator('.sf-data-table__table tbody tr')).toHaveCount(1, { timeout: 20000 });
   await expect(page.locator('.sf-data-table__table tbody')).toContainText('Old timer');
+});
+
+test.describe('narrow screen', () => {
+  test.use({ viewport: { width: 782, height: 900 } });
+
+  test('the Form filter fits at 782 px without sideways scrolling', async ({ page }) => {
+    await loginPage(page);
+    await page.goto('/wp-admin/admin.php?page=subtleforms-submissions');
+    await page.getByRole('button', { name: 'Filters' }).click();
+    const combo = page.getByRole('combobox', { name: 'Form' });
+    await expect(combo).toBeVisible();
+    if (process.env.SF_SHOT_DIR) {
+      await page.screenshot({ path: `${process.env.SF_SHOT_DIR}/form-combobox-closed-782.png` });
+    }
+    await combo.click();
+    await combo.fill('Legacy');
+    await expect(page.getByRole('listbox').getByRole('option').first()).toBeVisible();
+    if (process.env.SF_SHOT_DIR) {
+      await page.screenshot({ path: `${process.env.SF_SHOT_DIR}/form-combobox-search-782.png` });
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  });
 });

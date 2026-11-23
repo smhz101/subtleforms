@@ -49,8 +49,6 @@ export default function SubmissionsFormFilter({ forms, value, onChange }) {
       options={shown}
       onChange={(next) => onChange(next || 'all')}
       className='sf-filter-control sf-form-filter'
-      __next40pxDefaultSize
-      __nextHasNoMarginBottom
     />
   );
 }
