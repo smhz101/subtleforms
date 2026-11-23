@@ -127,6 +127,11 @@ const PipelineStepCard = ( { step } ) => {
         ) }
       </div>
 
+      {/* A step that ran with a note, such as notification conditions nobody checked */}
+      { status === 'succeeded' && mainEntry && mainEntry.error && (
+        <p className='sf-pipe-step__skip-note'>{ mainEntry.error }</p>
+      ) }
+
       {/* Expandable body */}
       { open && (
         <div className='sf-pipe-step__body'>
@@ -160,7 +165,7 @@ const PipelineStepCard = ( { step } ) => {
             </div>
           ) }
 
-          { mainEntry && mainEntry.error && (
+          { mainEntry && mainEntry.error && status !== 'succeeded' && (
             <div className='sf-pipe-step__section sf-pipe-step__section--error'>
               <div className='sf-pipe-step__section-title'>{ __( 'Error', 'subtleforms' ) }</div>
               <p className='sf-pipe-error-msg'>{ mainEntry.error }</p>
