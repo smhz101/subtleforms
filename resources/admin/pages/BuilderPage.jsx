@@ -24,6 +24,7 @@ import {
   apiDelete,
   buildApiUrl,
 } from '../utils/api';
+import { clearFormETag } from '../data/apiClient';
 import { createInitialSchema } from '../utils/initialSchema';
 import { schemaEquals } from '../utils/schemaEquals';
 import useBuilderReducer, {
@@ -176,6 +177,10 @@ function FormBuilderInner({
     setShowPublishConfirm,
     showDiscardConfirm,
     setShowDiscardConfirm,
+    showConflict,
+    closeConflict,
+    reloadLatest,
+    replaceWithMine,
     lastManualSaveRef,
     autoSaveTimeoutRef,
   } = useBuilderOrchestrator({
@@ -194,6 +199,7 @@ function FormBuilderInner({
     onSaved,
     navigate,
     hasValidationErrors: false, // placeholder, replaced after useBuilderValidation
+    loadForm,
   });
 
   // Legacy status mapping for UI components
@@ -244,6 +250,9 @@ function FormBuilderInner({
     canUndo,
     canRedo,
   });
+
+  // The version this tab holds belongs to this builder session only.
+  useEffect(() => () => clearFormETag(formId), [formId]);
 
   // Cleanup and navigation protection effects
   useEffect(
@@ -819,6 +828,10 @@ function FormBuilderInner({
         showPublishConfirm={showPublishConfirm}
         isPublished={formStatus === 'published'}
         showDiscardConfirm={showDiscardConfirm}
+        showConflict={showConflict}
+        onCloseConflict={closeConflict}
+        onReloadLatest={reloadLatest}
+        onReplaceWithMine={replaceWithMine}
         showTour={showTour}
         showPreview={showPreview}
         onCloseDeleteConfirm={() => setShowDeleteConfirm(false)}

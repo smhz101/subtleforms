@@ -306,6 +306,8 @@ function builderReducer(state, action) {
         schemaHistoryFuture: [],
         validationErrors: [],
         error: null,
+        hasConflict: false,
+        conflictData: null,
       };
     }
 
@@ -607,6 +609,8 @@ function builderReducer(state, action) {
         lastAutoSaveTime: Date.now(),
         autoSaveError: null,
         saveError: null,
+        hasConflict: false,
+        conflictData: null,
         // A draft save of a live form is not on the site yet.
         hasUnpublishedChanges:
           state.formStatus === 'published' ? true : state.hasUnpublishedChanges,
@@ -642,6 +646,15 @@ function builderReducer(state, action) {
         // Set field errors if validation error
         fieldErrors: error?.fields || state.fieldErrors,
         validationErrors: error?.isValidationError ? [error.message] : state.validationErrors,
+        // Someone saved the form since this tab loaded it (#145).
+        hasConflict: error?.isConflict ? true : state.hasConflict,
+        conflictData: error?.isConflict
+          ? {
+              currentETag: error.currentETag,
+              providedIfMatch: error.providedIfMatch,
+              auto: true,
+            }
+          : state.conflictData,
       };
     }
 
@@ -686,6 +699,8 @@ function builderReducer(state, action) {
         lastSaveTime: Date.now(),
         saveError: null,
         validationErrors: [],
+        hasConflict: false,
+        conflictData: null,
       };
     }
 
@@ -758,6 +773,7 @@ function builderReducer(state, action) {
         conflictData: error?.isConflict ? {
           currentETag: error.currentETag,
           providedIfMatch: error.providedIfMatch,
+          auto: false,
         } : null,
       };
     }

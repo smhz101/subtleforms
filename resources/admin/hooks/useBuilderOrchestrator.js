@@ -21,8 +21,33 @@ import {
 	getFieldErrors,
 } from '../utils/api';
 import { BUILDER_ACTIONS } from '../hooks/useBuilderReducer';
+import { clearFormETag } from '../data/apiClient';
 import { withOwnMetadata } from '../utils/schemaCopy';
 import { describeSaveError } from '../utils/saveErrors';
+
+/**
+ * Payload for a save that the server refused because the form changed since
+ * this tab loaded it.
+ *
+ * @param {Object}  body Response body of the refused request.
+ * @param {boolean} auto Whether it was an autosave.
+ * @return {Object} Reducer payload.
+ */
+function conflictPayload(body, auto) {
+	const meta = body?.error?.meta ?? body?.data ?? {};
+	return {
+		error: {
+			message: __(
+				'This form was changed somewhere else after you opened it.',
+				'subtleforms'
+			),
+			isConflict: true,
+			currentETag: meta.current_etag,
+			providedIfMatch: meta.provided_if_match,
+			auto,
+		},
+	};
+}
 
 /**
  * @param {Object}   opts
@@ -36,6 +61,7 @@ import { describeSaveError } from '../utils/saveErrors';
  * @param {Function} opts.navigate           react-router navigate
  * @param {Function} opts.forceAutosave      From useDraftAutosave
  * @param {boolean}  opts.hasValidationErrors From useBuilderValidation
+ * @param {Function} opts.loadForm           From useBuilderBoot; reloads the form from the server
  */
 export default function useBuilderOrchestrator({
 	builderState,
@@ -47,6 +73,7 @@ export default function useBuilderOrchestrator({
 	onSaved,
 	navigate,
 	hasValidationErrors,
+	loadForm,
 }) {
 	const {
 		draftSchema,
@@ -56,6 +83,7 @@ export default function useBuilderOrchestrator({
 		formStatus,
 		isDirty,
 		hasUnpublishedChanges,
+		conflictData,
 	} = builderState;
 
 	const {
@@ -70,6 +98,8 @@ export default function useBuilderOrchestrator({
 	const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 	const [showPublishConfirm, setShowPublishConfirm] = useState(false);
 	const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+	// Open while a save is refused because the form changed elsewhere (#145).
+	const [showConflict, setShowConflict] = useState(false);
 
 	// ── Refs ─────────────────────────────────────────────────────────────
 	const lastManualSaveRef = useRef({ targetStatus: null });
@@ -87,7 +117,7 @@ export default function useBuilderOrchestrator({
 
 	// ── performSave ──────────────────────────────────────────────────────
 	const performSave = useCallback(
-		async ({ auto = false, targetStatus = null } = {}) => {
+		async ({ auto = false, targetStatus = null, force = false } = {}) => {
 			if (!draftSchema) {
 				return;
 			}
@@ -153,10 +183,16 @@ export default function useBuilderOrchestrator({
 					ok,
 					body,
 					status: saveStatus,
-				} = await apiPost(`/forms/${resolvedFormId}/schema`, {
-					schema: enrichedSchema,
-					activate: !auto,
-				});
+				} = await apiPost(
+					`/forms/${resolvedFormId}/schema`,
+					{
+						schema: enrichedSchema,
+						activate: !auto,
+					},
+					// "Replace with my changes" sends the save without the
+					// version check, once, and the response brings the new one.
+					force ? { ifMatch: false } : {}
+				);
 
 				if (!ok) {
 					// HTTP 422, Validation error
@@ -261,51 +297,17 @@ export default function useBuilderOrchestrator({
 						return;
 					}
 
-					// HTTP 409, Conflict
+					// HTTP 409, Conflict: another tab or user saved first. The
+					// builder shows a modal asking to reload or replace (#145).
 					if (isConflictError({ status: saveStatus })) {
-						const currentETag = body?.data?.current_etag;
-						const providedIfMatch =
-							body?.data?.provided_if_match;
-
 						dispatch({
 							type: auto
 								? BUILDER_ACTIONS.AUTOSAVE_ERROR
 								: BUILDER_ACTIONS.PUBLISH_ERROR,
-							payload: {
-								error: {
-									message: __(
-										'This form was modified by another user. Please reload to see the latest version.',
-										'subtleforms'
-									),
-									isConflict: true,
-									currentETag,
-									providedIfMatch,
-								},
-							},
+							payload: conflictPayload(body, auto),
 						});
-
 						removeNotice(SUCCESS_NOTICE_ID);
-						createErrorNotice(
-							__(
-								'Conflict detected. The form was modified elsewhere. Please reload.',
-								'subtleforms'
-							),
-							{
-								id: ERROR_NOTICE_ID,
-								isDismissible: false,
-								type: 'snackbar',
-								actions: [
-									{
-										label: __(
-											'Reload',
-											'subtleforms'
-										),
-										onClick: () =>
-											window.location.reload(),
-									},
-								],
-							}
-						);
+						removeNotice(ERROR_NOTICE_ID);
 						return;
 					}
 
@@ -319,9 +321,13 @@ export default function useBuilderOrchestrator({
 						ok: statusOk,
 						body: statusBody,
 						status: statusCode,
-					} = await apiPut(`/forms/${resolvedFormId}`, {
-						status: targetStatus,
-					});
+					} = await apiPut(
+						`/forms/${resolvedFormId}`,
+						{
+							status: targetStatus,
+						},
+						force ? { ifMatch: false } : {}
+					);
 
 					if (!statusOk) {
 						// HTTP 422
@@ -431,48 +437,12 @@ export default function useBuilderOrchestrator({
 						if (
 							isConflictError({ status: statusCode })
 						) {
-							const currentETag =
-								statusBody?.data?.current_etag;
-							const providedIfMatch =
-								statusBody?.data?.provided_if_match;
-
 							dispatch({
 								type: BUILDER_ACTIONS.PUBLISH_ERROR,
-								payload: {
-									error: {
-										message: __(
-											'This form was modified by another user. Please reload.',
-											'subtleforms'
-										),
-										isConflict: true,
-										currentETag,
-										providedIfMatch,
-									},
-								},
+								payload: conflictPayload(statusBody, false),
 							});
-
 							removeNotice(SUCCESS_NOTICE_ID);
-							createErrorNotice(
-								__(
-									'Conflict detected. Please reload to see latest changes.',
-									'subtleforms'
-								),
-								{
-									id: ERROR_NOTICE_ID,
-									isDismissible: false,
-									type: 'snackbar',
-									actions: [
-										{
-											label: __(
-												'Reload',
-												'subtleforms'
-											),
-											onClick: () =>
-												window.location.reload(),
-										},
-									],
-								}
-							);
+							removeNotice(ERROR_NOTICE_ID);
 							return;
 						}
 
@@ -851,8 +821,40 @@ export default function useBuilderOrchestrator({
 		navigate('/forms');
 	}, [currentFormId, isDirty, navigate]);
 
+	// ── Save conflict (#145) ─────────────────────────────────────────────
+	// Every refused save writes a new conflictData, so the modal opens again
+	// when the person tries to save after closing it. Answering clears it.
+	useEffect(() => {
+		setShowConflict(!!conflictData);
+	}, [conflictData]);
+
+	const closeConflict = useCallback(() => setShowConflict(false), []);
+
+	// Throw this tab's changes away and open the version on the server.
+	const reloadLatest = useCallback(() => {
+		setShowConflict(false);
+		clearFormETag(currentFormId ?? formId);
+		loadForm?.(true);
+	}, [currentFormId, formId, loadForm]);
+
+	// Send the same save again without the version check. The response brings
+	// the form's new version, which the next save then sends.
+	const replaceWithMine = useCallback(() => {
+		const auto = !!conflictData?.auto;
+		setShowConflict(false);
+		return performSave({
+			auto,
+			targetStatus: auto ? null : lastManualSaveRef.current.targetStatus,
+			force: true,
+		});
+	}, [conflictData, performSave]);
+
 	// ── Public API ───────────────────────────────────────────────────────
 	return {
+		showConflict,
+		closeConflict,
+		reloadLatest,
+		replaceWithMine,
 		performSave,
 		handleSave,
 		handleUnpublish,
