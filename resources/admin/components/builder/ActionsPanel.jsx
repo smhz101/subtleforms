@@ -38,6 +38,7 @@ import MergeTagsHelpLink from '../merge-tags/MergeTagsHelp';
 import { insertAt } from '../merge-tags/mergeTags';
 import ConnectionTest from '../settings/extensions/ConnectionTest';
 import { normalizeWebhookUrl } from '../../utils/webhookUrl';
+import { bareHost } from '../settings/senderDomain';
 import Icon from '../../ui/Icon';
 import HeadersEditor from './webhook/HeadersEditor';
 import PayloadPicker, { currentSelection, payloadMode } from './webhook/PayloadPicker';
@@ -58,6 +59,69 @@ function normalizeActions(raw) {
     // Templates store email settings under `config` (2.3.1): show them.
     settings: a.settings ?? (a.config && typeof a.config === 'object' ? a.config : {}),
   }));
+}
+
+/**
+ * The From header a notification carries itself (imported notifications keep
+ * the original sender), or ''. EmailAction::withSender() keeps such a header
+ * instead of the Settings, Email sender, so the note must show it.
+ *
+ * @param {Array|Object|undefined} headers Email action headers: "Name: value" strings, or an object.
+ * @return {string} The From value, or ''.
+ */
+export function actionFromHeader(headers) {
+  if (Array.isArray(headers)) {
+    for (const h of headers) {
+      const m = typeof h === 'string' ? /^\s*from\s*:\s*(.+)$/i.exec(h) : null;
+      if (m && m[1].trim()) return m[1].trim();
+    }
+    return '';
+  }
+  if (headers && typeof headers === 'object') {
+    const key = Object.keys(headers).find((k) => k.trim().toLowerCase() === 'from');
+    return key ? String(headers[key] || '').trim() : '';
+  }
+  return '';
+}
+
+/**
+ * Read-only line saying who the notification mail comes from.
+ */
+export function SenderNote({ headers } = {}) {
+  const own = actionFromHeader(headers);
+  if (own) {
+    return (
+      <p className='sf-actions-panel__sender' style={{ margin: '0 0 12px', fontSize: 12, color: 'var(--sf-text-muted, #757575)' }}>
+        {sprintf(
+          /* translators: %s: sender name and address set on this notification */
+          __('Sent from: %s, set on this notification.', 'subtleforms'),
+          own
+        )}
+      </p>
+    );
+  }
+  const data = window.subtleformsData || {};
+  const email = (data.senderEmail || '').trim();
+  const name = (data.senderName || '').trim();
+  const from = email
+    ? (name ? `${ name } <${ email }>` : email)
+    : sprintf(
+      /* translators: %s: default sender email address */
+      __('the WordPress default (%s)', 'subtleforms'),
+      `wordpress@${ bareHost(data.siteDomain) || 'example.com' }`
+    );
+  return (
+    <p className='sf-actions-panel__sender' style={{ margin: '0 0 12px', fontSize: 12, color: 'var(--sf-text-muted, #757575)' }}>
+      {sprintf(
+        /* translators: %s: sender name and address */
+        __('Sent from: %s.', 'subtleforms'),
+        from
+      )}{' '}
+      <a href='admin.php?page=subtleforms-settings#tab=email' target='_blank' rel='noopener noreferrer'>
+        {__('Change it in Settings, Email.', 'subtleforms')}
+      </a>
+    </p>
+  );
 }
 
 /**
@@ -280,6 +344,8 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fie
       {/* ── Email body ── */}
       {action.type === 'email' && (
         <div className='sf-actions-panel__item-body'>
+
+          <SenderNote headers={s.headers} />
 
           <MergeTagField
             label={__('To', 'subtleforms')}

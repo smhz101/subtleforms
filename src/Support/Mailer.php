@@ -119,13 +119,17 @@ class Mailer {
                 $label = trim( html_entity_decode( wp_strip_all_tags( $m[3] ), ENT_QUOTES, 'UTF-8' ) );
                 $url   = trim( html_entity_decode( $m[2], ENT_QUOTES, 'UTF-8' ) );
                 if ( ! preg_match( '#^(https?://|mailto:)#i', $url ) ) {
-                    return $label;
+                    return htmlspecialchars( $label, ENT_QUOTES, 'UTF-8' );
                 }
                 $shown = (string) preg_replace( '#^mailto:#i', '', $url );
                 if ( '' === $label ) {
-                    return $shown;
+                    $out = $shown;
+                } else {
+                    $out = ( $label === $shown || $label === $url ) ? $label : $label . ' (' . $shown . ')';
                 }
-                return ( $label === $shown || $label === $url ) ? $label : $label . ' (' . $shown . ')';
+                // Stay escaped until the final strip and decode, so literal
+                // markup in a label (an escaped "<button>") is not stripped.
+                return htmlspecialchars( $out, ENT_QUOTES, 'UTF-8' );
             },
             $t
         );

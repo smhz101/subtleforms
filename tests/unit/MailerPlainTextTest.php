@@ -36,4 +36,9 @@ final class MailerPlainTextTest extends TestCase {
 		$html = '<html><head><title>T</title></head><body><style>p{color:red}</style><script>x()</script><p>Body</p></body></html>';
 		$this->assertSame( 'Body', Mailer::plainText( $html ) );
 	}
+
+	public function test_escaped_markup_in_link_label_survives() {
+		$this->assertSame( '<button> documentation (https://example.com)', Mailer::plainText( '<a href="https://example.com">&lt;button&gt; documentation</a>' ) );
+		$this->assertSame( 'Tom & Jerry (https://x.test/?a=1&b=2)', Mailer::plainText( '<a href="https://x.test/?a=1&amp;b=2">Tom &amp; Jerry</a>' ) );
+	}
 }

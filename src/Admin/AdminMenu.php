@@ -746,9 +746,11 @@ class AdminMenu {
 			'subtleforms-admin',
 			'subtleformsData',
 			array(
-				'siteName'   => get_option( 'blogname' ),
-				'adminEmail' => get_option( 'admin_email' ),
-				'siteDomain' => $this->get_site_domain(),
+				'siteName'    => get_option( 'blogname' ),
+				'adminEmail'  => get_option( 'admin_email' ),
+				'siteDomain'  => $this->get_site_domain(),
+				'senderName'  => sanitize_text_field( (string) ( new Settings() )->get( 'sender_name', '' ) ),
+				'senderEmail' => sanitize_email( (string) ( new Settings() )->get( 'sender_email', '' ) ),
 			)
 		);
 
