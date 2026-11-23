@@ -240,7 +240,6 @@ function FormBuilderInner({
     dispatch,
     isHydrating,
     saving,
-    autoSaving,
     canUndo,
     canRedo,
   });

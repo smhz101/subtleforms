@@ -150,4 +150,21 @@ describe('useBuilderReducer Undo/Redo Edge Cases', () => {
       expect(nextState.schemaHistoryPast).toHaveLength(0);
     });
   });
+
+  it('keeps the redo stack when an autosave succeeds', () => {
+    const future = [createSchema(2)];
+    const state = {
+      ...initialBuilderState,
+      state: BUILDER_STATES.AUTOSAVING,
+      autoSaving: true,
+      draftSchema: createSchema(1),
+      schemaHistoryPast: [createSchema(0)],
+      schemaHistoryFuture: future,
+    };
+    const next = builderReducer(state, {
+      type: BUILDER_ACTIONS.AUTOSAVE_SUCCESS,
+      payload: { stillDirty: false },
+    });
+    expect(next.schemaHistoryFuture).toEqual(future);
+  });
 });
