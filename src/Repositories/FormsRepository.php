@@ -1034,12 +1034,19 @@ final class FormsRepository {
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update for draft schema; no caching for writes.
 		$result = $wpdb->update(
 			$this->table,
-			array( 'draft_schema' => wp_json_encode( $schema ) ),
+			array(
+				'draft_schema' => wp_json_encode( $schema ),
+				'updated_at'   => current_time( 'mysql', true ),
+			),
 			array( 'id' => $formId ),
-			array( '%s' ),
+			array( '%s', '%s' ),
 			array( '%d' )
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+		if ( $result !== false ) {
+			wp_cache_delete( "subtleforms_form_{$formId}", 'subtleforms' );
+		}
 
 		if ( $result === false ) {
 			Logger::error(
