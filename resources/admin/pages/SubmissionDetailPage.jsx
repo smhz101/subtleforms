@@ -1,6 +1,7 @@
 import { submissionStatus } from '../utils/submissionStatus';
 import { displayItems, displayLabel, displayRow, displayText } from '../utils/entryDisplay';
 import { nextReviewStatus } from '../utils/entryStatus';
+import { isOn } from '../utils/isOn';
 import { adminLabel } from '../../shared/fieldDisplay';
 import { structuralType } from '../../shared/formType';
 import { useState, useEffect, useRef } from '@wordpress/element';
@@ -338,7 +339,7 @@ function FileLinks( { files, submissionId } ) {
   );
 }
 
-export default function SubmissionDetailPage({ submissionId, onBack, formId, embedded = false, onBrowse = null, onEntryChanged = null, onEntryUpdated = null }) {
+export default function SubmissionDetailPage({ submissionId, onBack, formId, embedded = false, onBrowse = null, onEntryChanged = null, onEntryUpdated = null, listPatch = null }) {
   const routerNavigate = useNavigate();
   const [submission, setSubmission] = useState(null);
   const [logs, setLogs] = useState([]);
@@ -353,6 +354,14 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
   useEffect(() => {
     loadSubmission();
   }, [submissionId]);
+
+  // A change made to this entry in the list (its star) shows in the panel.
+  useEffect(() => {
+    if (!listPatch) return;
+    setSubmission((current) =>
+      current && String(current.id) === String(listPatch.id) ? { ...current, ...listPatch.patch } : current
+    );
+  }, [listPatch]);
 
   const loadSubmission = async () => {
     const requestId = ++requestRef.current;
@@ -438,7 +447,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
   // Star (2.3.0).
   const handleStarToggle = async () => {
     if (!submission) return;
-    const next = parseInt(submission.starred, 10) === 1 ? 0 : 1;
+    const next = isOn(submission.starred) ? 0 : 1;
     setUpdating(true);
     try {
       await apiClient.put(`/submissions/${submission.id}`, { starred: !!next });
@@ -693,7 +702,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
 
   const isUnread = parseInt( submission.is_read, 10 ) === 0;
   const isFlagged = submission.status === 'flagged';
-  const isStarred = parseInt( submission.starred, 10 ) === 1;
+  const isStarred = isOn( submission.starred );
   const notes = Array.isArray( meta.notes ) ? meta.notes : [];
 
   // Field types, so answers can be shown the way they were typed.
@@ -785,6 +794,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
           size='compact'
           icon={ <Icon.Star size={ 16 } fill={ isStarred ? 'currentColor' : 'none' } /> }
           isPressed={ isStarred }
+          aria-pressed={ isStarred }
           disabled={ updating }
           onClick={ handleStarToggle }>
           { isStarred ? __( 'Starred', 'subtleforms' ) : __( 'Star', 'subtleforms' ) }

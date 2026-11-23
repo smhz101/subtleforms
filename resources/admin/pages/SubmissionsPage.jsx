@@ -12,6 +12,7 @@ import { apiPost } from '../utils/api';
 import { useForms, useSettings } from '../data';
 import { deletesPermanently } from '../utils/deleteBehavior';
 import { tabsFor } from '../utils/tabCounts';
+import { isOn } from '../utils/isOn';
 import { buildInboxTabs, tabFromParams } from '../utils/inboxTabs';
 import lazyWithRetry from '../utils/lazyWithRetry';
 import { noticeDialog } from '../utils/confirmDialog';
@@ -286,6 +287,16 @@ export default function SubmissionsPage({ formId }) {
         starred: next.starred,
         status: next.status,
       });
+    }
+  };
+
+  // The star of the open entry changed in the list: the panel follows.
+  const [listPatch, setListPatch] = useState(null);
+  const entriesChanged = (changes) => {
+    adjustCounts(changes);
+    const open = (changes || []).find((change) => change.after && String(change.before?.id) === String(openId));
+    if (open && isOn(open.after.starred) !== isOn(open.before.starred)) {
+      setListPatch({ id: open.before.id, patch: { starred: isOn(open.after.starred) ? 1 : 0 } });
     }
   };
 
@@ -652,7 +663,7 @@ export default function SubmissionsPage({ formId }) {
             density={view.density}
             readingId={split ? openId : null}
             onNeighbors={split ? onNeighbors : null}
-            onEntriesChanged={adjustCounts}
+            onEntriesChanged={entriesChanged}
             onRowClick={(submission) => {
               if (!split) {
                 const params = new URLSearchParams(searchParams);
@@ -680,6 +691,7 @@ export default function SubmissionsPage({ formId }) {
                   onBack={closePane}
                   onEntryChanged={() => submissionsTableRef.current?.removeEntry?.(openId)}
                   onEntryUpdated={entryUpdated}
+                  listPatch={listPatch}
                   onBrowse={{
                     hasPrev: neighbors.hasPrev,
                     hasNext: neighbors.hasNext,
