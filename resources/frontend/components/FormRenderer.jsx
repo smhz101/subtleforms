@@ -118,11 +118,14 @@ export default function FormRenderer({
   // Which copy of this form is on the page: 1 for the first, 2 for the next.
   // Claimed once per mount (a ref, so a re-render never claims again) and given
   // back on unmount. Field ids carry it from copy 2 on (formInstance.js).
+  // The builder canvas and Preview show one copy and are drawn again from
+  // scratch on edits, so they never claim a number and always keep copy 1.
   const instanceRef = useRef(null);
-  if (instanceRef.current === null) {
+  if (instanceRef.current === null && !preview) {
     instanceRef.current = { formId, n: claimInstance(formId) };
   }
   useEffect(() => {
+    if (preview) return undefined;
     if (instanceRef.current === null) {
       instanceRef.current = { formId, n: claimInstance(formId) };
     }

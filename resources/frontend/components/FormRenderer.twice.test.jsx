@@ -118,4 +118,17 @@ describe('the same form twice on a page (#135)', () => {
     await second.render();
     expect(fieldIds(second.container)).toContain('subtleforms-field-2-name');
   });
+
+  it('keeps copy 1 ids in Preview even while another copy is live', async () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(<FormRenderer preloadedSchema={schema} formId={77} preview />);
+    });
+    await settle();
+    expect(fieldIds(container)).toContain('subtleforms-field-name');
+    act(() => root.unmount());
+    container.remove();
+  });
 });
