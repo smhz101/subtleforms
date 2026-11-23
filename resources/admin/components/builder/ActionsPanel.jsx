@@ -584,7 +584,11 @@ export default function ActionsPanel({ schema, onChange, isReadOnly = false }) {
     let live = true;
     Promise.resolve()
       .then(() => apiClient.get('/settings'))
-      .then((data) => { if (live && data && typeof data === 'object') setSiteSettings(data); })
+      .then((response) => {
+        // The endpoint answers { success, data }: keep the settings inside it.
+        const data = response && typeof response.data === 'object' && response.data !== null ? response.data : response;
+        if (live && data && typeof data === 'object') setSiteSettings(data);
+      })
       .catch(() => {});
     return () => { live = false; };
   }, []);

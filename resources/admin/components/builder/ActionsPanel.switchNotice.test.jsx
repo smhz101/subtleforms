@@ -20,7 +20,8 @@ const schemaTo = (to) => ({
 });
 
 async function mount(schema, settings) {
-  apiClient.get.mockResolvedValue(settings);
+  // The settings endpoint answers { success, data }.
+  apiClient.get.mockResolvedValue({ success: true, data: settings });
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
@@ -44,7 +45,7 @@ test('shows the notice with a link when To is an answer tag and submitter emails
 });
 
 test('hides the notice when submitter emails are on', async () => {
-  const { container, unmount } = await mount(schemaTo('{email}'), { user_confirmation_enabled: true });
+  const { container, unmount } = await mount(schemaTo('{email}'), { user_confirmation_enabled: true, admin_notification_enabled: true });
   expect(notice(container)).toBeNull();
   unmount();
 });
