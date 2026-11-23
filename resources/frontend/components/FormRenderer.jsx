@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from '@wordpress/element';
+import { useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef } from '@wordpress/element';
 import { __, sprintf, _n } from '@wordpress/i18n';
 import FieldRenderer from './FieldRenderer';
 import StepNavigation from './StepNavigation';
@@ -116,28 +116,19 @@ export default function FormRenderer({
   );
   const honeypotName = `sf_hp_${honeypotSuffix}`;
   // Which copy of this form is on the page: 1 for the first, 2 for the next.
-  // Claimed once per mount (a ref, so a re-render never claims again) and given
-  // back on unmount. Field ids carry it from copy 2 on (formInstance.js).
-  // The builder canvas and Preview show one copy and are drawn again from
-  // scratch on edits, so they never claim a number and always keep copy 1.
-  const instanceRef = useRef(null);
-  if (instanceRef.current === null && !preview) {
-    instanceRef.current = { formId, n: claimInstance(formId) };
-  }
-  useEffect(() => {
+  // The first render always uses copy 1 (the plain ids). A layout effect then
+  // claims the real number and, for a later copy, renders again before the
+  // browser paints. React runs the cleanup of a removed copy before the layout
+  // effects of a new one in the same commit, so a copy swapped for a fresh mount
+  // of the same form gets 1 again. The builder canvas and Preview show one copy
+  // and are drawn again on edits, so they never claim a number (formInstance.js).
+  const [instance, setInstance] = useState(1);
+  useLayoutEffect(() => {
     if (preview) return undefined;
-    if (instanceRef.current === null) {
-      instanceRef.current = { formId, n: claimInstance(formId) };
-    }
-    return () => {
-      if (instanceRef.current) {
-        releaseInstance(instanceRef.current.formId, instanceRef.current.n);
-        instanceRef.current = null;
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  const instance = instanceRef.current ? instanceRef.current.n : 1;
+    const n = claimInstance(formId);
+    if (n !== 1) setInstance(n);
+    return () => releaseInstance(formId, n);
+  }, [formId, preview]);
   const honeypotId = `subtleforms-hp-${formId}-${honeypotSuffix}`;
 
   // Load schema (skip if preloaded)

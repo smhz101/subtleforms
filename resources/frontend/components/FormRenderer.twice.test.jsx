@@ -131,4 +131,23 @@ describe('the same form twice on a page (#135)', () => {
     act(() => root.unmount());
     container.remove();
   });
+
+  it('gives a copy swapped for a fresh mount of the same form the plain ids again', async () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    const render = (key) => act(async () => {
+      root.render(<FormRenderer key={key} preloadedSchema={schema} formId={88} />);
+    });
+    await render('one');
+    await settle();
+    expect(fieldIds(container)).toContain('subtleforms-field-name');
+    await render('two');
+    await settle();
+    const ids = fieldIds(container);
+    expect(ids).toContain('subtleforms-field-name');
+    expect(ids.some((id) => /^subtleforms-field-\d+-/.test(id))).toBe(false);
+    act(() => root.unmount());
+    container.remove();
+  });
 });
