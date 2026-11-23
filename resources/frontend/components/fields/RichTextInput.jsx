@@ -184,7 +184,7 @@ export default function RichTextInput( {
             disabled={ disabled }
             aria-label={ label }
             title={ label }>
-            { text }
+            <span aria-hidden='true'>{ text }</span>
           </button>
         ) ) }
       </div>

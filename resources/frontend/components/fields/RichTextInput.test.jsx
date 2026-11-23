@@ -51,3 +51,21 @@ test( 'allowed formatting in the starting value is kept', () => {
   expect( editor.querySelector( 'ul li' ).textContent ).toBe( 'c' );
   unmount();
 } );
+
+test( 'toolbar buttons are named by their label and the visible glyph is decorative', () => {
+  const { container, unmount } = render( '' );
+  const buttons = container.querySelectorAll( '.subtleforms-richtext__button' );
+  expect( buttons ).toHaveLength( 4 );
+  const names = [];
+  buttons.forEach( ( button ) => {
+    const glyph = button.querySelector( 'span' );
+    expect( glyph ).not.toBeNull();
+    expect( glyph.getAttribute( 'aria-hidden' ) ).toBe( 'true' );
+    expect( glyph.textContent.length ).toBeGreaterThan( 0 );
+    expect( button.textContent ).toBe( glyph.textContent );
+    expect( button.getAttribute( 'aria-label' ) ).toBe( button.getAttribute( 'title' ) );
+    names.push( button.getAttribute( 'aria-label' ) );
+  } );
+  expect( names ).toEqual( [ 'Bold', 'Italic', 'Bulleted list', 'Numbered list' ] );
+  unmount();
+} );
