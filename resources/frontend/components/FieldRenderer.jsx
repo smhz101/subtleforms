@@ -488,9 +488,14 @@ export default function FieldRenderer({
         />
       );
     }
+    // The setup message is for site admins and is empty for visitors. With
+    // nothing to say and nothing to show, draw nothing (#142).
+    if (!config.captchaWarning) {
+      return null;
+    }
     return (
       <p className='subtleforms-captcha-warning' role='status'>
-        {config.captchaWarning || __('This CAPTCHA is not set up yet.', 'subtleforms')}
+        {config.captchaWarning}
       </p>
     );
   }
