@@ -41,6 +41,7 @@ export function readInlineFormData(formId, doc = typeof document !== 'undefined'
     return {
       schema,
       spamToken: typeof data.spam_token === 'string' ? data.spam_token : '',
+      spamMinSeconds: Number(data.spam_min_seconds) > 0 ? Number(data.spam_min_seconds) : 0,
       version: data.version ?? null,
     };
   } catch (e) {
