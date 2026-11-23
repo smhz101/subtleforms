@@ -180,6 +180,17 @@ describe('search box on long lists', () => {
     expect(document.activeElement).toBe(trigger);
   });
 
+  test('Enter that confirms an IME composition does not pick an option', () => {
+    const { container, trigger, onChange } = mount(numbered(30));
+    act(() => trigger.click());
+    const search = searchOf(container);
+    key(search, 'Enter', { isComposing: true });
+    expect(onChange).not.toHaveBeenCalled();
+    expect(container.querySelector('[role="listbox"]')).not.toBeNull();
+    key(search, 'Enter');
+    expect(onChange).toHaveBeenCalledWith('Option 1');
+  });
+
   test('Escape closes the list and gives focus back to the trigger', () => {
     const { container, trigger } = mount(numbered(30));
     act(() => trigger.click());

@@ -116,6 +116,10 @@ export default function ChoiceSelect({
   };
 
   const onSearchKeyDown = (event) => {
+    // Enter and the arrows belong to the IME while a composition is open.
+    if (event.isComposing || event.keyCode === 229) {
+      return;
+    }
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
       moveActive(event.key);
@@ -132,7 +136,7 @@ export default function ChoiceSelect({
   };
 
   const onKeyDown = (event) => {
-    if (locked) {
+    if (locked || event.isComposing || event.keyCode === 229) {
       return;
     }
     const printable = event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey;
