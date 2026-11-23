@@ -4,10 +4,12 @@
  * or replace, and a tab that keeps saving its own work is never in conflict
  * with itself.
  */
+const fs = require('fs');
+const path = require('path');
 const { test, expect } = require('@playwright/test');
 const { adminApi, publishForm, cleanup, loginPage, openBuilder } = require('./helpers');
 
-const SHOTS = '/home/claude/dist/2.9.2/free/145';
+const SHOTS = path.join(process.cwd(), 'test-results', 'shots', '145');
 
 test.use({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 });
 
@@ -15,6 +17,7 @@ let client;
 const created = [];
 
 test.beforeAll(async () => {
+  fs.mkdirSync(SHOTS, { recursive: true });
   client = await adminApi();
 });
 
@@ -81,7 +84,7 @@ test('a stale tab is asked, and Reload latest version shows the newer save', asy
   await expect(dialog).toContainText('Someone saved this form in another tab or browser after you opened it.');
   await expect(dialog.getByRole('button', { name: 'Reload latest version' })).toBeVisible();
   await expect(dialog.getByRole('button', { name: 'Replace with my changes' })).toBeVisible();
-  await b.screenshot({ path: `${SHOTS}/conflict-modal.png` });
+  await b.screenshot({ path: path.join(SHOTS, 'conflict-modal.png') });
 
   // Nothing of tab B reached the form.
   expect(await liveKeys(form.id)).toEqual(['text', 'email']);
@@ -165,4 +168,41 @@ test('one tab updating twice with edits in between is never in conflict', async 
 
   await expect(conflict(page)).toHaveCount(0);
   expect(await liveKeys(form.id)).toEqual(['text', 'email', 'number']);
+});
+
+test('Replace with my changes also sends the rename that was refused', async ({ browser }) => {
+  const form = await freshForm('Stale tab rename');
+  const { context, a, b } = await twoTabs(browser, form.id);
+
+  await addField(a, 'Email');
+  await update(a);
+  await expect(badge(a)).toHaveText(/^Published$/, { timeout: 20000 });
+
+  // Tab B adds a field and renames the form after tab A saved.
+  await addField(b, 'Number');
+  const title = `Renamed in tab B ${Date.now()}`;
+  await b.locator('.sf-builder-header-bar__title-button').click();
+  await b.getByRole('textbox', { name: 'Form title' }).fill(title);
+  await b.getByRole('textbox', { name: 'Form title' }).press('Enter');
+  const dialog = conflict(b);
+  await expect(dialog).toBeVisible({ timeout: 20000 });
+
+  await dialog.getByRole('button', { name: 'Replace with my changes' }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(b.locator('.sf-builder-header-bar__save-status')).toHaveText(/^Saved$/, { timeout: 20000 });
+
+  const stored = await client.call('GET', `/forms/${form.id}`);
+  expect(stored.body.data.title).toBe(title);
+
+  // The Forms list shows it. The local SQLite test site cannot run the list
+  // query (JSON_EXTRACT), so the list check runs where the list API answers.
+  const listed = await client.call('GET', '/forms?per_page=100');
+  if ((listed.body?.data || []).length > 0) {
+    await b.goto('/wp-admin/admin.php?page=subtleforms-forms', { waitUntil: 'domcontentloaded' });
+    await b.getByRole('tab', { name: /^All/ }).waitFor({ timeout: 30000 });
+    await b.getByPlaceholder('Search forms').fill(title);
+    await expect(b.locator('tr', { hasText: title }).first()).toBeVisible({ timeout: 45000 });
+  }
+
+  await context.close();
 });
