@@ -2,9 +2,23 @@
  * Keyboard helpers for listboxes and calendar grids (FLD2-04, FLD2-05).
  */
 
+/**
+ * Lower-case text with accents removed, so "e" finds "École" and "cafe"
+ * finds "Café". Used for type-ahead and for the search boxes.
+ *
+ * @param {*} text Anything; null and undefined fold to an empty string.
+ * @return {string}
+ */
+export function foldText(text) {
+  return String(text ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
 export function typeaheadIndex(labels, buffer, fromIndex = -1) {
-  const query = String(buffer || '').toLowerCase();
-  const list = (Array.isArray(labels) ? labels : []).map((label) => String(label || '').toLowerCase());
+  const query = foldText(buffer);
+  const list = (Array.isArray(labels) ? labels : []).map((label) => foldText(label));
   if (!query || list.length === 0) {
     return fromIndex;
   }

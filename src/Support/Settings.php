@@ -506,6 +506,25 @@ class Settings {
 	}
 
 	/**
+	 * New installs start with the submitter confirmation email on: an
+	 * auto-reply only exists when the owner adds one. Existing sites keep
+	 * whatever they have, and the class default stays off.
+	 *
+	 * @param bool $fresh From SpamDefaults::isFreshInstall(), read before activation.
+	 */
+	public static function afterActivate( bool $fresh ): void {
+		if ( ! $fresh ) {
+			return;
+		}
+		$settings = get_option( self::OPTION_NAME, array() );
+		$settings = is_array( $settings ) ? $settings : array();
+		if ( ! array_key_exists( 'user_confirmation_enabled', $settings ) ) {
+			$settings['user_confirmation_enabled'] = true;
+			update_option( self::OPTION_NAME, $settings );
+		}
+	}
+
+	/**
 	 * Drop stored AI assistant keys. Nothing in the plugin reads them, and
 	 * saving one used to fail the whole settings form.
 	 */

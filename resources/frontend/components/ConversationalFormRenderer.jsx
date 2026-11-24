@@ -1,4 +1,5 @@
 import { createSpamTokenSource } from '../utils/spamToken';
+import useTimeTrapHold from '../utils/useTimeTrapHold';
 import { useState, useEffect, useCallback, useMemo, useRef } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import FieldRenderer from './FieldRenderer';
@@ -35,12 +36,19 @@ export default function ConversationalFormRenderer({
   schema,
   formId,
   preview = false,
+  instance = 1,
   onSubmit: customOnSubmit = null,
   spamToken = '',
+  spamMinSeconds = 0,
 }) {
+  // Holds a fast submit until the time trap's minimum has passed (issue 126).
+  const waitForMinimum = useTimeTrapHold(spamMinSeconds);
   const spamTokens = useMemo(() => createSpamTokenSource(formId), [formId]);
   const primeSpamToken = useCallback(() => spamTokens.prime(spamToken), [spamTokens, spamToken]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const cardRef = useRef(null);
+  const reviewHeadingRef = useRef(null);
+  const movedRef = useRef(false);
   const [currentStep, setCurrentStep] = useState('questions'); // 'questions', 'review'
   const [values, setValues] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
@@ -217,6 +225,35 @@ export default function ConversationalFormRenderer({
     return () => document.removeEventListener('keypress', handleKeyPress);
   }, [currentField, currentStep, currentIndex, totalFields, handleNext]);
 
+  // After the question or step changes (not on first render), keep the card
+  // in view and move focus to the new question's first input.
+  useEffect(() => {
+    if (!movedRef.current) {
+      movedRef.current = true;
+      return;
+    }
+    if (currentStep === 'review') {
+      reviewHeadingRef.current?.focus?.({ preventScroll: true });
+      reviewHeadingRef.current?.scrollIntoView?.({ block: 'nearest' });
+      return;
+    }
+    const card = cardRef.current;
+    if (!card) return;
+    const inputs = card.querySelectorAll(
+      '.subtleforms-field-wrapper input:not([type="hidden"]):not([disabled]), .subtleforms-field-wrapper textarea:not([disabled]), .subtleforms-field-wrapper select:not([disabled])'
+    );
+    let target = inputs[0];
+    if (target && (target.type === 'radio' || target.type === 'checkbox')) {
+      target = Array.from(inputs).find((el) => el.checked && el.name === target.name) || target;
+    }
+    target?.focus?.({ preventScroll: true });
+    const reduce =
+      typeof window !== 'undefined' &&
+      window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    card.scrollIntoView?.({ block: 'nearest', behavior: reduce ? 'auto' : 'smooth' });
+  }, [currentIndex, currentStep]);
+
   // Handle submit
   const handleSubmitOnce = useCallback(
     async (e) => {
@@ -231,6 +268,10 @@ export default function ConversationalFormRenderer({
 
       setSubmitting(true);
       setSubmitError(null);
+
+      if (!(await waitForMinimum())) {
+        return;
+      }
 
       // Handle reCAPTCHA v3 if present
       const recaptchaV3Input = document.querySelector(
@@ -364,7 +405,7 @@ export default function ConversationalFormRenderer({
         setSubmitting(false);
       }
     },
-    [formId, values, leafPaths, preview, customOnSubmit, hiddenFields, spamToken, spamTokens]
+    [formId, values, leafPaths, preview, customOnSubmit, hiddenFields, spamToken, spamTokens, waitForMinimum]
   );
 
   const handleSubmit = useCallback(
@@ -455,7 +496,7 @@ export default function ConversationalFormRenderer({
         </div>
 
         <div className='subtleforms-review-card'>
-          <h2 className='subtleforms-review-title'>
+          <h2 className='subtleforms-review-title' tabIndex={-1} ref={reviewHeadingRef}>
             {__('Please review your answers', 'subtleforms')}
           </h2>
 
@@ -543,7 +584,7 @@ export default function ConversationalFormRenderer({
       )}
 
       {/* Question Card */}
-      <div className='subtleforms-question-card'>
+      <div className='subtleforms-question-card' ref={cardRef}>
         <div className='subtleforms-question-number' aria-live='polite'>
           {sprintf(
             /* translators: 1: question number, 2: number of questions */
@@ -557,7 +598,7 @@ export default function ConversationalFormRenderer({
 
         <div className='subtleforms-field-wrapper'>
           {currentField && (
-            <FormContext.Provider value={{ formId, preview, fieldDefaults }}>
+            <FormContext.Provider value={{ formId, preview, fieldDefaults, instance }}>
               <FieldRenderer
                 field={currentField}
                 fieldPath={fieldKey}

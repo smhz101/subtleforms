@@ -78,6 +78,60 @@ final class SchemaRepair {
 	}
 
 	/**
+	 * Store a Radio or Multiple choice field that asks for `multiple: true`
+	 * exactly as the builder's Checkboxes item stores it: type
+	 * `multiple_choice` with `allowMultiple` on (#140).
+	 *
+	 * A field created through the REST API with `multiple: true` (top level or
+	 * in `config`) used to render radio buttons because only `allowMultiple`
+	 * is read. The setting is honoured here, at save, rather than rejected.
+	 * The `multiple` key is dropped so one spelling is stored. Fields that do
+	 * not ask for it, or ask for `false`, are left alone.
+	 *
+	 * @param array $fields Field list.
+	 * @return array{0: array, 1: int} The list and the number of fields changed.
+	 */
+	public static function multipleToCheckboxes( array $fields ): array {
+		$count = 0;
+		foreach ( $fields as $i => $field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+			if ( in_array( $field['type'] ?? '', array( 'radio', 'multiple_choice' ), true ) ) {
+				$hasConfig = isset( $field['config'] ) && is_array( $field['config'] );
+				$asked     = true === ( $field['multiple'] ?? null ) || ( $hasConfig && true === ( $field['config']['multiple'] ?? null ) );
+				if ( $asked ) {
+					$field['type']          = 'multiple_choice';
+					$field['allowMultiple'] = true;
+					unset( $field['multiple'] );
+					if ( $hasConfig ) {
+						$field['config']['type']          = 'multiple_choice';
+						$field['config']['allowMultiple'] = true;
+						unset( $field['config']['multiple'] );
+					}
+					++$count;
+				}
+			}
+			foreach ( array( 'children', 'fields' ) as $childKey ) {
+				if ( isset( $field[ $childKey ] ) && is_array( $field[ $childKey ] ) ) {
+					list( $field[ $childKey ], $n ) = self::multipleToCheckboxes( $field[ $childKey ] );
+					$count                         += $n;
+				}
+			}
+			if ( isset( $field['columns'] ) && is_array( $field['columns'] ) ) {
+				foreach ( $field['columns'] as $c => $column ) {
+					if ( is_array( $column ) ) {
+						list( $field['columns'][ $c ], $n ) = self::multipleToCheckboxes( $column );
+						$count                             += $n;
+					}
+				}
+			}
+			$fields[ $i ] = $field;
+		}
+		return array( $fields, $count );
+	}
+
+	/**
 	 * Whether a field list has a Page Break (step) at root level.
 	 *
 	 * @param mixed $fields Field list.

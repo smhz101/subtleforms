@@ -2,7 +2,7 @@
  * 2.6.0: default spam protection and the blocked spam counter.
  *
  * - a filled hidden trap field is dropped quietly and the counter goes up
- * - a too-fast submit gets the same "thank you", stores nothing and counts
+ * - a too-fast request to the server gets the same "thank you", stores nothing and counts
  * - a normal submit is still stored and not counted
  * - the trap field is hidden from screen readers and keyboards
  * - the dashboard card and the form's Spam protection settings show it
@@ -10,7 +10,7 @@
 const fs = require('fs');
 const path = require('path');
 const { test, expect } = require('@playwright/test');
-const { adminApi, publishForm, cleanup, entries, waitForForm, useBundleOverride, loginPage, openBuilder } = require('./helpers');
+const { adminApi, publishForm, cleanup, entries, waitForForm, useBundleOverride, loginPage, openBuilder, BASE } = require('./helpers');
 
 const SHOTS = path.join(process.cwd(), 'test-results', 'shots', 'spam260');
 
@@ -86,19 +86,26 @@ test('a filled trap field is dropped quietly and counted', async ({ page }) => {
   expect(after.reasons.honeypot).toBe(before.reasons.honeypot + 1);
 });
 
-test('a too-fast submit gets a thank you, stores nothing and is counted', async ({ page }) => {
+test('a too-fast submit gets a thank you, stores nothing and is counted', async ({ playwright }) => {
+  // What a robot does: post at once, without waiting. The browser form holds
+  // a fast human until the minimum has passed (issue 126), so this goes to the
+  // server directly.
   const form = await contactForm('Spam too fast');
   const before = await stats(form.id);
+  const anon = await playwright.request.newContext({ baseURL: BASE });
 
-  await page.goto(form.url);
-  await waitForForm(page);
-  await page.getByLabel('Your name').fill('Speedy');
-  await page.click('.subtleforms-button-submit');
-  await expect(page.locator('.subtleforms-success-message')).toBeVisible();
+  const ticket = (await (await anon.get(`/wp-json/subtleforms/v1/forms/${form.id}/schema`)).json())?.data?.spam_token || '';
+  const traded = await anon.post(`/wp-json/subtleforms/v1/forms/${form.id}/spam-token`, { data: { token: ticket } });
+  const token = (await traded.json())?.data?.spam_token || '';
+  const res = await anon.post('/wp-json/subtleforms/v1/submit', {
+    data: { form_id: form.id, data: { name: 'Speedy', form_rendered_at: token } },
+  });
+  expect(res.status()).toBe(200);
 
   expect(await entries(client, form.id)).toHaveLength(0);
   const after = await stats(form.id);
   expect(after.reasons.time_trap).toBe(before.reasons.time_trap + 1);
+  await anon.dispose();
 });
 
 test('a normal submit is stored and not counted', async ({ page }) => {

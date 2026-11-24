@@ -430,6 +430,44 @@ final class SubmissionsApi {
 	}
 
 	/**
+	 * What a Submissions tab filters on. The list and the CSV export both read
+	 * the tab through this, so they always show the same entries.
+	 *
+	 * 'unread' (and the older 'new') and 'read' are the is_read column,
+	 * 'starred' is the starred column, and only 'spam', 'flagged' and 'trash'
+	 * are real status values. Any other tab is the All tab, where the
+	 * processing-status filter (completed, failed, and so on) applies.
+	 *
+	 * @param string|null $tab              The tab: all, unread, read, starred, spam, flagged or trash.
+	 * @param string|null $processingStatus The filter bar's processing status.
+	 * @return array{status: ?string, is_read: ?int, starred: ?int}
+	 */
+	private static function tabFilters( ?string $tab, ?string $processingStatus ): array {
+		$status  = null;
+		$is_read = null;
+
+		if ( 'unread' === $tab || 'new' === $tab ) {
+			$is_read = 0;
+		} elseif ( 'read' === $tab ) {
+			$is_read = 1;
+		} elseif ( in_array( $tab, array( 'spam', 'flagged', 'trash' ), true ) ) {
+			$status = $tab;
+		}
+		$starred = 'starred' === $tab ? 1 : null;
+
+		// Only the All tab takes the processing status.
+		if ( $processingStatus && null === $status && null === $is_read && 'starred' !== $tab ) {
+			$status = $processingStatus;
+		}
+
+		return array(
+			'status'  => $status,
+			'is_read' => $is_read,
+			'starred' => $starred,
+		);
+	}
+
+	/**
 	 * Get all submissions with optional filtering.
 	 */
 	public function get_all_submissions( WP_REST_Request $request ): WP_REST_Response {
@@ -449,27 +487,14 @@ final class SubmissionsApi {
 			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
 		}
 
-		// Map tab-based status filter to the correct DB field.
-		// 'unread'/'read' resolve to is_read column; 'spam'/'flagged' use status column.
-		// A separate 'processing_status' param filters by pipeline status (completed/failed/etc).
+		// The tab and the processing-status filter become the right columns,
+		// the same way the CSV export reads them (see tabFilters()).
 		$tab_status  = $request->get_param( 'status' );
 		$proc_status = $request->get_param( 'processing_status' );
-		$status_arg  = null;
-		$is_read_arg = null;
-
-		if ( $tab_status === 'unread' || $tab_status === 'new' ) {
-			$is_read_arg = 0;
-		} elseif ( $tab_status === 'read' ) {
-			$is_read_arg = 1;
-		} elseif ( in_array( $tab_status, array( 'spam', 'flagged', 'trash' ), true ) ) {
-			$status_arg = $tab_status;
-		}
-		$starred_arg = $tab_status === 'starred' ? 1 : null;
-
-		// Processing status (filter bar), only applies when tab is 'all'
-		if ( $proc_status && $status_arg === null && $is_read_arg === null && $tab_status !== 'starred' ) {
-			$status_arg = $proc_status;
-		}
+		$tab         = self::tabFilters( is_string( $tab_status ) ? $tab_status : null, is_string( $proc_status ) ? $proc_status : null );
+		$status_arg  = $tab['status'];
+		$is_read_arg = $tab['is_read'];
+		$starred_arg = $tab['starred'];
 
 		$args = array(
 			'form_id'     => $request->get_param( 'form_id' ),
@@ -530,10 +555,13 @@ final class SubmissionsApi {
 			return ApiResponse::not_found( __( 'Submission not found', 'subtleforms' ) );
 		}
 
-		// Auto-mark as read (track via is_read, not status)
+		// Auto-mark as read (track via is_read, not status). The response says
+		// so, because it carries is_read 1 and the screen could not otherwise
+		// tell that this entry was unread a moment ago (issue 130).
 		if ( intval( $submission['is_read'] ?? 0 ) === 0 ) {
 			$this->submissionsRepo->update( $submission['id'], array( 'is_read' => 1 ) );
-			$submission['is_read'] = 1;
+			$submission['is_read']     = 1;
+			$submission['marked_read'] = true;
 		}
 
 		// Enhance with form info
@@ -1080,13 +1108,28 @@ final class SubmissionsApi {
 	 * Trash, capped at the newest entry that exists now so rows added while the
 	 * file is written are left out.
 	 *
-	 * @param array $params form_id, status, search, range, after, ids.
+	 * The tab (status) is read the way the list reads it, through tabFilters(),
+	 * so a tab exports the entries it shows. A status that is not a tab at all
+	 * (completed, failed, from before the export knew the tabs) is a processing
+	 * status.
+	 *
+	 * @param array $params form_id, status (the tab), processing_status, search, range, after, ids.
 	 * @return array|null Query arguments, or null when nothing matches.
 	 */
 	private function exportQuery( array $params ): ?array {
+		$tab  = isset( $params['status'] ) && is_scalar( $params['status'] ) ? Helpers::safe_sanitize_text( (string) $params['status'] ) : '';
+		$proc = isset( $params['processing_status'] ) && is_scalar( $params['processing_status'] ) ? Helpers::safe_sanitize_text( (string) $params['processing_status'] ) : '';
+		if ( '' !== $tab && '' === $proc && ! in_array( $tab, self::TABS, true ) ) {
+			$proc = $tab;
+			$tab  = '';
+		}
+		$filters = self::tabFilters( '' !== $tab ? $tab : null, '' !== $proc ? $proc : null );
+
 		$args = array(
 			'form_id' => ! empty( $params['form_id'] ) ? intval( $params['form_id'] ) : null,
-			'status'  => isset( $params['status'] ) ? Helpers::safe_sanitize_text( $params['status'] ) : null,
+			'status'  => $filters['status'],
+			'is_read' => $filters['is_read'],
+			'starred' => $filters['starred'],
 			'search'  => isset( $params['search'] ) ? Helpers::safe_sanitize_text( $params['search'] ) : null,
 			'after'   => ReportQueries::rangeStartUtc( (string) ( $params['range'] ?? '' ) ) ?? ( isset( $params['after'] ) ? Helpers::safe_sanitize_text( $params['after'] ) : null ),
 			// Export selected (2.3.0).
@@ -1222,7 +1265,7 @@ final class SubmissionsApi {
 			$filters['ids'] = $ids;
 		} else {
 			$formId = isset( $source['form_id'] ) ? absint( $source['form_id'] ) : 0;
-			foreach ( array( 'status', 'search', 'range', 'after' ) as $key ) {
+			foreach ( array( 'status', 'processing_status', 'search', 'range', 'after' ) as $key ) {
 				if ( isset( $source[ $key ] ) && is_string( $source[ $key ] ) ) {
 					$filters[ $key ] = sanitize_text_field( wp_unslash( $source[ $key ] ) );
 				}
@@ -1232,7 +1275,7 @@ final class SubmissionsApi {
 
 		$args = $this->exportQuery( array_merge( $filters, array( 'form_id' => $formId ) ) );
 		if ( null === $args ) {
-			$this->refuseExport( 'empty', __( 'No submissions to export', 'subtleforms' ), 404 );
+			$this->refuseExport( 'empty', __( 'Nothing to export for these filters.', 'subtleforms' ), 404, array_merge( $filters, array( 'form_id' => $formId ) ) );
 		}
 		return array(
 			'args'    => $args,
@@ -1251,15 +1294,37 @@ final class SubmissionsApi {
 	 * @param string $reason  empty, expired or forbidden.
 	 * @param string $message Text for the error page.
 	 * @param int    $status  HTTP status for the error page.
+	 * @param array  $filters The filters of the download (form_id, status, search, range). The
+	 *                        screen is sent back with them, so the list the person was on is
+	 *                        kept even where the address of the screen did not carry them.
 	 */
-	private function refuseExport( string $reason, string $message, int $status ): void {
+	private function refuseExport( string $reason, string $message, int $status, array $filters = array() ): void {
 		$back = wp_get_referer();
 		if ( $back ) {
-			wp_safe_redirect( add_query_arg( 'sf_export', $reason, remove_query_arg( 'sf_export', $back ) ) );
+			$back = remove_query_arg( 'sf_export', $back );
+			$keep = array();
+			if ( ! empty( $filters['form_id'] ) ) {
+				$keep['form_id'] = absint( $filters['form_id'] );
+			}
+			if ( ! empty( $filters['status'] ) && in_array( $filters['status'], self::TABS, true ) && 'all' !== $filters['status'] ) {
+				$keep['tab'] = $filters['status'];
+			}
+			foreach ( array( 'search', 'range' ) as $key ) {
+				if ( isset( $filters[ $key ] ) && '' !== $filters[ $key ] ) {
+					$keep[ $key ] = $filters[ $key ];
+				}
+			}
+			if ( $keep ) {
+				$back = add_query_arg( array_map( 'rawurlencode', $keep ), $back );
+			}
+			wp_safe_redirect( add_query_arg( 'sf_export', $reason, $back ) );
 			exit;
 		}
 		wp_die( esc_html( $message ), '', array( 'response' => absint( $status ) ) );
 	}
+
+	/** The Submissions tabs. Any other word is not a tab. */
+	private const TABS = array( 'all', 'unread', 'new', 'read', 'starred', 'spam', 'flagged', 'trash' );
 
 	/** Nonce action for the CSV download link. */
 	public const EXPORT_NONCE_ACTION = 'subtleforms_export_csv';
@@ -1308,21 +1373,14 @@ final class SubmissionsApi {
 		$skip = array( 'website_url', 'form_rendered_at' );
 
 		// Column order: the form's fields (single-form export), then any other
-		// answer keys in the order they were first seen.
+		// answer keys in the order they were first seen. An export of all forms
+		// reads the schemas of the forms found in the first pass below.
 		$labels    = array();
 		$repeaters = array();
 		if ( ! empty( $args['form_id'] ) ) {
-			try {
-				$active = $this->formsRepo->loadSchemaVersion( (int) $args['form_id'] );
-				$schema = is_array( $active ) ? ( $active['schema'] ?? $active ) : array();
-				foreach ( \SubtleForms\Support\FieldMapper::fields( is_array( $schema ) ? $schema : array() ) as $field ) {
-					$labels[ $field['key'] ] = '' !== $field['label'] ? $field['label'] : $field['key'];
-					if ( \SubtleForms\Support\Repeater::TYPE === $field['type'] ) {
-						$repeaters[ $field['key'] ] = $field['field'];
-					}
-				}
-			} catch ( \Throwable $e ) {
-				$labels = array();
+			list( $labels, $repeaters ) = $this->exportFormColumns( (int) $args['form_id'] );
+			foreach ( $labels as $key => $label ) {
+				$labels[ $key ] = '' !== $label ? $label : $key;
 			}
 		}
 
@@ -1336,10 +1394,12 @@ final class SubmissionsApi {
 		}
 
 		// First pass: the columns. The answers of an entry are not kept.
-		$keys = array();
+		$keys    = array();
+		$formIds = array();
 		$walk(
-			function ( array $submission ) use ( &$keys, $skip ): void {
-				$payload = $this->exportPayload( $submission );
+			function ( array $submission ) use ( &$keys, &$formIds, $skip ): void {
+				$formIds[ (int) $submission['form_id'] ] = true;
+				$payload                                  = $this->exportPayload( $submission );
 				foreach ( array_keys( $payload ) as $key ) {
 					$key = (string) $key;
 					if ( '' === $key || '_' === $key[0] || in_array( $key, $skip, true ) ) {
@@ -1349,6 +1409,10 @@ final class SubmissionsApi {
 				}
 			}
 		);
+
+		if ( empty( $args['form_id'] ) ) {
+			list( $labels, $repeaters ) = $this->mergedExportColumns( array_keys( $formIds ) );
+		}
 
 		$ordered = array();
 		foreach ( array_keys( $labels ) as $key ) {
@@ -1449,6 +1513,83 @@ final class SubmissionsApi {
 		);
 
 		return $count;
+	}
+
+	/**
+	 * The labels and Repeaters of one form's active schema, for the export.
+	 *
+	 * @param int $formId Form ID.
+	 * @return array{0: array<string,string>, 1: array<string,array>} Label by key ('' when a field has none), and Repeater field by key. Both empty when the form is gone.
+	 */
+	private function exportFormColumns( int $formId ): array {
+		$labels    = array();
+		$repeaters = array();
+		try {
+			$active = $this->formsRepo->loadSchemaVersion( $formId );
+			$schema = is_array( $active ) ? ( $active['schema'] ?? $active ) : array();
+			foreach ( \SubtleForms\Support\FieldMapper::fields( is_array( $schema ) ? $schema : array() ) as $field ) {
+				$labels[ $field['key'] ] = (string) $field['label'];
+				if ( \SubtleForms\Support\Repeater::TYPE === $field['type'] ) {
+					$repeaters[ $field['key'] ] = $field['field'];
+				}
+			}
+		} catch ( \Throwable $e ) {
+			return array( array(), array() );
+		}
+		return array( $labels, $repeaters );
+	}
+
+	/**
+	 * Headings and Repeaters for an export of several forms (issue 125).
+	 *
+	 * One schema is read at a time, in the order the forms were first seen.
+	 * A key used by several forms gets each distinct label, joined with " / ".
+	 * A key that is a Repeater in any form uses the children of the first form
+	 * that has it, plus any child the other forms add. A field with no label in any form is headed by its key.
+	 *
+	 * @param int[] $formIds Form IDs found in the entries.
+	 * @return array{0: array<string,string>, 1: array<string,array>} Heading by key, in column order, and Repeater field by key.
+	 */
+	private function mergedExportColumns( array $formIds ): array {
+		$names     = array();
+		$repeaters = array();
+		foreach ( $formIds as $formId ) {
+			list( $labels, $found ) = $this->exportFormColumns( (int) $formId );
+			foreach ( $labels as $key => $label ) {
+				$key = (string) $key;
+				if ( ! isset( $names[ $key ] ) ) {
+					$names[ $key ] = array();
+				}
+				if ( '' !== $label && ! in_array( $label, $names[ $key ], true ) ) {
+					$names[ $key ][] = $label;
+				}
+			}
+			foreach ( $found as $key => $field ) {
+				if ( ! isset( $repeaters[ $key ] ) ) {
+					$repeaters[ $key ] = $field;
+					continue;
+				}
+				// The same Repeater key in another form: keep the columns of the
+				// first and add the children it does not have, so no answer of
+				// the other form is dropped.
+				$have  = array_column( \SubtleForms\Support\Repeater::childFields( $repeaters[ $key ] ), 'key' );
+				$extra = array();
+				foreach ( \SubtleForms\Support\Repeater::childFields( $field ) as $child ) {
+					if ( ! in_array( $child['key'], $have, true ) ) {
+						$extra[] = $child['field'];
+					}
+				}
+				if ( $extra ) {
+					$repeaters[ $key ]['children'] = array_merge( \SubtleForms\Support\Repeater::children( $repeaters[ $key ] ), $extra );
+				}
+			}
+			unset( $labels, $found );
+		}
+		$headings = array();
+		foreach ( $names as $key => $list ) {
+			$headings[ $key ] = $list ? implode( ' / ', $list ) : (string) $key;
+		}
+		return array( $headings, $repeaters );
 	}
 
 	/**

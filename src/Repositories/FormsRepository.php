@@ -406,6 +406,12 @@ final class FormsRepository {
 				$field['config'] = \SubtleForms\Fields\InputMask::sanitizeSettings( $field['config'] );
 			}
 
+			// Autofill setting (2.10.0): only a known token, else the setting is dropped.
+			$field = \SubtleForms\Fields\CoreFields::sanitizeAutocomplete( $field );
+			if ( isset( $field['config'] ) && is_array( $field['config'] ) ) {
+				$field['config'] = \SubtleForms\Fields\CoreFields::sanitizeAutocomplete( $field['config'] );
+			}
+
 			if ( isset( $field['config']['appearance'] ) ) {
 				$clean = \SubtleForms\Support\Appearance::sanitizeField( $field['config']['appearance'] );
 
@@ -479,6 +485,11 @@ final class FormsRepository {
 
 		// The type follows the structure (2.3.2), whatever the client sent.
 		list( $schema ) = \SubtleForms\Support\SchemaRepair::syncType( $schema );
+
+		// Radio or Multiple choice saved with `multiple: true` is stored as Checkboxes (#140).
+		if ( isset( $schema['fields'] ) && is_array( $schema['fields'] ) ) {
+			list( $schema['fields'] ) = \SubtleForms\Support\SchemaRepair::multipleToCheckboxes( $schema['fields'] );
+		}
 
 		// A field saved without a key gets one rather than breaking the form.
 		list( $schema ) = \SubtleForms\Support\SchemaRepair::assignMissingKeys( $schema );
@@ -1001,6 +1012,9 @@ final class FormsRepository {
 	 */
 	public static function prepareStoredSchema( array $schema ): array {
 		list( $schema ) = \SubtleForms\Support\SchemaRepair::syncType( $schema );
+		if ( isset( $schema['fields'] ) && is_array( $schema['fields'] ) ) {
+			list( $schema['fields'] ) = \SubtleForms\Support\SchemaRepair::multipleToCheckboxes( $schema['fields'] );
+		}
 		list( $schema ) = \SubtleForms\Support\SchemaRepair::assignMissingKeys( $schema );
 		return self::sanitizeAppearance( $schema );
 	}
@@ -1034,12 +1048,19 @@ final class FormsRepository {
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update for draft schema; no caching for writes.
 		$result = $wpdb->update(
 			$this->table,
-			array( 'draft_schema' => wp_json_encode( $schema ) ),
+			array(
+				'draft_schema' => wp_json_encode( $schema ),
+				'updated_at'   => current_time( 'mysql', true ),
+			),
 			array( 'id' => $formId ),
-			array( '%s' ),
+			array( '%s', '%s' ),
 			array( '%d' )
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+		if ( $result !== false ) {
+			wp_cache_delete( "subtleforms_form_{$formId}", 'subtleforms' );
+		}
 
 		if ( $result === false ) {
 			Logger::error(

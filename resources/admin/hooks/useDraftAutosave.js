@@ -74,6 +74,11 @@ export function useDraftAutosave({ builderState, dispatch, formId, enabled = tru
       return;
     }
 
+    // Paused while the "changed somewhere else" question is open.
+    if (builderState.hasConflict) {
+      return;
+    }
+
     // Must have schema and form ID
     if (!draftSchema || !formId) {
       return;
@@ -110,7 +115,7 @@ export function useDraftAutosave({ builderState, dispatch, formId, enabled = tru
         timeoutRef.current = null;
       }
     };
-  }, [state, draftSchema, isDirty, formId, enabled, intervalSeconds]);
+  }, [state, draftSchema, isDirty, formId, enabled, intervalSeconds, builderState.hasConflict]);
 
   // Save on blur and when the tab is hidden: with a 30s debounce, an
   // in-progress edit could be lost if the user switches away mid-edit, so
@@ -127,6 +132,7 @@ export function useDraftAutosave({ builderState, dispatch, formId, enabled = tru
       if (
         latest?.state === BUILDER_STATES.DIRTY &&
         latest?.isDirty &&
+        !latest?.hasConflict &&
         !saveInFlightRef.current
       ) {
         forceAutosave();
@@ -164,6 +170,12 @@ export function useDraftAutosave({ builderState, dispatch, formId, enabled = tru
 
     // Prevent concurrent saves
     if (saveInFlightRef.current) {
+      return;
+    }
+
+    // The form changed somewhere else and the person has not answered yet.
+    // Saving now would only be refused again, or worse, replace their choice.
+    if (latest.hasConflict) {
       return;
     }
 
@@ -229,6 +241,24 @@ export function useDraftAutosave({ builderState, dispatch, formId, enabled = tru
           }
         }, waitMs + 500);
 
+        return;
+      }
+
+      // Another tab or user saved first (#145). Stop here: no retry, the
+      // builder asks the person whether to reload or replace.
+      if (status === 409) {
+        const meta = body?.error?.meta ?? body?.data ?? {};
+        dispatch({
+          type: BUILDER_ACTIONS.AUTOSAVE_ERROR,
+          payload: {
+            error: {
+              message: 'This form was changed somewhere else after you opened it.',
+              isConflict: true,
+              currentETag: meta.current_etag,
+              providedIfMatch: meta.provided_if_match,
+            },
+          },
+        });
         return;
       }
 

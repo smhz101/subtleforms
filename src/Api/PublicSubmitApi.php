@@ -412,7 +412,14 @@ final class PublicSubmitApi {
 						$settings[ $provider ] = $this->captchaManager->keysFor( $provider );
 					}
 					$resolved = FieldCaptcha::resolve( $captchaField, $settings );
-					if ( ! $resolved['ready'] || ! $this->captchaManager ) {
+					if ( ! $resolved['ready'] ) {
+						// No keys on the field or in Settings: the owner has not set
+						// this CAPTCHA up, so it is skipped instead of locking every
+						// visitor out. The honeypot and the time trap still apply.
+						Logger::warning( 'CAPTCHA field %s on form %d has no keys and was skipped.', (string) ( $captchaField['key'] ?? ( $captchaField['id'] ?? '' ) ), $formId );
+						continue;
+					}
+					if ( ! $this->captchaManager ) {
 						return ApiResponse::bad_request( $resolved['warning'] );
 					}
 					$verification = $this->captchaManager->verifyField( $resolved['provider'], $resolved['secret'], $payload );

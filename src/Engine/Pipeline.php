@@ -127,7 +127,25 @@ final class Pipeline {
 					$ctx->setMeta( 'action_failures', $remaining );
 				}
 
-				if ( ! $found ) {
+				// Skips recorded by action implementations: the action decided
+				// not to run. A failure for the same step wins over a skip.
+				$skips   = $ctx->getMeta( 'action_skips', array() );
+				$skipped = null;
+				if ( is_array( $skips ) ) {
+					$remainingSkips = array();
+					foreach ( $skips as $sk ) {
+						if ( is_array( $sk ) && isset( $sk['action'] ) && $sk['action'] === $step->action()->id() ) {
+							$skipped = $skipped ?? $sk;
+						} else {
+							$remainingSkips[] = $sk;
+						}
+					}
+					$ctx->setMeta( 'action_skips', $remainingSkips );
+				}
+
+				if ( ! $found && null !== $skipped ) {
+					$this->logEvent( $ctx, $step, 'skipped', (string) ( $skipped['message'] ?? $skipped['reason'] ?? 'skipped' ), time() );
+				} elseif ( ! $found ) {
 					$this->logEvent( $ctx, $step, 'succeeded', $uncheckedNote, time() );
 				}
 

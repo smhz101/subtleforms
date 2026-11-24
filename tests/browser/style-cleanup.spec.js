@@ -95,9 +95,11 @@ test('theme: controls get only the theme styles', async ({ page }) => {
   await page.goto(forms.theme.url);
   await waitForForm(page);
 
-  // The same elements outside the form: whatever they compute is the theme.
+  // The same elements without plugin classes: whatever they compute is the theme.
   await page.evaluate(() => {
-    const host = document.querySelector('.subtleforms-form-container').parentElement;
+    // Inside the form's own scope, so the reference gets the 2.9.2 text box
+    // floor too: the form may add that floor and nothing else.
+    const host = document.querySelector('.subtleforms.subtleforms--inherit-theme');
     const ref = document.createElement('div');
     ref.id = 'theme-reference';
     ref.innerHTML =

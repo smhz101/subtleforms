@@ -5,14 +5,14 @@ import { flagMark } from '../../../shared/phone';
 import FlagIcon from './FlagIcon';
 import { ChevronIcon } from './PickerIcons';
 import { useMenu } from './useMenu';
-import { typeaheadIndex } from '../../../shared/pickerKeyboard';
+import { foldText, typeaheadIndex } from '../../../shared/pickerKeyboard';
 
 function matches(country, query) {
-  const needle = query.trim().toLowerCase();
+  const needle = foldText(query.trim());
   if (!needle) {
     return true;
   }
-  return country.name.toLowerCase().includes(needle) || country.code.toLowerCase().includes(needle);
+  return foldText(country.name).includes(needle) || foldText(country.code).includes(needle);
 }
 
 /**

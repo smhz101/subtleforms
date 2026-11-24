@@ -18,7 +18,7 @@
  */
 
 import apiFetch from '@wordpress/api-fetch';
-import { storeETag } from '../data/apiClient';
+import { storeETag, storeFormETag, getFormETag } from '../data/apiClient';
 
 const NAMESPACE = 'subtleforms/v1';
 
@@ -74,8 +74,41 @@ async function readBody( response ) {
  * @param {Object} [options] apiFetch options (method, data, headers).
  * @return {Promise<{ok: boolean, status: number, body: *, headers: ?Headers}>} Result.
  */
+/**
+ * A write to a form: a schema save, or an update of the form itself.
+ *
+ * @param {string} path   Namespace-relative path.
+ * @param {string} method HTTP method.
+ * @return {?string} The form ID, or null when the request is not a form write.
+ */
+function formWriteId( path, method ) {
+  const match = /^\/forms\/(\d+)(\/schema)?(?:\?.*)?$/.exec( path );
+  if ( ! match ) {
+    return null;
+  }
+  const isSchema = !! match[ 2 ];
+  const writes =
+    ( method === 'POST' && isSchema ) ||
+    ( ( method === 'PUT' || method === 'PATCH' ) && ! isSchema );
+  return writes ? match[ 1 ] : null;
+}
+
+/**
+ * Pass `ifMatch: false` to send a write without the version check, which is
+ * how the builder replaces a newer save on purpose.
+ */
 async function request( path, options = {} ) {
   const fullPath = `/${ NAMESPACE }${ path }`;
+  const { ifMatch, ...fetchOptions } = options;
+  const method = ( fetchOptions.method || 'GET' ).toUpperCase();
+  const writtenFormId = formWriteId( path, method );
+
+  if ( writtenFormId && ifMatch !== false ) {
+    const known = getFormETag( writtenFormId );
+    if ( known && ! fetchOptions.headers?.[ 'If-Match' ] ) {
+      fetchOptions.headers = { ...fetchOptions.headers, 'If-Match': known };
+    }
+  }
 
   const settle = async ( response ) => {
     const headers = response.headers ?? null;
@@ -85,10 +118,18 @@ async function request( path, options = {} ) {
       storeETag( fullPath, etag );
     }
 
+    const body = await readBody( response );
+
+    // The tab's own save moved the form on: keep the new version so its next
+    // save is not mistaken for a stale one.
+    if ( writtenFormId && response.ok ) {
+      storeFormETag( writtenFormId, etag || body?.data?.etag );
+    }
+
     return {
       ok: response.ok,
       status: response.status,
-      body: await readBody( response ),
+      body,
       headers,
     };
   };
@@ -99,7 +140,7 @@ async function request( path, options = {} ) {
     const response = await apiFetch( {
       path: fullPath,
       parse: false,
-      ...options,
+      ...fetchOptions,
     } );
 
     return await settle( response );
@@ -124,11 +165,11 @@ async function request( path, options = {} ) {
 
 export const apiGet = ( path ) => request( path );
 
-export const apiPost = ( path, payload ) =>
-  request( path, { method: 'POST', data: payload } );
+export const apiPost = ( path, payload, options = {} ) =>
+  request( path, { ...options, method: 'POST', data: payload } );
 
-export const apiPut = ( path, payload ) =>
-  request( path, { method: 'PUT', data: payload } );
+export const apiPut = ( path, payload, options = {} ) =>
+  request( path, { ...options, method: 'PUT', data: payload } );
 
 export const apiDelete = ( path ) => request( path, { method: 'DELETE' } );
 

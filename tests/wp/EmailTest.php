@@ -91,4 +91,43 @@ final class EmailTest extends TestCase {
 		$this->assertStringNotContainsString( '<br', $job['subject'] );
 		$this->assertSame( 'New entry from Multi <line>', $job['subject'] );
 	}
+
+	public function test_submitter_email_is_queued_when_the_switch_is_on_and_skipped_when_off_134() {
+		$before = get_option( 'subtleforms_settings', null );
+		$run    = function ( bool $on ): array {
+			update_option( 'subtleforms_settings', array( 'user_confirmation_enabled' => $on ) );
+			$this->jobs = array();
+			$context    = new SubmissionContext( 1, array( 'email' => 'visitor@example.com' ) );
+			$context->setMeta( 'form_schema', array( 'fields' => array( array( 'key' => 'email', 'type' => 'email', 'label' => 'Email' ) ) ) );
+			$context->setMeta( 'submission_id', 0 );
+			$context->setMeta( 'current_step_settings', array( 'to' => '{email}', 'subject' => 'Thanks', 'body' => 'Hello' ) );
+			( new EmailAction() )->handle( $context );
+			return array( count( $this->jobs ), $context->getMeta( 'action_skips', array() ) );
+		};
+
+		list( $queued, $skips ) = $run( false );
+		$this->assertSame( 0, $queued, 'nothing is sent with the switch off' );
+		$this->assertSame( 'submitter_emails_off', $skips[0]['reason'] );
+		$this->assertSame( 'Submitter emails are turned off in Settings, Email.', $skips[0]['message'] );
+
+		list( $queued, $skips ) = $run( true );
+		$this->assertSame( 1, $queued, 'the auto-reply is queued with the switch on' );
+		$this->assertSame( array(), $skips );
+
+		null === $before ? delete_option( 'subtleforms_settings' ) : update_option( 'subtleforms_settings', $before );
+	}
+
+	public function test_fresh_install_helper_turns_submitter_emails_on_only_on_a_fresh_install_134() {
+		$before = get_option( 'subtleforms_settings', null );
+
+		delete_option( 'subtleforms_settings' );
+		\SubtleForms\Support\Settings::afterActivate( true );
+		$this->assertTrue( get_option( 'subtleforms_settings' )['user_confirmation_enabled'] );
+
+		update_option( 'subtleforms_settings', array( 'user_confirmation_enabled' => false ) );
+		\SubtleForms\Support\Settings::afterActivate( false );
+		$this->assertFalse( get_option( 'subtleforms_settings' )['user_confirmation_enabled'] );
+
+		null === $before ? delete_option( 'subtleforms_settings' ) : update_option( 'subtleforms_settings', $before );
+	}
 }

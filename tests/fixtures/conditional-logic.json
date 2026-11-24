@@ -252,6 +252,203 @@
 			"expected": true
 		},
 		{
+			"name": "date less_than matches an earlier date",
+			"value": "2026-11-25",
+			"operator": "less_than",
+			"compare": "2026-12-01",
+			"expected": true,
+			"field": {
+				"type": "date"
+			}
+		},
+		{
+			"name": "date less_than ignores a later date",
+			"value": "2026-12-20",
+			"operator": "less_than",
+			"compare": "2026-12-01",
+			"expected": false,
+			"field": {
+				"type": "date"
+			}
+		},
+		{
+			"name": "date greater_than matches a later date",
+			"value": "2026-12-20",
+			"operator": "greater_than",
+			"compare": "2026-12-01",
+			"expected": true,
+			"field": {
+				"type": "date"
+			}
+		},
+		{
+			"name": "date greater_than ignores an earlier date",
+			"value": "2026-11-25",
+			"operator": "greater_than",
+			"compare": "2026-12-01",
+			"expected": false,
+			"field": {
+				"type": "date"
+			}
+		},
+		{
+			"name": "date equal is neither greater_than",
+			"value": "2026-12-01",
+			"operator": "greater_than",
+			"compare": "2026-12-01",
+			"expected": false,
+			"field": {
+				"type": "date"
+			}
+		},
+		{
+			"name": "date equal is neither less_than",
+			"value": "2026-12-01",
+			"operator": "less_than",
+			"compare": "2026-12-01",
+			"expected": false,
+			"field": {
+				"type": "date"
+			}
+		},
+		{
+			"name": "datetime less_than compares the time of day",
+			"value": "2026-11-25T09:00",
+			"operator": "less_than",
+			"compare": "2026-11-25 14:30",
+			"expected": true,
+			"field": {
+				"type": "datetime"
+			}
+		},
+		{
+			"name": "datetime greater_than compares the time of day",
+			"value": "2026-11-25T14:30",
+			"operator": "greater_than",
+			"compare": "2026-11-25 09:00",
+			"expected": true,
+			"field": {
+				"type": "datetime"
+			}
+		},
+		{
+			"name": "datetime equal moment is neither",
+			"value": "2026-11-25T14:30",
+			"operator": "less_than",
+			"compare": "2026-11-25 14:30:00",
+			"expected": false,
+			"field": {
+				"type": "datetime"
+			}
+		},
+		{
+			"name": "date answer without a field type still compares",
+			"value": "2026-11-25",
+			"operator": "less_than",
+			"compare": "2026-12-01",
+			"expected": true
+		},
+		{
+			"name": "date multi-value any item matches",
+			"value": [
+				"2026-12-20",
+				"2026-11-25"
+			],
+			"operator": "less_than",
+			"compare": "2026-12-01",
+			"expected": true,
+			"field": {
+				"type": "date"
+			}
+		},
+		{
+			"name": "date unparseable answer does not match",
+			"value": "soon",
+			"operator": "less_than",
+			"compare": "2026-12-01",
+			"expected": false,
+			"field": {
+				"type": "date"
+			}
+		},
+		{
+			"name": "date unparseable rule value does not match",
+			"value": "2026-11-25",
+			"operator": "less_than",
+			"compare": "next month",
+			"expected": false,
+			"field": {
+				"type": "date"
+			}
+		},
+		{
+			"name": "date relative rule value is not supported",
+			"value": "2026-11-25",
+			"operator": "less_than",
+			"compare": "today",
+			"expected": false,
+			"field": {
+				"type": "date"
+			}
+		},
+		{
+			"name": "time less_than matches an earlier time",
+			"value": "09:30",
+			"operator": "less_than",
+			"compare": "10:00",
+			"expected": true,
+			"field": {
+				"type": "time"
+			}
+		},
+		{
+			"name": "time less_than ignores a later time",
+			"value": "10:00",
+			"operator": "less_than",
+			"compare": "10:00",
+			"expected": false,
+			"field": {
+				"type": "time"
+			}
+		},
+		{
+			"name": "time greater_than matches a later time",
+			"value": "10:30",
+			"operator": "greater_than",
+			"compare": "10:00:00",
+			"expected": true,
+			"field": {
+				"type": "time"
+			}
+		},
+		{
+			"name": "time unparseable answer does not match",
+			"value": "late",
+			"operator": "greater_than",
+			"compare": "10:00",
+			"expected": false,
+			"field": {
+				"type": "time"
+			}
+		},
+		{
+			"name": "time without a field type still compares",
+			"value": "09:30",
+			"operator": "less_than",
+			"compare": "10:00",
+			"expected": true
+		},
+		{
+			"name": "number less_than still works on a number field",
+			"value": "500",
+			"operator": "less_than",
+			"compare": "1000",
+			"expected": true,
+			"field": {
+				"type": "number"
+			}
+		},
+		{
 			"name": "unknown operator",
 			"value": "x",
 			"operator": "matches_regex",

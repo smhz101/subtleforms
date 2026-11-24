@@ -2,16 +2,18 @@ import { useState, useRef, useEffect, useCallback, Suspense } from '@wordpress/e
 import { SearchControl, SelectControl } from '@wordpress/components';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/navigation';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import AdminShell from '../components/AdminShell';
 import TabBar from '../components/TabBar';
 import SubmissionsTable, { ALL_COLUMNS, DEFAULT_VISIBLE, COLUMN_LABELS } from '../components/SubmissionsTable';
 import useRealTimeUpdates from '../hooks/useRealTimeUpdates';
 import { Icon } from '../ui';
 import { apiPost } from '../utils/api';
-import { useForms, useSettings } from '../data';
+import { useAllForms, useSettings } from '../data';
+import SubmissionsFormFilter from '../components/SubmissionsFormFilter';
 import { deletesPermanently } from '../utils/deleteBehavior';
 import { tabsFor } from '../utils/tabCounts';
+import { isOn } from '../utils/isOn';
 import { buildInboxTabs, tabFromParams } from '../utils/inboxTabs';
 import lazyWithRetry from '../utils/lazyWithRetry';
 import { noticeDialog } from '../utils/confirmDialog';
@@ -222,6 +224,11 @@ export default function SubmissionsPage({ formId }) {
 
   const closePane = () => {
     setOpenId(null);
+    // Entries opened on the Unread tab were marked read and stayed in place
+    // while open. Now that the pane is closed, they leave the list.
+    if (statusFilter === 'unread') {
+      submissionsTableRef.current?.refreshData?.();
+    }
     const next = new URLSearchParams(searchParams);
     next.delete('submission_id');
     setSearchParams(next, { replace: true });
@@ -234,7 +241,7 @@ export default function SubmissionsPage({ formId }) {
     }
   };
 
-  const { data: formsData = [] } = useForms({}, { enabled: !formId });
+  const { data: formsData = [] } = useAllForms({ enabled: !formId });
 
   // Real-time updates for live badge and table refresh
   const countFormId = selectedFormId !== 'all' ? selectedFormId : (formId || '');
@@ -289,6 +296,16 @@ export default function SubmissionsPage({ formId }) {
     }
   };
 
+  // The star of the open entry changed in the list: the panel follows.
+  const [listPatch, setListPatch] = useState(null);
+  const entriesChanged = (changes) => {
+    adjustCounts(changes);
+    const open = (changes || []).find((change) => change.after && String(change.before?.id) === String(openId));
+    if (open && isOn(open.after.starred) !== isOn(open.before.starred)) {
+      setListPatch({ id: open.before.id, patch: { starred: isOn(open.after.starred) ? 1 : 0 } });
+    }
+  };
+
   const handleSearchChange = (value) => {
     setSearch(value);
     clearTimeout(searchTimerRef.current);
@@ -337,19 +354,6 @@ export default function SubmissionsPage({ formId }) {
     { label: __('Last 3 months', 'subtleforms'), value: '3months' },
   ];
 
-  const formOptions = [
-    { label: __('All forms', 'subtleforms'), value: 'all' },
-    ...forms.map((form) => ({
-      label:
-        form.title ||
-        sprintf(
-          /* translators: %1$d: form id */ __('Form #%1$d', 'subtleforms'),
-          form.id
-        ),
-      value: String(form.id),
-    })),
-  ];
-
   const hasActiveFilters =
     search ||
     statusFilter !== 'all' ||
@@ -396,6 +400,7 @@ export default function SubmissionsPage({ formId }) {
       {
         form_id: selectedFormId !== 'all' ? parseInt(selectedFormId) : null,
         status: statusFilter !== 'all' ? statusFilter : null,
+        processing_status: processingStatus || null,
         search: search || null,
         range: dateRange !== 'all' ? dateRange : null,
       },
@@ -411,7 +416,7 @@ export default function SubmissionsPage({ formId }) {
     if (outcome === 'empty') {
       await noticeDialog({
         title: __('Export CSV', 'subtleforms'),
-        message: __('No submissions to export', 'subtleforms'),
+        message: __('Nothing to export for these filters.', 'subtleforms'),
       });
     } else {
       await noticeDialog({ message: __('Failed to export submissions', 'subtleforms') });
@@ -579,14 +584,7 @@ export default function SubmissionsPage({ formId }) {
       {/* Filter Bar */}
       {!formId && showFilters && (
         <div className='sf-filter-bar'>
-          <SelectControl
-            label={__('Form', 'subtleforms')}
-            value={selectedFormId}
-            options={formOptions}
-            onChange={setSelectedFormId}
-            className='sf-filter-control'
-            style={{ minWidth: '200px' }}
-          />
+          <SubmissionsFormFilter forms={forms} value={selectedFormId} onChange={setSelectedFormId} />
           <SelectControl
             label={__('Date Range', 'subtleforms')}
             value={dateRange}
@@ -652,7 +650,7 @@ export default function SubmissionsPage({ formId }) {
             density={view.density}
             readingId={split ? openId : null}
             onNeighbors={split ? onNeighbors : null}
-            onEntriesChanged={adjustCounts}
+            onEntriesChanged={entriesChanged}
             onRowClick={(submission) => {
               if (!split) {
                 const params = new URLSearchParams(searchParams);
@@ -680,6 +678,7 @@ export default function SubmissionsPage({ formId }) {
                   onBack={closePane}
                   onEntryChanged={() => submissionsTableRef.current?.removeEntry?.(openId)}
                   onEntryUpdated={entryUpdated}
+                  listPatch={listPatch}
                   onBrowse={{
                     hasPrev: neighbors.hasPrev,
                     hasNext: neighbors.hasNext,

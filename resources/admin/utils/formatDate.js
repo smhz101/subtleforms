@@ -164,3 +164,121 @@ export function isNewForm(form) {
   const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
   return new Date() - created < sevenDaysMs;
 }
+
+/**
+ * The site time zone from Settings, General, as the admin script receives it.
+ *
+ * @return {string} An IANA name, a fixed offset such as "+05:30", or "".
+ */
+function siteZoneSetting() {
+  const admin = typeof window !== 'undefined' ? window.subtleformsAdmin : null;
+  return admin && typeof admin.timezone === 'string' ? admin.timezone.trim() : '';
+}
+
+/**
+ * Minutes east of UTC for a fixed offset such as "+05:30", or null when the
+ * value is not one.
+ *
+ * @param {string} zone Zone setting.
+ * @return {number|null}
+ */
+function fixedOffsetMinutes(zone) {
+  const match = /^([+-])(\d{1,2}):?(\d{2})$/.exec(zone);
+  if (!match) return null;
+  const minutes = parseInt(match[2], 10) * 60 + parseInt(match[3], 10);
+  return match[1] === '-' ? -minutes : minutes;
+}
+
+/**
+ * Whether Intl accepts the value as a time zone name.
+ *
+ * @param {string} zone Zone setting.
+ * @return {boolean}
+ */
+function isKnownZone(zone) {
+  if (!zone) return false;
+  try {
+    new Intl.DateTimeFormat(undefined, { timeZone: zone });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Label for the site time zone: the IANA name, "UTC+05:30" for a fixed
+ * offset, or "UTC" when the setting is missing or not usable.
+ *
+ * @return {string}
+ */
+export function siteZoneLabel() {
+  const zone = siteZoneSetting();
+  const offset = fixedOffsetMinutes(zone);
+  if (offset !== null) {
+    const abs = Math.abs(offset);
+    const hh = String(Math.floor(abs / 60)).padStart(2, '0');
+    const mm = String(abs % 60).padStart(2, '0');
+    return `UTC${offset < 0 ? '-' : '+'}${hh}:${mm}`;
+  }
+  return isKnownZone(zone) ? zone : 'UTC';
+}
+
+/**
+ * Date and time in the site time zone, never the browser's, so every admin
+ * sees the same time for the same entry.
+ *
+ * Accepts a naive UTC "YYYY-MM-DD HH:MM:SS" string (read as UTC), an ISO
+ * string, an epoch or a Date.
+ *
+ * @param {string|number|Date} value Date value.
+ * @return {string} Formatted date and time, or the raw value when unreadable.
+ */
+export function formatSiteDateTime(value) {
+  if (value === null || value === undefined || value === '') return '';
+  let date;
+  if (value instanceof Date || typeof value === 'number') {
+    date = new Date(value);
+  } else {
+    const raw = String(value);
+    date = new Date(
+      !/[zZ]|[+-]\d{2}:?\d{2}$/.test(raw) ? `${raw.replace(' ', 'T')}Z` : raw
+    );
+  }
+  if (isNaN(date.getTime())) return String(value);
+
+  const options = {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  };
+  const zone = siteZoneSetting();
+  const offset = fixedOffsetMinutes(zone);
+  try {
+    if (offset !== null) {
+      return new Intl.DateTimeFormat(undefined, {
+        ...options,
+        timeZone: 'UTC',
+      }).format(new Date(date.getTime() + offset * 60000));
+    }
+    return new Intl.DateTimeFormat(undefined, {
+      ...options,
+      timeZone: isKnownZone(zone) ? zone : 'UTC',
+    }).format(date);
+  } catch (e) {
+    return String(value);
+  }
+}
+
+/**
+ * Tooltip text for an absolute date: the site time plus the zone it is in,
+ * for example "20 Nov 2026, 11:07 (Asia/Karachi)".
+ *
+ * @param {string|number|Date} value Date value.
+ * @return {string}
+ */
+export function siteDateTitle(value) {
+  const text = formatSiteDateTime(value);
+  return text ? `${text} (${siteZoneLabel()})` : '';
+}

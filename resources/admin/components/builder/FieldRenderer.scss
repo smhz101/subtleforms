@@ -890,6 +890,21 @@
 		align-items: center;
 		color: var(--sf-gray-400);
 	}
+
+	// No keys: the live form skips this check (#142).
+	&__status--warning {
+		color: var(--sf-warning);
+		font-style: normal;
+
+		.sf-captcha-preview__status-icon {
+			color: var(--sf-warning);
+		}
+
+		a {
+			color: inherit;
+			text-decoration: underline;
+		}
+	}
 }
 // Country Field
 .sf-country-field {
@@ -2081,4 +2096,14 @@ select.sf-field-renderer__select {
 	background: var(--sf-surface);
 	color: var(--sf-gray-800);
 	font-size: var(--sf-text-base);
+}
+
+.sf-field-renderer__chained-warning {
+	margin: 0.5rem 0 0;
+	padding: 0.5rem 0.75rem;
+	border-left: 3px solid var(--sf-warning);
+	background: var(--sf-warning-bg);
+	color: var(--sf-warning-strong);
+	font-size: 0.8125rem;
+	line-height: 1.4;
 }

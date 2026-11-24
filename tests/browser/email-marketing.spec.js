@@ -257,7 +257,7 @@ async function submit(page, { email, consent }) {
   // The default minimum time between loading and sending a form is 3 seconds.
   await page.waitForTimeout(3500);
   await page.click('.subtleforms-button-submit');
-  await expect(page.locator('.subtleforms-success, .subtleforms-form-container [role="status"], .subtleforms-confirmation').first()).toBeVisible({ timeout: 20000 });
+  await expect(page.locator('.subtleforms-success, .subtleforms-confirmation').first()).toBeVisible({ timeout: 20000 });
 }
 
 test('Submitting: a consenting visitor is sent to Mailchimp and the entry says so; one who does not consent is skipped', async ({ page }) => {
