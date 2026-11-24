@@ -955,6 +955,19 @@ final class Uploads {
 	}
 
 	/**
+	 * The private uploads folder, created and protected if missing, or null
+	 * when it cannot be created. Used by the exposure check (issue 169).
+	 */
+	public static function ensureBaseDir(): ?string {
+		$base = self::baseDir();
+		if ( ! is_dir( $base ) && ! wp_mkdir_p( $base ) ) {
+			return null;
+		}
+		self::protect( $base );
+		return $base;
+	}
+
+	/**
 	 * A protected sub-folder, created on first use, or null.
 	 */
 	private static function dir( string $where ): ?string {
