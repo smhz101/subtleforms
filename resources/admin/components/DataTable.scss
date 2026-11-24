@@ -14,6 +14,13 @@
 	// ── Bulk actions ─────────────────────────────────────────────────────────
 	// A slim bar: "N selected" and ghost icon buttons. It wraps rather than
 	// scrolling, at any width.
+	&__match-bar {
+		padding: 6px var(--sf-gutter);
+		border-bottom: 1px solid var(--sf-border);
+		background: var(--sf-bg-page);
+		font-size: 13px;
+	}
+
 	&__bulk-actions {
 		position: sticky;
 		top: 56px;

@@ -27,9 +27,10 @@ import { apiClient, useSettings } from '../data';
 import { deletesPermanently } from '../utils/deleteBehavior';
 import { Icon } from '../ui';
 import { keepRowsAfterFailedLoad, listQueryKey } from '../utils/failedLoad';
-import { startCsvDownloadOfIds } from '../utils/csvExport';
+import { startCsvDownload, startCsvDownloadOfIds } from '../utils/csvExport';
 import { entrySender } from '../utils/entrySender';
 import { timeAgo, siteDateTitle } from '../utils/formatDate';
+import { matchFilters, matchBulkBody, MATCH_ACTIONS, MATCH_DESTRUCTIVE } from '../utils/bulkMatch';
 import { entryAfter } from '../utils/tabCounts';
 import useElementWidth from '../hooks/useElementWidth';
 import { chunkPagesFor } from '../utils/listChunks';
@@ -108,6 +109,10 @@ const SubmissionsTable = forwardRef(
     const [deleteModal, setDeleteModal] = useState(null);
     const [selectedSubmissions, setSelectedSubmissions] = useState([]);
     const [bulkDelete, setBulkDelete] = useState(null);
+    // Every entry that matches the view is selected (not only the page), and
+    // the destructive action waiting for a yes.
+    const [allMatching, setAllMatching] = useState(false);
+    const [matchConfirm, setMatchConfirm] = useState(null);
     const { data: siteSettings } = useSettings();
     const hardDelete = deletesPermanently(siteSettings?.delete_behavior, false);
     const isPrefetchingRef = useRef(false);
@@ -137,6 +142,11 @@ const SubmissionsTable = forwardRef(
     useEffect(() => {
       loadFresh();
     }, [formId, statusFilter, searchTerm, dateRange, fieldValue, processingStatus, sortBy, sortDirection, perPage]);
+
+    // A change of view or page ends the "all matching" selection.
+    useEffect(() => {
+      setAllMatching(false);
+    }, [formId, statusFilter, searchTerm, dateRange, fieldValue, processingStatus, perPage, currentPage]);
 
     // Prefetch next batch when user reaches 3rd page of loaded window
     useEffect(() => {
@@ -548,6 +558,60 @@ const SubmissionsTable = forwardRef(
       }
     };
 
+    // Bulk actions on every entry that matches the view: the server resolves
+    // the entries from the same filters the list sends.
+    const view = { formId, statusFilter, searchTerm, fieldValue, processingStatus, dateRange };
+
+    const runMatch = async (action) => {
+      setMatchConfirm(null);
+      setAllMatching(false);
+      setSelectedSubmissions([]);
+      try {
+        const res = await apiClient.post('/submissions/bulk', matchBulkBody(action, view));
+        createSuccessNotice(
+          sprintf(
+            /* translators: %s: number of entries, with thousands separators */
+            __('%s entries updated.', 'subtleforms'),
+            Number(res?.affected || 0).toLocaleString()
+          ),
+          { type: 'snackbar' }
+        );
+      } catch (err) {
+        createErrorNotice(err?.message || __('Entries could not be changed.', 'subtleforms'), { type: 'snackbar' });
+      }
+      onEntriesChanged?.([]);
+      loadFresh();
+    };
+
+    const exportMatching = async () => {
+      try {
+        const outcome = await startCsvDownload(matchFilters(view), { total: totalItems });
+        if (outcome === 'empty') {
+          createErrorNotice(__('No submissions to export', 'subtleforms'), { type: 'snackbar' });
+        } else if (outcome === 'unavailable') {
+          createErrorNotice(__('Failed to export submissions', 'subtleforms'), { type: 'snackbar' });
+        }
+      } catch (err) {
+        createErrorNotice(__('Failed to export submissions', 'subtleforms'), { type: 'snackbar' });
+      }
+    };
+
+    // In "all matching" mode a bulk action goes to the server as one request
+    // for the whole view; destructive ones ask first.
+    const withMatching = (actions) =>
+      allMatching
+        ? actions.map((action) => {
+            if (action.key === 'export') return { ...action, onClick: exportMatching };
+            const serverAction = MATCH_ACTIONS[action.key];
+            if (!serverAction) return action;
+            return {
+              ...action,
+              onClick: () =>
+                MATCH_DESTRUCTIVE.includes(action.key) ? setMatchConfirm(serverAction) : runMatch(serverAction),
+            };
+          })
+        : actions;
+
     // Export the selected entries as CSV: the same streamed download as the
     // Export CSV button, with the IDs posted in the body (2.8.1).
     const handleExportSelected = async (ids) => {
@@ -847,8 +911,14 @@ const SubmissionsTable = forwardRef(
           renderCompactRow={renderCompactRow}
           selectable={true}
           selectedItems={selectedSubmissions}
-          onSelectionChange={setSelectedSubmissions}
-          bulkActions={
+          onSelectionChange={(ids) => {
+            setAllMatching(false);
+            setSelectedSubmissions(ids);
+          }}
+          allMatching={allMatching}
+          onSelectAllMatching={() => setAllMatching(true)}
+          onClearAllMatching={() => setAllMatching(false)}
+          bulkActions={withMatching(
             inTrash
               ? [
                   {
@@ -916,7 +986,20 @@ const SubmissionsTable = forwardRef(
                     onClick: (ids) => handleBulkMarkStatus(ids, 'flagged'),
                   },
                 ]
-          }
+          )}
+        />
+        <ConfirmModal
+          isOpen={!!matchConfirm}
+          onClose={() => setMatchConfirm(null)}
+          title={__('Apply to all matching entries', 'subtleforms')}
+          message={sprintf(
+            /* translators: %s: number of entries, with thousands separators */
+            __('Apply this to %s entries?', 'subtleforms'),
+            Number(totalItems).toLocaleString()
+          )}
+          onConfirm={() => runMatch(matchConfirm)}
+          confirmText={__('Apply', 'subtleforms')}
+          confirmVariant='destructive'
         />
         <ConfirmModal
           isOpen={!!bulkDelete}

@@ -299,9 +299,12 @@ final class SubmissionsApi {
 				'permission_callback' => array( $this, 'check_write_permission' ),
 				'args'                => array(
 					'ids'    => array(
-						'type'     => 'array',
-						'required' => true,
-						'items'    => array( 'type' => 'integer' ),
+						'type'  => 'array',
+						'items' => array( 'type' => 'integer' ),
+					),
+					// 2.10.0: every entry that matches the view (filters as in the list).
+					'match'  => array(
+						'type' => 'boolean',
 					),
 					'action' => array(
 						'type'     => 'string',
@@ -430,6 +433,31 @@ final class SubmissionsApi {
 	}
 
 	/**
+	 * The filters of the entries list, read from a request. The tab and the
+	 * processing status become the right columns (see tabFilters()). Bulk
+	 * "match" mode reads them here too, so it acts on exactly the entries the
+	 * list shows.
+	 *
+	 * @return array form_id, status, is_read, starred, search, after, field_key, field_value.
+	 */
+	private function listFilterArgs( WP_REST_Request $request ): array {
+		$tab_status  = $request->get_param( 'status' );
+		$proc_status = $request->get_param( 'processing_status' );
+		$tab         = self::tabFilters( is_string( $tab_status ) ? $tab_status : null, is_string( $proc_status ) ? $proc_status : null );
+
+		return array(
+			'form_id'     => $request->get_param( 'form_id' ),
+			'status'      => $tab['status'],
+			'is_read'     => $tab['is_read'],
+			'starred'     => $tab['starred'],
+			'search'      => $request->get_param( 'search' ),
+			'after'       => ReportQueries::rangeStartUtc( (string) $request->get_param( 'range' ) ) ?? $request->get_param( 'after' ),
+			'field_key'   => $request->get_param( 'field_key' ),
+			'field_value' => $request->get_param( 'field_value' ),
+		);
+	}
+
+	/**
 	 * What a Submissions tab filters on. The list and the CSV export both read
 	 * the tab through this, so they always show the same entries.
 	 *
@@ -487,28 +515,14 @@ final class SubmissionsApi {
 			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
 		}
 
-		// The tab and the processing-status filter become the right columns,
-		// the same way the CSV export reads them (see tabFilters()).
-		$tab_status  = $request->get_param( 'status' );
-		$proc_status = $request->get_param( 'processing_status' );
-		$tab         = self::tabFilters( is_string( $tab_status ) ? $tab_status : null, is_string( $proc_status ) ? $proc_status : null );
-		$status_arg  = $tab['status'];
-		$is_read_arg = $tab['is_read'];
-		$starred_arg = $tab['starred'];
-
-		$args = array(
-			'form_id'     => $request->get_param( 'form_id' ),
-			'status'      => $status_arg,
-			'is_read'     => $is_read_arg,
-			'starred'     => $starred_arg,
-			'search'      => $request->get_param( 'search' ),
-			'after'       => ReportQueries::rangeStartUtc( (string) $request->get_param( 'range' ) ) ?? $request->get_param( 'after' ),
-			'field_key'   => $request->get_param( 'field_key' ),
-			'field_value' => $request->get_param( 'field_value' ),
-			'limit'       => $pagination['per_page'],
-			'offset'      => intval( $request->get_param( 'offset' ) ?? 0 ),
-			'orderby'     => in_array( $request->get_param( 'orderby' ), array( 'id', 'created_at', 'updated_at', 'status' ), true ) ? $request->get_param( 'orderby' ) : 'created_at',
-			'order'       => strtoupper( $request->get_param( 'order' ) ?? 'DESC' ) === 'ASC' ? 'ASC' : 'DESC',
+		$args = array_merge(
+			$this->listFilterArgs( $request ),
+			array(
+				'limit'   => $pagination['per_page'],
+				'offset'  => intval( $request->get_param( 'offset' ) ?? 0 ),
+				'orderby' => in_array( $request->get_param( 'orderby' ), array( 'id', 'created_at', 'updated_at', 'status' ), true ) ? $request->get_param( 'orderby' ) : 'created_at',
+				'order'   => strtoupper( $request->get_param( 'order' ) ?? 'DESC' ) === 'ASC' ? 'ASC' : 'DESC',
+			)
 		);
 
 		$submissions = array_map( array( $this, 'listItem' ), $this->submissionsRepo->findAll( $args ) );
@@ -672,13 +686,56 @@ final class SubmissionsApi {
 
 		$ids    = array_values( array_unique( array_filter( array_map( 'absint', (array) $request->get_param( 'ids' ) ) ) ) );
 		$action = (string) $request->get_param( 'action' );
-		if ( ! $ids ) {
-			return ApiResponse::bad_request( __( 'Select at least one entry.', 'subtleforms' ) );
+		$match  = rest_sanitize_boolean( $request->get_param( 'match' ) );
+
+		// Exactly one of ids or match.
+		if ( $match === (bool) $ids ) {
+			return ApiResponse::error( 'subtleforms_bulk_target', __( 'Choose entries or a view.', 'subtleforms' ), 400 );
 		}
-		if ( count( $ids ) > 500 ) {
+
+		if ( $match ) {
+			$args  = $this->listFilterArgs( $request );
+			$total = $this->submissionsRepo->count( $args );
+			if ( $total > self::BULK_MATCH_MAX ) {
+				return ApiResponse::error( 'subtleforms_bulk_too_many', __( 'That is more than 20,000 entries. Narrow the view and try again.', 'subtleforms' ), 400 );
+			}
+			// Resolve every id before changing any entry, so a change that moves
+			// entries out of the view cannot shift the pages being read.
+			$ids = array();
+			for ( $offset = 0; $offset < $total; $offset += self::BULK_BATCH ) {
+				$page = $this->submissionsRepo->findAll( array_merge( $args, array( 'limit' => self::BULK_BATCH, 'offset' => $offset, 'orderby' => 'id', 'order' => 'ASC' ) ) );
+				if ( ! $page ) {
+					break;
+				}
+				$ids = array_merge( $ids, array_map( 'intval', array_column( $page, 'id' ) ) );
+			}
+		} elseif ( count( $ids ) > self::BULK_BATCH ) {
 			return ApiResponse::bad_request( __( 'Select 500 entries or fewer at a time.', 'subtleforms' ) );
 		}
 
+		$done = array();
+		foreach ( array_chunk( $ids, self::BULK_BATCH ) as $batch ) {
+			$done = array_merge( $done, $this->applyBulk( $batch, $action ) );
+		}
+
+		return ApiResponse::success(
+			array(
+				'action'   => $action,
+				'updated'  => $match ? array() : $done,
+				'count'    => count( $done ),
+				'affected' => count( $done ),
+			)
+		);
+	}
+
+	/**
+	 * Apply one bulk action to up to BULK_BATCH entries.
+	 *
+	 * @param int[]  $ids    Entry ids.
+	 * @param string $action The bulk action.
+	 * @return int[] The ids that changed.
+	 */
+	private function applyBulk( array $ids, string $action ): array {
 		$changes = array(
 			'read'    => array( 'is_read' => 1 ),
 			'unread'  => array( 'is_read' => 0 ),
@@ -729,13 +786,7 @@ final class SubmissionsApi {
 			}
 		}
 
-		return ApiResponse::success(
-			array(
-				'action'  => $action,
-				'updated' => $done,
-				'count'   => count( $done ),
-			)
-		);
+		return $done;
 	}
 
 	/**
@@ -1324,6 +1375,10 @@ final class SubmissionsApi {
 	}
 
 	/** The Submissions tabs. Any other word is not a tab. */
+	private const BULK_BATCH = 500;
+
+	private const BULK_MATCH_MAX = 20000;
+
 	private const TABS = array( 'all', 'unread', 'new', 'read', 'starred', 'spam', 'flagged', 'trash' );
 
 	/** Nonce action for the CSV download link. */
