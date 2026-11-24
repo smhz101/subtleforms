@@ -480,6 +480,11 @@ final class FormsRepository {
 		// The type follows the structure (2.3.2), whatever the client sent.
 		list( $schema ) = \SubtleForms\Support\SchemaRepair::syncType( $schema );
 
+		// Radio or Multiple choice saved with `multiple: true` is stored as Checkboxes (#140).
+		if ( isset( $schema['fields'] ) && is_array( $schema['fields'] ) ) {
+			list( $schema['fields'] ) = \SubtleForms\Support\SchemaRepair::multipleToCheckboxes( $schema['fields'] );
+		}
+
 		// A field saved without a key gets one rather than breaking the form.
 		list( $schema ) = \SubtleForms\Support\SchemaRepair::assignMissingKeys( $schema );
 
@@ -1001,6 +1006,9 @@ final class FormsRepository {
 	 */
 	public static function prepareStoredSchema( array $schema ): array {
 		list( $schema ) = \SubtleForms\Support\SchemaRepair::syncType( $schema );
+		if ( isset( $schema['fields'] ) && is_array( $schema['fields'] ) ) {
+			list( $schema['fields'] ) = \SubtleForms\Support\SchemaRepair::multipleToCheckboxes( $schema['fields'] );
+		}
 		list( $schema ) = \SubtleForms\Support\SchemaRepair::assignMissingKeys( $schema );
 		return self::sanitizeAppearance( $schema );
 	}
