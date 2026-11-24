@@ -27,6 +27,12 @@ export default function BuilderModalsController({
   onConfirmSaveDraft,
   onConfirmDiscard,
 
+  // Saved elsewhere since this tab opened the form (#145)
+  showConflict = false,
+  onCloseConflict,
+  onReloadLatest,
+  onReplaceWithMine,
+
   // Tour
   showTour,
   onCloseTour,
@@ -94,6 +100,23 @@ export default function BuilderModalsController({
         onSecondary={onConfirmDiscard}
         secondaryText={__('Discard Changes', 'subtleforms')}
         cancelText={__('Cancel', 'subtleforms')}
+      />
+
+      {/* Save conflict: the form was saved in another tab or browser */}
+      <ConfirmModal
+        isOpen={showConflict}
+        onClose={onCloseConflict}
+        title={__('This form changed somewhere else', 'subtleforms')}
+        message={__(
+          'Someone saved this form in another tab or browser after you opened it. Reload to get the latest version, or replace it with your changes.',
+          'subtleforms'
+        )}
+        onConfirm={onReloadLatest}
+        confirmText={__('Reload latest version', 'subtleforms')}
+        confirmVariant='primary'
+        onSecondary={onReplaceWithMine}
+        secondaryText={__('Replace with my changes', 'subtleforms')}
+        showCancel={false}
       />
 
       {/* Builder Tour */}

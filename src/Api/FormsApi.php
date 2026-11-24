@@ -472,6 +472,10 @@ final class FormsApi {
 			return ApiResponse::not_found( __( 'Form not found', 'subtleforms' ) );
 		}
 
+		// The tag is taken from the stored row, the same data the write guard
+		// compares against, before the computed fields are added.
+		$etag = $this->generateETag( $form, 'form' );
+
 		// Single source of truth for type/status/unpublished-changes.
 		$form = \SubtleForms\Support\FormMeta::with_meta( $form );
 
@@ -480,7 +484,6 @@ final class FormsApi {
 		$counts                   = $this->submissionsRepo->get_counts_by_forms( array( (int) $form['id'] ) );
 		$form['submission_count'] = (int) ( $counts[ (int) $form['id'] ] ?? 0 );
 
-		$etag     = $this->generateETag( $form, 'form' );
 		$response = ApiResponse::success( $form );
 		return ApiResponse::withHeaders( $response, array( 'ETag' => $etag ) );
 	}
@@ -777,14 +780,14 @@ final class FormsApi {
 				 */
 				do_action( 'subtleforms/forms/schema_published', $formId, $savedSchema['schema'] ?? $schema, $version );
 
-				return ApiResponse::success( array( 'version' => $version, 'active' => true ), 201 );
+				return $this->withFormEtag( $formId, ApiResponse::success( array( 'version' => $version, 'active' => true, 'etag' => $this->currentFormEtag( $formId ) ), 201 ) );
 			} else {
 				$success = $this->formsRepo->saveDraftSchema( $formId, $schema );
 				if ( ! $success ) {
 					return ApiResponse::server_error( __( 'Failed to save draft schema', 'subtleforms' ) );
 				}
 
-				return ApiResponse::success( array( 'draft' => true, 'active' => false ) );
+				return $this->withFormEtag( $formId, ApiResponse::success( array( 'draft' => true, 'active' => false, 'etag' => $this->currentFormEtag( $formId ) ) ) );
 			}
 		} catch ( \InvalidArgumentException $e ) {
 			Logger::error( 'Schema validation error for form %d: %s', $formId, $e->getMessage() );
@@ -1052,8 +1055,32 @@ final class FormsApi {
 
 		$updatedForm = $this->formsRepo->find( $id );
 		$etag        = $this->generateETag( $updatedForm, 'form' );
-		$response    = ApiResponse::success( array( 'success' => true, 'form' => $updatedForm ) );
+		$response    = ApiResponse::success( array( 'success' => true, 'form' => $updatedForm, 'etag' => $etag ) );
 		return ApiResponse::withHeaders( $response, array( 'ETag' => $etag ) );
+	}
+
+	/**
+	 * ETag of a form as stored right now.
+	 *
+	 * @param int $formId Form ID.
+	 * @return string Empty when the form cannot be read.
+	 */
+	private function currentFormEtag( int $formId ): string {
+		$form = $this->formsRepo->find( $formId );
+		return $form ? $this->generateETag( $form, 'form' ) : '';
+	}
+
+	/**
+	 * Return the form's new ETag on a write response, so the caller can keep
+	 * saving without conflicting with its own last save.
+	 *
+	 * @param int              $formId   Form ID.
+	 * @param WP_REST_Response $response Response to add the header to.
+	 * @return WP_REST_Response
+	 */
+	private function withFormEtag( int $formId, WP_REST_Response $response ): WP_REST_Response {
+		$etag = $this->currentFormEtag( $formId );
+		return '' === $etag ? $response : ApiResponse::withHeaders( $response, array( 'ETag' => $etag ) );
 	}
 
 	/**
