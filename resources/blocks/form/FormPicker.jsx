@@ -27,7 +27,10 @@ export function useForms() {
 }
 
 export function buildOptions(forms, value) {
-	const options = forms.map((form) => ({
+	const sorted = [...forms].sort(
+		(a, b) => String(a.title || '').localeCompare(String(b.title || '')) || Number(a.id) - Number(b.id)
+	);
+	const options = sorted.map((form) => ({
 		label: sprintf(
 			/* translators: 1: form title, 2: form id */
 			__('%1$s (#%2$d)', 'subtleforms'),
