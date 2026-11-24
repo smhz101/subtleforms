@@ -48,6 +48,8 @@ final class FrontendAssets {
 		'image_upload'     => 'upload',
 		'repeat_container' => 'repeater',
 		'chained_select'   => 'chained',
+		'select'           => 'choice',
+		'dropdown'         => 'choice',
 		'rich_text'        => 'richText',
 	);
 
@@ -565,6 +567,7 @@ final class FrontendAssets {
 	/** Webpack chunk name of each field code group. */
 	private const GROUP_CHUNKS = array(
 		'chained'        => 'field-chained-select',
+		'choice'         => 'field-choice',
 		'conversational' => 'form-conversational',
 		'date'           => 'field-date',
 		'flags'          => 'feature-flags',
