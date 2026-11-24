@@ -1374,11 +1374,13 @@ final class SubmissionsApi {
 		wp_die( esc_html( $message ), '', array( 'response' => absint( $status ) ) );
 	}
 
-	/** The Submissions tabs. Any other word is not a tab. */
+	/** Most entries one bulk request changes per batch, and per ids request. */
 	private const BULK_BATCH = 500;
 
+	/** Most entries a "match" bulk request may change. */
 	private const BULK_MATCH_MAX = 20000;
 
+	/** The Submissions tabs. Any other word is not a tab. */
 	private const TABS = array( 'all', 'unread', 'new', 'read', 'starred', 'spam', 'flagged', 'trash' );
 
 	/** Nonce action for the CSV download link. */
