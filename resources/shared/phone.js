@@ -103,7 +103,15 @@ function dropTrunkZero(country, digits) {
   if (!country?.dial || KEEPS_TRUNK_ZERO.has(country.dial)) {
     return digits;
   }
-  return digits.replace(/^0/, '');
+  return digits.replace(/^0[\s-]*/, '');
+}
+
+/** The typed characters of a number: digits, spaces, dashes, dots and brackets, spaces collapsed. */
+function typedChars(text) {
+  return String(text ?? '')
+    .replace(/[^\d\s().-]/g, '')
+    .replace(/\s+/g, ' ')
+    .replace(/^\s+/, '');
 }
 
 /**
@@ -119,7 +127,7 @@ function dropTrunkZero(country, digits) {
 export function splitPhoneValue(value, preferredCode = 'US') {
   const countries = phoneCountries();
   const preferred = phoneCountry(preferredCode) || phoneCountry('US') || countries[0] || null;
-  const raw = String(value ?? '').trim();
+  const raw = String(value ?? '').replace(/^\s+/, '');
   if (!raw) {
     return { country: preferred, national: '' };
   }
@@ -144,30 +152,41 @@ export function splitPhoneValue(value, preferredCode = 'US') {
       }
     }
     if (match) {
-      return { country: match, national: dropTrunkZero(match, numeric.slice(match.dial.length)) };
+      // Keep the national part as it was typed: skip the dial digits only.
+      let seen = 0;
+      let at = raw.replace(/^00/, '+').indexOf('+') + 1;
+      const text = raw.replace(/^00/, '+');
+      while (at < text.length && seen < match.dial.length) {
+        if (/\d/.test(text[at])) {
+          seen += 1;
+        }
+        at += 1;
+      }
+      const rest = typedChars(text.slice(at).replace(/^[\s.-]+/, ''));
+      return { country: match, national: dropTrunkZero(match, rest) };
     }
   }
 
-  return { country: preferred, national: raw.replace(/[^\d]/g, '') };
+  return { country: preferred, national: typedChars(raw) };
 }
 
 /**
  * Value stored on the submission: dial code plus the digits the visitor
- * typed, without the trunk 0 (FLD2-07).
+ * typed (spaces kept), without the trunk 0 (FLD2-07).
  *
  * @param {{dial?: string}|null} country
  * @param {string} national
  * @return {string}
  */
 export function joinPhoneValue(country, national) {
-  const digits = String(national || '').replace(/[^\d]/g, '');
-  if (!digits) {
+  const typed = typedChars(national);
+  if (!typed.replace(/\D/g, '')) {
     return '';
   }
   if (!country?.dial) {
-    return digits;
+    return typed;
   }
-  const local = dropTrunkZero(country, digits);
-  return local ? `+${country.dial} ${local}` : '';
+  const local = dropTrunkZero(country, typed);
+  return local.replace(/\D/g, '') ? `+${country.dial} ${local}` : '';
 }
 

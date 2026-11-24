@@ -84,8 +84,8 @@ final class FieldValueParity240Test extends TestCase {
 		);
 		$this->assertSame( 'https://example.com/about', $out['web'] );
 		$this->assertSame( 'a@example.com, b@example.com', $out['mail'] );
-		$this->assertSame( '+44 2079460958', $out['ph'] );
-		$this->assertSame( '+39 0612345678', $out['it'] );
+		$this->assertSame( '+44 (0)20 7946 0958', $out['ph'] );
+		$this->assertSame( '+39 06 1234 5678', $out['it'] );
 		$this->assertSame( '', $out['code'] );
 		$this->assertSame( 'ftp://example.com', FieldValidator::normalizeUrl( 'ftp://example.com' ) );
 	}

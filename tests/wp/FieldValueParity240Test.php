@@ -96,9 +96,9 @@ final class FieldValueParity240Test extends TestCase {
 			'email without rfc check'    => array( array( 'type' => 'email', 'rfcValidation' => false ), 'user@', 'user@localhost', 'user@localhost' ),
 			'website scheme'             => array( array( 'type' => 'url' ), 'ftp://example.com', 'example.com', 'https://example.com' ),
 			// FLD2-07: international phone numbers.
-			'phone too short'            => array( array( 'type' => 'phone', 'enableCountryCode' => true ), '+1 5', '+1 415 555 0100', '+1 4155550100' ),
-			'phone unknown code'         => array( array( 'type' => 'phone', 'enableCountryCode' => true ), '+999 123', '+44 07700 900123', '+44 7700900123' ),
-			'phone code only, required'  => array( array( 'type' => 'phone', 'enableCountryCode' => true, 'required' => true ), '+1', '+92 300 1234567', '+92 3001234567' ),
+			'phone too short'            => array( array( 'type' => 'phone', 'enableCountryCode' => true ), '+1 5', '+1 415 555 0100', '+1 415 555 0100' ),
+			'phone unknown code'         => array( array( 'type' => 'phone', 'enableCountryCode' => true ), '+999 123', '+44 07700 900123', '+44 07700 900123' ),
+			'phone code only, required'  => array( array( 'type' => 'phone', 'enableCountryCode' => true, 'required' => true ), '+1', '+92 300 1234567', '+92 300 1234567' ),
 			// FA-17: rich text with nothing in it is empty.
 			'rich text required'         => array( array( 'type' => 'rich_text', 'required' => true ), '<p><br></p>', '<p>Hello</p>' ),
 		);
