@@ -72,6 +72,14 @@ const stepStatus = ( entries ) => {
   return main.length ? main[ main.length - 1 ].status : 'started';
 };
 
+/** Readable text for skip reasons the pipeline stores as a code. */
+const SKIP_REASON_TEXT = {
+  conditions_not_met: __( 'Its conditions did not match this entry.', 'subtleforms' ),
+};
+
+/** The reason a step was skipped: a known code reads as text, any other reason shows its stored message. */
+export const skipReasonText = ( reason ) => ( reason ? SKIP_REASON_TEXT[ reason ] || String( reason ) : '' );
+
 const STATUS_LABEL = {
   succeeded:       'Succeeded',
   failed:          'Failed',
@@ -82,7 +90,7 @@ const STATUS_LABEL = {
 };
 
 /** A single pipeline step card showing dispatch + async completion. */
-const PipelineStepCard = ( { step } ) => {
+export const PipelineStepCard = ( { step } ) => {
   const [ open, setOpen ] = useState( false );
   const { iconName, label } = getActionMeta( step.actionType );
   const StepIcon = Icon[ iconName ] || Icon.Settings;
@@ -128,6 +136,10 @@ const PipelineStepCard = ( { step } ) => {
         ) }
       </div>
 
+      { status === 'skipped' && mainEntry && mainEntry.error && (
+        <p className='sf-pipe-step__skip-note'>{ skipReasonText( mainEntry.error ) }</p>
+      ) }
+
       {/* Expandable body */}
       { open && (
         <div className='sf-pipe-step__body'>
@@ -165,7 +177,7 @@ const PipelineStepCard = ( { step } ) => {
             </div>
           ) }
 
-          { mainEntry && mainEntry.error && (
+          { mainEntry && mainEntry.error && status !== 'skipped' && (
             <div className='sf-pipe-step__section sf-pipe-step__section--error'>
               <div className='sf-pipe-step__section-title'>{ __( 'Error', 'subtleforms' ) }</div>
               <p className='sf-pipe-error-msg'>{ mainEntry.error }</p>

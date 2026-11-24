@@ -37,7 +37,22 @@ final class EmailAction implements ActionInterface {
 		if ( ! is_array( $global ) ) {
 			$global = array();
 		}
-		if ( ! self::audienceAllowed( $this->audience( $settings['to'] ?? '' ), $global ) ) {
+		$audience = $this->audience( $settings['to'] ?? '' );
+		if ( ! self::audienceAllowed( $audience, $global ) ) {
+			$skips   = $context->getMeta( 'action_skips', array() );
+			$skips   = is_array( $skips ) ? $skips : array();
+			$skips[] = 'submitter' === $audience
+				? array(
+					'action'  => 'email',
+					'reason'  => 'submitter_emails_off',
+					'message' => __( 'Submitter emails are turned off in Settings, Email.', 'subtleforms' ),
+				)
+				: array(
+					'action'  => 'email',
+					'reason'  => 'admin_emails_off',
+					'message' => __( 'Admin notifications are turned off in Settings, Email.', 'subtleforms' ),
+				);
+			$context->setMeta( 'action_skips', $skips );
 			return;
 		}
 
