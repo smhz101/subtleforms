@@ -113,7 +113,7 @@ final class CustomStyling272Test extends TestCase {
 		);
 		$this->assertTrue( FrontendAssets::isPlainThemeForm( $schema ) );
 		// The only CSS it gets is the 2.7 layout lines.
-		$this->assertSame( 'a49d7b177ba961146f36a08ce1e134aa', md5( FrontendAssets::layoutCss() ) ); // 2.7 layout lines plus the 2.7.2 flag rule.
+		$this->assertSame( '942ce35bb68dbc4da5a366e5f0292fe4', md5( FrontendAssets::layoutCss() ) ); // 2.7 layout lines, the 2.7.2 flag rule and the 2.9.2 text box floor.
 		$this->assertStringNotContainsString( 'var(--subtleforms-label', FrontendAssets::layoutCss() );
 		// A legacy customCss key must not force the stylesheet; Free never renders it.
 		$schema['metadata']['appearance']['customCss'] = '.a{color:red}';

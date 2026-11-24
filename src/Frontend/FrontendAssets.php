@@ -436,10 +436,19 @@ final class FrontendAssets {
 	/**
 	 * The only CSS a form that inherits the theme receives: layout, hidden
 	 * text for screen readers, the honeypot and the field error colour. No
-	 * colour, border, font, size or spacing of the plugin's own (2.7.1).
+	 * colour, border or font of the plugin's own (2.7.1). Text boxes get the
+	 * same zero-specificity padding floor as in appearance.css (2.9.2), so a
+	 * theme with no form styles still shows usable fields and any theme rule
+	 * for inputs wins.
 	 */
 	public static function layoutCss(): string {
-		return '.subtleforms-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}'
+		$boxes = 'input:is([type="text"],[type="email"],[type="tel"],[type="url"],[type="number"],[type="password"],[type="search"],[type="date"],[type="time"],[type="datetime-local"]),input:not([type]),select';
+		$skip  = ':not(.subtleforms-picker__input,.subtleforms-picker__search)';
+		$scope = ':where(.subtleforms.subtleforms--inherit-theme) ';
+
+		return $scope . ':where(:is(' . $boxes . ',textarea)' . $skip . '){padding:0.5em 0.75em;box-sizing:border-box;line-height:1.4}'
+			. $scope . ':where(:is(' . $boxes . ')' . $skip . '){min-height:2.75em}'
+			. '.subtleforms-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}'
 			. '.subtleforms-honeypot{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}'
 			. '.subtleforms-form-container[data-reserve],.subtleforms-block[data-reserve]{min-height:var(--subtleforms-reserve,0px)}'
 			. '.subtleforms-skeleton{display:flex;flex-wrap:wrap;gap:44px var(--subtleforms-field-gap,20px);pointer-events:none;user-select:none}'
