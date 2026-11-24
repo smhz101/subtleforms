@@ -4,8 +4,8 @@
  *
  * The folder carries .htaccess and web.config deny rules, which nginx and
  * some other servers ignore. This class asks the site for a probe file in
- * that folder and reports the result in Site Health and, after activation,
- * as a notice on SubtleForms screens with the nginx rule to add (issue 169).
+ * that folder and reports the result in Site Health and, after activation
+ * and on a daily re-check, as a notice on SubtleForms screens with the nginx rule to add (issue 169).
  * The notice is hooked from AdminNotices, which owns every admin notice.
  *
  * @package SubtleForms\Uploads
@@ -26,8 +26,15 @@ final class UploadsExposure {
 	public const EXPOSED   = 'exposed';
 	public const UNKNOWN   = 'unknown';
 
-	/** Last result, kept for a day so admin pages do not send requests. */
-	public const RESULT_TRANSIENT = 'subtleforms_uploads_exposure';
+	/**
+	 * Last result and when it was taken. Kept as an option, not a transient,
+	 * so an exposed folder keeps its warning until a later check finds it
+	 * protected.
+	 */
+	public const RESULT_OPTION = 'subtleforms_uploads_exposure';
+
+	/** How often admin pages re-check, in seconds (one day). */
+	public const RECHECK_AFTER = 86400;
 
 	/** Set on activation: run the check on the next admin page load. */
 	public const PENDING_OPTION = 'subtleforms_uploads_check_pending';
@@ -55,14 +62,29 @@ final class UploadsExposure {
 	}
 
 	/**
-	 * Run the check left by activation, once, for a person who can act on it.
+	 * Run the check left by activation, and re-check once a day, on an admin
+	 * page load by a person who can act on it.
 	 */
 	public static function runPendingCheck(): void {
-		if ( wp_doing_ajax() || ! current_user_can( 'manage_options' ) || ! get_option( self::PENDING_OPTION ) ) {
+		if ( wp_doing_ajax() || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		$pending = (bool) get_option( self::PENDING_OPTION );
+		if ( ! $pending && ! self::isStale( self::storedResult(), time() ) ) {
 			return;
 		}
 		delete_option( self::PENDING_OPTION );
 		self::check();
+	}
+
+	/**
+	 * Whether a stored result is missing or older than RECHECK_AFTER.
+	 *
+	 * @param array|null $stored Stored result with 'checked', or null.
+	 * @param int        $now    Current time.
+	 */
+	public static function isStale( ?array $stored, int $now ): bool {
+		return null === $stored || ( $now - (int) ( $stored['checked'] ?? 0 ) ) >= self::RECHECK_AFTER;
 	}
 
 	/**
@@ -132,8 +154,21 @@ final class UploadsExposure {
 	 * Last stored result, or null when none is stored.
 	 */
 	public static function lastResult(): ?string {
-		$value = get_transient( self::RESULT_TRANSIENT );
-		return is_string( $value ) && in_array( $value, array( self::PROTECTED, self::EXPOSED, self::UNKNOWN ), true ) ? $value : null;
+		$stored = self::storedResult();
+		return null === $stored ? null : $stored['status'];
+	}
+
+	/**
+	 * The stored result, or null when none is stored or it is malformed.
+	 *
+	 * @return array{status: string, checked: int}|null
+	 */
+	private static function storedResult(): ?array {
+		$value = get_option( self::RESULT_OPTION );
+		if ( ! is_array( $value ) || ! isset( $value['status'] ) || ! in_array( $value['status'], array( self::PROTECTED, self::EXPOSED, self::UNKNOWN ), true ) ) {
+			return null;
+		}
+		return array( 'status' => $value['status'], 'checked' => (int) ( $value['checked'] ?? 0 ) );
 	}
 
 	/**
@@ -240,7 +275,7 @@ final class UploadsExposure {
 	}
 
 	private static function store( string $status ): string {
-		set_transient( self::RESULT_TRANSIENT, $status, DAY_IN_SECONDS );
+		update_option( self::RESULT_OPTION, array( 'status' => $status, 'checked' => time() ), false );
 		return $status;
 	}
 

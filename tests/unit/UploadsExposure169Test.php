@@ -35,6 +35,13 @@ final class UploadsExposure169Test extends TestCase {
 		$this->assertSame( UploadsExposure::UNKNOWN, UploadsExposure::classify( 301, '', self::PROBE ) );
 	}
 
+	public function test_result_is_rechecked_after_a_day_and_kept_until_then(): void {
+		$now = 1800000000;
+		$this->assertTrue( UploadsExposure::isStale( null, $now ), 'no result yet' );
+		$this->assertFalse( UploadsExposure::isStale( array( 'status' => 'exposed', 'checked' => $now - 3600 ), $now ) );
+		$this->assertTrue( UploadsExposure::isStale( array( 'status' => 'exposed', 'checked' => $now - UploadsExposure::RECHECK_AFTER ), $now ) );
+	}
+
 	public function test_nginx_rule_blocks_the_folder_path(): void {
 		$rule = UploadsExposure::nginxRule( '/wp-content/uploads/subtleforms-uploads-abcdef0123456789/' );
 		$this->assertStringContainsString( 'location ^~ /wp-content/uploads/subtleforms-uploads-abcdef0123456789/ {', $rule );
