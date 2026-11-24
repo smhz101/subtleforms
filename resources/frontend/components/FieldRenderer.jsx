@@ -11,7 +11,6 @@ import { compositeParts, partValue } from '../../shared/compositeParts';
 import { rangeSliderSeed } from '../utils/defaults';
 import { debug } from '../../shared/debug';
 import { cloneElement, useContext, useEffect } from '@wordpress/element';
-import ChoiceSelect from './fields/ChoiceSelect';
 import PanelContainer from './fields/PanelContainer';
 import { FormContext } from './fields/contexts';
 import { lazyField, fieldHasMask } from './fields/lazyFields';
@@ -25,6 +24,7 @@ import { toggleIsOn } from '../../shared/toggleState';
 // Heavier fields are only downloaded for forms that have them (rich text
 // since 2.3.0, the rest since 2.6.0). See fields/lazyFields.jsx.
 const ChainedSelect = lazyField('chained');
+const ChoiceSelect = lazyField('choice');
 const PhoneField = lazyField('geo', 'PhoneField');
 const CountrySelect = lazyField('geo', 'CountrySelect');
 const DateTimeField = lazyField('date');
