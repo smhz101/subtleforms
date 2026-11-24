@@ -30,10 +30,13 @@ final class SubmissionsRepository {
 	public const TRASH = 'trash';
 
 	/**
-	 * SQL condition that leaves trashed entries out. `status` may be NULL.
+	 * SQL condition that leaves only builder previews out. `status` may be NULL.
 	 */
 	public const NOT_PREVIEW = "( status IS NULL OR status <> 'preview' )";
 
+	/**
+	 * SQL condition that leaves trashed entries out. `status` may be NULL.
+	 */
 	public const NOT_TRASHED = "( status IS NULL OR status <> 'trash' )";
 
 	/**
