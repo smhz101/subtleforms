@@ -28,7 +28,7 @@ test('the help text says what deleting the plugin does with the data', () => {
   expect(text).toContain('When this is on, deleting SubtleForms from the Plugins screen leaves its forms, entries, settings and uploaded files in place, so reinstalling brings them back.');
   expect(text).toContain('When it is off, deleting removes them for good. Data that other plugins store is never removed.');
   expect(text).not.toContain('Off by default.');
-  expect(text).not.toContain('—');
+  expect(text).not.toContain(String.fromCharCode(8212));
   act(() => root.unmount());
   container.remove();
 });
