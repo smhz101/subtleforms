@@ -87,7 +87,7 @@ export default function BuilderCanvasArea({
         </div>
       )}
 
-      <div className={`sf-builder-view sf-builder-view--${view}`} role='tabpanel' aria-labelledby={`sf-builder-view-${view}`}>
+      <div id={`sf-builder-panel-${view}`} className={`sf-builder-view sf-builder-view--${view}`} role='tabpanel' aria-labelledby={`sf-builder-view-${view}`}>
           <>
             {view === 'build' && showWelcome && (
               <EmptyFormWelcome />
