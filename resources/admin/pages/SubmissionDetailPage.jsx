@@ -1,6 +1,7 @@
 import { submissionStatus } from '../utils/submissionStatus';
 import { displayItems, displayLabel, displayRow, displayText } from '../utils/entryDisplay';
 import { nextReviewStatus } from '../utils/entryStatus';
+import { isOn } from '../utils/isOn';
 import { adminLabel } from '../../shared/fieldDisplay';
 import { structuralType } from '../../shared/formType';
 import { useState, useEffect, useRef } from '@wordpress/element';
@@ -18,8 +19,10 @@ import AdminShell from '../components/AdminShell';
 import { apiClient } from '../data';
 import Icon from '../ui/Icon';
 import { isSafeHref } from '../components/integrations/ConnectionSteps';
+import EmailActionDetails from '../components/EmailActionDetails';
 import ExtensionSlot from '../components/ExtensionSlot';
 import { getSlotItems } from '../../shared/extend';
+import { formatSiteDateTime, siteDateTitle } from '../utils/formatDate';
 import './SubmissionDetailPage.scss';
 
 // ─── Pipeline timeline helpers ──────────────────────────────────────────────
@@ -71,6 +74,14 @@ const stepStatus = ( entries ) => {
   return main.length ? main[ main.length - 1 ].status : 'started';
 };
 
+/** Readable text for skip reasons the pipeline stores as a code. */
+const SKIP_REASON_TEXT = {
+  conditions_not_met: __( 'Its conditions did not match this entry.', 'subtleforms' ),
+};
+
+/** The reason a step was skipped: a known code reads as text, any other reason shows its stored message. */
+export const skipReasonText = ( reason ) => ( reason ? SKIP_REASON_TEXT[ reason ] || String( reason ) : '' );
+
 const STATUS_LABEL = {
   succeeded:       'Succeeded',
   failed:          'Failed',
@@ -81,7 +92,7 @@ const STATUS_LABEL = {
 };
 
 /** A single pipeline step card showing dispatch + async completion. */
-const PipelineStepCard = ( { step } ) => {
+export const PipelineStepCard = ( { step } ) => {
   const [ open, setOpen ] = useState( false );
   const { iconName, label } = getActionMeta( step.actionType );
   const StepIcon = Icon[ iconName ] || Icon.Settings;
@@ -118,7 +129,7 @@ const PipelineStepCard = ( { step } ) => {
           { STATUS_LABEL[ status ] || status }
         </span>
         { mainEntry && (
-          <span className='sf-pipe-step__time'>{ mainEntry.createdAt }</span>
+          <span className='sf-pipe-step__time' title={ siteDateTitle( mainEntry.createdAt ) }>{ formatSiteDateTime( mainEntry.createdAt ) }</span>
         ) }
         { ( hasData || hasAsync ) && (
           <span className='sf-pipe-step__toggle' aria-hidden='true'>
@@ -126,6 +137,15 @@ const PipelineStepCard = ( { step } ) => {
           </span>
         ) }
       </div>
+
+      { status === 'skipped' && mainEntry && mainEntry.error && (
+        <p className='sf-pipe-step__skip-note'>{ skipReasonText( mainEntry.error ) }</p>
+      ) }
+
+      {/* A step that ran with a note, such as notification conditions nobody checked */}
+      { status === 'succeeded' && mainEntry && mainEntry.error && (
+        <p className='sf-pipe-step__skip-note'>{ mainEntry.error }</p>
+      ) }
 
       {/* Expandable body */}
       { open && (
@@ -143,6 +163,9 @@ const PipelineStepCard = ( { step } ) => {
                   </a>
                 </p>
               ) }
+              { step.actionType === 'email' ? (
+                <EmailActionDetails data={ Object.fromEntries( Object.entries( mainEntry.data ).filter( ( [ k ] ) => ! SHOWN_AS_LINK.includes( k ) ) ) } />
+              ) : (
               <dl className='sf-pipe-data'>
                 { Object.entries( mainEntry.data ).filter( ( [ k ] ) => ! SHOWN_AS_LINK.includes( k ) ).map( ( [ k, v ] ) => (
                   <div key={ k } className='sf-pipe-data__row'>
@@ -157,10 +180,11 @@ const PipelineStepCard = ( { step } ) => {
                   </div>
                 ) ) }
               </dl>
+              ) }
             </div>
           ) }
 
-          { mainEntry && mainEntry.error && (
+          { mainEntry && mainEntry.error && status !== 'skipped' && status !== 'succeeded' && (
             <div className='sf-pipe-step__section sf-pipe-step__section--error'>
               <div className='sf-pipe-step__section-title'>{ __( 'Error', 'subtleforms' ) }</div>
               <p className='sf-pipe-error-msg'>{ mainEntry.error }</p>
@@ -195,7 +219,7 @@ const PipelineStepCard = ( { step } ) => {
                   </div>
                 ) }
               </dl>
-              <span className='sf-pipe-step__async-time'>{ ae.createdAt }</span>
+              <span className='sf-pipe-step__async-time' title={ siteDateTitle( ae.createdAt ) }>{ formatSiteDateTime( ae.createdAt ) }</span>
             </div>
           ) ) }
         </div>
@@ -338,7 +362,7 @@ function FileLinks( { files, submissionId } ) {
   );
 }
 
-export default function SubmissionDetailPage({ submissionId, onBack, formId, embedded = false, onBrowse = null, onEntryChanged = null, onEntryUpdated = null }) {
+export default function SubmissionDetailPage({ submissionId, onBack, formId, embedded = false, onBrowse = null, onEntryChanged = null, onEntryUpdated = null, listPatch = null }) {
   const routerNavigate = useNavigate();
   const [submission, setSubmission] = useState(null);
   const [logs, setLogs] = useState([]);
@@ -353,6 +377,14 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
   useEffect(() => {
     loadSubmission();
   }, [submissionId]);
+
+  // A change made to this entry in the list (its star) shows in the panel.
+  useEffect(() => {
+    if (!listPatch) return;
+    setSubmission((current) =>
+      current && String(current.id) === String(listPatch.id) ? { ...current, ...listPatch.patch } : current
+    );
+  }, [listPatch]);
 
   const loadSubmission = async () => {
     const requestId = ++requestRef.current;
@@ -378,12 +410,20 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
               }`
             ),
       ]);
+      // Opening an unread entry marks it read on the server. Tell the list,
+      // once, so the Unread count and the row follow (issue 130). This holds
+      // even when a newer load has replaced this one on screen: only this
+      // response says the entry was unread, and the server change happened.
+      const loaded = subData && subData.data ? subData.data : subData;
+      if (loaded && loaded.marked_read === true) {
+        onEntryUpdated?.({ ...loaded, is_read: 0 }, loaded);
+      }
       if (requestId !== requestRef.current) {
         return;
       }
 
       // ApiResponse wraps payloads in { data: ... } for consistency. Unwrap if present.
-      setSubmission(subData && subData.data ? subData.data : subData);
+      setSubmission(loaded);
       setLogs(
         Array.isArray(logsData)
           ? logsData
@@ -438,7 +478,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
   // Star (2.3.0).
   const handleStarToggle = async () => {
     if (!submission) return;
-    const next = parseInt(submission.starred, 10) === 1 ? 0 : 1;
+    const next = isOn(submission.starred) ? 0 : 1;
     setUpdating(true);
     try {
       await apiClient.put(`/submissions/${submission.id}`, { starred: !!next });
@@ -664,17 +704,6 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
     return new Date( raw && ! /[zZ]|[+-]\d{2}:?\d{2}$/.test( raw ) ? `${ raw.replace( ' ', 'T' ) }Z` : raw );
   };
 
-  const formatAbsDate = ( iso ) => {
-    try {
-      return toDate( iso ).toLocaleDateString( undefined, {
-        year: 'numeric', month: 'short', day: 'numeric',
-        hour: '2-digit', minute: '2-digit',
-      } );
-    } catch {
-      return iso;
-    }
-  };
-
   const formatRelDate = ( iso ) => {
     try {
       const diff = Math.max( 0, Math.floor( ( Date.now() - toDate( iso ).getTime() ) / 1000 ) );
@@ -688,12 +717,12 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
     }
   };
 
-  const absDate = formatAbsDate( submission.created_at );
+  const absDate = formatSiteDateTime( submission.created_at );
   const relDate = formatRelDate( submission.created_at );
 
   const isUnread = parseInt( submission.is_read, 10 ) === 0;
   const isFlagged = submission.status === 'flagged';
-  const isStarred = parseInt( submission.starred, 10 ) === 1;
+  const isStarred = isOn( submission.starred );
   const notes = Array.isArray( meta.notes ) ? meta.notes : [];
 
   // Field types, so answers can be shown the way they were typed.
@@ -785,6 +814,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
           size='compact'
           icon={ <Icon.Star size={ 16 } fill={ isStarred ? 'currentColor' : 'none' } /> }
           isPressed={ isStarred }
+          aria-pressed={ isStarred }
           disabled={ updating }
           onClick={ handleStarToggle }>
           { isStarred ? __( 'Starred', 'subtleforms' ) : __( 'Star', 'subtleforms' ) }
@@ -1016,7 +1046,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
                       <tbody>
                         { displayLogs.map( ( log, idx ) => (
                           <tr key={ idx }>
-                            <td className='sf-log-table__time'>{ log.created_at }</td>
+                            <td className='sf-log-table__time' title={ siteDateTitle( log.created_at ) }>{ formatSiteDateTime( log.created_at ) }</td>
                             <td>
                               <span className={ `sf-log-level sf-log-level--${ log.level }` }>{ log.level }</span>
                             </td>
@@ -1056,7 +1086,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
                     <li key={ note.id } className='sf-notes__item'>
                       <div className='sf-notes__meta'>
                         <strong>{ note.author_name || __( 'Unknown user', 'subtleforms' ) }</strong>
-                        <span>{ formatAbsDate( note.created_at ) }</span>
+                        <span title={ siteDateTitle( note.created_at ) }>{ formatSiteDateTime( note.created_at ) }</span>
                         <Button
                           size='small'
                           isDestructive
@@ -1104,7 +1134,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
                 <dt>{ __( 'Entry', 'subtleforms' ) }</dt>
                 <dd><code>#{ submission.id }</code></dd>
                 <dt>{ __( 'Received', 'subtleforms' ) }</dt>
-                <dd title={ submission.created_at }>{ absDate }</dd>
+                <dd title={ siteDateTitle( submission.created_at ) }>{ absDate }</dd>
                 <dt>{ __( 'Submitted by', 'subtleforms' ) }</dt>
                 <dd>
                   { meta.user_id

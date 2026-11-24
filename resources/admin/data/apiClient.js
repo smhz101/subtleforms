@@ -51,6 +51,29 @@ export const clearETag = (path) => {
 };
 
 /**
+ * Form versions for the builder.
+ *
+ * A form is read from /forms/<id> but written through /forms/<id>/schema and
+ * /forms/<id>, and the server keeps one ETag for the whole form. Keying by path
+ * left the schema save with nothing to send, so a stale tab overwrote a newer
+ * save without a word (#145). The builder's version is kept per form instead:
+ * what it loaded, then what its own last successful save returned.
+ */
+const formETags = new Map();
+
+export const storeFormETag = (formId, etag) => {
+  if (formId && etag) {
+    formETags.set(String(formId), etag);
+  }
+};
+
+export const getFormETag = (formId) => formETags.get(String(formId));
+
+export const clearFormETag = (formId) => {
+  formETags.delete(String(formId));
+};
+
+/**
  * Nonce handling
  *
  * WordPress core's `wp-api-fetch` script already registers a nonce middleware

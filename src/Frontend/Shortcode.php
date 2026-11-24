@@ -84,18 +84,21 @@ final class Shortcode {
 
 		$formId = intval( $atts['id'] );
 		if ( $formId <= 0 ) {
+			if ( EmbedNotice::canSee() ) {
+				return EmbedNotice::render( EmbedNotice::NO_ID, 0 );
+			}
 			return '<p class="subtleforms-error">' . esc_html__( 'Invalid form ID.', 'subtleforms' ) . '</p>';
 		}
 
 		// Verify form exists
 		$form = $this->formsRepo->find( $formId );
 		if ( ! $form ) {
-			return self::unavailable();
+			return EmbedNotice::canSee() ? EmbedNotice::render( EmbedNotice::MISSING, $formId ) : self::unavailable();
 		}
 
 		// Only render published forms on frontend
 		if ( $form['status'] !== 'published' ) {
-			return self::unavailable();
+			return EmbedNotice::canSee() ? EmbedNotice::render( EmbedNotice::UNPUBLISHED, $formId ) : self::unavailable();
 		}
 
 		// Login, schedule and entry-limit rules (2.0).
@@ -116,10 +119,11 @@ final class Shortcode {
 		FrontendAssets::preloadFieldCode( $schema );
 		FrontendAssets::loadFieldTranslations( $schema );
 		return sprintf(
-			'<div class="subtleforms-form-container" data-form-id="%d"%s%s>%s</div>%s',
+			'<div class="subtleforms-form-container" data-form-id="%d"%s%s>%s%s</div>%s',
 			esc_attr( (string) $formId ),
 			FormPlaceholder::attributes( $schema ),
 			self::featuresAttribute( $schema ),
+			EmbedNotice::noscript( $formId ),
 			$inline['outline'],
 			$inline['tag']
 		);

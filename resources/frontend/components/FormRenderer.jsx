@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from '@wordpress/element';
+import { useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef } from '@wordpress/element';
 import { __, sprintf, _n } from '@wordpress/i18n';
 import FieldRenderer from './FieldRenderer';
 import StepNavigation from './StepNavigation';
@@ -19,6 +19,7 @@ import { formFieldDefaults, formHasRequiredFields, requiredIndicatorMark } from 
 import { debug } from '../../shared/debug';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { FormContext } from './fields/contexts';
+import { claimInstance, releaseInstance } from '../utils/formInstance';
 import { revealField } from '../utils/revealField';
 import { getFormWrappers } from '../../shared/extend';
 import { lazyField, loadFieldsFor, fieldsReadyFor } from './fields/lazyFields';
@@ -33,6 +34,7 @@ import {
 
 import { restFetch, restUrl, restNonce } from '../utils/restFetch';
 import { createSpamTokenSource } from '../utils/spamToken';
+import useTimeTrapHold from '../utils/useTimeTrapHold';
 import { fillConfirmation, fieldTypesOf } from '../../shared/confirmationTags';
 import { messageParagraphs } from '../../shared/safeLinks';
 import ConfirmationText from './ConfirmationText';
@@ -69,6 +71,7 @@ export default function FormRenderer({
   formId,
   preloadedSchema = null,
   preloadedSpamToken = '',
+  preloadedSpamMinSeconds = 0,
   preview = false,
   onSubmit: customOnSubmit = null,
   blockOptions = null,
@@ -83,6 +86,12 @@ export default function FormRenderer({
   const [schema, setSchema] = useState(preloadedSchema || inline?.schema || null);
   // Server-signed load time for the spam time trap (FF-11, FF-12).
   const [spamToken, setSpamToken] = useState(preloadedSpamToken || inline?.spamToken || '');
+  // The time trap's minimum in seconds, 0 when the form has none (issue 126).
+  const [spamMinSeconds, setSpamMinSeconds] = useState(
+    Number(preloadedSpamMinSeconds || inline?.spamMinSeconds) || 0
+  );
+  // Holds a fast submit until the time trap's minimum has passed (issue 126).
+  const waitForMinimum = useTimeTrapHold(spamMinSeconds);
   const [error, setError] = useState(null);
   const [values, setValues] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -114,6 +123,20 @@ export default function FormRenderer({
     []
   );
   const honeypotName = `sf_hp_${honeypotSuffix}`;
+  // Which copy of this form is on the page: 1 for the first, 2 for the next.
+  // The first render always uses copy 1 (the plain ids). A layout effect then
+  // claims the real number and, for a later copy, renders again before the
+  // browser paints. React runs the cleanup of a removed copy before the layout
+  // effects of a new one in the same commit, so a copy swapped for a fresh mount
+  // of the same form gets 1 again. The builder canvas and Preview show one copy
+  // and are drawn again on edits, so they never claim a number (formInstance.js).
+  const [instance, setInstance] = useState(1);
+  useLayoutEffect(() => {
+    if (preview) return undefined;
+    const n = claimInstance(formId);
+    setInstance(n);
+    return () => releaseInstance(formId, n);
+  }, [formId, preview]);
   const honeypotId = `subtleforms-hp-${formId}-${honeypotSuffix}`;
 
   // Load schema (skip if preloaded)
@@ -156,6 +179,7 @@ export default function FormRenderer({
             return;
           }
           setSpamToken(data?.data?.spam_token || '');
+          setSpamMinSeconds(Number(data?.data?.spam_min_seconds) || 0);
           if (schemaPayload) {
             setSchema(schemaPayload);
           } else {
@@ -593,8 +617,8 @@ export default function FormRenderer({
   // survives a step change (their fields are drawn again then).
   const panelState = useRef(new Map()).current;
   const formContext = useMemo(
-    () => ({ formId, preview, fieldDefaults, panelState }),
-    [formId, preview, fieldDefaults, panelState]
+    () => ({ formId, preview, fieldDefaults, panelState, instance }),
+    [formId, preview, fieldDefaults, panelState, instance]
   );
 
   // On a multi-step form, show the first step that has a field in error.
@@ -670,6 +694,14 @@ export default function FormRenderer({
       setSubmitting(true);
       setSubmitError(null);
       setErrorSummary('');
+
+      // The server drops a submit that comes before the time trap's minimum
+      // and still answers "Thank you", so a fast visitor (autofill) would lose
+      // the entry. Hold the send until the minimum has passed; the button
+      // already shows its sending state (issue 126).
+      if (!(await waitForMinimum())) {
+        return;
+      }
 
       // Handle reCAPTCHA v3 if present
       const recaptchaV3Input = document.querySelector(
@@ -974,6 +1006,7 @@ export default function FormRenderer({
       schema,
       spamToken,
       spamTokens,
+      waitForMinimum,
     ]
   );
 
@@ -1087,8 +1120,10 @@ export default function FormRenderer({
         schema={schema}
         formId={formId}
         preview={preview}
+        instance={instance}
         onSubmit={customOnSubmit}
         spamToken={spamToken}
+        spamMinSeconds={spamMinSeconds}
       />
     );
   }

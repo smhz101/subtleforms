@@ -11,7 +11,6 @@ export default function useBuilderKeyboardShortcuts({
   dispatch,
   isHydrating,
   saving,
-  autoSaving,
   canUndo,
   canRedo,
 }) {
@@ -38,7 +37,10 @@ export default function useBuilderKeyboardShortcuts({
         return;
       }
 
-      if (isHydrating || saving || autoSaving) {
+      // An autosave in flight must not block undo and redo, the same as the
+      // toolbar buttons: the next edit is saved after it. Only the load and a
+      // manual save hold the keys.
+      if (isHydrating || saving) {
         return;
       }
 
@@ -69,5 +71,5 @@ export default function useBuilderKeyboardShortcuts({
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [autoSaving, canRedo, canUndo, dispatch, isHydrating, saving]);
+  }, [canRedo, canUndo, dispatch, isHydrating, saving]);
 }

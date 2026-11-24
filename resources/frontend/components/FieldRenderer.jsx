@@ -5,6 +5,7 @@ import { consentParts } from '../../shared/consentLabel';
 import { formatUsPhone, isCompleteUsPhone } from '../../shared/phoneFormat';
 import { passwordStrength } from '../../shared/passwordStrength';
 import { columnFields } from '../utils/columnFields';
+import { fieldDomId } from '../utils/formInstance';
 import { getCompositeEmptyParts, isAnswerable } from '../utils/fieldValidation';
 import { compositeParts, partValue } from '../../shared/compositeParts';
 import { rangeSliderSeed } from '../utils/defaults';
@@ -35,11 +36,13 @@ import {
   fieldAppearanceStyle,
   fieldAppearanceClasses,
 } from '../../shared/appearance';
+import { inferAutocomplete } from '../../shared/autocomplete';
 
 // HTML autocomplete tokens per field type, so browsers can autofill the form
-// (Part B2). `undefined` means no hint (let the browser decide).
+// (Part B2). `undefined` means no hint (let the browser decide). A Text field
+// has no default here: its token is the field's Autofill setting, else one
+// inferred from its key or label (2.10.0).
 const AUTOCOMPLETE_TOKENS = {
-  text: 'off',
   email: 'email',
   url: 'url',
   number: 'off',
@@ -52,6 +55,13 @@ const AUTOCOMPLETE_TOKENS = {
   password: 'new-password',
 };
 
+
+// The autocomplete token of an input: the field's setting, else the one
+// inferred from its key or label, else the type's default. `off` means off;
+// an empty result draws no attribute.
+function autofillToken(field, config) {
+  return config.autocomplete || inferAutocomplete(field) || AUTOCOMPLETE_TOKENS[field.type] || undefined;
+}
 
 export default function FieldRenderer({
   field,
@@ -71,7 +81,7 @@ export default function FieldRenderer({
   // width never hides required, options, placeholder or help text (bug 1).
   const config = fieldConfig(field);
   // Label visibility and help text placement, with the form's defaults (2.3.2).
-  const { fieldDefaults, preview: isPreview } = useContext(FormContext) || {};
+  const { fieldDefaults, preview: isPreview, instance = 1 } = useContext(FormContext) || {};
   const display = fieldDisplay(field, fieldDefaults);
   const requiredMark = requiredIndicatorMark(fieldDefaults);
 
@@ -87,10 +97,7 @@ export default function FieldRenderer({
 
   // Accessible input id
   // A saved node can lack a key (RCOMPAT-02); never let that stop the form.
-  const inputId = `subtleforms-field-${String(resolvedPath || field.key || field.id || '').replace(
-    /[^a-zA-Z0-9\-_:.]/g,
-    '-'
-  )}`;
+  const inputId = fieldDomId(resolvedPath || field.key || field.id || '', instance);
 
   const error = errors?.[resolvedPath];
 
@@ -488,9 +495,14 @@ export default function FieldRenderer({
         />
       );
     }
+    // The setup message is for site admins and is empty for visitors. With
+    // nothing to say and nothing to show, draw nothing (#142).
+    if (!config.captchaWarning) {
+      return null;
+    }
     return (
       <p className='subtleforms-captcha-warning' role='status'>
-        {config.captchaWarning || __('This CAPTCHA is not set up yet.', 'subtleforms')}
+        {config.captchaWarning}
       </p>
     );
   }
@@ -667,7 +679,7 @@ function renderInput(
             required={required || undefined}
             aria-required={required}
             aria-invalid={!!error}
-            autoComplete={config.autocomplete || AUTOCOMPLETE_TOKENS[field.type]}
+            autoComplete={autofillToken(field, config)}
             readOnly={config.readOnly === true}
           />
         );
@@ -691,7 +703,7 @@ function renderInput(
           aria-invalid={!!error}
           aria-describedby={describedBy}
           name={name}
-          autoComplete={config.autocomplete || AUTOCOMPLETE_TOKENS[field.type]}
+          autoComplete={autofillToken(field, config)}
           readOnly={config.readOnly === true}
           min={isNumeric ? numOrUndef(config.min) : field.type === 'date' ? config.minDate || undefined : undefined}
           max={isNumeric ? numOrUndef(config.max) : field.type === 'date' ? config.maxDate || undefined : undefined}
@@ -814,6 +826,7 @@ function renderInput(
           aria-invalid={!!error}
           aria-describedby={describedBy}
           name={name}
+          autoComplete={config.autocomplete || undefined}
           readOnly={config.readOnly === true}
           minLength={numOrUndef(config.minLength)}
           maxLength={numOrUndef(config.maxLength)}

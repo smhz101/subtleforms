@@ -8,12 +8,14 @@ import AddressFieldRenderer from './AddressFieldRenderer';
 import { getCanvasPreview, addonProvides } from '../../../shared/extend';
 import { fieldDisplay, requiredIndicatorMark } from '../../../shared/fieldDisplay';
 import { fieldConfig } from '../../../shared/fieldConfig';
+import { captchaFieldReady, CAPTCHA_SETTINGS_URL } from '../../../shared/captchaReady';
 import { flagsOn } from '../../../shared/flagsOn';
 import { resolveMask } from '../../../shared/inputMask';
 import { choiceChecked, choiceShowsDefault } from '../../../shared/canvasDefaults';
 import { consentParts } from '../../../shared/consentLabel';
 import { toggleInitialValue, toggleIsOn } from '../../../shared/toggleState';
 import ChainedSelect from '../../../frontend/components/fields/ChainedSelect';
+import { isAnswerable } from '../../../frontend/utils/fieldValidation';
 import PhoneField from '../../../frontend/components/fields/PhoneField';
 import ChoiceSelect from '../../../frontend/components/fields/ChoiceSelect';
 import CountrySelect from '../../../frontend/components/fields/CountrySelect';
@@ -579,16 +581,27 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
             </div>
           </div>
           <div className='sf-captcha-preview__footer'>
-            <div className='sf-captcha-preview__status'>
+            <div className={captchaFieldReady(field) ? 'sf-captcha-preview__status' : 'sf-captcha-preview__status sf-captcha-preview__status--warning'}>
               <span className='sf-captcha-preview__status-icon'><Icon.HelpCircle size={12} /></span>
-              {fieldConfig(field).site_key && fieldConfig(field).secret_key ? __('CAPTCHA will appear here on the live form', 'subtleforms') : __('Add a site key and a secret key, or this check will not run.', 'subtleforms')}
+              {captchaFieldReady(field) ? (
+                __('CAPTCHA will appear here on the live form', 'subtleforms')
+              ) : (
+                <span className='sf-captcha-preview__status-text'>
+                  {__('No keys yet, so this check is skipped on the live form.', 'subtleforms')}{' '}
+                  <a href={CAPTCHA_SETTINGS_URL}>
+                    {__('Add keys in Settings, Security & privacy', 'subtleforms')}
+                  </a>
+                </span>
+              )}
             </div>
           </div>
         </div>
       )}
 
       {/* ── Chained Select ──────────────────────────────────────────────────── */}
-      {type === 'chained_select' && (
+      {/* An unconfigured Chained Select shows only the warning below, not
+          the field's own empty hint as well (#140 item 6). */}
+      {type === 'chained_select' && isAnswerable('chained_select', fieldConfig(field)) && (
         <ChainedSelect
           config={fieldConfig(field)}
           value={chainedSelections}
@@ -596,6 +609,11 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           selectClassName={selectClass}
           disabled={!interactive}
         />
+      )}
+      {type === 'chained_select' && !isAnswerable('chained_select', fieldConfig(field)) && (
+        <p className='sf-field-renderer__chained-warning' role='note'>
+          {__('No options yet, so this field is hidden on the live form. Add them in the field settings.', 'subtleforms')}
+        </p>
       )}
 
       {/* ── Color Picker ────────────────────────────────────────────────────── */}

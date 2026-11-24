@@ -17,6 +17,23 @@ export function tokenAge(token, now = Math.floor(Date.now() / 1000)) {
 }
 
 /**
+ * Milliseconds a submit still has to wait so the server's time trap does not
+ * drop it. The page was built before the browser mounted the form, so time
+ * since mount never overstates the token's age. One extra second covers the
+ * server counting whole seconds.
+ *
+ * @param {number} minSeconds The form's time trap minimum, 0 when it is off.
+ * @param {number} mountedAt  performance.now() when the form first mounted.
+ * @param {number} now        performance.now() now.
+ * @return {number} Milliseconds to wait, 0 when none.
+ */
+export function msUntilMinimum(minSeconds, mountedAt, now) {
+  const min = Number(minSeconds);
+  if (!Number.isFinite(min) || min <= 0) return 0;
+  return Math.max(0, (min + 1) * 1000 - (now - mountedAt));
+}
+
+/**
  * Trade a page ticket (or an old submit token) for a per-visitor submit
  * token. Resolves to null when the exchange fails.
  *

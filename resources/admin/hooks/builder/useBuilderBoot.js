@@ -7,6 +7,7 @@
 import { useState, useEffect, useCallback } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { apiGet } from '../../utils/api';
+import { storeFormETag, clearFormETag } from '../../data/apiClient';
 import { BUILDER_ACTIONS } from '../useBuilderReducer';
 
 export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTour }) {
@@ -237,6 +238,13 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
         // envelope always gave "draft", so a live form opened in the builder
         // was labelled Draft (2.2.1, bug 12).
         const formBody = formRes.ok ? formRes.body?.data ?? formRes.body ?? {} : {};
+
+        // The version this tab is editing. Every save sends it back, and the
+        // server refuses the save if someone else has moved the form on.
+        clearFormETag(formId);
+        if (formRes.ok) {
+          storeFormETag(formId, formRes.headers?.get?.('ETag'));
+        }
 
         dispatch({
           type: BUILDER_ACTIONS.LOAD_SUCCESS,

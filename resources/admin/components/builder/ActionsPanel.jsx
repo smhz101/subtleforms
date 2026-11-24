@@ -5,7 +5,7 @@
  * Supports: webhook, email
  */
 
-import { useCallback, useMemo, useRef, useId } from '@wordpress/element';
+import { useCallback, useEffect, useMemo, useRef, useId, useState } from '@wordpress/element';
 import {
   Button,
   TextControl,
@@ -40,6 +40,8 @@ import ConnectionTest from '../settings/extensions/ConnectionTest';
 import { normalizeWebhookUrl } from '../../utils/webhookUrl';
 import { bareHost } from '../settings/senderDomain';
 import Icon from '../../ui/Icon';
+import { apiClient } from '../../data/apiClient';
+import { emailAudience, emailSwitchOff } from '../../utils/emailAudience';
 import HeadersEditor from './webhook/HeadersEditor';
 import PayloadPicker, { currentSelection, payloadMode } from './webhook/PayloadPicker';
 import { collectPayloadFields, defaultSelection, applicableGroups, sampleAnswers } from './webhook/webhookModel';
@@ -140,6 +142,9 @@ export function missingActionSettings(action) {
   }
   return [];
 }
+
+/** Settings, Email, where the two email switches live. */
+const EMAIL_SETTINGS_URL = 'admin.php?page=subtleforms-settings#tab=email';
 
 /** Default settings shape for a new webhook action */
 const DEFAULT_WEBHOOK_SETTINGS = {
@@ -253,7 +258,7 @@ function ActionConditions({ settings, fields, disabled, onChange }) {
   );
 }
 
-function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fields, payloadFields, addonGroups, form }) {
+function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fields, payloadFields, addonGroups, form, siteSettings = null }) {
   const {
     attributes,
     listeners,
@@ -278,6 +283,7 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fie
 
   /** Merge a patch into settings */
   const patchSettings = (patch) => onUpdate(index, { settings: { ...s, ...patch } });
+  const switchOff = action.type === 'email' ? emailSwitchOff( emailAudience( s.to ), siteSettings ) : null;
   const patchSigning  = (patch) => patchSettings({ signing: { ...signing, ...patch } });
 
   return (
@@ -373,6 +379,15 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fie
           {showWarnings && !s.to && (
             <Notice status='warning' isDismissible={false} className='sf-actions-panel__field-notice'>
               {__('A recipient email address is required.', 'subtleforms')}
+            </Notice>
+          )}
+          {switchOff && (
+            <Notice status='warning' isDismissible={false} className='sf-actions-panel__field-notice sf-actions-panel__switch-notice'>
+              {switchOff === 'submitter_off'
+                ? __('Submitter emails are turned off, so this email will not be sent.', 'subtleforms')
+                : __('Admin notifications are turned off, so this email will not be sent.', 'subtleforms')}
+              {' '}
+              <a href={EMAIL_SETTINGS_URL}>{__('Turn them on in Settings, Email', 'subtleforms')}</a>
             </Notice>
           )}
 
@@ -613,7 +628,10 @@ function AddBar({ isReadOnly, onAddEmail, onAddWebhook, label, position = 'befor
 // ─── ActionsPanel ────────────────────────────────────────────────────────────
 
 export default function ActionsPanel({ schema, onChange, isReadOnly = false }) {
-  const actions = normalizeActions(schema?.actions);
+  // Memoised so an action saved without an id keeps the id made for it: a new
+  // id on every render remounts the card, which loses focus and the element
+  // a user or test is working with when the settings arrive.
+  const actions = useMemo(() => normalizeActions(schema?.actions), [schema?.actions]);
   const logicFields = collectLogicFields(schema?.fields || []);
   const payloadFields = useMemo(() => collectPayloadFields(schema?.fields || []), [schema?.fields]);
   const addonGroups = useMemo(() => applicableGroups(schema?.fields || []), [schema?.fields]);
@@ -627,6 +645,22 @@ export default function ActionsPanel({ schema, onChange, isReadOnly = false }) {
     const meta = schema?.metadata || {};
     return { id, title: meta.title || meta.name || '', siteUrl: window.location.origin };
   }, [schema?.metadata]);
+
+  // Site settings, read once, so a notification can warn when the Settings,
+  // Email switch for its audience is off.
+  const [siteSettings, setSiteSettings] = useState(null);
+  useEffect(() => {
+    let live = true;
+    Promise.resolve()
+      .then(() => apiClient.get('/settings'))
+      .then((response) => {
+        // The endpoint answers { success, data }: keep the settings inside it.
+        const data = response && typeof response.data === 'object' && response.data !== null ? response.data : response;
+        if (live && data && typeof data === 'object') setSiteSettings(data);
+      })
+      .catch(() => {});
+    return () => { live = false; };
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -732,6 +766,7 @@ export default function ActionsPanel({ schema, onChange, isReadOnly = false }) {
                   payloadFields={payloadFields}
                   addonGroups={addonGroups}
                   form={form}
+                  siteSettings={siteSettings}
                 />
               ))}
             </SortableContext>

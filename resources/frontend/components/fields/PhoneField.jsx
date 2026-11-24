@@ -214,7 +214,7 @@ export default function PhoneField({
         name={name}
         value={usLayout ? formatUsPhone(national) : phoneMask ? sanitizePhone(national) : national}
         inputMode="tel"
-        autoComplete="tel-national"
+        autoComplete={config.autocomplete || 'tel-national'}
         placeholder={placeholder || __('Phone number', 'subtleforms')}
         required={required || undefined}
         aria-required={required || undefined}

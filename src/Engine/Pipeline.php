@@ -80,6 +80,18 @@ final class Pipeline {
 					continue;
 				}
 
+				// A condition nobody checks (no add-on evaluates action logic)
+				// does not stop the action, but the log says so (#137).
+				$uncheckedNote = null;
+				if (
+					$step->action()->id() !== 'save'
+					&& is_array( $stepSettings )
+					&& ! ConditionalLogic::hasLogic( $stepSettings['logic'] ?? null, 'action' )
+					&& null !== ConditionalLogic::normalizeLogic( $stepSettings['logic'] ?? null )
+				) {
+					$uncheckedNote = __( 'Sent without checking its conditions: SubtleForms Pro, which checks them, is not active.', 'subtleforms' );
+				}
+
 				// Log start
 				$this->logEvent( $ctx, $step, 'started', null, $ts );
 
@@ -115,8 +127,26 @@ final class Pipeline {
 					$ctx->setMeta( 'action_failures', $remaining );
 				}
 
-				if ( ! $found ) {
-					$this->logEvent( $ctx, $step, 'succeeded', null, time() );
+				// Skips recorded by action implementations: the action decided
+				// not to run. A failure for the same step wins over a skip.
+				$skips   = $ctx->getMeta( 'action_skips', array() );
+				$skipped = null;
+				if ( is_array( $skips ) ) {
+					$remainingSkips = array();
+					foreach ( $skips as $sk ) {
+						if ( is_array( $sk ) && isset( $sk['action'] ) && $sk['action'] === $step->action()->id() ) {
+							$skipped = $skipped ?? $sk;
+						} else {
+							$remainingSkips[] = $sk;
+						}
+					}
+					$ctx->setMeta( 'action_skips', $remainingSkips );
+				}
+
+				if ( ! $found && null !== $skipped ) {
+					$this->logEvent( $ctx, $step, 'skipped', (string) ( $skipped['message'] ?? $skipped['reason'] ?? 'skipped' ), time() );
+				} elseif ( ! $found ) {
+					$this->logEvent( $ctx, $step, 'succeeded', $uncheckedNote, time() );
 				}
 
 				// Clear step-specific transient meta

@@ -32,6 +32,9 @@
 	align-items: flex-end;
 	gap: 16px;
 	flex-shrink: 0;
+	// Above the table, so the open Form list is not painted over by it.
+	position: relative;
+	z-index: 30;
 	padding: 16px var(--sf-gutter);
 	border-bottom: 1px solid var(--sf-border);
 	background: var(--sf-bg-subtle);
@@ -55,6 +58,75 @@
 .sf-filter-control {
 	min-width: 200px;
 	margin: 0;
+}
+
+// The Form filter is a combobox: make it look like the sibling selects, one
+// 32px control with one border and the label directly above it.
+.sf-filter-bar .sf-form-filter {
+	position: relative;
+	z-index: 30;
+	flex: 0 0 200px;
+	width: 200px;
+	min-width: 200px;
+	max-width: 200px;
+
+	.components-base-control__label {
+		margin-bottom: 8px;
+	}
+
+	// The open list floats over the table instead of growing the bar.
+	.components-form-token-field__suggestions-list {
+		position: absolute;
+		top: 100%;
+		inset-inline-start: 0;
+		z-index: 30;
+		box-sizing: border-box;
+		width: max-content;
+		min-width: 100%;
+		max-width: 360px;
+		max-height: 240px;
+		margin: 2px 0 0;
+		overflow-y: auto;
+		border: 1px solid var(--sf-border-strong, #949494);
+		border-radius: 2px;
+		background: var(--sf-bg-surface, #fff);
+		box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
+	}
+
+	.components-combobox-control__suggestions-container {
+		position: relative;
+		box-sizing: border-box;
+		height: 32px;
+		border: 1px solid var(--sf-border-strong, #949494);
+		border-radius: 2px;
+		background: var(--sf-bg-surface, #fff);
+
+		&:focus-within {
+			border-color: var(--wp-admin-theme-color, #2271b1);
+			box-shadow: 0 0 0 1px var(--wp-admin-theme-color, #2271b1);
+		}
+	}
+
+	.components-combobox-control__input.components-form-token-field__input {
+		box-sizing: border-box;
+		width: 100%;
+		height: 100%;
+		min-height: 0;
+		margin: 0;
+		padding: 0 0 0 1px;
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+		box-shadow: none;
+		outline: 0;
+
+		&:focus,
+		&:focus-visible {
+			border: 0;
+			box-shadow: none !important;
+			outline: 0 !important;
+		}
+	}
 }
 
 .sf-filter-clear-link.components-button {

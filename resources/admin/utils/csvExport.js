@@ -19,13 +19,13 @@
 import { __ } from '@wordpress/i18n';
 import { apiPost } from './api';
 
-const FILTER_KEYS = ['form_id', 'status', 'search', 'range', 'after'];
+const FILTER_KEYS = ['form_id', 'status', 'processing_status', 'search', 'range', 'after'];
 
 /**
  * The filters whose "all" is the dropdown's own "no filter" choice. A search
  * for the word "all" is a real search and is kept.
  */
-const DROPDOWN_KEYS = ['status', 'range'];
+const DROPDOWN_KEYS = ['status', 'processing_status', 'range'];
 
 /** The address parameter the server adds when it sends the browser back. */
 export const EXPORT_FLAG = 'sf_export';
@@ -35,7 +35,7 @@ const admin = () => window.subtleformsAdmin || {};
 /**
  * The download address for a set of filters.
  *
- * @param {Object} filters form_id, status, search, range, after. Empty values are left out.
+ * @param {Object} filters form_id, status (the tab), processing_status, search, range, after. The names the list sends. Empty values are left out.
  * @param {string} [nonce] Nonce for the address. Defaults to the one the page was given.
  * @return {string} Address, or an empty string when the page has no download address.
  */
@@ -196,7 +196,7 @@ export async function startCsvDownloadOfIds(ids = []) {
 export function exportFlagNotice(flag) {
   switch (flag) {
     case 'empty':
-      return { type: 'warning', message: __('No submissions to export', 'subtleforms') };
+      return { type: 'warning', message: __('Nothing to export for these filters.', 'subtleforms') };
     case 'expired':
       return {
         type: 'error',

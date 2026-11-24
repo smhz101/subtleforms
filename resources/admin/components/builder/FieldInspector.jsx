@@ -266,6 +266,11 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
               <kbd>Z</kbd> {__('Undo', 'subtleforms')}
             </li>
             <li>
+              <kbd>Ctrl</kbd>
+              <kbd>Shift</kbd>
+              <kbd>Z</kbd> {__('Redo', 'subtleforms')}
+            </li>
+            <li>
               <kbd>Del</kbd> {__('Delete selected field', 'subtleforms')}
             </li>
           </ul>

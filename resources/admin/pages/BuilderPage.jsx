@@ -24,6 +24,7 @@ import {
   apiDelete,
   buildApiUrl,
 } from '../utils/api';
+import { clearFormETag } from '../data/apiClient';
 import { createInitialSchema } from '../utils/initialSchema';
 import { schemaEquals } from '../utils/schemaEquals';
 import useBuilderReducer, {
@@ -131,6 +132,7 @@ function FormBuilderInner({
   const {
     createSuccessNotice,
     createErrorNotice,
+    createWarningNotice,
     removeNotice,
     SUCCESS_NOTICE_ID,
     ERROR_NOTICE_ID,
@@ -176,6 +178,11 @@ function FormBuilderInner({
     setShowPublishConfirm,
     showDiscardConfirm,
     setShowDiscardConfirm,
+    showConflict,
+    closeConflict,
+    reloadLatest,
+    replaceWithMine,
+    putTitle,
     lastManualSaveRef,
     autoSaveTimeoutRef,
   } = useBuilderOrchestrator({
@@ -187,6 +194,7 @@ function FormBuilderInner({
     notices: {
       createSuccessNotice,
       createErrorNotice,
+      createWarningNotice,
       removeNotice,
       SUCCESS_NOTICE_ID,
       ERROR_NOTICE_ID,
@@ -194,6 +202,7 @@ function FormBuilderInner({
     onSaved,
     navigate,
     hasValidationErrors: false, // placeholder, replaced after useBuilderValidation
+    loadForm,
   });
 
   // Legacy status mapping for UI components
@@ -240,10 +249,12 @@ function FormBuilderInner({
     dispatch,
     isHydrating,
     saving,
-    autoSaving,
     canUndo,
     canRedo,
   });
+
+  // The version this tab holds belongs to this builder session only.
+  useEffect(() => () => clearFormETag(formId), [formId]);
 
   // Cleanup and navigation protection effects
   useEffect(
@@ -521,11 +532,14 @@ function FormBuilderInner({
     // Update both the schema (via autosave) and the form title (via direct API call)
     const updateTitleAsync = async () => {
       try {
-        // Update form title at the top level
+        // Update form title at the top level. A refused rename (the form
+        // changed elsewhere) opens the conflict modal, which keeps it for
+        // "Replace with my changes"; autosave waits for the answer.
         if (currentFormId) {
-          await apiPut(`/forms/${currentFormId}`, {
-            title: trimmed,
-          });
+          const renamed = await putTitle(trimmed);
+          if (renamed.conflict) {
+            return;
+          }
         }
 
         // Force autosave to persist the schema title change
@@ -819,6 +833,10 @@ function FormBuilderInner({
         showPublishConfirm={showPublishConfirm}
         isPublished={formStatus === 'published'}
         showDiscardConfirm={showDiscardConfirm}
+        showConflict={showConflict}
+        onCloseConflict={closeConflict}
+        onReloadLatest={reloadLatest}
+        onReplaceWithMine={replaceWithMine}
         showTour={showTour}
         showPreview={showPreview}
         onCloseDeleteConfirm={() => setShowDeleteConfirm(false)}

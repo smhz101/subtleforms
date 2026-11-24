@@ -185,14 +185,24 @@ class ETag
      */
     public static function fromForm(array $form): string
     {
-        // Use updated_at if available, otherwise hash key fields
-        if (isset($form['updated_at']) || isset($form['modified'])) {
-            return self::fromResource($form);
+        // A form changes in more places than its row timestamp: a draft save
+        // writes only draft_schema, and two saves inside one second share a
+        // timestamp. Hashing what a save actually writes keeps the tag moving
+        // with every change, so a stale copy can be told apart from the
+        // current one.
+        $parts = [
+            $form['id'] ?? '',
+            $form['updated_at'] ?? ($form['modified'] ?? ''),
+            $form['title'] ?? '',
+            $form['status'] ?? '',
+            $form['active_version'] ?? '',
+        ];
+        foreach (['config', 'draft_schema'] as $key) {
+            $value = $form[$key] ?? '';
+            $parts[] = md5(is_string($value) ? $value : (string) wp_json_encode($value));
         }
 
-        // Hash stable form attributes
-        $fields = ['id', 'title', 'status', 'config', 'updated_at', 'created_at'];
-        return self::fromResource($form, $fields);
+        return self::weak(md5(implode('|', array_map('strval', $parts))));
     }
 
     /**

@@ -7,7 +7,7 @@ const put = (id, text) => {
 
 test('reads the schema, the signed load time and the version', () => {
   put(5, JSON.stringify({ form: { id: 5 }, schema: { fields: [] }, version: 3, spam_token: 'v1.1.5.x' }));
-  expect(readInlineFormData(5)).toEqual({ schema: { fields: [] }, spamToken: 'v1.1.5.x', version: 3 });
+  expect(readInlineFormData(5)).toEqual({ schema: { fields: [] }, spamToken: 'v1.1.5.x', spamMinSeconds: 0, version: 3 });
 });
 
 test('reads data the server escaped for a script tag', () => {

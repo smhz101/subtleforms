@@ -18,21 +18,22 @@ import { runFormMountHooks } from '../shared/extend';
  *
  * @param {number} formId
  * @param {Object|null} optionSchema
- * @return {Promise<{schema: Object|null, spamToken: string}>}
+ * @return {Promise<{schema: Object|null, spamToken: string, spamMinSeconds: number}>}
  */
 async function resolveSchema(formId, optionSchema) {
   if (optionSchema) {
-    return { schema: optionSchema, spamToken: '' };
+    return { schema: optionSchema, spamToken: '', spamMinSeconds: 0 };
   }
   const inline = readInlineFormData(formId);
   if (inline) {
-    return { schema: inline.schema, spamToken: inline.spamToken || '' };
+    return { schema: inline.schema, spamToken: inline.spamToken || '', spamMinSeconds: inline.spamMinSeconds || 0 };
   }
   const res = await restFetch(`/forms/${formId}/schema`);
   const data = await res.json();
   return {
     schema: data?.data?.schema ?? data?.schema ?? null,
     spamToken: data?.data?.spam_token || data?.spam_token || '',
+    spamMinSeconds: Number(data?.data?.spam_min_seconds ?? data?.spam_min_seconds) || 0,
   };
 }
 
@@ -63,7 +64,7 @@ function mount(container, options = {}) {
   const root = existing || createRoot(container);
   container._subtleformsRoot = root;
 
-  const draw = (opts, schema, spamToken) => {
+  const draw = (opts, schema, spamToken, spamMinSeconds = 0) => {
     // Unmounted while the field code was downloading.
     if (!existing && container._subtleformsRoot !== root) {
       return;
@@ -80,6 +81,7 @@ function mount(container, options = {}) {
           formId={drawFormId}
           preloadedSchema={schema || null}
           preloadedSpamToken={spamToken || ''}
+          preloadedSpamMinSeconds={spamMinSeconds || 0}
           preview={drawPreview}
           onSubmit={drawOnSubmit}
           blockOptions={drawBlockOptions}
@@ -95,7 +97,7 @@ function mount(container, options = {}) {
       container._subtleformsPendingMount = options;
       return;
     }
-    draw(options, optionSchema || null, '');
+    draw(options, optionSchema || null, '', 0);
     return;
   }
 
@@ -104,14 +106,17 @@ function mount(container, options = {}) {
   container._subtleformsPreparing = (async () => {
     let schema = null;
     let spamToken = '';
+    let spamMinSeconds = 0;
     try {
       const resolved = await resolveSchema(formId, optionSchema || null);
       schema = resolved.schema;
       spamToken = resolved.spamToken;
+      spamMinSeconds = resolved.spamMinSeconds;
     } catch (e) {
       // Fall through: paint without a preload so FormRenderer can show the error.
       schema = null;
       spamToken = '';
+      spamMinSeconds = 0;
     }
 
     await loadGroups(containerGroups(container));
@@ -129,13 +134,16 @@ function mount(container, options = {}) {
     if (pending) {
       let pendingSchema = null;
       let pendingSpam = '';
+      let pendingMin = 0;
       try {
         const resolved = await resolveSchema(pending.formId, pending.schema || null);
         pendingSchema = resolved.schema;
         pendingSpam = resolved.spamToken;
+        pendingMin = resolved.spamMinSeconds;
       } catch (e) {
         pendingSchema = null;
         pendingSpam = '';
+        pendingMin = 0;
       }
       if (pendingSchema) {
         await loadFieldsFor(pendingSchema);
@@ -143,9 +151,9 @@ function mount(container, options = {}) {
       if (container._subtleformsRoot !== root) {
         return;
       }
-      draw(pending, pendingSchema, pendingSpam);
+      draw(pending, pendingSchema, pendingSpam, pendingMin);
     } else {
-      draw(options, schema, spamToken);
+      draw(options, schema, spamToken, spamMinSeconds);
     }
     releaseReserve(container);
   })().finally(() => {

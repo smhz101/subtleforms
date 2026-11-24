@@ -92,7 +92,7 @@ final class SubtleFormsBlock {
 		$form_id = $attributes['formId'] ?? 0;
 
 		if ( ! $form_id ) {
-			return '';
+			return \SubtleForms\Frontend\EmbedNotice::canSee() ? \SubtleForms\Frontend\EmbedNotice::render( \SubtleForms\Frontend\EmbedNotice::NO_ID, 0 ) : '';
 		}
 
 		// Verify form exists and is published (security check)
@@ -107,14 +107,17 @@ final class SubtleFormsBlock {
 		);
 		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
-		// If form doesn't exist or isn't published, render nothing
+		// If the form is missing or not published, visitors get nothing. People
+		// who manage forms get a note; in a preview, anyone gets the plain message.
 		if ( ! $form || $form->status !== 'published' ) {
-			// In admin/preview, show message; on frontend, fail silently
-			if ( is_admin() || is_preview() ) {
-				return sprintf(
-					'<div class="subtleforms-block-error" style="padding: 20px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; color: #856404;">%s</div>',
-					esc_html__( 'This form is not available or has been unpublished.', 'subtleforms' )
+			if ( \SubtleForms\Frontend\EmbedNotice::canSee() ) {
+				return \SubtleForms\Frontend\EmbedNotice::render(
+					$form ? \SubtleForms\Frontend\EmbedNotice::UNPUBLISHED : \SubtleForms\Frontend\EmbedNotice::MISSING,
+					(int) $form_id
 				);
+			}
+			if ( is_admin() || is_preview() ) {
+				return \SubtleForms\Frontend\EmbedNotice::plain( __( 'This form is not available or has been unpublished.', 'subtleforms' ) );
 			}
 			return '';
 		}
@@ -169,7 +172,7 @@ final class SubtleFormsBlock {
 		\SubtleForms\Frontend\FrontendAssets::preloadFieldCode( $schema );
 		\SubtleForms\Frontend\FrontendAssets::loadFieldTranslations( $schema );
 		return sprintf(
-			'<div class="%s" data-form-id="%d" data-show-title="%d" data-show-description="%d" data-theme="%s" data-ajax="%d" data-tabindex="%d" data-field-values="%s"%s%s>%s</div>%s',
+			'<div class="%s" data-form-id="%d" data-show-title="%d" data-show-description="%d" data-theme="%s" data-ajax="%d" data-tabindex="%d" data-field-values="%s"%s%s>%s%s</div>%s',
 			esc_attr( implode( ' ', $classes ) ),
 			esc_attr( $form_id ),
 			$show_title ? 1 : 0,
@@ -180,6 +183,7 @@ final class SubtleFormsBlock {
 			esc_attr( $field_values ),
 			null === $classic ? '' : ' data-classic-result="' . esc_attr( (string) wp_json_encode( $classic ) ) . '"',
 			$reserve,
+			\SubtleForms\Frontend\EmbedNotice::noscript( (int) $form_id ),
 			$inline['outline'],
 			$inline['tag']
 		);

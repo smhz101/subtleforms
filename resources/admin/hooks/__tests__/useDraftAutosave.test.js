@@ -121,4 +121,34 @@ describe('useDraftAutosave', () => {
     jest.advanceTimersByTime(30000);
     expect(apiPost).not.toHaveBeenCalled();
   });
+
+  it('reports a 409 as a conflict, does not retry, and stays paused until it is answered (#145)', async () => {
+    apiPost.mockResolvedValue({
+      ok: false,
+      status: 409,
+      body: { error: { code: 'version_conflict', meta: { current_etag: 'W/"theirs"' } } },
+    });
+    const { rerender } = renderHook((props) => useDraftAutosave(props), {
+      initialProps: defaultProps,
+    });
+
+    await jest.advanceTimersByTimeAsync(30000);
+
+    const errors = mockDispatch.mock.calls.filter(
+      ([a]) => a.type === BUILDER_ACTIONS.AUTOSAVE_ERROR
+    );
+    expect(errors).toHaveLength(1);
+    expect(errors[0][0].payload.error).toMatchObject({ isConflict: true, currentETag: 'W/"theirs"' });
+
+    // No retry while the question is open.
+    await jest.advanceTimersByTimeAsync(60000);
+    expect(apiPost).toHaveBeenCalledTimes(1);
+
+    rerender({
+      ...defaultProps,
+      builderState: { ...defaultProps.builderState, hasConflict: true },
+    });
+    await jest.advanceTimersByTimeAsync(60000);
+    expect(apiPost).toHaveBeenCalledTimes(1);
+  });
 });

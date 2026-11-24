@@ -561,7 +561,16 @@ $pipe-status-colors: (
 		margin: 0;
 
 		&--error { color: var(--sf-danger); font-weight: 500; }
+		&--preview { white-space: pre-line; }
 	}
+}
+
+.sf-pipe-step__skip-note {
+	font-size: var(--sf-text-sm);
+	color: var(--sf-slate-500);
+	margin: 0;
+	padding: 0 12px 10px;
+	word-break: break-word;
 }
 
 .sf-pipe-error-msg {

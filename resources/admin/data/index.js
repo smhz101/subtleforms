@@ -13,6 +13,7 @@ export { apiClient } from './apiClient';
 // Queries
 export {
   useForms,
+  useAllForms,
   useForm,
   useFormStatus,
 } from './queries/forms';

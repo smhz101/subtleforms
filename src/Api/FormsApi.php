@@ -472,6 +472,10 @@ final class FormsApi {
 			return ApiResponse::not_found( __( 'Form not found', 'subtleforms' ) );
 		}
 
+		// The tag is taken from the stored row, the same data the write guard
+		// compares against, before the computed fields are added.
+		$etag = $this->generateETag( $form, 'form' );
+
 		// Single source of truth for type/status/unpublished-changes.
 		$form = \SubtleForms\Support\FormMeta::with_meta( $form );
 
@@ -480,7 +484,6 @@ final class FormsApi {
 		$counts                   = $this->submissionsRepo->get_counts_by_forms( array( (int) $form['id'] ) );
 		$form['submission_count'] = (int) ( $counts[ (int) $form['id'] ] ?? 0 );
 
-		$etag     = $this->generateETag( $form, 'form' );
 		$response = ApiResponse::success( $form );
 		return ApiResponse::withHeaders( $response, array( 'ETag' => $etag ) );
 	}
@@ -655,16 +658,21 @@ final class FormsApi {
 		$schemaData = is_array( $schemaData ) ? SchemaRepair::repair( $schemaData, $formId ) : $schemaData;
 		$schemaData = $this->injectCaptchaHtml( $schemaData );
 
+		$protection = \SubtleForms\Engine\SpamProtection::for_form( is_array( $schemaData ) ? $schemaData : null );
+
 		return array(
-			'form'       => array(
+			'form'             => array(
 				'id'    => $formId,
 				'title' => $form['title'] ?? '',
 			),
-			'schema'     => self::filterPublicSchema( $this->buildPublicSchema( $schemaData ), $formId ),
-			'version'    => $schema['version'] ?? null,
+			'schema'           => self::filterPublicSchema( $this->buildPublicSchema( $schemaData ), $formId ),
+			'version'          => $schema['version'] ?? null,
 			// Server-signed build time (a render ticket) for the spam time trap
 			// (FF-11, FF-12). The browser trades it for a submit token.
-			'spam_token' => \SubtleForms\Engine\SpamProtection::issue_ticket( $formId ),
+			'spam_token'       => \SubtleForms\Engine\SpamProtection::issue_ticket( $formId ),
+			// The time trap's minimum in seconds, or 0 when the form has the
+			// trap off. The browser holds a fast submit until it has passed.
+			'spam_min_seconds' => $protection['timeTrap'] ? (int) $protection['minSeconds'] : 0,
 		);
 	}
 
@@ -694,6 +702,9 @@ final class FormsApi {
 		}
 
 		$input = $request->get_json_params();
+		if ( is_array( $input ) && isset( $input['schema'] ) && is_array( $input['schema'] ) ) {
+			$input['schema'] = SchemaRepair::actionLogic( $input['schema'] );
+		}
 		try {
 			$validator = new RequestValidator( array( 'schemas' => Schemas::all() ) );
 			$validated = $validator->validateOrFail( $input, Schemas::get( Schemas::FORM_SCHEMA_SAVE ) );
@@ -772,14 +783,14 @@ final class FormsApi {
 				 */
 				do_action( 'subtleforms/forms/schema_published', $formId, $savedSchema['schema'] ?? $schema, $version );
 
-				return ApiResponse::success( array( 'version' => $version, 'active' => true ), 201 );
+				return $this->withFormEtag( $formId, ApiResponse::success( array( 'version' => $version, 'active' => true, 'etag' => $this->currentFormEtag( $formId ) ), 201 ) );
 			} else {
 				$success = $this->formsRepo->saveDraftSchema( $formId, $schema );
 				if ( ! $success ) {
 					return ApiResponse::server_error( __( 'Failed to save draft schema', 'subtleforms' ) );
 				}
 
-				return ApiResponse::success( array( 'draft' => true, 'active' => false ) );
+				return $this->withFormEtag( $formId, ApiResponse::success( array( 'draft' => true, 'active' => false, 'etag' => $this->currentFormEtag( $formId ) ) ) );
 			}
 		} catch ( \InvalidArgumentException $e ) {
 			Logger::error( 'Schema validation error for form %d: %s', $formId, $e->getMessage() );
@@ -879,6 +890,9 @@ final class FormsApi {
 			}
 		}
 
+		if ( is_array( $input ) && isset( $input['schema'] ) && is_array( $input['schema'] ) ) {
+			$input['schema'] = SchemaRepair::actionLogic( $input['schema'] );
+		}
 		try {
 			Logger::debug( 'create_form - raw input: %s', print_r( $input, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			$validator = new RequestValidator( array( 'schemas' => Schemas::all() ) );
@@ -1047,8 +1061,32 @@ final class FormsApi {
 
 		$updatedForm = $this->formsRepo->find( $id );
 		$etag        = $this->generateETag( $updatedForm, 'form' );
-		$response    = ApiResponse::success( array( 'success' => true, 'form' => $updatedForm ) );
+		$response    = ApiResponse::success( array( 'success' => true, 'form' => $updatedForm, 'etag' => $etag ) );
 		return ApiResponse::withHeaders( $response, array( 'ETag' => $etag ) );
+	}
+
+	/**
+	 * ETag of a form as stored right now.
+	 *
+	 * @param int $formId Form ID.
+	 * @return string Empty when the form cannot be read.
+	 */
+	private function currentFormEtag( int $formId ): string {
+		$form = $this->formsRepo->find( $formId );
+		return $form ? $this->generateETag( $form, 'form' ) : '';
+	}
+
+	/**
+	 * Return the form's new ETag on a write response, so the caller can keep
+	 * saving without conflicting with its own last save.
+	 *
+	 * @param int              $formId   Form ID.
+	 * @param WP_REST_Response $response Response to add the header to.
+	 * @return WP_REST_Response
+	 */
+	private function withFormEtag( int $formId, WP_REST_Response $response ): WP_REST_Response {
+		$etag = $this->currentFormEtag( $formId );
+		return '' === $etag ? $response : ApiResponse::withHeaders( $response, array( 'ETag' => $etag ) );
 	}
 
 	/**
@@ -1441,9 +1479,12 @@ final class FormsApi {
 				if ( $resolved['ready'] && $this->captchaManager ) {
 					$html = $this->captchaManager->widgetFor( $resolved['provider'], $resolved['site_key'] );
 				}
-				$field['config']['captchaHtml']     = $html;
-				$field['config']['captchaWarning']  = '' === $html ? $resolved['warning'] : '';
-				$field['config']['providerName']    = $provider;
+				// The setup message is written for the site owner, so only a user
+				// who can manage the plugin gets it. Visitors get an empty string.
+				$field['config']['captchaHtml']    = $html;
+				$field['config']['captchaReady']   = (bool) $resolved['ready'];
+				$field['config']['captchaWarning'] = ( '' === $html && current_user_can( 'manage_options' ) ) ? $resolved['warning'] : '';
+				$field['config']['providerName']   = $provider;
 			}
 
 			if ( ! empty( $field['fields'] ) && is_array( $field['fields'] ) ) {

@@ -13,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 use SubtleForms\Support\Helpers;
 
 use SubtleForms\Support\Logger;
+use SubtleForms\Support\SearchTerms;
 /**
  * Repository for managing form submissions.
  */
@@ -196,8 +197,8 @@ final class SubmissionsRepository {
 			array(
 				'form_id'        => intval( Helpers::safe_array_get( $data, 'form_id', 0 ) ),
 				'schema_version' => isset( $data['schema_version'] ) ? intval( $data['schema_version'] ) : null,
-				'payload'        => wp_json_encode( Helpers::safe_array_get( $data, 'payload', array() ) ),
-				'meta'           => wp_json_encode( Helpers::safe_array_get( $data, 'meta', array() ) ),
+				'payload'        => $this->encodeColumn( Helpers::safe_array_get( $data, 'payload', array() ), 'payload' ),
+				'meta'           => $this->encodeColumn( Helpers::safe_array_get( $data, 'meta', array() ), 'meta' ),
 				'status'         => Helpers::safe_array_get( $data, 'status', 'unread' ),
 				// wpdb::insert() refuses a value longer than its column and the
 				// whole entry is lost, so request data is cut to fit.
@@ -245,7 +246,7 @@ final class SubmissionsRepository {
 		$format      = array();
 
 		if ( isset( $data['payload'] ) ) {
-			$update_data['payload'] = wp_json_encode( $data['payload'] );
+			$update_data['payload'] = $this->encodeColumn( $data['payload'], 'payload' );
 			$format[]               = '%s';
 		}
 
@@ -253,7 +254,7 @@ final class SubmissionsRepository {
 		$columns = self::statusColumns( $data, is_array( $current ) ? $current : array() );
 		foreach ( $columns as $column => $value ) {
 			if ( 'meta' === $column ) {
-				$update_data['meta'] = wp_json_encode( $value );
+				$update_data['meta'] = $this->encodeColumn( $value, 'meta' );
 				$format[]            = '%s';
 				continue;
 			}
@@ -551,11 +552,7 @@ final class SubmissionsRepository {
 		}
 
 		if ( $args['search'] ) {
-			$searchTerm = '%' . $wpdb->esc_like( $args['search'] ) . '%';
-			$where[]    = '(id LIKE %s OR payload LIKE %s OR meta LIKE %s)';
-			$params[]   = $searchTerm;
-			$params[]   = $searchTerm;
-			$params[]   = $searchTerm;
+			$this->applySearch( $where, $params, (string) $args['search'] );
 		}
 
 		if ( $args['after'] ) {
@@ -568,9 +565,7 @@ final class SubmissionsRepository {
 		if ( $args['field_key'] && $args['field_value'] ) {
 			$this->applyFieldFilter( $where, $params, (string) $args['field_key'], (string) $args['field_value'] );
 		} elseif ( $args['field_value'] && ! $args['field_key'] ) {
-			$searchTerm = '%' . $wpdb->esc_like( $args['field_value'] ) . '%';
-			$where[]    = 'payload LIKE %s';
-			$params[]   = $searchTerm;
+			$this->applyPayloadSearch( $where, $params, (string) $args['field_value'] );
 		}
 
 		$whereClause = ! empty( $where ) ? 'WHERE ' . implode( ' AND ', $where ) : '';
@@ -659,11 +654,7 @@ final class SubmissionsRepository {
 		}
 
 		if ( $args['search'] ) {
-			$searchTerm = '%' . $wpdb->esc_like( $args['search'] ) . '%';
-			$where[]    = '(id LIKE %s OR payload LIKE %s OR meta LIKE %s)';
-			$params[]   = $searchTerm;
-			$params[]   = $searchTerm;
-			$params[]   = $searchTerm;
+			$this->applySearch( $where, $params, (string) $args['search'] );
 		}
 
 		if ( $args['after'] ) {
@@ -676,9 +667,7 @@ final class SubmissionsRepository {
 		if ( $args['field_key'] && $args['field_value'] ) {
 			$this->applyFieldFilter( $where, $params, (string) $args['field_key'], (string) $args['field_value'] );
 		} elseif ( $args['field_value'] ) {
-			$searchTerm = '%' . $wpdb->esc_like( $args['field_value'] ) . '%';
-			$where[]    = 'payload LIKE %s';
-			$params[]   = $searchTerm;
+			$this->applyPayloadSearch( $where, $params, (string) $args['field_value'] );
 		}
 
 		$whereClause = ! empty( $where ) ? 'WHERE ' . implode( ' AND ', $where ) : '';
@@ -837,8 +826,7 @@ final class SubmissionsRepository {
 		$field_key = preg_replace( '/[^a-zA-Z0-9_\-]/', '', $key );
 
 		if ( $field_key === '' ) {
-			$where[]  = 'payload LIKE %s';
-			$params[] = '%' . $wpdb->esc_like( $value ) . '%';
+			$this->applyPayloadSearch( $where, $params, $value );
 			return;
 		}
 
@@ -850,8 +838,81 @@ final class SubmissionsRepository {
 		}
 
 		// Fallback: anchor the match on the quoted key so other fields cannot match.
-		$where[]  = 'payload LIKE %s';
-		$params[] = '%' . $wpdb->esc_like( '"' . $field_key . '":"' ) . '%' . $wpdb->esc_like( $value ) . '%';
+		// Each spelling of a non-Latin value is tried (2.9.2).
+		$conditions = array();
+		foreach ( SearchTerms::variants( $value ) as $variant ) {
+			$conditions[] = 'payload LIKE %s';
+			$params[]     = '%' . $wpdb->esc_like( '"' . $field_key . '":"' ) . '%' . $wpdb->esc_like( $variant ) . '%';
+		}
+		$where[] = '(' . implode( ' OR ', $conditions ) . ')';
+	}
+
+	/**
+	 * JSON for a payload or meta column, with non-Latin text readable (2.9.2).
+	 *
+	 * A table still on the three-byte utf8 charset cannot hold an emoji or
+	 * another four-byte character as written, so a value with one is stored
+	 * escaped, the way it was before 2.9.2. Search looks for both spellings.
+	 *
+	 * @param mixed  $value  Value to store.
+	 * @param string $column Column the value goes into.
+	 * @return string|false
+	 */
+	private function encodeColumn( $value, string $column ) {
+		global $wpdb;
+
+		$readable = wp_json_encode( $value, JSON_UNESCAPED_UNICODE );
+		if ( ! is_string( $readable ) ) {
+			return $readable;
+		}
+
+		$charset = strtolower( (string) $wpdb->get_col_charset( $this->table, $column ) );
+		if ( in_array( $charset, array( 'utf8', 'utf8mb3' ), true ) && 1 === preg_match( '/[\x{10000}-\x{10FFFF}]/u', $readable ) ) {
+			return wp_json_encode( $value );
+		}
+
+		return $readable;
+	}
+
+	/**
+	 * Entry search over the id, the answers and the meta.
+	 *
+	 * The one place the list and its count build this condition, so they
+	 * always agree. A query with non-Latin text is also looked for in its
+	 * \uXXXX form, which is how entries saved before 2.9.2 hold it.
+	 *
+	 * @param array  $where  WHERE fragments, appended by reference.
+	 * @param array  $params Bound parameters, appended by reference.
+	 * @param string $query  Search text as typed.
+	 */
+	private function applySearch( array &$where, array &$params, string $query ): void {
+		$patterns   = SearchTerms::likePatterns( $query );
+		$conditions = array( 'id LIKE %s' );
+		$params[]   = $patterns[0];
+		foreach ( array( 'payload', 'meta' ) as $column ) {
+			foreach ( $patterns as $pattern ) {
+				$conditions[] = $column . ' LIKE %s';
+				$params[]     = $pattern;
+			}
+		}
+		$where[] = '(' . implode( ' OR ', $conditions ) . ')';
+	}
+
+	/**
+	 * Search the answers only, in every spelling of the text.
+	 *
+	 * @param array  $where  WHERE fragments, appended by reference.
+	 * @param array  $params Bound parameters, appended by reference.
+	 * @param string $query  Search text as typed.
+	 */
+	private function applyPayloadSearch( array &$where, array &$params, string $query ): void {
+		$patterns   = SearchTerms::likePatterns( $query );
+		$conditions = array();
+		foreach ( $patterns as $pattern ) {
+			$conditions[] = 'payload LIKE %s';
+			$params[]     = $pattern;
+		}
+		$where[] = '(' . implode( ' OR ', $conditions ) . ')';
 	}
 
 	/**
