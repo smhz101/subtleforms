@@ -285,7 +285,8 @@ final class CsvStream281Test extends TestCase {
 		wp_set_current_user( $admin );
 		$good = wp_create_nonce( SubmissionsApi::EXPORT_NONCE_ACTION );
 		$this->assertSame( 'served', $this->download( $admin, $good, array( 'form_id' => (string) $id, 'status' => 'completed' ), $this->screen() ) );
-		$this->assertSame( 'redirect:' . $this->screen() . '&sf_export=empty', $this->download( $admin, $good, array( 'form_id' => (string) $id, 'status' => 'spam' ), $this->screen() ) );
+		// The screen comes back with the form it was filtered to (133).
+		$this->assertSame( 'redirect:' . $this->screen() . '&form_id=' . $id . '&sf_export=empty', $this->download( $admin, $good, array( 'form_id' => (string) $id, 'status' => 'spam' ), $this->screen() ) );
 	}
 
 	public function test_a_search_for_the_word_all_reaches_the_query(): void {
@@ -295,7 +296,7 @@ final class CsvStream281Test extends TestCase {
 		wp_set_current_user( $admin );
 		$good = wp_create_nonce( SubmissionsApi::EXPORT_NONCE_ACTION );
 		// Nobody wrote "all": a search for it finds nothing, which is not the same as no search.
-		$this->assertSame( 'redirect:' . $this->screen() . '&sf_export=empty', $this->download( $admin, $good, array( 'form_id' => (string) $id, 'search' => 'all' ), $this->screen() ) );
+		$this->assertSame( 'redirect:' . $this->screen() . '&form_id=' . $id . '&search=all&sf_export=empty', $this->download( $admin, $good, array( 'form_id' => (string) $id, 'search' => 'all' ), $this->screen() ) );
 		$this->assertSame( 'served', $this->download( $admin, $good, array( 'form_id' => (string) $id, 'search' => 'Person 1' ), $this->screen() ) );
 	}
 

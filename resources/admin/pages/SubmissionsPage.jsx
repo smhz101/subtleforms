@@ -396,6 +396,7 @@ export default function SubmissionsPage({ formId }) {
       {
         form_id: selectedFormId !== 'all' ? parseInt(selectedFormId) : null,
         status: statusFilter !== 'all' ? statusFilter : null,
+        processing_status: processingStatus || null,
         search: search || null,
         range: dateRange !== 'all' ? dateRange : null,
       },
@@ -411,7 +412,7 @@ export default function SubmissionsPage({ formId }) {
     if (outcome === 'empty') {
       await noticeDialog({
         title: __('Export CSV', 'subtleforms'),
-        message: __('No submissions to export', 'subtleforms'),
+        message: __('Nothing to export for these filters.', 'subtleforms'),
       });
     } else {
       await noticeDialog({ message: __('Failed to export submissions', 'subtleforms') });

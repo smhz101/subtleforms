@@ -35,6 +35,20 @@ describe('csvExport', () => {
     expect(url.searchParams.get('_wpnonce')).toBe('abc123');
   });
 
+  it('carries the tab and the filters the list uses', () => {
+    const url = new URL(
+      csvExportUrl({ form_id: 3, status: 'starred', processing_status: 'failed', search: 'Khan', range: '7days' })
+    );
+    expect(url.searchParams.get('status')).toBe('starred');
+    expect(url.searchParams.get('processing_status')).toBe('failed');
+    expect(url.searchParams.get('form_id')).toBe('3');
+    expect(url.searchParams.get('search')).toBe('Khan');
+    expect(url.searchParams.get('range')).toBe('7days');
+    ['unread', 'read'].forEach((tab) => {
+      expect(new URL(csvExportUrl({ status: tab })).searchParams.get('status')).toBe(tab);
+    });
+  });
+
   it('leaves out empty filters and the "all" of the status and range dropdowns', () => {
     const url = new URL(csvExportUrl({ form_id: null, status: 'all', search: '', range: 'all', after: undefined }));
     expect([...url.searchParams.keys()].sort()).toEqual(['_wpnonce', 'action']);
@@ -187,7 +201,7 @@ describe('csvExport', () => {
 
   describe('the notice for a refused download', () => {
     it('words each flag the server sends back', () => {
-      expect(exportFlagNotice('empty').message).toBe('No submissions to export');
+      expect(exportFlagNotice('empty').message).toBe('Nothing to export for these filters.');
       expect(exportFlagNotice('expired').message).toBe('The export link expired, reload the page and try again');
       expect(exportFlagNotice('forbidden').message).toBe('You do not have permission to export');
       expect(exportFlagNotice('expired').type).toBe('error');
