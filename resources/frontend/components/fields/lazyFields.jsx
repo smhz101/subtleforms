@@ -27,8 +27,10 @@ const LOADERS = {
   upload: () => import(/* webpackChunkName: "field-upload" */ './FileUpload'),
   repeater: () => import(/* webpackChunkName: "field-repeater" */ './RepeaterField'),
   chained: () => import(/* webpackChunkName: "field-chained-select" */ './ChainedSelect'),
+  choice: () => import(/* webpackChunkName: "field-choice" */ './ChoiceSelect'),
   richText: () => import(/* webpackChunkName: "field-rich-text" */ './RichTextInput'),
   mask: () => import(/* webpackChunkName: "field-mask" */ './maskField'),
+  draft: () => import(/* webpackChunkName: "form-draft" */ '../../utils/formDraft'),
   conversational: () =>
     import(/* webpackChunkName: "form-conversational" */ '../ConversationalFormRenderer'),
 };
@@ -46,6 +48,8 @@ const TYPE_GROUPS = {
   image_upload: 'upload',
   repeat_container: 'repeater',
   chained_select: 'chained',
+  select: 'choice',
+  dropdown: 'choice',
   rich_text: 'richText',
 };
 

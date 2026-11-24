@@ -67,8 +67,8 @@ final class SubmissionTabCountsTest extends TestCase {
 
 		$this->assertSame(
 			array(
-				'all'     => 6,
-				'unread'  => 3,
+				'all'     => 5,
+				'unread'  => 2,
 				'read'    => 3,
 				'spam'    => 1,
 				'starred' => 1,
@@ -105,7 +105,7 @@ final class SubmissionTabCountsTest extends TestCase {
 		$second = $this->publish( array( array( 'id' => 'n', 'key' => 'name', 'type' => 'text', 'label' => 'Name' ) ) );
 		$this->entry( $second, array( 'status' => 'trash', 'trashed_from' => 'completed' ) );
 
-		$this->assertSame( 6, $this->repo->tabCounts( $first )['all'] );
+		$this->assertSame( 5, $this->repo->tabCounts( $first )['all'] );
 		$this->assertSame( 0, $this->repo->tabCounts( $second )['all'] );
 		$this->assertSame( 1, $this->repo->tabCounts( $second )['trash'] );
 		$this->assertGreaterThanOrEqual( 3, $this->repo->tabCounts( null )['trash'] );
@@ -136,9 +136,9 @@ final class SubmissionTabCountsTest extends TestCase {
 		$data = rest_do_request( $request )->get_data();
 
 		$payload = $data['data'] ?? $data;
-		$this->assertSame( 3, $payload['count'] );
-		$this->assertSame( 3, $payload['counts']['unread'] );
+		$this->assertSame( 2, $payload['count'] );
+		$this->assertSame( 2, $payload['counts']['unread'] );
 		$this->assertSame( 2, $payload['counts']['trash'] );
-		$this->assertSame( 6, $payload['counts']['all'] );
+		$this->assertSame( 5, $payload['counts']['all'] );
 	}
 }

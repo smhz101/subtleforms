@@ -96,8 +96,8 @@ test('every tab shows its count on first load, from one request', async ({ page 
   });
   await page.goto(listUrl());
   await expect(rows(page).first()).toBeVisible({ timeout: 30000 });
-  // 9 entries, 1 trashed: 8 live. Read: 2.
-  await expectCounts(page, { All: 8, Read: 2, Spam: 1, Starred: 2, Flagged: 1, Trash: 1 });
+  // 9 entries, 1 trashed, 1 spam (spam shows only in Spam, issue 131): 7 in the inbox. Read: 2.
+  await expectCounts(page, { All: 7, Read: 2, Spam: 1, Starred: 2, Flagged: 1, Trash: 1 });
   expect(counted.length).toBe(1);
 });
 
@@ -105,7 +105,7 @@ test('counts follow every action without a reload', async ({ page }) => {
   await loginPage(page);
   await page.goto(listUrl());
   await expect(rows(page).first()).toBeVisible({ timeout: 30000 });
-  await expectCounts(page, { All: 8, Read: 2, Spam: 1, Starred: 2, Flagged: 1, Trash: 1 });
+  await expectCounts(page, { All: 7, Read: 2, Spam: 1, Starred: 2, Flagged: 1, Trash: 1 });
 
   // Star then unstar the first row.
   const first = rowNamed(page, 'Ada');
@@ -119,7 +119,7 @@ test('counts follow every action without a reload', async ({ page }) => {
   // Trash (the newest entry is a read one): leaves All and Read, joins Trash.
   await first.hover();
   await first.getByRole('button', { name: 'Move to Trash' }).click();
-  await expectCounts(page, { All: 7, Read: 1, Trash: 2 });
+  await expectCounts(page, { All: 6, Read: 1, Trash: 2 });
 
   // Restore it from the Trash tab.
   await page.getByRole('tab', { name: /^Trash/ }).click();
@@ -127,29 +127,29 @@ test('counts follow every action without a reload', async ({ page }) => {
   const trashed = rowNamed(page, 'Ada');
   await trashed.hover();
   await trashed.getByRole('button', { name: 'Restore' }).click();
-  await expectCounts(page, { All: 8, Read: 2, Trash: 1 });
+  await expectCounts(page, { All: 7, Read: 2, Trash: 1 });
 
   // Delete forever the entry that was trashed before.
   const remaining = rowNamed(page, 'Dennis');
   await remaining.hover();
   await remaining.getByRole('button', { name: 'Delete permanently' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Delete permanently' }).click();
-  await expectCounts(page, { Trash: 0, All: 8 });
+  await expectCounts(page, { Trash: 0, All: 7 });
 
   // Bulk: select all on the All tab, mark read, then unread.
   await page.getByRole('tab', { name: /^All/ }).click();
   await expect(rows(page).first()).toBeVisible();
   await page.getByRole('checkbox', { name: 'Select all' }).check();
   await page.getByRole('toolbar', { name: 'Bulk actions' }).getByRole('button', { name: 'Mark read' }).click();
-  await expectCounts(page, { Read: 8 });
+  await expectCounts(page, { Read: 7 });
   await page.getByRole('checkbox', { name: 'Select all' }).check();
   await page.getByRole('toolbar', { name: 'Bulk actions' }).getByRole('button', { name: 'Mark unread' }).click();
   await expectCounts(page, { Read: 0 });
 
   // The numbers are what the server says.
   const server = await client.call('GET', `/submissions/unread-count?form_id=${form.id}`);
-  expect(server.body.data.counts.all).toBe(8);
-  expect(server.body.data.counts.unread).toBe(8);
+  expect(server.body.data.counts.all).toBe(7);
+  expect(server.body.data.counts.unread).toBe(7);
 });
 
 test('Unread is a tab after All, an old New link opens it, and the unread count is kept', async ({ page }) => {

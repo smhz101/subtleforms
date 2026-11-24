@@ -24,43 +24,7 @@ import {
 import { FORM_PRESETS } from '../../shared/appearance';
 import { whenRendererReady } from './rendererReady';
 import markIcon from './icon.jsx';
-
-/**
- * Fetch published forms from REST API
- */
-async function fetchPublishedForms() {
-	try {
-		const headers = {
-		'Content-Type': 'application/json',
-	};
-
-	// Add nonce for authenticated requests
-	if (window.subtleformsAdmin?.nonce) {
-		headers['X-WP-Nonce'] = window.subtleformsAdmin.nonce;
-	}
-
-	const response = await fetch(
-		`${
-		window.subtleformsAdmin?.restUrl || '/wp-json/subtleforms/v1/'
-		}forms?status=published&context=view`,
-		{
-		credentials: 'same-origin',
-		headers,
-		}
-	);
-
-	if (!response.ok) {
-		throw new Error('Failed to fetch forms');
-	}
-
-	const data = await response.json();
-	// API returns paginated response: { data: [...], meta: { pagination: {...} } }
-	return Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
-	} catch (error) {
-	console.error('SubtleForms block: Failed to fetch forms', error);
-	return [];
-	}
-}
+import FormPicker, { useForms } from './FormPicker';
 
 /**
  * Fetch form schema for preview
@@ -247,37 +211,17 @@ export default function Edit({ attributes, setAttributes }) {
 	tabIndex,
 	fieldValues,
 	} = attributes;
-	const [forms, setForms] = useState([]);
-	const [loading, setLoading] = useState(true);
+	const { forms, loading, failed } = useForms();
 	const blockProps = useBlockProps();
-
-	// Fetch published forms on mount
-	useEffect(() => {
-	let mounted = true;
-
-	async function loadForms() {
-		const publishedForms = await fetchPublishedForms();
-		if (mounted) {
-		setForms(publishedForms);
-		setLoading(false);
-		}
-	}
-
-	loadForms();
-
-	return () => {
-		mounted = false;
-	};
-	}, []);
-
-	// Build form options for select control
-	const formOptions = [
-	{ label: __('Select a form', 'subtleforms'), value: 0 },
-	...forms.map((form) => ({
-		label: form.title,
-		value: form.id,
-	})),
-	];
+	const picker = (
+		<FormPicker
+			forms={forms}
+			loading={loading}
+			failed={failed}
+			value={formId}
+			onChange={(id) => setAttributes({ formId: id })}
+		/>
+	);
 
 	// Theme options derived from the shared preset list.
 	const themeOptions = FORM_PRESETS.map((preset) => ({
@@ -302,16 +246,7 @@ export default function Edit({ attributes, setAttributes }) {
 	const inspector = (
 	<InspectorControls>
 		<PanelBody title={__('Form Settings', 'subtleforms')} initialOpen>
-		<SelectControl
-			label={__('Select Form', 'subtleforms')}
-			value={formId}
-			options={formOptions}
-			onChange={(value) =>
-			setAttributes({ formId: parseInt(value, 10) })
-			}
-			disabled={loading}
-			__next40pxDefaultSize
-		/>
+		{picker}
 		<ToggleControl
 			label={__('Show form title', 'subtleforms')}
 			checked={showTitle}
@@ -388,18 +323,7 @@ export default function Edit({ attributes, setAttributes }) {
 			icon={markIcon}
 			label={__('SubtleForms', 'subtleforms')}
 			instructions={__('Select a published form to embed', 'subtleforms')}>
-			{loading ? (
-			<Spinner />
-			) : (
-			<SelectControl
-				value={formId}
-				options={formOptions}
-				onChange={(value) =>
-				setAttributes({ formId: parseInt(value, 10) })
-				}
-				__next40pxDefaultSize
-			/>
-			)}
+			{picker}
 		</Placeholder>
 		</div>
 	);

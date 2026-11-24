@@ -46,3 +46,23 @@ describe('FLD2-10: required chained field in the browser', () => {
     expect(validateField(field, ['toyota'])).toBeUndefined();
   });
 });
+
+describe('a configured Chained Select renders', () => {
+  it('draws a dropdown for the first level', () => {
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    act(() => {
+      root.render(
+        <ChainedSelect
+          inputId='car'
+          config={{ key: 'car', levels: config.levels }}
+          value={[]}
+          onChange={() => {}}
+        />
+      );
+    });
+    expect(container.querySelector('select, [role="combobox"], [role="listbox"], button')).not.toBeNull();
+    expect(container.textContent).toContain('Make');
+    act(() => root.unmount());
+  });
+});

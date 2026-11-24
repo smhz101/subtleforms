@@ -4,9 +4,9 @@
       "frontend.js",
       "index.jsx.css"
     ],
-    "measuredGzipBytes": 49392,
+    "measuredGzipBytes": 49152,
     "limitGzipBytes": 50861,
-    "note": "Limit is the 2.6.0 size plus 10 percent (46237 * 1.1) and is kept as is. The 2.7.0 move of picture choice, multi upload, advanced logic and analytics to Pro shrank the bundle to 46606 (47493 measured at 2.6.1). 2.9.0: the picker styles moved out of index.jsx.css into picker.css and the date limit checks moved into the date file, so the base is 49392.",
+    "note": "Limit is the 2.6.0 size plus 10 percent (46237 * 1.1) and is kept as is. The 2.7.0 move of picture choice, multi upload, advanced logic and analytics to Pro shrank the bundle to 46606 (47493 measured at 2.6.1). 2.9.0: the picker styles moved out of index.jsx.css into picker.css and the date limit checks moved into the date file, so the base is 49392. 2.10.0: the dropdown (ChoiceSelect with type-ahead and search) moved to the lazy field-choice file, so the base is 49152.",
     "mustNotContain": [
       "Afghanistan"
     ],

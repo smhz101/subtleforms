@@ -39,6 +39,8 @@ class AdminNotices {
 		add_action( 'in_admin_header', array( self::class, 'print_notice_guard' ) );
 		add_action( 'admin_notices', array( self::class, 'maybe_show_permalink_notice' ) );
 		add_action( 'admin_notices', array( self::class, 'maybe_show_outdated_add_on_notice' ) );
+		// Uploaded files readable from the web, for example on nginx (issue 169).
+		add_action( 'admin_notices', array( \SubtleForms\Uploads\UploadsExposure::class, 'maybeShowNotice' ) );
 		add_action( 'network_admin_notices', array( self::class, 'maybe_show_outdated_add_on_notice' ) );
 		add_action( 'wp_ajax_' . self::OUTDATED_DISMISS_ACTION, array( self::class, 'dismiss_outdated_add_on_notice' ) );
 	}

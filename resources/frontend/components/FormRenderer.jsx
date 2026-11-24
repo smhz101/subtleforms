@@ -20,6 +20,7 @@ import { debug } from '../../shared/debug';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { FormContext } from './fields/contexts';
 import { claimInstance, releaseInstance } from '../utils/formInstance';
+import { draftKeeper, clearDraft } from '../utils/useFormDraft';
 import { revealField } from '../utils/revealField';
 import { getFormWrappers } from '../../shared/extend';
 import { lazyField, loadFieldsFor, fieldsReadyFor } from './fields/lazyFields';
@@ -286,6 +287,19 @@ export default function FormRenderer({
   const currentStep = hasSteps ? steps[currentStepIndex] : null;
   // Steps are saved flat or with settings under `config` (FA-21).
   const currentStepConfig = fieldConfig(currentStep);
+
+  // Multi-step forms keep answers and step across a reload (issue 139).
+  const draft = {
+    enabled: !preview && hasSteps && !isConversational && !submitSuccess,
+    formId,
+    instance,
+    schema,
+    values,
+    step: currentStepIndex,
+    stepCount: steps.length,
+    setValues,
+    setStep: setCurrentStepIndex,
+  };
 
   // Get fields to render
   const fieldsToRender = useMemo(() => {
@@ -955,6 +969,7 @@ export default function FormRenderer({
             paragraphs: messageParagraphs(ownMessage ? conf.message : message, ownMessage ? merge : undefined),
             allowAnother: !!conf.allowAnother,
           });
+          clearDraft(formId, instance);
           setSubmitSuccess(true);
           setSubmitCount((n) => n + 1);
           setValues({ ...defaultValues });
@@ -1007,6 +1022,7 @@ export default function FormRenderer({
       spamToken,
       spamTokens,
       waitForMinimum,
+      instance,
     ]
   );
 
@@ -1087,6 +1103,7 @@ export default function FormRenderer({
         paragraphs: messageParagraphs(ownMessage ? conf.message : message, ownMessage ? merge : undefined),
         allowAnother: !!conf.allowAnother,
       });
+      clearDraft(formId, instance);
       setSubmitSuccess(true);
       return;
     }
@@ -1232,6 +1249,7 @@ export default function FormRenderer({
       >
         {liveMessage}
       </div>
+      {draftKeeper(draft)}
 
       {showTitle && schema.metadata?.title && (
         <h2 className='subtleforms-form-title'>{schema.metadata.title}</h2>

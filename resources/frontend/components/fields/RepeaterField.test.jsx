@@ -56,3 +56,13 @@ test('remove control names the entry, not the field heading', () => {
   expect(remove.getAttribute('aria-label')).not.toMatch(/Companies/);
   unmount();
 });
+
+test('a repeater with a child field renders its first row and an Add control', () => {
+  const { container, unmount } = mount({
+    renderChild: (child) => <input data-testid={child.key} name={child.key} />,
+  });
+  expect(container.querySelectorAll('.subtleforms-repeater__legend')).toHaveLength(1);
+  expect(container.querySelector('input[name="name"]')).not.toBeNull();
+  expect(container.textContent).toContain('Add another');
+  unmount();
+});

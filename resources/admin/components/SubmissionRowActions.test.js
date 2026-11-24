@@ -143,3 +143,42 @@ describe('tooltipPosition', () => {
     expect(tooltipPosition({ ...rect, left: 290 }, { width: 100, height: 24 }, { width: 300 }).left).toBe(196);
   });
 });
+
+describe('SubmissionRowActions Not spam (#131)', () => {
+  const { createElement: h, render: r, unmountComponentAtNode: un } = require('@wordpress/element');
+  const run = async (submission) => {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const onMark = jest.fn();
+    await act(async () => {
+      r(
+        h(SubmissionRowActions, {
+          submission: { id: 7, status: 'completed', starred: 0, is_read: 1, ...submission },
+          hardDelete: false,
+          onView: jest.fn(),
+          onMark,
+          onRestore: jest.fn(),
+          onTrash: jest.fn(),
+          onDelete: jest.fn(),
+        }),
+        host
+      );
+    });
+    return { host, onMark, done: () => { un(host); host.remove(); } };
+  };
+
+  test('a spam row has Not spam, which sends restore', async () => {
+    const { host, onMark, done } = await run({ status: 'spam' });
+    const btn = host.querySelector('button[aria-label="Not spam"]');
+    expect(btn).toBeTruthy();
+    await act(async () => { btn.click(); });
+    expect(onMark).toHaveBeenCalledWith(7, 'restore');
+    done();
+  });
+
+  test('other rows have no Not spam', async () => {
+    const { host, done } = await run({ status: 'completed' });
+    expect(host.querySelector('button[aria-label="Not spam"]')).toBeNull();
+    done();
+  });
+});

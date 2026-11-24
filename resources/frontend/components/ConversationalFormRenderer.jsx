@@ -23,6 +23,7 @@ import { validateFields } from '../utils/fieldValidation';
 
 import { restFetch } from '../utils/restFetch';
 import { announceSubmitted } from '../utils/submitted';
+import { draftKeeper, clearDraft } from '../utils/useFormDraft';
 import { messageParagraphs } from '../../shared/safeLinks';
 import ConfirmationText from './ConfirmationText';
 
@@ -91,6 +92,21 @@ export default function ConversationalFormRenderer({
     }
   }, [defaultValues]);
   const fieldDefaults = useMemo(() => formFieldDefaults(schema?.metadata), [schema?.metadata]);
+
+  // Keep answers and the question the visitor is on across a reload (issue 139).
+  const draft = {
+    enabled: !preview && !submitSuccess,
+    formId,
+    instance,
+    schema,
+    values,
+    step: currentIndex,
+    view: currentStep,
+    stepCount: allFields.length,
+    setValues,
+    setStep: setCurrentIndex,
+    setView: setCurrentStep,
+  };
 
   // Generate form type-aware CSS classes (early, before any returns)
   // Conversational forms are rendered by this component rather than by
@@ -386,6 +402,7 @@ export default function ConversationalFormRenderer({
                 }
               : null
           );
+          clearDraft(formId, instance);
           setSubmitSuccess(true);
           setValues({});
           setCurrentIndex(0);
@@ -405,7 +422,7 @@ export default function ConversationalFormRenderer({
         setSubmitting(false);
       }
     },
-    [formId, values, leafPaths, preview, customOnSubmit, hiddenFields, spamToken, spamTokens, waitForMinimum]
+    [formId, values, leafPaths, preview, customOnSubmit, hiddenFields, spamToken, spamTokens, waitForMinimum, instance]
   );
 
   const handleSubmit = useCallback(
@@ -560,6 +577,7 @@ export default function ConversationalFormRenderer({
   return (
     <div className={formClassNames} style={appearanceStyle} onFocusCapture={primeSpamToken} onInputCapture={primeSpamToken}>
       {trackingInputs}
+      {draftKeeper(draft)}
       {/* Progress Bar */}
       <div className='subtleforms-progress'>
         <div className='subtleforms-progress-bar'>
