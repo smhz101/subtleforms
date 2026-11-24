@@ -47,6 +47,18 @@ final class SubmissionsRepository {
 	public const LISTED = "( status IS NULL OR status NOT IN ( 'trash', 'preview' ) )";
 
 	/**
+	 * Status of an entry marked as spam.
+	 */
+	public const SPAM = 'spam';
+
+	/**
+	 * SQL condition for inbox rows: not trashed, not a preview, not spam.
+	 * The All, Unread, Read, Starred and Flagged tabs, their counts, the menu
+	 * badge and the per-form totals all read it.
+	 */
+	public const INBOX = "( status IS NULL OR status NOT IN ( 'trash', 'preview', 'spam' ) )";
+
+	/**
 	 * The visibility conditions for a list or a count.
 	 *
 	 * Trash only shows in the Trash, Preview entries only when asked for by
@@ -62,7 +74,10 @@ final class SubmissionsRepository {
 		if ( self::PREVIEW === $status ) {
 			return array( self::NOT_TRASHED );
 		}
-		return array( self::LISTED );
+		if ( self::SPAM === $status ) {
+			return array( self::LISTED );
+		}
+		return array( self::INBOX );
 	}
 
 	/**
@@ -695,7 +710,7 @@ final class SubmissionsRepository {
 	public function tabCounts( $formId = null ): array {
 		global $wpdb;
 
-		$live   = self::LISTED;
+		$live   = self::INBOX;
 		$where  = '';
 		$params = array();
 		$formId = (int) $formId;
@@ -1054,7 +1069,7 @@ $cutoff_date
 		} else {
 			$query = $wpdb->prepare(
 				"SELECT form_id, COUNT(*) as count FROM {$this->table}
-                WHERE form_id IN ({$placeholders}) AND ( status IS NULL OR status NOT IN ( 'trash', 'preview' ) )
+                WHERE form_id IN ({$placeholders}) AND " . self::INBOX . "
                 GROUP BY form_id",
 				$form_ids
 			);
