@@ -24,6 +24,12 @@ describe('csvExport', () => {
     jest.restoreAllMocks();
   });
 
+  it('keeps the field filter in the address', () => {
+    const url = new URL(csvExportUrl({ field_key: 'name', field_value: 'Ada' }));
+    expect(url.searchParams.get('field_key')).toBe('name');
+    expect(url.searchParams.get('field_value')).toBe('Ada');
+  });
+
   it('builds the download address from the filters and the nonce', () => {
     const url = new URL(csvExportUrl({ form_id: 7, status: 'completed', search: 'a b', range: '30days' }));
     expect(url.pathname).toBe('/wp-admin/admin-post.php');
