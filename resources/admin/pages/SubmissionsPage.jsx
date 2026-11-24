@@ -2,14 +2,15 @@ import { useState, useRef, useEffect, useCallback, Suspense } from '@wordpress/e
 import { SearchControl, SelectControl } from '@wordpress/components';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/navigation';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import AdminShell from '../components/AdminShell';
 import TabBar from '../components/TabBar';
 import SubmissionsTable, { ALL_COLUMNS, DEFAULT_VISIBLE, COLUMN_LABELS } from '../components/SubmissionsTable';
 import useRealTimeUpdates from '../hooks/useRealTimeUpdates';
 import { Icon } from '../ui';
 import { apiPost } from '../utils/api';
-import { useForms, useSettings } from '../data';
+import { useAllForms, useSettings } from '../data';
+import SubmissionsFormFilter from '../components/SubmissionsFormFilter';
 import { deletesPermanently } from '../utils/deleteBehavior';
 import { tabsFor } from '../utils/tabCounts';
 import { buildInboxTabs, tabFromParams } from '../utils/inboxTabs';
@@ -234,7 +235,7 @@ export default function SubmissionsPage({ formId }) {
     }
   };
 
-  const { data: formsData = [] } = useForms({}, { enabled: !formId });
+  const { data: formsData = [] } = useAllForms({ enabled: !formId });
 
   // Real-time updates for live badge and table refresh
   const countFormId = selectedFormId !== 'all' ? selectedFormId : (formId || '');
@@ -335,19 +336,6 @@ export default function SubmissionsPage({ formId }) {
     { label: __('Last 7 days', 'subtleforms'), value: '7days' },
     { label: __('Last 30 days', 'subtleforms'), value: '30days' },
     { label: __('Last 3 months', 'subtleforms'), value: '3months' },
-  ];
-
-  const formOptions = [
-    { label: __('All forms', 'subtleforms'), value: 'all' },
-    ...forms.map((form) => ({
-      label:
-        form.title ||
-        sprintf(
-          /* translators: %1$d: form id */ __('Form #%1$d', 'subtleforms'),
-          form.id
-        ),
-      value: String(form.id),
-    })),
   ];
 
   const hasActiveFilters =
@@ -580,14 +568,7 @@ export default function SubmissionsPage({ formId }) {
       {/* Filter Bar */}
       {!formId && showFilters && (
         <div className='sf-filter-bar'>
-          <SelectControl
-            label={__('Form', 'subtleforms')}
-            value={selectedFormId}
-            options={formOptions}
-            onChange={setSelectedFormId}
-            className='sf-filter-control'
-            style={{ minWidth: '200px' }}
-          />
+          <SubmissionsFormFilter forms={forms} value={selectedFormId} onChange={setSelectedFormId} />
           <SelectControl
             label={__('Date Range', 'subtleforms')}
             value={dateRange}
