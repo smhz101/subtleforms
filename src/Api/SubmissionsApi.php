@@ -1370,21 +1370,14 @@ final class SubmissionsApi {
 		$skip = array( 'website_url', 'form_rendered_at' );
 
 		// Column order: the form's fields (single-form export), then any other
-		// answer keys in the order they were first seen.
+		// answer keys in the order they were first seen. An export of all forms
+		// reads the schemas of the forms found in the first pass below.
 		$labels    = array();
 		$repeaters = array();
 		if ( ! empty( $args['form_id'] ) ) {
-			try {
-				$active = $this->formsRepo->loadSchemaVersion( (int) $args['form_id'] );
-				$schema = is_array( $active ) ? ( $active['schema'] ?? $active ) : array();
-				foreach ( \SubtleForms\Support\FieldMapper::fields( is_array( $schema ) ? $schema : array() ) as $field ) {
-					$labels[ $field['key'] ] = '' !== $field['label'] ? $field['label'] : $field['key'];
-					if ( \SubtleForms\Support\Repeater::TYPE === $field['type'] ) {
-						$repeaters[ $field['key'] ] = $field['field'];
-					}
-				}
-			} catch ( \Throwable $e ) {
-				$labels = array();
+			list( $labels, $repeaters ) = $this->exportFormColumns( (int) $args['form_id'] );
+			foreach ( $labels as $key => $label ) {
+				$labels[ $key ] = '' !== $label ? $label : $key;
 			}
 		}
 
@@ -1398,10 +1391,12 @@ final class SubmissionsApi {
 		}
 
 		// First pass: the columns. The answers of an entry are not kept.
-		$keys = array();
+		$keys    = array();
+		$formIds = array();
 		$walk(
-			function ( array $submission ) use ( &$keys, $skip ): void {
-				$payload = $this->exportPayload( $submission );
+			function ( array $submission ) use ( &$keys, &$formIds, $skip ): void {
+				$formIds[ (int) $submission['form_id'] ] = true;
+				$payload                                  = $this->exportPayload( $submission );
 				foreach ( array_keys( $payload ) as $key ) {
 					$key = (string) $key;
 					if ( '' === $key || '_' === $key[0] || in_array( $key, $skip, true ) ) {
@@ -1411,6 +1406,10 @@ final class SubmissionsApi {
 				}
 			}
 		);
+
+		if ( empty( $args['form_id'] ) ) {
+			list( $labels, $repeaters ) = $this->mergedExportColumns( array_keys( $formIds ) );
+		}
 
 		$ordered = array();
 		foreach ( array_keys( $labels ) as $key ) {
@@ -1511,6 +1510,83 @@ final class SubmissionsApi {
 		);
 
 		return $count;
+	}
+
+	/**
+	 * The labels and Repeaters of one form's active schema, for the export.
+	 *
+	 * @param int $formId Form ID.
+	 * @return array{0: array<string,string>, 1: array<string,array>} Label by key ('' when a field has none), and Repeater field by key. Both empty when the form is gone.
+	 */
+	private function exportFormColumns( int $formId ): array {
+		$labels    = array();
+		$repeaters = array();
+		try {
+			$active = $this->formsRepo->loadSchemaVersion( $formId );
+			$schema = is_array( $active ) ? ( $active['schema'] ?? $active ) : array();
+			foreach ( \SubtleForms\Support\FieldMapper::fields( is_array( $schema ) ? $schema : array() ) as $field ) {
+				$labels[ $field['key'] ] = (string) $field['label'];
+				if ( \SubtleForms\Support\Repeater::TYPE === $field['type'] ) {
+					$repeaters[ $field['key'] ] = $field['field'];
+				}
+			}
+		} catch ( \Throwable $e ) {
+			return array( array(), array() );
+		}
+		return array( $labels, $repeaters );
+	}
+
+	/**
+	 * Headings and Repeaters for an export of several forms (issue 125).
+	 *
+	 * One schema is read at a time, in the order the forms were first seen.
+	 * A key used by several forms gets each distinct label, joined with " / ".
+	 * A key that is a Repeater in any form uses the children of the first form
+	 * that has it, plus any child the other forms add. A field with no label in any form is headed by its key.
+	 *
+	 * @param int[] $formIds Form IDs found in the entries.
+	 * @return array{0: array<string,string>, 1: array<string,array>} Heading by key, in column order, and Repeater field by key.
+	 */
+	private function mergedExportColumns( array $formIds ): array {
+		$names     = array();
+		$repeaters = array();
+		foreach ( $formIds as $formId ) {
+			list( $labels, $found ) = $this->exportFormColumns( (int) $formId );
+			foreach ( $labels as $key => $label ) {
+				$key = (string) $key;
+				if ( ! isset( $names[ $key ] ) ) {
+					$names[ $key ] = array();
+				}
+				if ( '' !== $label && ! in_array( $label, $names[ $key ], true ) ) {
+					$names[ $key ][] = $label;
+				}
+			}
+			foreach ( $found as $key => $field ) {
+				if ( ! isset( $repeaters[ $key ] ) ) {
+					$repeaters[ $key ] = $field;
+					continue;
+				}
+				// The same Repeater key in another form: keep the columns of the
+				// first and add the children it does not have, so no answer of
+				// the other form is dropped.
+				$have  = array_column( \SubtleForms\Support\Repeater::childFields( $repeaters[ $key ] ), 'key' );
+				$extra = array();
+				foreach ( \SubtleForms\Support\Repeater::childFields( $field ) as $child ) {
+					if ( ! in_array( $child['key'], $have, true ) ) {
+						$extra[] = $child['field'];
+					}
+				}
+				if ( $extra ) {
+					$repeaters[ $key ]['children'] = array_merge( \SubtleForms\Support\Repeater::children( $repeaters[ $key ] ), $extra );
+				}
+			}
+			unset( $labels, $found );
+		}
+		$headings = array();
+		foreach ( $names as $key => $list ) {
+			$headings[ $key ] = $list ? implode( ' / ', $list ) : (string) $key;
+		}
+		return array( $headings, $repeaters );
 	}
 
 	/**
