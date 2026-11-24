@@ -86,7 +86,7 @@ final class ThemeFormStyleTest extends TestCase {
 		$this->assertStringContainsString( ':where(.subtleforms.subtleforms--inherit-theme) :where(:is(input:is([type="text"]', $css );
 		$this->assertStringContainsString( 'padding:0.5em 0.75em', $css );
 		$this->assertStringContainsString( 'min-height:2.75em', $css );
-		$this->assertStringContainsString( ':not(.subtleforms-picker__input,.subtleforms-picker__search)', $css );
+		$this->assertStringContainsString( ':not(.subtleforms-picker__search)', $css );
 		// No selector outside :where() that could outrank a theme's bare `input` rule.
 		$this->assertDoesNotMatchRegularExpression( '/(^|\})\s*\.subtleforms[^{]*\b(input|select|textarea)\b[^{]*\{[^}]*padding/', $css );
 	}

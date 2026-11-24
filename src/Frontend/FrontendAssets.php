@@ -443,7 +443,7 @@ final class FrontendAssets {
 	 */
 	public static function layoutCss(): string {
 		$boxes = 'input:is([type="text"],[type="email"],[type="tel"],[type="url"],[type="number"],[type="password"],[type="search"],[type="date"],[type="time"],[type="datetime-local"]),input:not([type]),select';
-		$skip  = ':not(.subtleforms-picker__input,.subtleforms-picker__search)';
+		$skip  = ':not(.subtleforms-picker__search)';
 		$scope = ':where(.subtleforms.subtleforms--inherit-theme) ';
 
 		return $scope . ':where(:is(' . $boxes . ',textarea)' . $skip . '){padding:0.5em 0.75em;box-sizing:border-box;line-height:1.4}'
