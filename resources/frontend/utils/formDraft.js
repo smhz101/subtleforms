@@ -3,7 +3,7 @@
  * useFormDraft so forms without steps never download it.
  */
 import { useEffect, useLayoutEffect, useRef } from '@wordpress/element';
-import { fieldTypesOf } from '../../shared/confirmationTags';
+import { columnFields } from './columnFields';
 
 const MAX_AGE = 24 * 60 * 60 * 1000;
 
@@ -48,13 +48,45 @@ export function remove(key) {
   }
 }
 
+/** Key => field node for every field the renderer shows. A repeater's own children are not listed. */
+function fieldsByKey(list, out = {}) {
+  (Array.isArray(list) ? list : []).forEach((f) => {
+    if (!f || typeof f !== 'object') return;
+    const k = f.config?.key || f.key;
+    if (k && f.type) out[k] = f;
+    if (f.type === 'repeat_container') return;
+    fieldsByKey(f.children, out);
+    fieldsByKey(f.fields, out);
+    (Array.isArray(f.columns) ? f.columns : []).forEach((c) => fieldsByKey(columnFields(c), out));
+  });
+  return out;
+}
+
+/** The safe part of one answer, or undefined to drop it. Fails closed. */
+function safeValue(value, field) {
+  if (!field || SKIP_TYPE.test(field.type)) return undefined;
+  if (field.type !== 'repeat_container') return value;
+  if (!Array.isArray(value)) return undefined;
+  const children = fieldsByKey(field.children || field.fields);
+  return value.map((row) => {
+    const kept = {};
+    if (row && typeof row === 'object') {
+      Object.keys(row).forEach((k) => {
+        const v = safeValue(row[k], children[k]);
+        if (v !== undefined) kept[k] = v;
+      });
+    }
+    return kept;
+  });
+}
+
 /** Keep only answers to fields that are in the schema and are safe to store. */
 export function allowed(values, schema) {
-  const types = fieldTypesOf(schema);
+  const fields = fieldsByKey(schema?.fields);
   const out = {};
   Object.keys(values || {}).forEach((k) => {
-    const type = types[k];
-    if (type && !SKIP_TYPE.test(type)) out[k] = values[k];
+    const v = safeValue(values[k], fields[k]);
+    if (v !== undefined) out[k] = v;
   });
   return out;
 }

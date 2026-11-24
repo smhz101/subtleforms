@@ -100,3 +100,27 @@ it('does not crash when storage throws', async () => {
   await act(async () => {});
   get.mockRestore(); set.mockRestore(); rm.mockRestore();
 });
+
+it('keeps only safe child answers in a repeater, at any depth', async () => {
+  const repeater = (key, children) => ({ type: 'repeat_container', key, children });
+  const nested = {
+    fields: [repeater('people', [
+      { type: 'text', key: 'name' },
+      { type: 'password', key: 'pw' },
+      repeater('kids', [{ type: 'text', key: 'kid' }, { type: 'signature', key: 'sig' }]),
+    ])],
+  };
+  const values = { people: [{ name: 'Ada', pw: 'secret', extra: 'x', kids: [{ kid: 'K', sig: 'data' }] }, { name: 'Bo', pw: 'p2' }] };
+  const { allowed } = await import('./formDraft');
+  expect(allowed(values, nested)).toEqual({ people: [{ name: 'Ada', kids: [{ kid: 'K' }] }, { name: 'Bo' }] });
+});
+
+it('finds fields in object-shaped columns', async () => {
+  const cols = { fields: [{ type: 'columns', key: 'c', columns: [
+    { fields: [{ type: 'text', key: 'one' }] },
+    { children: [{ type: 'text', key: 'two' }, { type: 'password', key: 'pw' }] },
+    [{ type: 'text', key: 'three' }],
+  ] }] };
+  const { allowed } = await import('./formDraft');
+  expect(allowed({ one: '1', two: '2', three: '3', pw: 'p' }, cols)).toEqual({ one: '1', two: '2', three: '3' });
+});
