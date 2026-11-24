@@ -142,3 +142,13 @@
 	font-weight: 400;
 	vertical-align: middle;
 }
+
+.sf-container-renderer__empty-warning {
+	margin: 0.5rem 0 0;
+	padding: 0.5rem 0.75rem;
+	border-left: 3px solid var(--sf-warning);
+	background: var(--sf-warning-bg);
+	color: var(--sf-warning-strong);
+	font-size: 0.8125rem;
+	line-height: 1.4;
+}

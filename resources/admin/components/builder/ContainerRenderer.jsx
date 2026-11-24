@@ -178,6 +178,11 @@ export default function ContainerRenderer({
             </div>
           ))}
         </div>
+        {isRepeater && columns.every((items) => !items?.length) && (
+          <p className='sf-container-renderer__empty-warning' role='note'>
+            {__('Add at least one field to this repeater. It shows nothing on the form until it has fields.', 'subtleforms')}
+          </p>
+        )}
         {isRepeater && (
           <div className='sf-container-renderer__repeat-preview' aria-hidden='true'>
             <span className='sf-container-renderer__repeat-button'>
