@@ -1069,7 +1069,7 @@ $cutoff_date
 		} else {
 			$query = $wpdb->prepare(
 				"SELECT form_id, COUNT(*) as count FROM {$this->table}
-                WHERE form_id IN ({$placeholders}) AND " . self::INBOX . "
+                WHERE form_id IN ({$placeholders}) AND ( status IS NULL OR status NOT IN ( 'trash', 'preview', 'spam' ) )
                 GROUP BY form_id",
 				$form_ids
 			);
