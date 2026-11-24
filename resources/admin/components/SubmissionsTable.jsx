@@ -29,7 +29,7 @@ import { Icon } from '../ui';
 import { keepRowsAfterFailedLoad, listQueryKey } from '../utils/failedLoad';
 import { startCsvDownloadOfIds } from '../utils/csvExport';
 import { entrySender } from '../utils/entrySender';
-import { timeAgo } from '../utils/formatDate';
+import { timeAgo, siteDateTitle } from '../utils/formatDate';
 import { entryAfter } from '../utils/tabCounts';
 import useElementWidth from '../hooks/useElementWidth';
 import { chunkPagesFor } from '../utils/listChunks';
@@ -601,12 +601,6 @@ const SubmissionsTable = forwardRef(
       setCurrentPage(1);
     };
 
-    // Stored timestamps are UTC without a zone suffix; parse them as UTC.
-    const parseUtc = (value) => {
-      const raw = String(value || '');
-      return new Date(raw && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(raw) ? `${raw.replace(' ', 'T')}Z` : raw);
-    };
-
     const getBrowserDevice = (userAgent) => {
       if (!userAgent) return { browser: 'N/A', device: 'N/A' };
       const browser =
@@ -617,20 +611,6 @@ const SubmissionsTable = forwardRef(
         ? 'Mobile'
         : 'Desktop';
       return { browser, device };
-    };
-
-    const formatAbsDate = (dateString) => {
-      try {
-        return new Intl.DateTimeFormat(undefined, {
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-        }).format(parseUtc(dateString));
-      } catch {
-        return dateString;
-      }
     };
 
     // Who sent it: a name answer, else an email answer, else Anonymous.
@@ -690,7 +670,7 @@ const SubmissionsTable = forwardRef(
           </div>
           <div className='sf-sub-compact__meta'>
             <span className={clsx('sf-pill', 'sf-pill--dot', config.cls)}>{config.label}</span>
-            <time className='sf-sub-time' title={formatAbsDate(submission.created_at)} dateTime={submission.created_at}>
+            <time className='sf-sub-time' title={siteDateTitle(submission.created_at)} dateTime={submission.created_at}>
               {timeAgo(submission.created_at)}
             </time>
             {renderActions(submission)}
@@ -777,7 +757,7 @@ const SubmissionsTable = forwardRef(
         title: __('Received', 'subtleforms'),
         sortable: true,
         render: (createdAt) => (
-          <time className='sf-sub-time' title={formatAbsDate(createdAt)} dateTime={createdAt}>
+          <time className='sf-sub-time' title={siteDateTitle(createdAt)} dateTime={createdAt}>
             {timeAgo(createdAt)}
           </time>
         ),
