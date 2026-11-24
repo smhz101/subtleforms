@@ -555,10 +555,13 @@ final class SubmissionsApi {
 			return ApiResponse::not_found( __( 'Submission not found', 'subtleforms' ) );
 		}
 
-		// Auto-mark as read (track via is_read, not status)
+		// Auto-mark as read (track via is_read, not status). The response says
+		// so, because it carries is_read 1 and the screen could not otherwise
+		// tell that this entry was unread a moment ago (issue 130).
 		if ( intval( $submission['is_read'] ?? 0 ) === 0 ) {
 			$this->submissionsRepo->update( $submission['id'], array( 'is_read' => 1 ) );
-			$submission['is_read'] = 1;
+			$submission['is_read']     = 1;
+			$submission['marked_read'] = true;
 		}
 
 		// Enhance with form info

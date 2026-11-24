@@ -223,6 +223,11 @@ export default function SubmissionsPage({ formId }) {
 
   const closePane = () => {
     setOpenId(null);
+    // Entries opened on the Unread tab were marked read and stayed in place
+    // while open. Now that the pane is closed, they leave the list.
+    if (statusFilter === 'unread') {
+      submissionsTableRef.current?.refreshData?.();
+    }
     const next = new URLSearchParams(searchParams);
     next.delete('submission_id');
     setSearchParams(next, { replace: true });
