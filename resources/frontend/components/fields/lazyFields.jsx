@@ -29,6 +29,7 @@ const LOADERS = {
   chained: () => import(/* webpackChunkName: "field-chained-select" */ './ChainedSelect'),
   richText: () => import(/* webpackChunkName: "field-rich-text" */ './RichTextInput'),
   mask: () => import(/* webpackChunkName: "field-mask" */ './maskField'),
+  draft: () => import(/* webpackChunkName: "form-draft" */ '../../utils/formDraft'),
   conversational: () =>
     import(/* webpackChunkName: "form-conversational" */ '../ConversationalFormRenderer'),
 };

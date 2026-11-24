@@ -20,7 +20,7 @@ import { debug } from '../../shared/debug';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { FormContext } from './fields/contexts';
 import { claimInstance, releaseInstance } from '../utils/formInstance';
-import useFormDraft from '../utils/useFormDraft';
+import { draftKeeper, clearDraft } from '../utils/useFormDraft';
 import { revealField } from '../utils/revealField';
 import { getFormWrappers } from '../../shared/extend';
 import { lazyField, loadFieldsFor, fieldsReadyFor } from './fields/lazyFields';
@@ -132,13 +132,10 @@ export default function FormRenderer({
   // of the same form gets 1 again. The builder canvas and Preview show one copy
   // and are drawn again on edits, so they never claim a number (formInstance.js).
   const [instance, setInstance] = useState(1);
-  // False until the copy number is known, so a draft is read for the right copy.
-  const [instanceReady, setInstanceReady] = useState(!!preview);
   useLayoutEffect(() => {
     if (preview) return undefined;
     const n = claimInstance(formId);
     setInstance(n);
-    setInstanceReady(true);
     return () => releaseInstance(formId, n);
   }, [formId, preview]);
   const honeypotId = `subtleforms-hp-${formId}-${honeypotSuffix}`;
@@ -292,19 +289,17 @@ export default function FormRenderer({
   const currentStepConfig = fieldConfig(currentStep);
 
   // Multi-step forms keep answers and step across a reload (issue 139).
-  const { clear: clearDraft } = useFormDraft({
-    enabled: !preview && instanceReady && hasSteps && !isConversational && !submitSuccess,
+  const draft = {
+    enabled: !preview && hasSteps && !isConversational && !submitSuccess,
     formId,
     instance,
     schema,
     values,
     step: currentStepIndex,
     stepCount: steps.length,
-    onRestore: ({ step, values: saved }) => {
-      setValues((prev) => ({ ...prev, ...saved }));
-      setCurrentStepIndex(step);
-    },
-  });
+    setValues,
+    setStep: setCurrentStepIndex,
+  };
 
   // Get fields to render
   const fieldsToRender = useMemo(() => {
@@ -974,7 +969,7 @@ export default function FormRenderer({
             paragraphs: messageParagraphs(ownMessage ? conf.message : message, ownMessage ? merge : undefined),
             allowAnother: !!conf.allowAnother,
           });
-          clearDraft();
+          clearDraft(formId, instance);
           setSubmitSuccess(true);
           setSubmitCount((n) => n + 1);
           setValues({ ...defaultValues });
@@ -1027,7 +1022,7 @@ export default function FormRenderer({
       spamToken,
       spamTokens,
       waitForMinimum,
-      clearDraft,
+      instance,
     ]
   );
 
@@ -1108,7 +1103,7 @@ export default function FormRenderer({
         paragraphs: messageParagraphs(ownMessage ? conf.message : message, ownMessage ? merge : undefined),
         allowAnother: !!conf.allowAnother,
       });
-      clearDraft();
+      clearDraft(formId, instance);
       setSubmitSuccess(true);
       return;
     }
@@ -1254,6 +1249,7 @@ export default function FormRenderer({
       >
         {liveMessage}
       </div>
+      {draftKeeper(draft)}
 
       {showTitle && schema.metadata?.title && (
         <h2 className='subtleforms-form-title'>{schema.metadata.title}</h2>
