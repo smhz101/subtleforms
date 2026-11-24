@@ -41,6 +41,16 @@ final class PhoneAsTyped140Test extends TestCase {
 		$this->assertSame( '+92 300 1234567', $this->stored( "+92   300 \t 1234567" ) );
 	}
 
+	public function test_dotted_international_number_gets_spaces() {
+		$this->assertSame( '+1 415 555 0100', $this->stored( '+1 415.555.0100' ) );
+		$result = ( new FieldValidator() )->validate(
+			array( 'fields' => array( array( 'key' => 'p', 'type' => 'phone' ) ) ),
+			array( 'p' => $this->stored( '+1 415.555.0100' ) ),
+			array( 'hidden_fields' => array(), 'required_fields' => array() )
+		);
+		$this->assertSame( array(), $result['errors'] );
+	}
+
 	public function test_calling_code_only_is_empty() {
 		$this->assertSame( '', $this->stored( '+92' ) );
 	}

@@ -106,10 +106,11 @@ function dropTrunkZero(country, digits) {
   return digits.replace(/^0[\s-]*/, '');
 }
 
-/** The typed characters of a number: digits, spaces, dashes, dots and brackets, spaces collapsed. */
+/** The typed characters of a number: digits, spaces, dashes and brackets (dots become spaces), spaces collapsed. */
 function typedChars(text) {
   return String(text ?? '')
     .replace(/[^\d\s().-]/g, '')
+    .replace(/\./g, ' ')
     .replace(/\s+/g, ' ')
     .replace(/^\s+/, '');
 }

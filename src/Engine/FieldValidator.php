@@ -1407,6 +1407,7 @@ final class FieldValidator {
 	public static function normalizePhone( string $value ): string {
 		$value = trim( (string) preg_replace( '/\s+/u', ' ', $value ) );
 		if ( str_starts_with( $value, '+' ) && preg_match( '/^[\d\s\-\+\(\)\.]+$/', $value ) ) {
+			$value  = trim( (string) preg_replace( '/\s+/', ' ', str_replace( '.', ' ', $value ) ) );
 			$digits = (string) preg_replace( '/\D/', '', $value );
 			$dial   = self::dialCodeOf( $digits );
 			if ( null !== $dial && $digits === $dial ) {

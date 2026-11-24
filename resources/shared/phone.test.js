@@ -24,6 +24,13 @@ describe('phone countries', () => {
     expect(filterPhoneCountries('zz')).toHaveLength(0);
   });
 
+  test('dotted input becomes spaces and passes validation', () => {
+    const us = phoneCountries().find((c) => c.code === 'US');
+    const value = joinPhoneValue(us, '415.555.0100');
+    expect(value).toBe('+1 415 555 0100');
+    expect(isValidInternational(value)).toBe(true);
+  });
+
   test('joins and splits a country code and national number', () => {
     const us = phoneCountries().find((c) => c.code === 'US');
     expect(joinPhoneValue(us, '(415) 555-0100')).toBe('+1 (415) 555-0100');
