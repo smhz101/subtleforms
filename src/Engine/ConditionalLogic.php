@@ -50,6 +50,8 @@ final class ConditionalLogic {
 	);
 
 	private const NUMERIC_RE = '/^\s*[-+]?(\d+(\.\d*)?|\.\d+)\s*$/';
+	private const DATE_RE    = '/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2}))?)?$/';
+	private const TIME_RE    = '/^(\d{2}):(\d{2})(?::(\d{2}))?$/';
 	private const MAX_PASSES = 5;
 
 	/** @var string|null Day used for "today" (YYYY-MM-DD); null = site's today. */
@@ -272,18 +274,7 @@ final class ConditionalLogic {
 				return ! self::isEmptyForField( $value, $field );
 			case 'greater_than':
 			case 'less_than':
-				if ( ! self::isNumeric( $c ) ) {
-					return false;
-				}
-				foreach ( $items as $x ) {
-					if ( ! self::isNumeric( $x ) ) {
-						continue;
-					}
-					if ( $operator === 'greater_than' ? (float) $x > (float) $c : (float) $x < (float) $c ) {
-						return true;
-					}
-				}
-				return false;
+				return self::orderedAny( $items, $c, 'greater_than' === $operator ? 1 : -1, $field );
 			default:
 				/**
 				 * Evaluate an operator this plugin does not know (an add-on's
@@ -302,6 +293,81 @@ final class ConditionalLogic {
 				$result = apply_filters( 'subtleforms/logic/evaluate_condition', null, $value, $operator, $compare, $compare2, $field, $this );
 				return null === $result ? false : (bool) $result;
 		}
+	}
+
+	/**
+	 * A sortable key for an ISO date with an optional time: "YYYY-MM-DD HH:MM:SS".
+	 * The same format SubtleForms Pro's toDate() produces. Null when the text is
+	 * not a date. Relative values such as "today" are Pro's, not handled here.
+	 *
+	 * @param mixed $s Text to read.
+	 */
+	private static function dateSortKey( $s ): ?string {
+		if ( ! preg_match( self::DATE_RE, trim( self::toText( $s ) ), $m ) ) {
+			return null;
+		}
+		return sprintf(
+			'%s-%s-%s %s:%s:%s',
+			$m[1],
+			$m[2],
+			$m[3],
+			isset( $m[4] ) && '' !== $m[4] ? $m[4] : '00',
+			isset( $m[5] ) && '' !== $m[5] ? $m[5] : '00',
+			isset( $m[6] ) && '' !== $m[6] ? $m[6] : '00'
+		);
+	}
+
+	/**
+	 * A sortable key for a time of day: "HH:MM:SS". Null when the text is not a time.
+	 *
+	 * @param mixed $s Text to read.
+	 */
+	private static function timeSortKey( $s ): ?string {
+		if ( ! preg_match( self::TIME_RE, trim( self::toText( $s ) ), $m ) ) {
+			return null;
+		}
+		return sprintf( '%s:%s:%s', $m[1], $m[2], isset( $m[3] ) && '' !== $m[3] ? $m[3] : '00' );
+	}
+
+	/**
+	 * Whether any answer is later (dir 1) or earlier (dir -1) than the rule value.
+	 * Numbers compare as numbers. Otherwise date and datetime fields compare as
+	 * dates and time fields as times; with no field type, the values decide.
+	 *
+	 * @param array      $items Answers.
+	 * @param string     $c     The rule's value.
+	 * @param int        $dir   1 for greater than, -1 for less than.
+	 * @param array|null $field The field the rule reads, if known.
+	 */
+	private static function orderedAny( array $items, string $c, int $dir, $field ): bool {
+		if ( self::isNumeric( $c ) ) {
+			foreach ( $items as $x ) {
+				if ( self::isNumeric( $x ) && ( (float) $x - (float) $c ) * $dir > 0 ) {
+					return true;
+				}
+			}
+			return false;
+		}
+		$type    = is_array( $field ) && isset( $field['type'] ) && is_string( $field['type'] ) ? $field['type'] : '';
+		$as_date = in_array( $type, array( 'date', 'datetime', '' ), true );
+		$as_time = in_array( $type, array( 'time', '' ), true );
+		$keys    = array();
+		if ( $as_date && null !== self::dateSortKey( $c ) ) {
+			$keys[] = 'dateSortKey';
+		}
+		if ( $as_time && null !== self::timeSortKey( $c ) ) {
+			$keys[] = 'timeSortKey';
+		}
+		foreach ( $keys as $key ) {
+			$limit = self::$key( $c );
+			foreach ( $items as $x ) {
+				$k = self::$key( $x );
+				if ( null !== $k && $dir === ( $k <=> $limit ) ) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	// ── Normalisation ───────────────────────────────────────────────────
