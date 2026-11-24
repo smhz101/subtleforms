@@ -11,11 +11,12 @@ const fields = [
   { id: 'b', key: 'topic', type: 'multiple_choice', label: 'Topic', options: [{ label: 'One', value: 'one' }, { label: 'Two', value: 'two' }] },
 ];
 
-// Properties that arrange things or hide text; none of them paint.
+// Properties that arrange things, size text boxes or hide text; none of them
+// paint. box-sizing and line-height come from the 2.9.2 text box floor.
 const ALLOWED = new Set([
   'display', 'flex', 'flex-wrap', 'flex-direction', 'flex-basis', 'flex-grow', 'flex-shrink', 'gap', 'min-width', 'min-height',
   'position', 'left', 'width', 'height', 'overflow', 'clip', 'clip-path', 'white-space', 'border-width', 'margin', 'padding', 'float',
-  'border', 'justify-content', 'pointer-events', 'user-select', 'color', 'border-style',
+  'border', 'justify-content', 'pointer-events', 'user-select', 'color', 'border-style', 'box-sizing', 'line-height',
 ]);
 
 let client;
