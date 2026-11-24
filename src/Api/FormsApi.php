@@ -655,16 +655,21 @@ final class FormsApi {
 		$schemaData = is_array( $schemaData ) ? SchemaRepair::repair( $schemaData, $formId ) : $schemaData;
 		$schemaData = $this->injectCaptchaHtml( $schemaData );
 
+		$protection = \SubtleForms\Engine\SpamProtection::for_form( is_array( $schemaData ) ? $schemaData : null );
+
 		return array(
-			'form'       => array(
+			'form'             => array(
 				'id'    => $formId,
 				'title' => $form['title'] ?? '',
 			),
-			'schema'     => self::filterPublicSchema( $this->buildPublicSchema( $schemaData ), $formId ),
-			'version'    => $schema['version'] ?? null,
+			'schema'           => self::filterPublicSchema( $this->buildPublicSchema( $schemaData ), $formId ),
+			'version'          => $schema['version'] ?? null,
 			// Server-signed build time (a render ticket) for the spam time trap
 			// (FF-11, FF-12). The browser trades it for a submit token.
-			'spam_token' => \SubtleForms\Engine\SpamProtection::issue_ticket( $formId ),
+			'spam_token'       => \SubtleForms\Engine\SpamProtection::issue_ticket( $formId ),
+			// The time trap's minimum in seconds, or 0 when the form has the
+			// trap off. The browser holds a fast submit until it has passed.
+			'spam_min_seconds' => $protection['timeTrap'] ? (int) $protection['minSeconds'] : 0,
 		);
 	}
 

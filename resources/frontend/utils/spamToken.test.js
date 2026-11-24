@@ -59,3 +59,22 @@ test('a token held for over an hour is traded again', async () => {
   source.prime(ticket);
   await expect(source.take(ticket, 1700009999)).resolves.toBe('s2.1700009999.9.eeeeeeeeeeeeeeee.x');
 });
+
+describe('msUntilMinimum', () => {
+  const { msUntilMinimum } = jest.requireActual('./spamToken');
+
+  test('is 0 when the form has no time trap', () => {
+    expect(msUntilMinimum(0, 0, 100)).toBe(0);
+    expect(msUntilMinimum(undefined, 0, 100)).toBe(0);
+  });
+
+  test('is the time left to the minimum plus one second of margin', () => {
+    expect(msUntilMinimum(3, 1000, 1500)).toBe(3500);
+    expect(msUntilMinimum(3, 0, 0)).toBe(4000);
+  });
+
+  test('is 0 once the minimum and the margin have passed', () => {
+    expect(msUntilMinimum(3, 0, 4000)).toBe(0);
+    expect(msUntilMinimum(3, 0, 9000)).toBe(0);
+  });
+});

@@ -33,6 +33,7 @@ import {
 
 import { restFetch, restUrl, restNonce } from '../utils/restFetch';
 import { createSpamTokenSource } from '../utils/spamToken';
+import useTimeTrapHold from '../utils/useTimeTrapHold';
 import { fillConfirmation, fieldTypesOf } from '../../shared/confirmationTags';
 import { messageParagraphs } from '../../shared/safeLinks';
 import ConfirmationText from './ConfirmationText';
@@ -69,6 +70,7 @@ export default function FormRenderer({
   formId,
   preloadedSchema = null,
   preloadedSpamToken = '',
+  preloadedSpamMinSeconds = 0,
   preview = false,
   onSubmit: customOnSubmit = null,
   blockOptions = null,
@@ -83,6 +85,12 @@ export default function FormRenderer({
   const [schema, setSchema] = useState(preloadedSchema || inline?.schema || null);
   // Server-signed load time for the spam time trap (FF-11, FF-12).
   const [spamToken, setSpamToken] = useState(preloadedSpamToken || inline?.spamToken || '');
+  // The time trap's minimum in seconds, 0 when the form has none (issue 126).
+  const [spamMinSeconds, setSpamMinSeconds] = useState(
+    Number(preloadedSpamMinSeconds || inline?.spamMinSeconds) || 0
+  );
+  // Holds a fast submit until the time trap's minimum has passed (issue 126).
+  const waitForMinimum = useTimeTrapHold(spamMinSeconds);
   const [error, setError] = useState(null);
   const [values, setValues] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -156,6 +164,7 @@ export default function FormRenderer({
             return;
           }
           setSpamToken(data?.data?.spam_token || '');
+          setSpamMinSeconds(Number(data?.data?.spam_min_seconds) || 0);
           if (schemaPayload) {
             setSchema(schemaPayload);
           } else {
@@ -671,6 +680,14 @@ export default function FormRenderer({
       setSubmitError(null);
       setErrorSummary('');
 
+      // The server drops a submit that comes before the time trap's minimum
+      // and still answers "Thank you", so a fast visitor (autofill) would lose
+      // the entry. Hold the send until the minimum has passed; the button
+      // already shows its sending state (issue 126).
+      if (!(await waitForMinimum())) {
+        return;
+      }
+
       // Handle reCAPTCHA v3 if present
       const recaptchaV3Input = document.querySelector(
         '.subtleforms-recaptcha-v3'
@@ -974,6 +991,7 @@ export default function FormRenderer({
       schema,
       spamToken,
       spamTokens,
+      waitForMinimum,
     ]
   );
 
@@ -1089,6 +1107,7 @@ export default function FormRenderer({
         preview={preview}
         onSubmit={customOnSubmit}
         spamToken={spamToken}
+        spamMinSeconds={spamMinSeconds}
       />
     );
   }

@@ -20,6 +20,7 @@ jest.mock('../utils/restFetch', () => ({
 }));
 jest.mock('../utils/spamToken', () => ({
   createSpamTokenSource: () => ({ prime: () => {}, take: async () => 'token' }),
+  msUntilMinimum: () => 0,
 }));
 
 const { restFetch } = require('../utils/restFetch');

@@ -191,7 +191,7 @@ async function submit(page, { email, consent }) {
   if (consent) await page.getByLabel('You may contact me').check();
   await page.waitForTimeout(3500);
   await page.click('.subtleforms-button-submit');
-  await expect(page.locator('.subtleforms-success, .subtleforms-form-container [role="status"], .subtleforms-confirmation').first()).toBeVisible({ timeout: 20000 });
+  await expect(page.locator('.subtleforms-success, .subtleforms-confirmation').first()).toBeVisible({ timeout: 20000 });
 }
 
 test('Submitting: a consenting visitor becomes a HubSpot contact and the entry says so; one who does not consent is skipped', async ({ page }) => {
