@@ -23,6 +23,7 @@ import { validateFields } from '../utils/fieldValidation';
 
 import { restFetch } from '../utils/restFetch';
 import { announceSubmitted } from '../utils/submitted';
+import useFormDraft from '../utils/useFormDraft';
 import { messageParagraphs } from '../../shared/safeLinks';
 import ConfirmationText from './ConfirmationText';
 
@@ -91,6 +92,23 @@ export default function ConversationalFormRenderer({
     }
   }, [defaultValues]);
   const fieldDefaults = useMemo(() => formFieldDefaults(schema?.metadata), [schema?.metadata]);
+
+  // Keep answers and the question the visitor is on across a reload (issue 139).
+  const { clear: clearDraft } = useFormDraft({
+    enabled: !preview && !submitSuccess,
+    formId,
+    instance,
+    schema,
+    values,
+    step: currentIndex,
+    view: currentStep,
+    stepCount: allFields.length,
+    onRestore: ({ step, view, values: saved }) => {
+      setValues((prev) => ({ ...prev, ...saved }));
+      setCurrentIndex(step);
+      setCurrentStep(view);
+    },
+  });
 
   // Generate form type-aware CSS classes (early, before any returns)
   // Conversational forms are rendered by this component rather than by
@@ -386,6 +404,7 @@ export default function ConversationalFormRenderer({
                 }
               : null
           );
+          clearDraft();
           setSubmitSuccess(true);
           setValues({});
           setCurrentIndex(0);
@@ -405,7 +424,7 @@ export default function ConversationalFormRenderer({
         setSubmitting(false);
       }
     },
-    [formId, values, leafPaths, preview, customOnSubmit, hiddenFields, spamToken, spamTokens, waitForMinimum]
+    [formId, values, leafPaths, preview, customOnSubmit, hiddenFields, spamToken, spamTokens, waitForMinimum, clearDraft]
   );
 
   const handleSubmit = useCallback(
