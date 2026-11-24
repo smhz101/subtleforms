@@ -68,7 +68,7 @@ export default function FormPicker({ forms, loading, failed, value, onChange }) 
 			{empty && (
 				<p>
 					{__('No published forms yet.', 'subtleforms')}{' '}
-					<a href='admin.php?page=subtleforms#/forms/new'>
+					<a href='admin.php?page=subtleforms-new-form'>
 						{__('Create a form', 'subtleforms')}
 					</a>
 				</p>
