@@ -1473,9 +1473,12 @@ final class FormsApi {
 				if ( $resolved['ready'] && $this->captchaManager ) {
 					$html = $this->captchaManager->widgetFor( $resolved['provider'], $resolved['site_key'] );
 				}
-				$field['config']['captchaHtml']     = $html;
-				$field['config']['captchaWarning']  = '' === $html ? $resolved['warning'] : '';
-				$field['config']['providerName']    = $provider;
+				// The setup message is written for the site owner, so only a user
+				// who can manage the plugin gets it. Visitors get an empty string.
+				$field['config']['captchaHtml']    = $html;
+				$field['config']['captchaReady']   = (bool) $resolved['ready'];
+				$field['config']['captchaWarning'] = ( '' === $html && current_user_can( 'manage_options' ) ) ? $resolved['warning'] : '';
+				$field['config']['providerName']   = $provider;
 			}
 
 			if ( ! empty( $field['fields'] ) && is_array( $field['fields'] ) ) {

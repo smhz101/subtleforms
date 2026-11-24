@@ -132,6 +132,7 @@ function FormBuilderInner({
   const {
     createSuccessNotice,
     createErrorNotice,
+    createWarningNotice,
     removeNotice,
     SUCCESS_NOTICE_ID,
     ERROR_NOTICE_ID,
@@ -193,6 +194,7 @@ function FormBuilderInner({
     notices: {
       createSuccessNotice,
       createErrorNotice,
+      createWarningNotice,
       removeNotice,
       SUCCESS_NOTICE_ID,
       ERROR_NOTICE_ID,

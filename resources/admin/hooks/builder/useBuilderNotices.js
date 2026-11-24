@@ -8,7 +8,7 @@ import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 
 export default function useBuilderNotices() {
-  const { createSuccessNotice, createErrorNotice, removeNotice } = useDispatch(noticesStore);
+  const { createSuccessNotice, createErrorNotice, createWarningNotice, removeNotice } = useDispatch(noticesStore);
 
   const SUCCESS_NOTICE_ID = 'subtleforms-form-save-success';
   const ERROR_NOTICE_ID = 'subtleforms-form-save-error';
@@ -16,6 +16,7 @@ export default function useBuilderNotices() {
   return {
     createSuccessNotice,
     createErrorNotice,
+    createWarningNotice,
     removeNotice,
     SUCCESS_NOTICE_ID,
     ERROR_NOTICE_ID,

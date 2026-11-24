@@ -24,6 +24,7 @@ import { BUILDER_ACTIONS } from '../hooks/useBuilderReducer';
 import { clearFormETag } from '../data/apiClient';
 import { withOwnMetadata } from '../utils/schemaCopy';
 import { describeSaveError } from '../utils/saveErrors';
+import { unconfiguredCaptchaFields } from '../../shared/captchaReady';
 
 /**
  * Payload for a save that the server refused because the form changed since
@@ -89,6 +90,7 @@ export default function useBuilderOrchestrator({
 	const {
 		createSuccessNotice,
 		createErrorNotice,
+		createWarningNotice,
 		removeNotice,
 		SUCCESS_NOTICE_ID,
 		ERROR_NOTICE_ID,
@@ -486,7 +488,27 @@ export default function useBuilderOrchestrator({
 				onSaved?.(detail);
 
 				removeNotice(ERROR_NOTICE_ID);
-				if (!auto) {
+				if (
+					!auto &&
+					targetStatus === 'published' &&
+					createWarningNotice &&
+					unconfiguredCaptchaFields(enrichedSchema.fields).length > 0
+				) {
+					// Published, but a CAPTCHA with no keys is skipped on the live
+					// form. A warning, not an error: publishing is not blocked.
+					createWarningNotice(
+						__(
+							'Published. The CAPTCHA field has no keys, so it is skipped until you add them in Settings, Security & privacy.',
+							'subtleforms'
+						),
+						{
+							id: SUCCESS_NOTICE_ID,
+							isDismissible: true,
+							type: 'snackbar',
+							actions: [],
+						}
+					);
+				} else if (!auto) {
 					createSuccessNotice(
 						targetStatus === 'published'
 							? __('Form published', 'subtleforms')
@@ -534,6 +556,7 @@ export default function useBuilderOrchestrator({
 			removeNotice,
 			createSuccessNotice,
 			createErrorNotice,
+			createWarningNotice,
 			onSaved,
 			SUCCESS_NOTICE_ID,
 			ERROR_NOTICE_ID,

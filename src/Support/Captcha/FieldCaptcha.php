@@ -48,7 +48,7 @@ final class FieldCaptcha {
 			$secret = self::global_key( $settings, $provider, 'secret_key' );
 		}
 		$ready   = '' !== $provider && '' !== $site && '' !== $secret;
-		$warning = $ready ? '' : __( 'This CAPTCHA is not set up yet. Add a site key and a secret key, or turn the provider on in Settings.', 'subtleforms' );
+		$warning = $ready ? '' : __( 'This CAPTCHA is not set up yet, so it is skipped and visitors can still send the form. Add a site key and a secret key in Settings, Security & privacy. Only site admins see this message.', 'subtleforms' );
 		return array(
 			'provider' => $provider,
 			'site_key' => $site,

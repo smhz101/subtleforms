@@ -890,6 +890,21 @@
 		align-items: center;
 		color: var(--sf-gray-400);
 	}
+
+	// No keys: the live form skips this check (#142).
+	&__status--warning {
+		color: var(--sf-warning);
+		font-style: normal;
+
+		.sf-captcha-preview__status-icon {
+			color: var(--sf-warning);
+		}
+
+		a {
+			color: inherit;
+			text-decoration: underline;
+		}
+	}
 }
 // Country Field
 .sf-country-field {
