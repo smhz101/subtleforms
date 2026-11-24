@@ -890,12 +890,19 @@ const SubmissionsTable = forwardRef(
                     icon: <Icon.StarOff size={16} />,
                     onClick: (ids) => handleBulkMarkStatus(ids, 'unstar'),
                   },
-                  {
-                    key: 'spam',
-                    label: __('Mark as spam', 'subtleforms'),
-                    icon: <Icon.ShieldAlert size={16} />,
-                    onClick: (ids) => handleBulkMarkStatus(ids, 'spam'),
-                  },
+                  statusFilter === 'spam'
+                    ? {
+                        key: 'not-spam',
+                        label: __('Not spam', 'subtleforms'),
+                        icon: <Icon.Undo size={16} />,
+                        onClick: (ids) => handleBulkMarkStatus(ids, 'restore'),
+                      }
+                    : {
+                        key: 'spam',
+                        label: __('Mark as spam', 'subtleforms'),
+                        icon: <Icon.ShieldAlert size={16} />,
+                        onClick: (ids) => handleBulkMarkStatus(ids, 'spam'),
+                      },
                   {
                     key: 'export',
                     label: __('Export selected (CSV)', 'subtleforms'),

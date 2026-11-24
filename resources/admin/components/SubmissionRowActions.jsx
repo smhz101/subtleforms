@@ -46,6 +46,13 @@ export default function SubmissionRowActions({ submission, hardDelete, onView, o
         className={clsx('sf-submissions-table__flag-btn', isFlagged && 'is-flagged')}
         onClick={stop(() => onMark(submission.id, isFlagged ? 'restore' : 'flagged'))}
       />
+      {submission.status === 'spam' && (
+        <IconAction
+          label={__('Not spam', 'subtleforms')}
+          icon={<Icon.Undo size={16} />}
+          onClick={stop(() => onMark(submission.id, 'restore'))}
+        />
+      )}
       {submission.status === 'trash' ? (
         <>
           <IconAction
