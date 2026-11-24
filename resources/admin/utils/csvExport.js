@@ -19,7 +19,7 @@
 import { __ } from '@wordpress/i18n';
 import { apiPost } from './api';
 
-const FILTER_KEYS = ['form_id', 'status', 'processing_status', 'search', 'range', 'after'];
+const FILTER_KEYS = ['form_id', 'status', 'processing_status', 'search', 'range', 'after', 'field_key', 'field_value'];
 
 /**
  * The filters whose "all" is the dropdown's own "no filter" choice. A search

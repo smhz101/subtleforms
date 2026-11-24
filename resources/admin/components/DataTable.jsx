@@ -46,6 +46,9 @@ import './DataTable.scss';
  * @param {Function} props.onSelectionChange - Callback when selection changes (newSelectedItems)
  * @param {Array} props.bulkActions - Array of bulk actions [{ label, onClick, isDestructive, icon, inMenu }].
  *   An action with an icon is an icon-only button with a tooltip; `inMenu` moves it to the More menu.
+ * @param {boolean} props.allMatching - Every entry that matches the view is selected, not only this page
+ * @param {Function|null} props.onSelectAllMatching - Select every entry that matches the view (shows the link when the page is fully selected and there are more)
+ * @param {Function|null} props.onClearAllMatching - Clear the "all matching" selection
  * @param {Function|null} props.rowClassName - Optional function to get additional classes for row (row)
  * @param {boolean} props.compact - Draw each row as a compact two-line item (renderCompactRow) instead of a
  *   table row, for a narrow list pane. The footer is compact too.
@@ -150,6 +153,45 @@ function BulkBar({ count, actions, selectedItems, onClear, children }) {
           {__('Clear', 'subtleforms')}
         </Button>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Offers to select every entry that matches the view, once the whole page is
+ * selected. A status region so a screen reader hears the change.
+ */
+function MatchBar({ pageCount, total, allMatching, onSelectAll, onClear }) {
+  const number = Number(total).toLocaleString();
+  return (
+    <div className='sf-data-table__match-bar' role='status'>
+      {allMatching ? (
+        <>
+          {sprintf(
+            /* translators: %s: number of entries, with thousands separators */
+            __('All %s entries that match this view are selected.', 'subtleforms'),
+            number
+          )}{' '}
+          <Button variant='link' onClick={onClear}>
+            {__('Clear selection', 'subtleforms')}
+          </Button>
+        </>
+      ) : (
+        <>
+          {sprintf(
+            /* translators: %d: number of entries on this page */
+            __('All %d entries on this page are selected.', 'subtleforms'),
+            pageCount
+          )}{' '}
+          <Button variant='link' onClick={onSelectAll}>
+            {sprintf(
+              /* translators: %s: number of entries, with thousands separators */
+              __('Select all %s entries that match this view.', 'subtleforms'),
+              number
+            )}
+          </Button>
+        </>
+      )}
     </div>
   );
 }
@@ -299,6 +341,9 @@ const DataTable = memo(function DataTable({
   selectedItems = [],
   onSelectionChange = () => {},
   bulkActions = [],
+  allMatching = false,
+  onSelectAllMatching = null,
+  onClearAllMatching = null,
   rowClassName = null,
   compact = false,
   renderCompactRow = null,
@@ -435,13 +480,27 @@ const DataTable = memo(function DataTable({
   const someSelected =
     data.some((item) => selectedItems.includes(item.id)) && !allSelected;
 
+  // The match bar shows once the whole page is selected and more entries match.
+  const matchBar =
+    selectable && onSelectAllMatching && ((allSelected && totalItems > data.length) || allMatching) ? (
+      <MatchBar
+        pageCount={data.length}
+        total={totalItems}
+        allMatching={allMatching}
+        onSelectAll={onSelectAllMatching}
+        onClear={onClearAllMatching}
+      />
+    ) : null;
+  const selectedCount = allMatching ? totalItems : selectedItems.length;
+
   if (compact && renderCompactRow) {
     const sortable = columns.filter((column) => column.sortable);
     return (
       <div className='sf-data-table sf-data-table--compact'>
         {selectable && selectedItems.length > 0 ? (
+          <>
           <BulkBar
-            count={selectedItems.length}
+            count={selectedCount}
             actions={bulkActions}
             selectedItems={selectedItems}
             onClear={() => onSelectionChange([])}>
@@ -453,6 +512,8 @@ const DataTable = memo(function DataTable({
               aria-label={__('Select all', 'subtleforms')}
             />
           </BulkBar>
+          {matchBar}
+          </>
         ) : (
           <div className='sf-data-table__compact-head'>
             {selectable && (
@@ -539,12 +600,15 @@ const DataTable = memo(function DataTable({
     <div className='sf-data-table'>
       {/* Bulk Actions Bar */}
       {selectable && selectedItems.length > 0 && (
-        <BulkBar
-          count={selectedItems.length}
-          actions={bulkActions}
-          selectedItems={selectedItems}
-          onClear={() => onSelectionChange([])}
-        />
+        <>
+          <BulkBar
+            count={selectedCount}
+            actions={bulkActions}
+            selectedItems={selectedItems}
+            onClear={() => onSelectionChange([])}
+          />
+          {matchBar}
+        </>
       )}
 
       {/* Table - Scrollable */}

@@ -484,6 +484,126 @@ final class SubmissionsRepository {
 	}
 
 	/**
+	 * Entries by id in one query, in the shape find() returns them.
+	 *
+	 * @param int[]       $ids    Entry ids.
+	 * @param string|null $status Pass 'trash' to read entries in the Trash instead of the listed ones.
+	 * @return array[] Rows keyed by id.
+	 */
+	private function rowsById( array $ids, ?string $status = null ): array {
+		$rows = array();
+		// Every stored entry (spam and flagged too), then the Trash is told apart here.
+		foreach ( $this->findAll( array( 'ids' => $ids, 'include' => 'all', 'limit' => count( $ids ), 'orderby' => 'id', 'order' => 'ASC' ) ) as $row ) {
+			if ( ( self::TRASH === ( $row['status'] ?? '' ) ) === ( self::TRASH === $status ) ) {
+				$rows[ (int) $row['id'] ] = $row;
+			}
+		}
+		return $rows;
+	}
+
+	/**
+	 * Run one UPDATE for a batch of ids. $set is SQL built here from constants
+	 * and prepared values only.
+	 *
+	 * @param string $set    SET clause, already prepared.
+	 * @param int[]  $ids    Entry ids.
+	 * @param string $extra  Extra AND condition (constant SQL), or empty.
+	 */
+	private function updateBatch( string $set, array $ids, string $extra = '' ): void {
+		global $wpdb;
+		$in = implode( ',', array_map( 'intval', $ids ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled, ids are cast to int, $set is prepared.
+		$wpdb->query( "UPDATE {$this->table} SET {$set} WHERE id IN ({$in}) {$extra}" );
+	}
+
+	/**
+	 * Set the read or starred flag on a batch of entries with one UPDATE
+	 * (2.10.0). Entries in the Trash are left alone, as in update(). Each
+	 * changed entry still fires subtleforms/submission/updated.
+	 *
+	 * @param int[] $ids Entry ids (up to 500).
+	 * @param array $set is_read and/or starred.
+	 * @return int[] Ids that were changed.
+	 */
+	public function bulkSetFlags( array $ids, array $set ): array {
+		global $wpdb;
+		$rows  = $this->rowsById( $ids );
+		$parts = array();
+		$new   = array();
+		foreach ( array( 'is_read', 'starred' ) as $column ) {
+			if ( isset( $set[ $column ] ) ) {
+				$new[ $column ] = $set[ $column ] ? 1 : 0;
+				$parts[]        = $column . ' = ' . $new[ $column ];
+			}
+		}
+		if ( ! $rows || ! $parts ) {
+			return array();
+		}
+		$this->updateBatch( implode( ', ', $parts ), array_keys( $rows ) );
+		foreach ( $rows as $id => $row ) {
+			do_action( 'subtleforms/submission/updated', $id, array_merge( $row, $new ) );
+		}
+		return array_keys( $rows );
+	}
+
+	/**
+	 * Move a batch of entries to the Trash with one UPDATE (2.10.0). Each one
+	 * fires subtleforms/submission/trashed with its row from before.
+	 *
+	 * @param int[] $ids Entry ids (up to 500).
+	 * @return int[] Ids that were moved.
+	 */
+	public function bulkTrash( array $ids ): array {
+		global $wpdb;
+		$rows = $this->rowsById( $ids );
+		if ( ! $rows ) {
+			return array();
+		}
+		$this->updateBatch(
+			$wpdb->prepare( "trashed_from = COALESCE( status, '' ), status = %s, trashed_at = %s", self::TRASH, current_time( 'mysql', true ) ),
+			array_keys( $rows ),
+			"AND ( status IS NULL OR status <> 'trash' )"
+		);
+		foreach ( $rows as $id => $row ) {
+			do_action( 'subtleforms/submission/trashed', $id, $row );
+		}
+		return array_keys( $rows );
+	}
+
+	/**
+	 * Restore a batch of entries from the Trash with one UPDATE (2.10.0). Each
+	 * one fires subtleforms/submission/untrashed.
+	 *
+	 * @param int[] $ids Entry ids (up to 500).
+	 * @return int[] Ids that were restored.
+	 */
+	public function bulkUntrash( array $ids ): array {
+		$rows = $this->rowsById( $ids, self::TRASH );
+		if ( ! $rows ) {
+			return array();
+		}
+		$this->updateBatch(
+			"status = CASE WHEN trashed_from IS NULL OR trashed_from IN ( '', 'trash' ) THEN 'completed' ELSE trashed_from END, trashed_from = NULL, trashed_at = NULL",
+			array_keys( $rows ),
+			"AND status = 'trash'"
+		);
+		foreach ( $rows as $id => $row ) {
+			$previous = (string) ( $row['trashed_from'] ?? '' );
+			$status   = ( '' === $previous || self::TRASH === $previous ) ? 'completed' : $previous;
+			do_action( 'subtleforms/submission/untrashed', $id, $status, $row );
+		}
+		return array_keys( $rows );
+	}
+
+	/**
+	 * Make the cached counts stale. Bulk changes call this once at the end
+	 * instead of once per entry.
+	 */
+	public function flushCountsCache(): void {
+		$this->invalidate_count_cache( 0 );
+	}
+
+	/**
 	 * Permanently delete entries that have been in the Trash longer than
 	 * $days days, with their files and logs (daily cron, 2.3.1).
 	 *
@@ -634,11 +754,13 @@ final class SubmissionsRepository {
 	}
 
 	/**
-	 * Count submissions.
+	 * The WHERE clause and its values for the list filters, shared by count()
+	 * and findIds() so they always match the same entries.
+	 *
+	 * @param array $args form_id, status, is_read, starred, search, after, field_key, field_value, ids, max_id.
+	 * @return array{0: string, 1: array} WHERE clause (or empty) and the values to prepare.
 	 */
-	public function count( array $args = array() ): int {
-		global $wpdb;
-
+	private function listWhere( array $args ): array {
 		$defaults = array(
 			'form_id'     => null,
 			'status'      => null,
@@ -699,6 +821,34 @@ final class SubmissionsRepository {
 		}
 
 		$whereClause = ! empty( $where ) ? 'WHERE ' . implode( ' AND ', $where ) : '';
+
+		return array( $whereClause, $params );
+	}
+
+	/**
+	 * Ids of the entries that match the filters, oldest id first, with no
+	 * paging and nothing else read (bulk "match" mode, 2.10.0).
+	 *
+	 * @param array $args Same filters as count().
+	 * @return int[]
+	 */
+	public function findIds( array $args = array() ): array {
+		global $wpdb;
+		list( $whereClause, $params ) = $this->listWhere( $args );
+		$sql = "SELECT id FROM {$this->table} {$whereClause} ORDER BY id ASC";
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $sql built from $wpdb->prefix table name; values are prepared.
+		$ids = $params ? $wpdb->get_col( $wpdb->prepare( $sql, ...$params ) ) : $wpdb->get_col( $sql );
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		return array_map( 'intval', (array) $ids );
+	}
+
+	/**
+	 * Count submissions.
+	 */
+	public function count( array $args = array() ): int {
+		global $wpdb;
+
+		list( $whereClause, $params ) = $this->listWhere( $args );
 
 		$sql = "SELECT COUNT(*) FROM {$this->table} {$whereClause}";
 
