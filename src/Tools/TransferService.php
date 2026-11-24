@@ -468,8 +468,9 @@ final class TransferService {
 			$batch = $this->submissions->findByForm(
 				$formId,
 				array(
-					'limit'  => 200,
-					'offset' => $offset,
+					'limit'   => 200,
+					'offset'  => $offset,
+					'include' => 'all',
 				)
 			);
 			if ( ! $batch ) {

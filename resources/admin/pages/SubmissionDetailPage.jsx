@@ -13,6 +13,7 @@ import {
   TextareaControl,
   __experimentalConfirmDialog as ConfirmDialog,
 } from '@wordpress/components';
+import { dispatch } from '@wordpress/data';
 import { useNavigate } from 'react-router-dom';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import AdminShell from '../components/AdminShell';
@@ -566,6 +567,22 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
       setUpdating(false);
     }
   };
+  // Not spam: the bulk route's restore puts the entry back in the inbox.
+  const handleNotSpam = async () => {
+    setUpdating(true);
+    try {
+      await apiClient.post('/submissions/bulk', { ids: [submission.id], action: 'restore' });
+      const after = { ...submission, status: 'completed' };
+      setSubmission(after);
+      onEntryUpdated?.(submission, after);
+      dispatch('core/notices')?.createSuccessNotice?.(__('Moved to the inbox.', 'subtleforms'), {
+        type: 'snackbar',
+      });
+    } catch (err) {
+      setError(__('The entry could not be moved. Please try again.', 'subtleforms'));
+    }
+    setUpdating(false);
+  };
   const handleRestore = async () => {
     setUpdating(true);
     try {
@@ -847,6 +864,16 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
             disabled={ updating }
             onClick={ handleRestore }>
             { __( 'Restore', 'subtleforms' ) }
+          </Button>
+        ) }
+        { submission.status === 'spam' && (
+          <Button
+            size='compact'
+            variant='secondary'
+            icon={ <Icon.Undo size={ 16 } /> }
+            disabled={ updating }
+            onClick={ handleNotSpam }>
+            { __( 'Not spam', 'subtleforms' ) }
           </Button>
         ) }
         <Button

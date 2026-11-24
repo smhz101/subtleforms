@@ -45,6 +45,7 @@ final class ExportTabs133Test extends TestCase {
 	 *   a: unread, starred       b: unread           c: read, starred
 	 *   d: read                  e: read, spam       f: unread, spam, starred
 	 *   g: unread, trash
+	 * Spam shows only in the Spam tab (issue 131).
 	 */
 	private function seed(): void {
 		global $wpdb;
@@ -113,18 +114,18 @@ final class ExportTabs133Test extends TestCase {
 
 	public function test_export_on_the_starred_tab_has_exactly_the_starred_entries(): void {
 		$this->seed();
-		$this->assertSame( array( 'a', 'c', 'f' ), $this->exported( array( 'status' => 'starred' ) ) );
+		$this->assertSame( array( 'a', 'c' ), $this->exported( array( 'status' => 'starred' ) ) );
 	}
 
 	public function test_export_on_the_unread_tab_has_exactly_the_unread_entries(): void {
 		$this->seed();
-		$this->assertSame( array( 'a', 'b', 'f' ), $this->exported( array( 'status' => 'unread' ) ) );
-		$this->assertSame( array( 'a', 'b', 'f' ), $this->exported( array( 'status' => 'new' ) ), 'the older "new" tab is Unread' );
+		$this->assertSame( array( 'a', 'b' ), $this->exported( array( 'status' => 'unread' ) ) );
+		$this->assertSame( array( 'a', 'b' ), $this->exported( array( 'status' => 'new' ) ), 'the older "new" tab is Unread' );
 	}
 
 	public function test_export_on_the_read_tab_has_exactly_the_read_entries(): void {
 		$this->seed();
-		$this->assertSame( array( 'c', 'd', 'e' ), $this->exported( array( 'status' => 'read' ) ) );
+		$this->assertSame( array( 'c', 'd' ), $this->exported( array( 'status' => 'read' ) ) );
 	}
 
 	public function test_export_on_the_spam_tab_has_the_spam_entries(): void {
@@ -134,14 +135,14 @@ final class ExportTabs133Test extends TestCase {
 
 	public function test_a_search_on_the_starred_tab_is_the_intersection(): void {
 		$this->seed();
-		$this->assertSame( array( 'a', 'c', 'f' ), $this->exported( array( 'status' => 'starred', 'search' => 'Khan' ) ) );
+		$this->assertSame( array( 'a', 'c' ), $this->exported( array( 'status' => 'starred', 'search' => 'Khan' ) ) );
 		$this->assertSame( array( 'a' ), $this->exported( array( 'status' => 'starred', 'search' => 'Ali' ) ) );
-		$this->assertSame( array( 'a', 'f' ), $this->exported( array( 'status' => 'unread', 'search' => 'Khan' ) ) );
+		$this->assertSame( array( 'a' ), $this->exported( array( 'status' => 'unread', 'search' => 'Khan' ) ) );
 	}
 
 	public function test_all_and_the_trash_tab_leave_the_trash_out(): void {
 		$this->seed();
-		$live = array( 'a', 'b', 'c', 'd', 'e', 'f' );
+		$live = array( 'a', 'b', 'c', 'd' );
 		$this->assertSame( $live, $this->exported( array() ) );
 		$this->assertSame( $live, $this->exported( array( 'status' => 'all' ) ) );
 		$this->assertSame( $live, $this->exported( array( 'status' => 'trash' ) ), 'entries in the Trash are never exported' );
@@ -151,24 +152,24 @@ final class ExportTabs133Test extends TestCase {
 		$this->seed();
 		$this->assertSame( array( 'e', 'f' ), $this->exported( array( 'processing_status' => 'spam' ) ) );
 		$this->assertSame( array( 'a', 'b', 'c', 'd' ), $this->exported( array( 'processing_status' => 'completed' ) ) );
-		$this->assertSame( array( 'a', 'c', 'f' ), $this->exported( array( 'status' => 'starred', 'processing_status' => 'completed' ) ), 'a tab other than All ignores it' );
+		$this->assertSame( array( 'a', 'c' ), $this->exported( array( 'status' => 'starred', 'processing_status' => 'completed' ) ), 'a tab other than All ignores it' );
 		// A status that is not a tab is a processing status (how the export was asked before).
 		$this->assertSame( array( 'a', 'b', 'c', 'd' ), $this->exported( array( 'status' => 'completed' ) ) );
 	}
 
 	public function test_the_list_returns_the_same_rows_for_each_tab(): void {
 		$this->seed();
-		$this->assertSame( array( 'a', 'b', 'c', 'd', 'e', 'f' ), $this->listed( array() ) );
-		$this->assertSame( array( 'a', 'c', 'f' ), $this->listed( array( 'status' => 'starred' ) ) );
-		$this->assertSame( array( 'a', 'b', 'f' ), $this->listed( array( 'status' => 'unread' ) ) );
-		$this->assertSame( array( 'a', 'b', 'f' ), $this->listed( array( 'status' => 'new' ) ) );
-		$this->assertSame( array( 'c', 'd', 'e' ), $this->listed( array( 'status' => 'read' ) ) );
+		$this->assertSame( array( 'a', 'b', 'c', 'd' ), $this->listed( array() ) );
+		$this->assertSame( array( 'a', 'c' ), $this->listed( array( 'status' => 'starred' ) ) );
+		$this->assertSame( array( 'a', 'b' ), $this->listed( array( 'status' => 'unread' ) ) );
+		$this->assertSame( array( 'a', 'b' ), $this->listed( array( 'status' => 'new' ) ) );
+		$this->assertSame( array( 'c', 'd' ), $this->listed( array( 'status' => 'read' ) ) );
 		$this->assertSame( array( 'e', 'f' ), $this->listed( array( 'status' => 'spam' ) ) );
 		$this->assertSame( array( 'g' ), $this->listed( array( 'status' => 'trash' ) ) );
-		$this->assertSame( array( 'a', 'c', 'f' ), $this->listed( array( 'status' => 'starred', 'search' => 'Khan' ) ) );
+		$this->assertSame( array( 'a', 'c' ), $this->listed( array( 'status' => 'starred', 'search' => 'Khan' ) ) );
 		$this->assertSame( array( 'a', 'b', 'c', 'd' ), $this->listed( array( 'processing_status' => 'completed' ) ) );
-		$this->assertSame( array( 'a', 'c', 'f' ), $this->listed( array( 'status' => 'starred', 'processing_status' => 'completed' ) ), 'the processing status is for the All tab only' );
-		$this->assertSame( array( 'a', 'b', 'c', 'd', 'e', 'f' ), $this->listed( array( 'status' => 'nonsense' ) ), 'an unknown tab is All' );
+		$this->assertSame( array( 'a', 'c' ), $this->listed( array( 'status' => 'starred', 'processing_status' => 'completed' ) ), 'the processing status is for the All tab only' );
+		$this->assertSame( array( 'a', 'b', 'c', 'd' ), $this->listed( array( 'status' => 'nonsense' ) ), 'an unknown tab is All' );
 	}
 
 	public function test_the_list_and_the_export_agree_on_every_tab(): void {
