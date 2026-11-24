@@ -36,6 +36,7 @@ export default function ConversationalFormRenderer({
   schema,
   formId,
   preview = false,
+  instance = 1,
   onSubmit: customOnSubmit = null,
   spamToken = '',
   spamMinSeconds = 0,
@@ -565,7 +566,7 @@ export default function ConversationalFormRenderer({
 
         <div className='subtleforms-field-wrapper'>
           {currentField && (
-            <FormContext.Provider value={{ formId, preview, fieldDefaults }}>
+            <FormContext.Provider value={{ formId, preview, fieldDefaults, instance }}>
               <FieldRenderer
                 field={currentField}
                 fieldPath={fieldKey}

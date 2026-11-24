@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from '@wordpress/element';
+import { useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef } from '@wordpress/element';
 import { __, sprintf, _n } from '@wordpress/i18n';
 import FieldRenderer from './FieldRenderer';
 import StepNavigation from './StepNavigation';
@@ -19,6 +19,7 @@ import { formFieldDefaults, formHasRequiredFields, requiredIndicatorMark } from 
 import { debug } from '../../shared/debug';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { FormContext } from './fields/contexts';
+import { claimInstance, releaseInstance } from '../utils/formInstance';
 import { revealField } from '../utils/revealField';
 import { getFormWrappers } from '../../shared/extend';
 import { lazyField, loadFieldsFor, fieldsReadyFor } from './fields/lazyFields';
@@ -122,6 +123,20 @@ export default function FormRenderer({
     []
   );
   const honeypotName = `sf_hp_${honeypotSuffix}`;
+  // Which copy of this form is on the page: 1 for the first, 2 for the next.
+  // The first render always uses copy 1 (the plain ids). A layout effect then
+  // claims the real number and, for a later copy, renders again before the
+  // browser paints. React runs the cleanup of a removed copy before the layout
+  // effects of a new one in the same commit, so a copy swapped for a fresh mount
+  // of the same form gets 1 again. The builder canvas and Preview show one copy
+  // and are drawn again on edits, so they never claim a number (formInstance.js).
+  const [instance, setInstance] = useState(1);
+  useLayoutEffect(() => {
+    if (preview) return undefined;
+    const n = claimInstance(formId);
+    setInstance(n);
+    return () => releaseInstance(formId, n);
+  }, [formId, preview]);
   const honeypotId = `subtleforms-hp-${formId}-${honeypotSuffix}`;
 
   // Load schema (skip if preloaded)
@@ -602,8 +617,8 @@ export default function FormRenderer({
   // survives a step change (their fields are drawn again then).
   const panelState = useRef(new Map()).current;
   const formContext = useMemo(
-    () => ({ formId, preview, fieldDefaults, panelState }),
-    [formId, preview, fieldDefaults, panelState]
+    () => ({ formId, preview, fieldDefaults, panelState, instance }),
+    [formId, preview, fieldDefaults, panelState, instance]
   );
 
   // On a multi-step form, show the first step that has a field in error.
@@ -1105,6 +1120,7 @@ export default function FormRenderer({
         schema={schema}
         formId={formId}
         preview={preview}
+        instance={instance}
         onSubmit={customOnSubmit}
         spamToken={spamToken}
         spamMinSeconds={spamMinSeconds}

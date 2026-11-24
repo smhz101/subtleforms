@@ -10,7 +10,9 @@
  * which all mount the same renderer.
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useContext, useEffect, useRef, useState } from '@wordpress/element';
+import { FormContext } from './contexts';
+import { repeaterDomId } from '../../utils/formInstance';
 import { getIn } from '../../utils/valuePaths';
 import { repeaterLimits } from '../../utils/fieldValidation';
 import { collectDefaultValues } from '../../utils/defaults';
@@ -45,7 +47,8 @@ export default function RepeaterField({
   const groups = Array.isArray(stored) ? stored : [];
   const count = groups.length;
   const buttonLabel = config.buttonLabel || __('Add another', 'subtleforms');
-  const baseId = `subtleforms-repeater-${String(path).replace(/[^a-zA-Z0-9\-_]/g, '-')}`;
+  const { instance = 1 } = useContext(FormContext) || {};
+  const baseId = repeaterDomId(path, instance);
   const error = errors?.[path];
 
   // Stable keys per group, so removing a middle group never hands its inputs

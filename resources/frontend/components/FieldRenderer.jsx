@@ -5,6 +5,7 @@ import { consentParts } from '../../shared/consentLabel';
 import { formatUsPhone, isCompleteUsPhone } from '../../shared/phoneFormat';
 import { passwordStrength } from '../../shared/passwordStrength';
 import { columnFields } from '../utils/columnFields';
+import { fieldDomId } from '../utils/formInstance';
 import { getCompositeEmptyParts, isAnswerable } from '../utils/fieldValidation';
 import { compositeParts, partValue } from '../../shared/compositeParts';
 import { rangeSliderSeed } from '../utils/defaults';
@@ -71,7 +72,7 @@ export default function FieldRenderer({
   // width never hides required, options, placeholder or help text (bug 1).
   const config = fieldConfig(field);
   // Label visibility and help text placement, with the form's defaults (2.3.2).
-  const { fieldDefaults, preview: isPreview } = useContext(FormContext) || {};
+  const { fieldDefaults, preview: isPreview, instance = 1 } = useContext(FormContext) || {};
   const display = fieldDisplay(field, fieldDefaults);
   const requiredMark = requiredIndicatorMark(fieldDefaults);
 
@@ -87,10 +88,7 @@ export default function FieldRenderer({
 
   // Accessible input id
   // A saved node can lack a key (RCOMPAT-02); never let that stop the form.
-  const inputId = `subtleforms-field-${String(resolvedPath || field.key || field.id || '').replace(
-    /[^a-zA-Z0-9\-_:.]/g,
-    '-'
-  )}`;
+  const inputId = fieldDomId(resolvedPath || field.key || field.id || '', instance);
 
   const error = errors?.[resolvedPath];
 
