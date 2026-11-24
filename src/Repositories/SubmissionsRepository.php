@@ -32,6 +32,8 @@ final class SubmissionsRepository {
 	/**
 	 * SQL condition that leaves trashed entries out. `status` may be NULL.
 	 */
+	public const NOT_PREVIEW = "( status IS NULL OR status <> 'preview' )";
+
 	public const NOT_TRASHED = "( status IS NULL OR status <> 'trash' )";
 
 	/**
@@ -64,10 +66,15 @@ final class SubmissionsRepository {
 	 * Trash only shows in the Trash, Preview entries only when asked for by
 	 * name, and everything else shows real entries.
 	 *
-	 * @param string|null $status Status filter, if any.
+	 * @param string|null $status  Status filter, if any.
+	 * @param string|null $include 'all' to see every stored entry except previews.
 	 * @return string[]
 	 */
-	public static function visibilityConditions( $status ): array {
+	public static function visibilityConditions( $status, $include = null ): array {
+		// Every stored entry but previews: spam, flagged and trashed too.
+		if ( 'all' === $include ) {
+			return array( self::NOT_PREVIEW );
+		}
 		if ( self::TRASH === $status ) {
 			return array();
 		}
@@ -121,6 +128,7 @@ final class SubmissionsRepository {
 
 		$defaults = array(
 			'status'  => null,
+			'include' => null,
 			'limit'   => 20,
 			'offset'  => 0,
 			'orderby' => 'created_at',
@@ -136,7 +144,7 @@ final class SubmissionsRepository {
 			$where[]  = 'status = %s';
 			$params[] = $args['status'];
 		}
-		$where = array_merge( $where, self::visibilityConditions( $args['status'] ) );
+		$where = array_merge( $where, self::visibilityConditions( $args['status'], $args['include'] ?? null ) );
 
 		$where_clause = 'WHERE ' . implode( ' AND ', $where );
 
@@ -517,6 +525,7 @@ final class SubmissionsRepository {
 			'field_value' => null,
 			'starred'     => null,
 			'ids'         => null,
+			'include'     => null,
 			'max_id'      => null,
 			'cursor'      => null,
 			'limit'       => 20,
@@ -559,7 +568,7 @@ final class SubmissionsRepository {
 		}
 		// Entries in the Trash only show in the Trash (2.3.1), and Preview
 		// entries only when asked for.
-		$where = array_merge( $where, self::visibilityConditions( $args['status'] ) );
+		$where = array_merge( $where, self::visibilityConditions( $args['status'], $args['include'] ?? null ) );
 
 		if ( $args['is_read'] !== null ) {
 			$where[]  = 'is_read = %d';
@@ -637,6 +646,7 @@ final class SubmissionsRepository {
 			'field_value' => null,
 			'starred'     => null,
 			'ids'         => null,
+			'include'     => null,
 			'max_id'      => null,
 		);
 
@@ -661,7 +671,7 @@ final class SubmissionsRepository {
 		}
 		// Entries in the Trash only show in the Trash (2.3.1), and Preview
 		// entries only when asked for.
-		$where = array_merge( $where, self::visibilityConditions( $args['status'] ) );
+		$where = array_merge( $where, self::visibilityConditions( $args['status'], $args['include'] ?? null ) );
 
 		if ( isset( $args['is_read'] ) && $args['is_read'] !== null ) {
 			$where[]  = 'is_read = %d';

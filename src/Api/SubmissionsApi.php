@@ -1139,9 +1139,13 @@ final class SubmissionsApi {
 		);
 
 		$args = array_filter( $args, fn( $value ) => $value !== null && $value !== '' );
-		// Entries in the Trash are never exported (2.3.1).
+		// Entries in the Trash are never exported (2.3.1), except by explicit ids.
 		if ( ( $args['status'] ?? '' ) === SubmissionsRepository::TRASH ) {
 			unset( $args['status'] );
+		}
+		// Export by ids returns exactly those entries, spam, flagged and trashed included.
+		if ( ! empty( $args['ids'] ) ) {
+			$args['include'] = 'all';
 		}
 
 		// Every matching entry is exported, however many there are (2.8.1: the
