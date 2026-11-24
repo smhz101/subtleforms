@@ -26,10 +26,10 @@ final class FrontEndSpeed260Test extends TestCase {
 				array( 'type' => 'text', 'key' => 'name' ),
 				array( 'type' => 'email', 'key' => 'email' ),
 				array( 'type' => 'phone', 'key' => 'phone' ),
-				array( 'type' => 'select', 'key' => 'topic' ),
 			),
 		);
 		$this->assertSame( array(), FrontendAssets::fieldGroups( $schema ) );
+		$this->assertSame( array( 'choice' ), FrontendAssets::fieldGroups( array( 'fields' => array( array( 'type' => 'select' ), array( 'type' => 'dropdown' ) ) ) ) );
 		$this->assertSame( array(), FrontendAssets::fieldGroups( null ) );
 	}
 
