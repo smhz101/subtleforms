@@ -145,6 +145,8 @@ final class Activator {
 		Settings::afterActivate( $fresh_install );
 		// New installs keep their forms and entries if the plugin is deleted.
 		\SubtleForms\Support\UninstallDefaults::afterActivate( $fresh_install );
+		// Check on the next admin page load whether uploaded files are private.
+		\SubtleForms\Uploads\UploadsExposure::scheduleCheck();
 
 		// Schedule privacy cron jobs
 		if ( ! wp_next_scheduled( 'subtleforms_daily_cleanup' ) ) {
