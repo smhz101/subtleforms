@@ -108,12 +108,6 @@ final class FieldValidator {
 	);
 
 	/**
-	 * Calling codes whose national numbers keep their leading 0 (Italy, San
-	 * Marino and the Vatican).
-	 */
-	private const KEEPS_TRUNK_ZERO = array( '39', '378' );
-
-	/**
 	 * Validate submission payload against schema fields.
 	 *
 	 * @param array<string,mixed> $schema
@@ -1404,30 +1398,23 @@ final class FieldValidator {
 	}
 
 	/**
-	 * An international number as "+{code} {digits}", the shape the phone
-	 * field stores, with the trunk 0 dropped (FLD2-07). A number that is
-	 * only a calling code becomes empty. Other values are returned as they were.
+	 * A phone answer as the visitor typed it: trimmed, runs of whitespace
+	 * collapsed to one space. A number that is only a calling code becomes
+	 * empty. Digit counts are checked by validation, not here.
 	 *
 	 * @param string $value Value.
 	 */
 	public static function normalizePhone( string $value ): string {
-		$value = trim( $value );
-		if ( ! str_starts_with( $value, '+' ) || ! preg_match( '/^[\d\s\-\+\(\)]+$/', $value ) ) {
-			return $value;
+		$value = trim( (string) preg_replace( '/\s+/u', ' ', $value ) );
+		if ( str_starts_with( $value, '+' ) && preg_match( '/^[\d\s\-\+\(\)\.]+$/', $value ) ) {
+			$value  = trim( (string) preg_replace( '/\s+/', ' ', str_replace( '.', ' ', $value ) ) );
+			$digits = (string) preg_replace( '/\D/', '', $value );
+			$dial   = self::dialCodeOf( $digits );
+			if ( null !== $dial && $digits === $dial ) {
+				return '';
+			}
 		}
-		$digits = (string) preg_replace( '/\D/', '', $value );
-		$dial   = self::dialCodeOf( $digits );
-		if ( null === $dial ) {
-			return $value;
-		}
-		$national = substr( $digits, strlen( $dial ) );
-		if ( '' === $national ) {
-			return '';
-		}
-		if ( ! in_array( $dial, self::KEEPS_TRUNK_ZERO, true ) ) {
-			$national = (string) preg_replace( '/^0/', '', $national );
-		}
-		return '+' . $dial . ' ' . $national;
+		return $value;
 	}
 
 	/**

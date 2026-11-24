@@ -24,12 +24,24 @@ describe('phone countries', () => {
     expect(filterPhoneCountries('zz')).toHaveLength(0);
   });
 
+  test('dotted input becomes spaces and passes validation', () => {
+    const us = phoneCountries().find((c) => c.code === 'US');
+    const value = joinPhoneValue(us, '415.555.0100');
+    expect(value).toBe('+1 415 555 0100');
+    expect(isValidInternational(value)).toBe(true);
+  });
+
   test('joins and splits a country code and national number', () => {
     const us = phoneCountries().find((c) => c.code === 'US');
-    expect(joinPhoneValue(us, '(415) 555-0100')).toBe('+1 4155550100');
+    expect(joinPhoneValue(us, '(415) 555-0100')).toBe('+1 (415) 555-0100');
     const parts = splitPhoneValue('+44 2079460958', 'GB');
     expect(parts.country.code).toBe('GB');
     expect(parts.national).toBe('2079460958');
+  });
+
+  test('spaces the visitor typed are kept', () => {
+    expect(joinPhoneValue(phoneCountry('PK'), '300 1234567')).toBe('+92 300 1234567');
+    expect(splitPhoneValue('+92 300 1234567', 'PK').national).toBe('300 1234567');
   });
 
   test('an empty value keeps the default country and no number', () => {
@@ -41,8 +53,8 @@ describe('phone countries', () => {
 
   // FLD2-07
   test('the trunk 0 is dropped, except where it is part of the number', () => {
-    expect(joinPhoneValue(phoneCountry('GB'), '07700 900123')).toBe('+44 7700900123');
-    expect(joinPhoneValue(phoneCountry('IT'), '06 1234 5678')).toBe('+39 0612345678');
+    expect(joinPhoneValue(phoneCountry('GB'), '07700 900123')).toBe('+44 7700 900123');
+    expect(joinPhoneValue(phoneCountry('IT'), '06 1234 5678')).toBe('+39 06 1234 5678');
   });
 
   test('a pasted international number carries its own country', () => {
@@ -51,7 +63,7 @@ describe('phone countries', () => {
     expect(looksInternational('0300 1234567')).toBe(false);
     const parts = splitPhoneValue('+44 20 7946 0958', 'PK');
     expect(parts.country.code).toBe('GB');
-    expect(joinPhoneValue(parts.country, parts.national)).toBe('+44 2079460958');
+    expect(joinPhoneValue(parts.country, parts.national)).toBe('+44 20 7946 0958');
   });
 
   test('a Canadian area code reads as Canada, others as the US', () => {
