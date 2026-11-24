@@ -16,10 +16,10 @@ describe('fieldGroups', () => {
       fields: [
         { type: 'text', key: 'name' },
         { type: 'phone', key: 'phone' },
-        { type: 'select', key: 'topic' },
       ],
     };
     expect([...fieldGroups(schema)]).toEqual([]);
+    expect([...fieldGroups({ fields: [{ type: 'select' }, { type: 'dropdown' }] })]).toEqual(['choice']);
     expect([...fieldGroups(null)]).toEqual([]);
   });
 
@@ -71,6 +71,14 @@ describe('loading', () => {
     const first = await mod.loadGroup('date');
     expect(await mod.loadGroup('date')).toBe(first);
     expect(await mod.loadGroup('nope')).toBeNull();
+  });
+
+  test('a form with a dropdown waits for the choice group', async () => {
+    const mod = require('./lazyFields');
+    const schema = { fields: [{ type: 'select' }] };
+    expect(mod.fieldsReadyFor(schema)).toBe(false);
+    await mod.loadFieldsFor(schema);
+    expect(mod.fieldsReadyFor(schema)).toBe(true);
   });
 
   test('a field whose code is not here yet shows the loading line, then the field', async () => {
