@@ -99,4 +99,36 @@ final class SpamOutOfCounts131Test extends TestCase {
 		$this->assertSame( 0, $counts['spam'] );
 		$this->assertSame( 1, $counts['trash'] );
 	}
+
+	public function test_export_by_ids_returns_spam_entries(): void {
+		$form = $this->form();
+		$a    = $this->entry( $form, array( 'status' => 'spam' ) );
+		$b    = $this->entry( $form, array( 'status' => 'spam' ) );
+		$this->entry( $form );
+
+		$caps = new \SubtleForms\Support\Capabilities( array_merge( \SubtleForms\Support\Capabilities::defaults(), array( 'submissions.export' => true, 'api.read' => true, 'api.write' => true ) ) );
+		$api  = new \SubtleForms\Api\SubmissionsApi( new \SubtleForms\Repositories\FormsRepository(), $this->repo, new \SubtleForms\Support\FeatureGate( $caps ) );
+		$h    = fopen( 'php://temp', 'r+' );
+		$this->assertSame( 2, $api->streamCsv( $form, array( 'status' => 'spam', 'ids' => array( $a, $b ) ), $h ) );
+		fclose( $h );
+		$h = fopen( 'php://temp', 'r+' );
+		$this->assertSame( 2, $api->streamCsv( $form, array( 'ids' => array( $a, $b ) ), $h ), 'Ids alone return exactly those entries.' );
+		fclose( $h );
+	}
+
+	public function test_importing_a_package_with_spam_twice_adds_nothing(): void {
+		$form    = $this->form();
+		$service = new \SubtleForms\Tools\TransferService( new \SubtleForms\Repositories\FormsRepository(), $this->repo );
+		$package = \SubtleForms\Tools\TransferPackage::submissions(
+			array( 'id' => 1, 'title' => 'T' ),
+			array(
+				array( 'entry_id' => 7, 'status' => 'spam', 'created_at' => '2026-01-01 00:00:00', 'payload' => array( 'name' => 'Spammer' ) ),
+				array( 'entry_id' => 8, 'status' => 'completed', 'created_at' => '2026-01-02 00:00:00', 'payload' => array( 'name' => 'Ada' ) ),
+			)
+		);
+		$this->assertSame( 2, $service->importSubmissions( $form, $package )['imported'] );
+		$again = $service->importSubmissions( $form, $package );
+		$this->assertSame( 0, $again['imported'], wp_json_encode( $again ) );
+		$this->assertSame( 1, $this->repo->count( array( 'form_id' => $form, 'status' => 'spam' ) ) );
+	}
 }
