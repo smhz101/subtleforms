@@ -143,6 +143,7 @@ final class Plugin {
 		\SubtleForms\Security\RateLimitStore::register();
 		\SubtleForms\Support\SpamDefaults::register();
 		\SubtleForms\Support\ImportOffer::register();
+		\SubtleForms\Support\UninstallDefaults::register();
 		\SubtleForms\Support\ThemeStyles::register();
 		\SubtleForms\Admin\ThemePreviewAssets::register();
 

@@ -143,6 +143,8 @@ final class Activator {
 		\SubtleForms\Support\ImportOffer::afterActivate( $fresh_install );
 		// New installs send the submitter auto-reply; existing sites keep their choice.
 		Settings::afterActivate( $fresh_install );
+		// New installs keep their forms and entries if the plugin is deleted.
+		\SubtleForms\Support\UninstallDefaults::afterActivate( $fresh_install );
 
 		// Schedule privacy cron jobs
 		if ( ! wp_next_scheduled( 'subtleforms_daily_cleanup' ) ) {
