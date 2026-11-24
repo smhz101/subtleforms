@@ -169,7 +169,7 @@ final class ExportTabs133Test extends TestCase {
 		$this->assertSame( array( 'a', 'c' ), $this->listed( array( 'status' => 'starred', 'search' => 'Khan' ) ) );
 		$this->assertSame( array( 'a', 'b', 'c', 'd' ), $this->listed( array( 'processing_status' => 'completed' ) ) );
 		$this->assertSame( array( 'a', 'c' ), $this->listed( array( 'status' => 'starred', 'processing_status' => 'completed' ) ), 'the processing status is for the All tab only' );
-		$this->assertSame( array( 'a', 'b', 'c', 'd', 'e', 'f' ), $this->listed( array( 'status' => 'nonsense' ) ), 'an unknown tab is All' );
+		$this->assertSame( array( 'a', 'b', 'c', 'd' ), $this->listed( array( 'status' => 'nonsense' ) ), 'an unknown tab is All' );
 	}
 
 	public function test_the_list_and_the_export_agree_on_every_tab(): void {
