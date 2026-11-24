@@ -561,6 +561,7 @@ $pipe-status-colors: (
 		margin: 0;
 
 		&--error { color: var(--sf-danger); font-weight: 500; }
+		&--preview { white-space: pre-line; }
 	}
 }
 
