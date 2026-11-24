@@ -112,4 +112,33 @@ final class BulkMatch143Test extends TestCase {
 		$this->assertSame( 1, $res['data']['data']['affected'] );
 		$this->assertSame( 1, $res['data']['data']['count'] );
 	}
+
+	public function test_a_column_action_on_1200_entries_runs_three_updates() {
+		global $wpdb;
+		$id = $this->form();
+		$this->submit( $id, array( 'name' => 'Ada' ) );
+		$table = $wpdb->prefix . 'subtleforms_submissions';
+		// 1 entry doubled 11 times is 2,048; keep 1,200 of them.
+		for ( $i = 0; $i < 11; $i++ ) {
+			$wpdb->query( $wpdb->prepare( "INSERT INTO {$table} (form_id, schema_version, payload, meta, status, is_read, starred, created_at) SELECT form_id, schema_version, payload, meta, status, is_read, starred, created_at FROM {$table} WHERE form_id = %d", $id ) );
+		}
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE form_id = %d AND id NOT IN (SELECT id FROM (SELECT id FROM {$table} WHERE form_id = %d ORDER BY id ASC LIMIT 1200) keep)", $id, $id ) );
+
+		$updates = 0;
+		$count   = function ( $sql ) use ( &$updates, $table ) {
+			if ( 0 === strpos( ltrim( $sql ), 'UPDATE ' . $table ) ) {
+				++$updates;
+			}
+			return $sql;
+		};
+		add_filter( 'query', $count );
+		$this->asAdmin();
+		$res = $this->bulk( array( 'match' => true, 'action' => 'read', 'form_id' => $id ) );
+		remove_filter( 'query', $count );
+
+		$this->assertSame( 200, $res['status'], wp_json_encode( $res['data'] ) );
+		$this->assertSame( 1200, $res['data']['data']['affected'] );
+		$this->assertSame( 3, $updates, 'one UPDATE per batch of 500' );
+		$this->assertSame( 1200, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE form_id = %d AND is_read = 1", $id ) ) );
+	}
 }

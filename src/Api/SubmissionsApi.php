@@ -699,16 +699,8 @@ final class SubmissionsApi {
 			if ( $total > self::BULK_MATCH_MAX ) {
 				return ApiResponse::error( 'subtleforms_bulk_too_many', __( 'That is more than 20,000 entries. Narrow the view and try again.', 'subtleforms' ), 400 );
 			}
-			// Resolve every id before changing any entry, so a change that moves
-			// entries out of the view cannot shift the pages being read.
-			$ids = array();
-			for ( $offset = 0; $offset < $total; $offset += self::BULK_BATCH ) {
-				$page = $this->submissionsRepo->findAll( array_merge( $args, array( 'limit' => self::BULK_BATCH, 'offset' => $offset, 'orderby' => 'id', 'order' => 'ASC' ) ) );
-				if ( ! $page ) {
-					break;
-				}
-				$ids = array_merge( $ids, array_map( 'intval', array_column( $page, 'id' ) ) );
-			}
+			// Resolve every id before changing any entry, with an ids-only query.
+			$ids = $this->submissionsRepo->findIds( $args );
 		} elseif ( count( $ids ) > self::BULK_BATCH ) {
 			return ApiResponse::bad_request( __( 'Select 500 entries or fewer at a time.', 'subtleforms' ) );
 		}
@@ -717,6 +709,7 @@ final class SubmissionsApi {
 		foreach ( array_chunk( $ids, self::BULK_BATCH ) as $batch ) {
 			$done = array_merge( $done, $this->applyBulk( $batch, $action ) );
 		}
+		$this->submissionsRepo->flushCountsCache();
 
 		return ApiResponse::success(
 			array(
@@ -728,6 +721,12 @@ final class SubmissionsApi {
 		);
 	}
 
+	/** The delete behavior setting: soft (Trash) or delete. */
+	private function deleteBehavior(): string {
+		$settings = get_option( 'subtleforms_settings', array() );
+		return is_array( $settings ) ? (string) ( $settings['delete_behavior'] ?? 'soft' ) : 'soft';
+	}
+
 	/**
 	 * Apply one bulk action to up to BULK_BATCH entries.
 	 *
@@ -736,6 +735,23 @@ final class SubmissionsApi {
 	 * @return int[] The ids that changed.
 	 */
 	private function applyBulk( array $ids, string $action ): array {
+		// Plain column changes run as one UPDATE per batch.
+		$flags = array(
+			'read'   => array( 'is_read' => 1 ),
+			'unread' => array( 'is_read' => 0 ),
+			'star'   => array( 'starred' => 1 ),
+			'unstar' => array( 'starred' => 0 ),
+		);
+		if ( isset( $flags[ $action ] ) ) {
+			return $this->submissionsRepo->bulkSetFlags( $ids, $flags[ $action ] );
+		}
+		if ( 'untrash' === $action ) {
+			return $this->submissionsRepo->bulkUntrash( $ids );
+		}
+		if ( 'trash' === $action && \SubtleForms\Support\Settings::deletionMode( $this->deleteBehavior(), false ) !== 'delete' ) {
+			return $this->submissionsRepo->bulkTrash( $ids );
+		}
+
 		$changes = array(
 			'read'    => array( 'is_read' => 1 ),
 			'unread'  => array( 'is_read' => 0 ),
@@ -755,9 +771,7 @@ final class SubmissionsApi {
 			$inTrash = ( $row['status'] ?? '' ) === SubmissionsRepository::TRASH;
 			try {
 				if ( $action === 'trash' ) {
-					$settings = get_option( 'subtleforms_settings', array() );
-					$behavior = is_array( $settings ) ? (string) ( $settings['delete_behavior'] ?? 'soft' ) : 'soft';
-					if ( \SubtleForms\Support\Settings::deletionMode( $behavior, false ) === 'delete' ) {
+					if ( \SubtleForms\Support\Settings::deletionMode( $this->deleteBehavior(), false ) === 'delete' ) {
 						if ( $this->submissionsRepo->delete( $id ) ) {
 							( new \SubtleForms\Repositories\LogsRepository() )->deleteBySubmission( $id );
 							$done[] = $id;
