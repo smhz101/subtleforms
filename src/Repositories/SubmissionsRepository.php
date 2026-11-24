@@ -492,8 +492,11 @@ final class SubmissionsRepository {
 	 */
 	private function rowsById( array $ids, ?string $status = null ): array {
 		$rows = array();
-		foreach ( $this->findAll( array( 'ids' => $ids, 'status' => $status, 'limit' => count( $ids ), 'orderby' => 'id', 'order' => 'ASC' ) ) as $row ) {
-			$rows[ (int) $row['id'] ] = $row;
+		// Every stored entry (spam and flagged too), then the Trash is told apart here.
+		foreach ( $this->findAll( array( 'ids' => $ids, 'include' => 'all', 'limit' => count( $ids ), 'orderby' => 'id', 'order' => 'ASC' ) ) as $row ) {
+			if ( ( self::TRASH === ( $row['status'] ?? '' ) ) === ( self::TRASH === $status ) ) {
+				$rows[ (int) $row['id'] ] = $row;
+			}
 		}
 		return $rows;
 	}

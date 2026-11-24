@@ -141,4 +141,31 @@ final class BulkMatch143Test extends TestCase {
 		$this->assertSame( 3, $updates, 'one UPDATE per batch of 500' );
 		$this->assertSame( 1200, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE form_id = %d AND is_read = 1", $id ) ) );
 	}
+
+	public function test_match_reads_search_like_the_list_does() {
+		$id = $this->form();
+		$this->submit( $id, array( 'name' => 'Ada Lovelace' ) );
+		$this->submit( $id, array( 'name' => 'Grace Hopper' ) );
+		$this->asAdmin();
+
+		$request = new \WP_REST_Request( 'GET', '/subtleforms/v1/submissions' );
+		$request->set_query_params( array( 'form_id' => $id, 'search' => 'Ada  Lovelace' ) );
+		$listed = rest_do_request( $request )->get_data();
+		$this->assertCount( 1, $listed['data'] );
+
+		$res = $this->bulk( array( 'match' => true, 'action' => 'star', 'form_id' => $id, 'search' => 'Ada  Lovelace' ) );
+		$this->assertSame( 200, $res['status'], wp_json_encode( $res['data'] ) );
+		$this->assertSame( 1, $res['data']['data']['affected'] );
+	}
+
+	public function test_view_export_keeps_the_field_value_filter() {
+		$id = $this->form();
+		$this->submit( $id, array( 'name' => 'Ada Lovelace' ) );
+		$this->submit( $id, array( 'name' => 'Grace Hopper' ) );
+		$caps = new \SubtleForms\Support\Capabilities( array_merge( \SubtleForms\Support\Capabilities::defaults(), array( 'submissions.export' => true, 'api.read' => true, 'api.write' => true ) ) );
+		$api  = new \SubtleForms\Api\SubmissionsApi( new \SubtleForms\Repositories\FormsRepository(), new SubmissionsRepository(), new \SubtleForms\Support\FeatureGate( $caps ) );
+		$h    = fopen( 'php://temp', 'r+' );
+		$this->assertSame( 1, $api->streamCsv( $id, array( 'field_value' => 'Ada' ), $h ) );
+		fclose( $h );
+	}
 }

@@ -111,7 +111,7 @@ final class SubmissionsApi {
 				'methods'             => 'GET',
 				'callback'            => array( $this, 'get_all_submissions' ),
 				'permission_callback' => array( $this, 'check_read_permission' ),
-				'args'                => array(
+				'args'                => self::listFilterSchema() + array(
 					'page'     => array(
 						'type'              => 'integer',
 						'default'           => 1,
@@ -121,18 +121,6 @@ final class SubmissionsApi {
 						'type'              => 'integer',
 						'default'           => 20,
 						'sanitize_callback' => 'absint',
-					),
-					'form_id'  => array(
-						'type'              => 'integer',
-						'sanitize_callback' => 'absint',
-					),
-					'status'   => array(
-						'type'              => 'string',
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-					'search'   => array(
-						'type'              => 'string',
-						'sanitize_callback' => 'sanitize_text_field',
 					),
 					'orderby'  => array(
 						'type'              => 'string',
@@ -144,28 +132,6 @@ final class SubmissionsApi {
 						'default'           => 'DESC',
 						'enum'              => array( 'ASC', 'DESC' ),
 						'sanitize_callback' => static function ( $value ) { return strtoupper( $value ); },
-					),
-					'after'      => array(
-						'type'              => 'string',
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-					'range'      => array(
-						'type'              => 'string',
-						'enum'              => array( 'today', '7days', '30days', '3months' ),
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-					'field_key'  => array(
-						'type'              => 'string',
-						'sanitize_callback' => 'sanitize_key',
-					),
-					'field_value' => array(
-						'type'              => 'string',
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-					'processing_status' => array(
-						'type'              => 'string',
-						'enum'              => array( 'completed', 'failed', 'payment_pending', 'processing', 'preview' ),
-						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 			)
@@ -297,7 +263,7 @@ final class SubmissionsApi {
 				'methods'             => 'POST',
 				'callback'            => array( $this, 'bulk_submissions' ),
 				'permission_callback' => array( $this, 'check_write_permission' ),
-				'args'                => array(
+				'args'                => self::listFilterSchema() + array(
 					'ids'    => array(
 						'type'  => 'array',
 						'items' => array( 'type' => 'integer' ),
@@ -429,6 +395,52 @@ final class SubmissionsApi {
 			$total,
 			( $args['offset'] / $args['limit'] ) + 1,
 			$args['limit']
+		);
+	}
+
+	/**
+	 * Route arguments for the list filters, with their sanitizers. The list
+	 * (GET /submissions) and the bulk route share them, so a bulk "match" action
+	 * reads the filters exactly as the list does.
+	 *
+	 * @return array
+	 */
+	private static function listFilterSchema(): array {
+		return array(
+			'form_id'           => array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+			),
+			'status'            => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'search'            => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'after'             => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'range'             => array(
+				'type'              => 'string',
+				'enum'              => array( 'today', '7days', '30days', '3months' ),
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'field_key'         => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_key',
+			),
+			'field_value'       => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'processing_status' => array(
+				'type'              => 'string',
+				'enum'              => array( 'completed', 'failed', 'payment_pending', 'processing', 'preview' ),
+				'sanitize_callback' => 'sanitize_text_field',
+			),
 		);
 	}
 
@@ -1196,6 +1208,8 @@ final class SubmissionsApi {
 			'is_read' => $filters['is_read'],
 			'starred' => $filters['starred'],
 			'search'  => isset( $params['search'] ) ? Helpers::safe_sanitize_text( $params['search'] ) : null,
+			'field_key'   => isset( $params['field_key'] ) && is_string( $params['field_key'] ) ? sanitize_key( $params['field_key'] ) : null,
+			'field_value' => isset( $params['field_value'] ) && is_string( $params['field_value'] ) ? sanitize_text_field( $params['field_value'] ) : null,
 			'after'   => ReportQueries::rangeStartUtc( (string) ( $params['range'] ?? '' ) ) ?? ( isset( $params['after'] ) ? Helpers::safe_sanitize_text( $params['after'] ) : null ),
 			// Export selected (2.3.0).
 			'ids'     => isset( $params['ids'] ) && is_array( $params['ids'] ) ? array_map( 'absint', $params['ids'] ) : null,
@@ -1334,7 +1348,7 @@ final class SubmissionsApi {
 			$filters['ids'] = $ids;
 		} else {
 			$formId = isset( $source['form_id'] ) ? absint( $source['form_id'] ) : 0;
-			foreach ( array( 'status', 'processing_status', 'search', 'range', 'after' ) as $key ) {
+			foreach ( array( 'status', 'processing_status', 'search', 'range', 'after', 'field_key', 'field_value' ) as $key ) {
 				if ( isset( $source[ $key ] ) && is_string( $source[ $key ] ) ) {
 					$filters[ $key ] = sanitize_text_field( wp_unslash( $source[ $key ] ) );
 				}

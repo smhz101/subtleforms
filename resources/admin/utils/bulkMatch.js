@@ -12,6 +12,7 @@ export const MATCH_ACTIONS = {
   spam: 'spam',
   flagged: 'flagged',
   restore: 'untrash',
+  'not-spam': 'restore',
   trash: 'trash',
   delete: 'delete',
 };

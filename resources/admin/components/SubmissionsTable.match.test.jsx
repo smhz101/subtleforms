@@ -145,4 +145,16 @@ describe('select all matching (#143)', () => {
     await flush();
     expect(host.textContent).not.toContain('that match this view are selected.');
   });
+
+  test('the Spam tab offers Not spam in match mode and runs it without a confirm', async () => {
+    apiGet.mockResolvedValue(list(4991));
+    render({ statusFilter: 'spam' });
+    await flush();
+    await tickAll();
+    act(() => buttonByText(`Select all ${(4991).toLocaleString()} entries that match this view.`).click());
+    act(() => buttonByText('Not spam').click());
+    await flush();
+    expect(document.body.textContent).not.toContain('Apply this to');
+    expect(apiClient.post.mock.calls[0][1]).toEqual({ match: true, action: 'restore', status: 'spam' });
+  });
 });
