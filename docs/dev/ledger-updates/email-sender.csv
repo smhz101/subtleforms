@@ -1,3 +1,0 @@
-GH119-01,P2,Free 2.9.2,,Claude,new in 2.9.1,fixed,Free 2.9.2,GitHub issue #119 (2.9.1),Sender domain warning shows a false alarm on www sites,Compares hosts without www and allows subdomains.
-GH119-02,P2,Free 2.9.2,,Claude,new in 2.9.1,fixed,Free 2.9.2,GitHub issue #119 (2.9.1),{admin_email} merge tag ignores the plugin admin email setting,Uses the plugin setting and falls back to the WordPress option.
-GH119-03,P2,Free 2.9.2,,Claude,new in 2.9.1,fixed,Free 2.9.2,GitHub issue #119 (2.9.1),Form notifications panel does not say who mail comes from,"Shows the saved sender or the WordPress default, with a link to Settings."

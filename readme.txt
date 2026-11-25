@@ -4,7 +4,7 @@ Tags: form builder, contact form, multi-step form, conversational form, forms
 Requires at least: 6.6
 Tested up to: 7.2
 Requires PHP: 8.1
-Stable tag: 2.9.1
+Stable tag: 2.10.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -199,6 +199,44 @@ Each entry is sent as JSON only to the URL the administrator enters.
 
 == Changelog ==
 
+= 2.10.0 - 2026-11-25 =
+* New: Text fields such as Name and Company now tell browsers what they ask for, so autofill and password managers can fill them, and each field has an Autofill setting to choose or turn it off.
+* New: Dropdowns jump to the option you type, and lists with more than 15 options have a search box.
+* New: Site admins now see a short note where a form embed points to a missing or unpublished form, and visitors with JavaScript turned off see a message instead of an empty space.
+* New: Multi-step and conversational forms keep a visitor's answers and step if the page is reloaded, until the form is sent.
+* New: Bulk actions on Submissions can apply to every entry that matches the current view, not only the visible page.
+* Change: The builder warns when a Repeat container has no fields, since it shows nothing on the form.
+* Change: New sites now keep their forms and entries if SubtleForms is deleted (Settings, Advanced), and the Plugins screen says whether deleting will remove them. Existing sites keep their current choice.
+* Change: Spam entries no longer appear in All, Read and Unread or count toward the unread badge. They stay in the Spam tab, where Not spam moves them back.
+* Change: The builder warns about fields that are not shown on the form yet, such as Post Selection, and the Password field says the password is not saved.
+* Fix: A condition sent on a notification through the API is no longer dropped, and the entry log now says when a notification was sent without its conditions being checked because SubtleForms Pro is not active.
+* Fix: The Form filter on the Submissions screen now lists every form, not only the newest 20, and can be searched.
+* Fix: The SubtleForms block's form picker lists every published form, with search, and shows each form's id.
+* Fix: In the form builder, Cmd/Ctrl+Shift+Z and Ctrl+Y now redo the last undone change.
+* Fix: The Build, Settings, Entries and Preview tabs in the form builder keep their names for screen readers and show a tooltip when the window is too narrow for their text.
+* Fix: Conversational forms keep the Next button on screen on shorter windows, and after Enter the cursor is ready in the next question.
+* Fix: The entry panel shows the country name for a Country answer instead of its code.
+* Fix: Conditional logic rules that compare a date or time with greater than or less than now work; they used to never match.
+* Fix: The email step in the submission log now shows From, Reply-To, format and a readable text preview instead of cut-off HTML.
+* Fix: HTML notification emails now include a plain text version, which helps them stay out of spam folders.
+* Fix: The sender domain warning no longer fires on www sites, {admin_email} follows the admin email set in plugin settings, and the email notification editor shows who mail is sent from.
+* Fix: Exporting the entries of all forms now uses each field's label as the column heading instead of its internal key.
+* Fix: Export CSV now works on the Starred, Unread and Read tabs, and says so when there is nothing to export.
+* Fix: Forms set to inherit the theme style get comfortable padding and height on text boxes when the theme does not set any.
+* Fix: The Star button in the entry panel now shows when the entry is starred, and stays in step with the star in the list.
+* Fix: Phone answers are saved as the visitor typed them, with spaces kept, and a number typed with dots, such as 415.555.0100, is saved with spaces and passes validation.
+* Fix: Rich text toolbar buttons are named for screen readers by their labels alone, Checkboxes created through the API render as checkboxes, and the builder flags a Chained Select that has no options yet.
+* Fix: Entry dates in the list, the entry panel and its activity log now follow the time zone in Settings, General, so everyone sees the same time.
+* Fix: Export selected from the Spam tab now exports those entries, and importing a package twice no longer duplicates its spam entries.
+* Fix: Saving a form from a tab that was opened before someone else's save no longer overwrites their changes; the builder asks whether to reload or replace.
+* Fix: An auto-reply that is not sent because submitter emails are off is now logged as Skipped with the reason, and the notification editor warns about it; new sites start with submitter emails on.
+* Fix: A visitor who sends a form within the first seconds, for example after browser autofill, is no longer silently dropped by the spam time trap; the form waits a moment and sends.
+* Fix: A CAPTCHA field without keys no longer blocks every visitor; it is skipped until keys are added, and only site admins see the setup message.
+* Fix: Searching entries now finds answers written in Arabic, Urdu, Chinese, Cyrillic and other non-Latin scripts, including entries saved before this update.
+* Fix: A form placed twice on one page now gives each copy its own field ids, so labels and error links point at the right copy.
+* Fix: Opening an unread entry now lowers the Unread count straight away, and the entry leaves the Unread list when you close it.
+* Security: SubtleForms checks whether uploaded files can be opened from the web, for example on nginx, and shows the server rule to block them in Site Health and on SubtleForms screens.
+
 = 2.9.1 - 2026-11-16 =
 * Change: The Upgrade to Pro item in the admin menu and in the admin bar is a lime button that opens the Pro page on subtleforms.com in a new tab, and the separate Upgrade to Pro page is gone.
 * Fix: The SubtleForms block icon in the editor is the same size as the other block icons.
@@ -214,27 +252,12 @@ Each entry is sent as JSON only to the URL the administrator enters.
 * Fix: The field settings panel now shows a control's default until it is saved, shows placeholders on number settings, and disables a setting that an add-on marks as disabled.
 * Fix: The pickers on a form that uses the theme look (dropdown, country, address, date and time) now load their own small stylesheet, picker.css, so they no longer show up unstyled or twice next to the theme's own select. The stylesheet is only loaded for forms that have a picker. (#109)
 
-= 2.8.1 - 2026-11-09 =
-* New: HubSpot is built in: connect a HubSpot service key (a legacy private app access token also works) under Settings, Integrations, CRM, then switch HubSpot on for a form to create or update a contact for each entry, with field mapping, custom properties, a consent checkbox and a line in each entry's activity log with an Open in HubSpot link.
-* New: The SubtleForms menu shows the total number of entries as a short count (1k, 1.2k, 12k) with the full number as its tooltip.
-* Change: The admin bar icon lines up with the other items, the bubble keeps its place on hover, and the SubtleForms menu has an Upgrade to Pro item on free sites.
-* Change: Every connection screen (Mailchimp, Brevo, Kit, MailPoet, HubSpot and webhooks) now has numbered steps in plain words, and each step on another website links straight to that page; a rejected HubSpot key says to paste the new one.
-* Change: All notices in the admin follow WordPress styling: square corners, the core border colours and a white background.
-* Change: The "How to connect" steps on every service screen sit in an accordion that starts open until the service is connected, then closed, and remembers your choice.
-* Fix: Forms with AJAX off lost every entry: the classic post handler was only registered on REST requests (broken since 2.4.0). The block default is now AJAX on, so form blocks saved without an AJAX setting now submit with AJAX.
-* Fix: The New form page has the same space above its heading as the other screens.
-* Fix: A form post without AJAX from a logged-in visitor now carries the REST nonce; a post without a valid one is handled as a guest post, so a cross-site post cannot act as the logged-in user.
-* Fix: Behind Cloudflare each visitor now has their own rate limit: the visitor address from Cloudflare is used for requests that come from Cloudflare's published ranges without turning on a setting, and Security & privacy shows a dismissible notice when it sees Cloudflare in front of the site.
-* Fix: The CSV export includes every matching entry instead of stopping at the newest 10,000, and the answer now carries the number of entries exported.
-* Fix: The CSV export, Export selected included, is now sent as a file while it is written instead of being built in memory, so a very large form no longer runs out of memory, and a download that cannot start says why instead of failing silently.
-* Fix: Notification emails are no longer lost when WP-Cron runs late: the queued email waits in the options table until it is sent instead of a transient that expired after 6 hours, and an email whose stored copy is gone is built again from the saved entry.
-* Fix: A logged-in visitor whose page was open for a long time can send a form with the time trap again (the form retries once with a fresh token instead of repeating "Please send it again"), and a form with AJAX off no longer creates a second entry when Submit is clicked twice while the page is posting.
-* Fix: An answer with a "<" in it, such as "Budget <5000", is saved and emailed in full instead of being cut at that point, and an entry is no longer lost when the visitor's browser sends a User-Agent longer than 255 characters (Facebook and Instagram in-app browsers on iPhone).
-* Security: The Rich Text field now cleans its starting value with the same allowlist as typed text, so a value filled in from the block, a default or the page address can only show the allowed formatting and safe links.
-
 The full history is in changelog.txt in the plugin folder.
 
 == Upgrade Notice ==
+
+= 2.10.0 =
+Spam no longer counts in All, Read and Unread, bulk actions can cover every matching entry, answers survive a page reload, and a Site Health check flags uploaded files that can be opened from the web, for example on nginx. Recommended for everyone.
 
 = 2.9.0 =
 Adds Tabs and Accordion layout fields, new appearance themes and a typed date and time picker.
