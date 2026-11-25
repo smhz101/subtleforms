@@ -32,3 +32,12 @@ describe('notShownWarning (#140)', () => {
     expect(notShownWarning({ type: 'dropdown' })).toBe('');
   });
 });
+
+describe('fieldNote (#140)', () => {
+  const { fieldNote } = require('./fieldWarnings');
+  test('the Password field says the password is not saved; other types have no note', () => {
+    expect(fieldNote({ type: 'password' })).toBe('The password is not saved. Entries show "Password provided" instead.');
+    expect(fieldNote({ type: 'text' })).toBe('');
+    expect(fieldNote(null)).toBe('');
+  });
+});

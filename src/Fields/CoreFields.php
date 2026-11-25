@@ -391,7 +391,6 @@ final class CoreFields {
 						'type'  => 'text',
 						'name'  => 'label',
 						'label' => __( 'Label', 'subtleforms' ),
-						'help'  => __( 'The password is not saved. Entries show "Password provided" instead.', 'subtleforms' ),
 					),
 					array(
 						'type'  => 'text',

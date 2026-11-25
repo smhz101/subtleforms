@@ -37,3 +37,16 @@ export function notShownWarning(field) {
     'subtleforms'
   );
 }
+
+/**
+ * Plain note for a field type, shown in its settings (#140). Not a warning.
+ *
+ * @param {Object} field Schema node.
+ * @return {string} The note, or an empty string.
+ */
+export function fieldNote(field) {
+  if (field?.type !== 'password') {
+    return '';
+  }
+  return __('The password is not saved. Entries show "Password provided" instead.', 'subtleforms');
+}
