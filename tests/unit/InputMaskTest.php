@@ -329,4 +329,13 @@ final class InputMaskTest extends TestCase {
 		$this->assertSame( 'AB12', $this->stored( $letters, 'x-AB12' ) );
 		$this->assertNull( $this->error( $letters, 'AB12' ) );
 	}
+
+	/** #140: the Password field says its answer is not saved. */
+	public function test_password_field_explains_it_is_not_saved() {
+		$registry = new FieldRegistry();
+		CoreFields::register( $registry );
+		FieldSettings::decorateAll( $registry );
+		$controls = array_column( $registry->get( 'password' )->inspectorControls, null, 'name' );
+		$this->assertSame( 'The password is not saved. Entries show "Password provided" instead.', $controls['label']['help'] );
+	}
 }
