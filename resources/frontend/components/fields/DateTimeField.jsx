@@ -599,6 +599,9 @@ export default function DateTimeField({
   };
 
   const todayAllowed = !isDisabled(siteNow());
+  const nowClockMinutes = clockMinutes(nowRounded(minuteStep));
+  // "Now" is off when the current time, or today for an empty date, is not allowed.
+  const nowOff = isTimeOff(nowClockMinutes) || (mode === 'datetime' && !dateValue && !todayAllowed);
   const monthNames = Array.from({ length: 12 }, (_, month) => (
     new Intl.DateTimeFormat(locale, { month: 'short' }).format(new Date(2024, month, 1))
   ));
@@ -963,6 +966,8 @@ export default function DateTimeField({
                 <button
                   type='button'
                   className='subtleforms-picker__text-button'
+                  disabled={nowOff}
+                  title={nowOff ? __('The current time is outside the allowed range', 'subtleforms') : undefined}
                   onClick={() => {
                     const now = parseTime(nowRounded(minuteStep));
                     emitTime(now.hours, now.minutes);

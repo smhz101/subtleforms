@@ -51,4 +51,17 @@ describe('time menu', () => {
     expect(container.querySelector('[role="dialog"]')).toBeNull();
     unmount();
   });
+
+  test('Now is disabled when the current time is outside the allowed range', () => {
+    const { container, onChange, unmount } = setup({ minTime: '00:00', maxTime: '00:00' });
+    const now = button(container, 'Now');
+    const d = new Date();
+    const atMidnight = d.getHours() === 0 && d.getMinutes() === 0;
+    expect(now.disabled).toBe(!atMidnight);
+    act(() => now.click());
+    if (!atMidnight) {
+      expect(onChange).not.toHaveBeenCalled();
+    }
+    unmount();
+  });
 });

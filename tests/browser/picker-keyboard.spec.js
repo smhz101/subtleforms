@@ -63,9 +63,11 @@ test('the time picker is usable from the keyboard only', async ({ page }) => {
   await expect(trigger).toHaveValue('02:45');
   await page.screenshot({ path: `${SHOTS}/bugs-time-picker-keyboard-focus.png`, clip: await clipOf(page, trigger, dialog) });
   expect(await axeOpen(page)).toEqual([]);
-  // Tab order inside the dialog: hour, minute, Clear.
-  await page.keyboard.press('Tab');
-  await expect(page.getByRole('button', { name: 'Clear' })).toBeFocused();
+  // Tab order inside the dialog: hour, minute, Now, Clear, Done.
+  for (const name of ['Now', 'Clear', 'Done']) {
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('button', { name })).toBeFocused();
+  }
   await page.keyboard.press('Escape');
   await expect(dialog).toBeHidden();
   await expect(trigger).toBeFocused();
