@@ -173,6 +173,34 @@ describe('custom masks and storage', () => {
   });
 
   it('has the presets the server has', () => {
-    expect(Object.keys(PRESETS)).toEqual(['phone', 'date_dmy', 'date_mdy', 'date_ymd', 'time_24', 'zip_us', 'custom']);
+    expect(Object.keys(PRESETS)).toEqual(['phone', 'phone_us', 'phone_dash', 'phone_uk', 'phone_au', 'phone_in', 'phone_intl', 'date_dmy', 'date_mdy', 'date_ymd', 'time_24', 'zip_us', 'custom']);
+  });
+});
+
+describe('ready-made phone masks', () => {
+  const cases = {
+    phone_us: ['5550101234', '(555) 010-1234'],
+    phone_dash: ['5550101234', '555-010-1234'],
+    phone_uk: ['07700900123', '07700 900123'],
+    phone_au: ['0491570156', '0491 570 156'],
+    phone_in: ['9876543210', '98765 43210'],
+    phone_intl: ['445550101234', '+44 555 010 1234'],
+  };
+
+  it.each(Object.entries(cases))('%s formats a typed digit string and rejects an incomplete one', (key, [digits, shown]) => {
+    const mask = resolveMask({ inputMask: key });
+    expect(mask.kind).toBe('fixed');
+    const typed = editValue(mask, digits, digits.length).value;
+    expect(typed).toBe(shown);
+    expect(maskProblem(mask, typed)).toBe('');
+    expect(maskProblem(mask, typed.slice(0, -1))).toBe('format');
+    expect(maskProblem(mask, '')).toBe('');
+  });
+
+  it('saves digits only when asked', () => {
+    const mask = resolveMask({ inputMask: 'phone_us', maskStore: 'digits' });
+    expect(storedValue(mask, '(555) 010-1234')).toBe('5550101234');
+    expect(shownValue(mask, '5550101234')).toBe('(555) 010-1234');
+    expect(maskProblem(mask, '5550101234')).toBe('');
   });
 });

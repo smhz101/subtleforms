@@ -17,6 +17,12 @@ export { PHONE_MAX_DIGITS, sanitizePhone, phoneDigits };
 /* PRESETS_START */
 export const PRESETS = {
   phone: { patterns: [], kind: 'phone', example: '+1 555 010 1234' },
+  phone_us: { patterns: ['(999) 999-9999'], kind: 'fixed', example: '(555) 010-1234' },
+  phone_dash: { patterns: ['999-999-9999'], kind: 'fixed', example: '555-010-1234' },
+  phone_uk: { patterns: ['99999 999999'], kind: 'fixed', example: '07700 900123' },
+  phone_au: { patterns: ['9999 999 999'], kind: 'fixed', example: '0491 570 156' },
+  phone_in: { patterns: ['99999 99999'], kind: 'fixed', example: '98765 43210' },
+  phone_intl: { patterns: ['+99 999 999 9999'], kind: 'fixed', example: '+44 555 010 1234' },
   date_dmy: { patterns: ['99/99/9999'], kind: 'date', order: 'dmy', example: 'DD/MM/YYYY' },
   date_mdy: { patterns: ['99/99/9999'], kind: 'date', order: 'mdy', example: 'MM/DD/YYYY' },
   date_ymd: { patterns: ['9999-99-99'], kind: 'date', order: 'ymd', example: 'YYYY-MM-DD' },
@@ -235,7 +241,7 @@ export function resolveMask(config) {
     example: key === 'custom' ? pattern : preset.example,
     store,
     digitsOnly,
-    inputMode: key === 'phone' ? 'tel' : digitsOnly ? 'numeric' : 'text',
+    inputMode: key === 'phone' || preset.kind === 'fixed' ? 'tel' : digitsOnly ? 'numeric' : 'text',
   };
 }
 

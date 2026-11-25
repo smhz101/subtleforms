@@ -35,6 +35,12 @@ final class InputMask {
 	public static function presets(): array {
 		return array(
 			'phone'    => array( 'patterns' => array(), 'kind' => 'phone', 'example' => '+1 555 010 1234' ),
+			'phone_us'   => array( 'patterns' => array( '(999) 999-9999' ), 'kind' => 'fixed', 'example' => '(555) 010-1234' ),
+			'phone_dash' => array( 'patterns' => array( '999-999-9999' ), 'kind' => 'fixed', 'example' => '555-010-1234' ),
+			'phone_uk'   => array( 'patterns' => array( '99999 999999' ), 'kind' => 'fixed', 'example' => '07700 900123' ),
+			'phone_au'   => array( 'patterns' => array( '9999 999 999' ), 'kind' => 'fixed', 'example' => '0491 570 156' ),
+			'phone_in'   => array( 'patterns' => array( '99999 99999' ), 'kind' => 'fixed', 'example' => '98765 43210' ),
+			'phone_intl' => array( 'patterns' => array( '+99 999 999 9999' ), 'kind' => 'fixed', 'example' => '+44 555 010 1234' ),
 			'date_dmy' => array( 'patterns' => array( '99/99/9999' ), 'kind' => 'date', 'order' => 'dmy', 'example' => 'DD/MM/YYYY' ),
 			'date_mdy' => array( 'patterns' => array( '99/99/9999' ), 'kind' => 'date', 'order' => 'mdy', 'example' => 'MM/DD/YYYY' ),
 			'date_ymd' => array( 'patterns' => array( '9999-99-99' ), 'kind' => 'date', 'order' => 'ymd', 'example' => 'YYYY-MM-DD' ),
@@ -54,6 +60,12 @@ final class InputMask {
 		$labels = array(
 			''         => __( 'None', 'subtleforms' ),
 			'phone'    => __( 'Phone', 'subtleforms' ),
+			'phone_us'   => __( '(999) 999-9999 (US and Canada)', 'subtleforms' ),
+			'phone_dash' => __( '999-999-9999', 'subtleforms' ),
+			'phone_uk'   => __( '99999 999999 (UK)', 'subtleforms' ),
+			'phone_au'   => __( '9999 999 999 (Australia)', 'subtleforms' ),
+			'phone_in'   => __( '99999 99999 (India)', 'subtleforms' ),
+			'phone_intl' => __( '+99 999 999 9999 (international)', 'subtleforms' ),
 			'date_dmy' => __( 'Date DD/MM/YYYY', 'subtleforms' ),
 			'date_mdy' => __( 'Date MM/DD/YYYY', 'subtleforms' ),
 			'date_ymd' => __( 'Date YYYY-MM-DD', 'subtleforms' ),
@@ -61,14 +73,29 @@ final class InputMask {
 			'zip_us'   => __( 'Postcode or ZIP (US)', 'subtleforms' ),
 			'custom'   => __( 'Custom', 'subtleforms' ),
 		);
-		// A Phone field takes the phone mask only: its country list already
-		// supplies the dial code.
-		$keys = in_array( $type, array( 'phone', 'tel' ), true ) ? array( '', 'phone' ) : array_keys( $labels );
+		// A Phone field lists the phone masks and a custom pattern. Its country
+		// list can supply the dial code, so it has no date, time or ZIP masks.
+		$phone = in_array( $type, array( 'phone', 'tel' ), true );
+		if ( $phone ) {
+			$labels['phone'] = __( 'Automatic (by country)', 'subtleforms' );
+			$keys            = array( '', 'phone', 'phone_us', 'phone_dash', 'phone_uk', 'phone_au', 'phone_in', 'phone_intl', 'custom' );
+		} else {
+			$keys = array_values( array_diff( array_keys( $labels ), self::fixedKeys() ) );
+		}
 		$out = array();
 		foreach ( $keys as $key ) {
 			$out[] = array( 'value' => $key, 'label' => $labels[ $key ] );
 		}
 		return $out;
+	}
+
+	/**
+	 * Keys of the fixed-pattern phone masks (Phone and Tel fields only).
+	 *
+	 * @return string[]
+	 */
+	public static function fixedKeys(): array {
+		return array( 'phone_us', 'phone_dash', 'phone_uk', 'phone_au', 'phone_in', 'phone_intl' );
 	}
 
 	/**

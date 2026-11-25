@@ -322,7 +322,8 @@ final class FieldValidator {
 			if ( in_array( $type, array( 'text', 'number', 'phone', 'tel' ), true ) && is_string( $payload[ $key ] ) ) {
 				$mask = self::maskOf( $field );
 				if ( null !== $mask ) {
-					$payload[ $key ] = \SubtleForms\Fields\InputMask::normalize( $mask, $payload[ $key ] );
+					list( $dial, $rest ) = self::splitDial( $field, $mask, $payload[ $key ] );
+					$payload[ $key ]     = $dial . \SubtleForms\Fields\InputMask::normalize( $mask, $rest );
 				}
 			}
 		}
@@ -592,7 +593,7 @@ final class FieldValidator {
 			case 'tel':
 				$mask = self::maskOf( $field );
 				if ( null !== $mask ) {
-					$maskError = $this->validateMask( $value, $mask );
+					$maskError = $this->validateMask( is_string( $value ) ? self::splitDial( $field, $mask, $value )[1] : $value, $mask );
 					if ( $maskError ) {
 						return $maskError;
 					}
@@ -1185,6 +1186,23 @@ final class FieldValidator {
 		$pattern = self::attr( $field, 'maskPattern' );
 		$store   = self::attr( $field, 'maskStore' );
 		return \SubtleForms\Fields\InputMask::resolve( $key, is_string( $pattern ) ? $pattern : '', is_string( $store ) ? $store : 'typed' );
+	}
+
+	/**
+	 * Split the calling code the country picker adds ("+44 ") from the number
+	 * when a ready-made phone mask applies to the number only.
+	 *
+	 * @param array<string, mixed> $field Field.
+	 * @param array<string, mixed> $mask  From maskOf().
+	 * @param string               $value Answer.
+	 * @return array{0: string, 1: string} Calling code with a space, and the number.
+	 */
+	private static function splitDial( array $field, array $mask, string $value ): array {
+		$phone = in_array( $field['type'] ?? '', array( 'phone', 'tel' ), true );
+		if ( $phone && 'fixed' === $mask['kind'] && ! empty( self::attr( $field, 'enableCountryCode' ) ) && preg_match( '/^(\+\d{1,3} )(.*)$/s', $value, $m ) ) {
+			return array( $m[1], $m[2] );
+		}
+		return array( '', $value );
 	}
 
 	/**

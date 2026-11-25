@@ -275,7 +275,7 @@ class Schemas {
 				// Phone, Country and Address fields: draw a small flag beside each country (2.7.2).
 				'showFlags'    => 'optional|bool',
 				// Text, Number and Phone fields: input mask (2.8.0).
-				'inputMask'    => 'optional|string|in:,phone,date_dmy,date_mdy,date_ymd,time_24,zip_us,custom',
+				'inputMask'    => 'optional|string|in:,phone,phone_us,phone_dash,phone_uk,phone_au,phone_in,phone_intl,date_dmy,date_mdy,date_ymd,time_24,zip_us,custom',
 				'maskPattern'  => 'optional|string|max:64',
 				'maskStore'    => 'optional|string|in:typed,digits',
 				'attributes'   => 'optional|object',
