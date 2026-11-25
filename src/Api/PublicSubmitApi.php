@@ -1027,6 +1027,8 @@ final class PublicSubmitApi {
 			if ( \SubtleForms\Support\EntryValues::isSecret( $entry['field'] ) && array_key_exists( $entry['key'], $payload ) ) {
 				$payload[ $entry['key'] ] = \SubtleForms\Support\EntryValues::passwordForStorage( $payload[ $entry['key'] ], $entry['field'] );
 			}
+			// The confirmation is never kept, not even in the first write.
+			unset( $payload[ $entry['key'] . '_confirm' ] );
 		}
 		foreach ( $payload as $key => $value ) {
 			if ( self::COMPUTE_ERROR === $value ) {
@@ -1066,8 +1068,12 @@ final class PublicSubmitApi {
 		$passwordKeys = array();
 		self::collectFieldKeysOfType( $schema['fields'] ?? array(), 'password', $passwordKeys );
 		foreach ( $passwordKeys as $key ) {
-			if ( array_key_exists( $key, $rawValues ) && is_scalar( $rawValues[ $key ] ) ) {
-				$payload[ $key ] = (string) $rawValues[ $key ];
+			// The confirmation is compared with the password, so it is taken
+			// as typed too.
+			foreach ( array( $key, $key . '_confirm' ) as $name ) {
+				if ( array_key_exists( $name, $rawValues ) && is_scalar( $rawValues[ $name ] ) ) {
+					$payload[ $name ] = (string) $rawValues[ $name ];
+				}
 			}
 		}
 

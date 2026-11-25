@@ -467,7 +467,10 @@ final class FieldValidator {
 			if ( ! empty( $field['columns'] ) && is_array( $field['columns'] ) ) {
 				foreach ( $field['columns'] as $column ) {
 					if ( is_array( $column ) ) {
-						$this->flattenFields( $column, $map );
+						// A column is a list of fields or an object holding
+						// them under `fields` or `children`.
+						$list = isset( $column['fields'] ) && is_array( $column['fields'] ) ? $column['fields'] : ( isset( $column['children'] ) && is_array( $column['children'] ) ? $column['children'] : $column );
+						$this->flattenFields( $list, $map );
 					}
 				}
 			}

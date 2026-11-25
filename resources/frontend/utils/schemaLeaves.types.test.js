@@ -15,3 +15,14 @@ describe('answers that reach the server (2.2.1 bugs 14 and 15)', () => {
     expect(collectLeafInputPaths([{ key: 'k', type: 'qa_addon' }])).toEqual(['k']);
   });
 });
+
+describe('password confirmation (issue 190)', () => {
+  test('is sent with the answers when the field requires it, flat or under config', () => {
+    expect(collectLeafInputPaths([{ key: 'pw', type: 'password', requireConfirmation: true }])).toEqual(['pw', 'pw_confirm']);
+    expect(collectLeafInputPaths([{ key: 'pw', type: 'password', config: { requireConfirmation: true } }])).toEqual(['pw', 'pw_confirm']);
+  });
+
+  test('is not sent when the setting is off', () => {
+    expect(collectLeafInputPaths([{ key: 'pw', type: 'password' }])).toEqual(['pw']);
+  });
+});

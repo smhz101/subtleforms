@@ -442,12 +442,12 @@ final class CoreFields {
 					array(
 						'type'  => 'checkbox',
 						'name'  => 'strengthMeter',
-						'label' => __( 'Show Strength Meter', 'subtleforms' ),
+						'label' => __( 'Show strength meter', 'subtleforms' ),
 					),
 					array(
 						'type'  => 'checkbox',
 						'name'  => 'requireConfirmation',
-						'label' => __( 'Require Confirmation', 'subtleforms' ),
+						'label' => __( 'Require confirmation', 'subtleforms' ),
 					),
 					array(
 						'type'    => 'checkbox',

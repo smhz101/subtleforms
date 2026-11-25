@@ -74,3 +74,38 @@ describe('password rules checklist', () => {
     strong.done();
   });
 });
+
+describe('password confirmation (issue 190)', () => {
+  function renderWith(field, values, errors = {}) {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    act(() => {
+      root.render(<FieldRenderer field={field} values={values} onChange={() => {}} errors={errors} />);
+    });
+    return { container, done: () => { act(() => root.unmount()); container.remove(); } };
+  }
+
+  test.each([
+    ['flat', { requireConfirmation: true }],
+    ['under config', { config: { requireConfirmation: true } }],
+  ])('the confirm input shows when the setting is saved %s', (_label, extra) => {
+    const { container, done } = renderWith({ type: 'password', key: 'pw', label: 'Password', ...extra }, { pw: 'abc' });
+    expect(container.querySelector('.subtleforms-password__confirm')).not.toBeNull();
+    done();
+  });
+
+  test('the confirm input is marked invalid after the mismatch error, even when empty', () => {
+    const field = { type: 'password', key: 'pw', label: 'Password', requireConfirmation: true };
+    const { container, done } = renderWith(field, { pw: 'abc' }, { pw: 'The passwords do not match.' });
+    expect(container.querySelector('.subtleforms-password__confirm').getAttribute('aria-invalid')).toBe('true');
+    done();
+  });
+
+  test('the confirm input is not marked invalid before any error', () => {
+    const field = { type: 'password', key: 'pw', label: 'Password', requireConfirmation: true };
+    const { container, done } = renderWith(field, { pw: 'abc' });
+    expect(container.querySelector('.subtleforms-password__confirm').getAttribute('aria-invalid')).toBeNull();
+    done();
+  });
+});
