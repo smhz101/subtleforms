@@ -90,4 +90,33 @@ describe('block form picker', () => {
 		).toBeGreaterThan(0);
 		expect(screen.getByRole('combobox', { name: 'Form' }).value).toBe('Form #5');
 	});
+
+	describe('edit this form link', () => {
+		afterEach(() => {
+			delete window.subtleformsAdmin;
+		});
+		const setup = async (value, editFormUrl) => {
+			window.subtleformsAdmin = editFormUrl ? { editFormUrl } : {};
+			apiFetch.mockResolvedValue({ data: makePage(1, 3) });
+			await mount(value);
+		};
+
+		test('links to the builder for the selected form', async () => {
+			await setup(2, 'http://x.test/wp-admin/admin.php?page=subtleforms-new-form&form_id=');
+			const link = screen.getByRole('link', { name: /Edit this form/ });
+			expect(link.getAttribute('href')).toBe(
+				'http://x.test/wp-admin/admin.php?page=subtleforms-new-form&form_id=2'
+			);
+		});
+
+		test('is hidden when no form is selected', async () => {
+			await setup(0, 'http://x.test/?form_id=');
+			expect(screen.queryByRole('link', { name: /Edit this form/ })).toBeNull();
+		});
+
+		test('is hidden without editFormUrl', async () => {
+			await setup(2, '');
+			expect(screen.queryByRole('link', { name: /Edit this form/ })).toBeNull();
+		});
+	});
 });

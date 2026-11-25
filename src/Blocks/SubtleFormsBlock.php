@@ -12,6 +12,8 @@
 
 namespace SubtleForms\Blocks;
 
+use SubtleForms\Support\Capabilities;
+
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /**
@@ -291,14 +293,15 @@ final class SubtleFormsBlock {
 		// script has loaded.
 		wp_register_script( self::LOADER_HANDLE, false, array( 'wp-data', 'wp-dom-ready', 'wp-i18n' ), SUBTLEFORMS_VERSION, true );
 		wp_enqueue_script( self::LOADER_HANDLE );
-		wp_localize_script(
-			self::LOADER_HANDLE,
-			'subtleformsAdmin',
-			array(
-				'restUrl' => rest_url( 'subtleforms/v1/' ),
-				'nonce'   => wp_create_nonce( 'wp_rest' ),
-			)
+		$admin_data = array(
+			'restUrl' => rest_url( 'subtleforms/v1/' ),
+			'nonce'   => wp_create_nonce( 'wp_rest' ),
 		);
+		// The "Edit this form" link, only for people who can edit forms.
+		if ( current_user_can( ( new Capabilities() )->manage_cap() ) ) {
+			$admin_data['editFormUrl'] = admin_url( 'admin.php?page=subtleforms-new-form&form_id=' );
+		}
+		wp_localize_script( self::LOADER_HANDLE, 'subtleformsAdmin', $admin_data );
 
 		// The 113 KB renderer is the live preview of a form block. A post that
 		// has the block gets it at once (and so do the site editor and widget

@@ -59,3 +59,8 @@
 	outline-offset: 6px;
 	border-radius: 4px;
 }
+
+/* Space between the form picker (dropdown and edit link) and the first toggle. */
+.subtleforms-block-picker {
+	margin-bottom: 16px;
+}

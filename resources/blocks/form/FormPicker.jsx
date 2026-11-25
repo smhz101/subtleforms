@@ -4,7 +4,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
-import { ComboboxControl, Notice, SelectControl } from '@wordpress/components';
+import { ComboboxControl, ExternalLink, Notice, SelectControl } from '@wordpress/components';
 import { fetchAllForms } from '../../shared/allForms';
 
 export function useForms() {
@@ -54,9 +54,11 @@ export function buildOptions(forms, value) {
 
 export default function FormPicker({ forms, loading, failed, value, onChange }) {
 	const empty = !loading && !failed && forms.length === 0;
+	const editFormUrl =
+		typeof window !== 'undefined' ? window.subtleformsAdmin?.editFormUrl : '';
 
 	return (
-		<>
+		<div className='subtleforms-block-picker'>
 			{failed && (
 				<Notice status='warning' isDismissible={false}>
 					{__(
@@ -92,6 +94,11 @@ export default function FormPicker({ forms, loading, failed, value, onChange }) 
 					__next40pxDefaultSize
 				/>
 			)}
-		</>
+			{value > 0 && editFormUrl && (
+				<ExternalLink href={`${editFormUrl}${value}`}>
+					{__('Edit this form', 'subtleforms')}
+				</ExternalLink>
+			)}
+		</div>
 	);
 }
