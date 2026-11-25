@@ -3,7 +3,6 @@ import { getIn } from '../utils/valuePaths';
 import { columnCountFromType } from '../../shared/columnCount';
 import { consentParts } from '../../shared/consentLabel';
 import { formatUsPhone, isCompleteUsPhone } from '../../shared/phoneFormat';
-import { passwordStrength } from '../../shared/passwordStrength';
 import { columnFields } from '../utils/columnFields';
 import { fieldDomId } from '../utils/formInstance';
 import { getCompositeEmptyParts, isAnswerable } from '../utils/fieldValidation';
@@ -32,6 +31,7 @@ const FileUpload = lazyField('upload');
 const RepeaterField = lazyField('repeater');
 const RichTextInput = lazyField('richText');
 const MaskedInput = lazyField('mask', 'MaskedInput');
+const PasswordHints = lazyField('password', 'default', () => null);
 import {
   fieldAppearanceStyle,
   fieldAppearanceClasses,
@@ -724,23 +724,14 @@ function renderInput(
           />
         );
       }
-      if (field.type === 'password' && (config.strengthMeter !== false || config.requireConfirmation)) {
-        const level = passwordStrength(value ?? '');
+      if (field.type === 'password') {
         const confirmPath = valuePath ? `${valuePath}_confirm` : `${name || 'password'}_confirm`;
         const confirm = getIn(values, confirmPath, '') ?? '';
         const mismatch = config.requireConfirmation && value && confirm && confirm !== value;
         return (
           <div className='subtleforms-password'>
             {input}
-            {config.strengthMeter !== false && (
-              <p className={`subtleforms-password__meter is-${level}`} role='status'>
-                {level === 'strong'
-                  ? __('Strong password', 'subtleforms')
-                  : level === 'fair'
-                    ? __('Fair password', 'subtleforms')
-                    : __('Weak password', 'subtleforms')}
-              </p>
-            )}
+            <PasswordHints value={value ?? ''} config={config} />
             {config.requireConfirmation && (
               <input
                 type='password'

@@ -13,12 +13,12 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { getIn } from './valuePaths';
 import { isCompleteUsPhone } from '../../shared/phoneFormat';
 import { columnFields } from './columnFields';
+import { loadedGroup } from '../components/fields/lazyFields';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { getFieldType } from '../../shared/extend';
 import { hasParts, missingParts } from '../../shared/compositeParts';
 import { chainedSelectLevels, firstUnansweredChainedLevel } from '../../shared/chainedOptions';
 import { isValidInternational } from '../../shared/phoneDial';
-import { loadedGroup } from '../components/fields/lazyFields';
 
 export const COMPOSITE_FIELD_TYPES = new Set(['name_group', 'address_group', 'address']);
 
@@ -303,6 +303,12 @@ function rawValidateField(field, value, defaults = {}) {
         __('Must be %d characters or fewer.', 'subtleforms'),
         maxLength
       );
+    }
+    // The password rules download with the Password field (field-password).
+    const passwordProblem = type === 'password' && value !== '' && loadedGroup('password')?.passwordProblem;
+    if (passwordProblem) {
+      const problem = passwordProblem(value, config);
+      if (problem) return problem;
     }
     if (type === 'text' && config.pattern) {
       try {

@@ -385,6 +385,11 @@ final class CoreFields {
 					'minLength'           => 8,
 					'strengthMeter'       => true,
 					'requireConfirmation' => false,
+					'requireUppercase'    => false,
+					'requireLowercase'    => false,
+					'requireNumber'       => false,
+					'requireSymbol'       => false,
+					'minStrength'         => 'any',
 				),
 				inspectorControls: array(
 					array(
@@ -401,6 +406,38 @@ final class CoreFields {
 						'type'  => 'number',
 						'name'  => 'minLength',
 						'label' => __( 'Minimum Length', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'requireUppercase',
+						'label' => __( 'Require an uppercase letter (A-Z)', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'requireLowercase',
+						'label' => __( 'Require a lowercase letter (a-z)', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'requireNumber',
+						'label' => __( 'Require a number (0-9)', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'requireSymbol',
+						'label' => __( 'Require a symbol (such as ~ ! @ # $ %)', 'subtleforms' ),
+					),
+					array(
+						'type'    => 'select',
+						'name'    => 'minStrength',
+						'label'   => __( 'Minimum strength', 'subtleforms' ),
+						'help'    => __( 'Visitors cannot send the form until the password reaches this strength.', 'subtleforms' ),
+						'options' => array(
+							array( 'value' => 'any', 'label' => __( 'Any', 'subtleforms' ) ),
+							array( 'value' => 'fair', 'label' => __( 'Fair', 'subtleforms' ) ),
+							array( 'value' => 'good', 'label' => __( 'Good', 'subtleforms' ) ),
+							array( 'value' => 'strong', 'label' => __( 'Strong', 'subtleforms' ) ),
+						),
 					),
 					array(
 						'type'  => 'checkbox',

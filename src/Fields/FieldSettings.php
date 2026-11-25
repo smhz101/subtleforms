@@ -122,6 +122,11 @@ final class FieldSettings {
 		'pattern',
 		'patternMessage',
 		'requireConfirmation',
+		'requireUppercase',
+		'requireLowercase',
+		'requireNumber',
+		'requireSymbol',
+		'minStrength',
 	);
 
 	/**

@@ -51,6 +51,7 @@ final class FrontendAssets {
 		'select'           => 'choice',
 		'dropdown'         => 'choice',
 		'rich_text'        => 'richText',
+		'password'         => 'password',
 	);
 
 	/**
@@ -573,6 +574,7 @@ final class FrontendAssets {
 		'flags'          => 'feature-flags',
 		'geo'            => 'field-phone-country',
 		'mask'           => 'field-mask',
+		'password'       => 'field-password',
 		'repeater'       => 'field-repeater',
 		'richText'       => 'field-rich-text',
 		'upload'         => 'field-upload',
