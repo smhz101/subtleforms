@@ -81,6 +81,11 @@ export function collectLeafInputPaths(fields) {
         const path = field?.config?.key || field?.key;
         if (typeof path === 'string' && path.trim()) {
           leafPaths.push(path);
+          // The server compares the password with `{key}_confirm`, so the
+          // confirmation is sent with the answers (issue 190).
+          if (field.type === 'password' && (field.config?.requireConfirmation || field.requireConfirmation)) {
+            leafPaths.push(`${path}_confirm`);
+          }
         }
         // Leaf fields own their value as a single node, do NOT recurse into children.
         // This is critical for Plan A group fields (name_group / address_group) which

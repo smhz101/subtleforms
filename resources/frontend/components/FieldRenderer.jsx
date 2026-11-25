@@ -727,7 +727,10 @@ function renderInput(
       if (field.type === 'password') {
         const confirmPath = valuePath ? `${valuePath}_confirm` : `${name || 'password'}_confirm`;
         const confirm = getIn(values, confirmPath, '') ?? '';
-        const mismatch = config.requireConfirmation && value && confirm && confirm !== value;
+        const mismatch =
+          config.requireConfirmation &&
+          value &&
+          ((confirm && confirm !== value) || error === __('The passwords do not match.', 'subtleforms'));
         return (
           <div className='subtleforms-password'>
             {input}

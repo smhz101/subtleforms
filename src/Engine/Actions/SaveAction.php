@@ -81,6 +81,12 @@ final class SaveAction implements ActionInterface {
 				$context->setMeta( 'validation_errors', $validation['errors'] );
 				throw new \RuntimeException( 'Validation failed: ' . implode( ', ', array_values( $validation['errors'] ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
+
+			// The password confirmation was only for the check above. It is
+			// not an answer, so no later step (emails, webhooks) sees it.
+			foreach ( \SubtleForms\Support\EntryValues::secretKeys( $schema ) as $secretKey ) {
+				unset( $context->payload[ $secretKey . '_confirm' ] );
+			}
 		}
 
 		// Persist payload/meta snapshot. Sanitize user-submitted values before storing.

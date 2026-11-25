@@ -127,3 +127,27 @@ describe('Password rules and minimum strength (2.11.0)', () => {
     expect(validateField(pw({ requireNumber: true, minStrength: 'strong' }), '')).toBeUndefined();
   });
 });
+
+describe('Password confirmation (issue 190)', () => {
+  beforeAll(() => loadGroup('password'));
+
+  const pw = { type: 'password', key: 'pw', label: 'Password', requireConfirmation: true };
+  const check = (values, field = pw) => validateFields([field], values, new Set(), {});
+
+  test('a mismatch and an empty confirmation block with the same message', () => {
+    expect(check({ pw: 'Secret123!', pw_confirm: 'Other123!' })).toEqual({ pw: 'The passwords do not match.' });
+    expect(check({ pw: 'Secret123!', pw_confirm: '' })).toEqual({ pw: 'The passwords do not match.' });
+    expect(check({ pw: 'Secret123!' })).toEqual({ pw: 'The passwords do not match.' });
+  });
+
+  test('a match passes, also inside a column and under config', () => {
+    expect(check({ pw: 'Secret123!', pw_confirm: 'Secret123!' })).toEqual({});
+    const cols = { type: 'two_column_container', key: 'cols', columns: [{ fields: [{ ...pw, requireConfirmation: undefined, config: { requireConfirmation: true } }] }] };
+    expect(check({ pw: 'a1B2c3D4', pw_confirm: 'x' }, cols)).toEqual({ pw: 'The passwords do not match.' });
+    expect(check({ pw: 'a1B2c3D4', pw_confirm: 'a1B2c3D4' }, cols)).toEqual({});
+  });
+
+  test('the setting off asks for nothing', () => {
+    expect(check({ pw: 'Secret123!' }, { ...pw, requireConfirmation: false })).toEqual({});
+  });
+});
