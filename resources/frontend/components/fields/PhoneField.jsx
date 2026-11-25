@@ -70,11 +70,17 @@ export default function PhoneField({
   // picked. The mask wins over the automatic country formatting.
   const fixed = useMemo(() => {
     const mask = resolveMask(config);
-    return mask && mask.kind === 'fixed' ? mask : null;
+    return mask && (mask.kind === 'fixed' || mask.kind === 'custom') ? mask : null;
   }, [config]);
-  const national = fixed ? String(stored ?? '').replace(/^\+\d{1,3} /, '') : parsed.national;
-  const joinNumber = (nextCountry, number) =>
-    number.replace(/\D/g, '') ? (nextCountry?.dial ? `+${nextCountry.dial} ${number}` : number) : '';
+  // The international preset types its own calling code, so none is added.
+  const ownDial = fixed?.key === 'phone_intl';
+  const national = fixed ? (ownDial ? String(stored ?? '') : String(stored ?? '').replace(/^\+\d{1,3} /, '')) : parsed.national;
+  const joinNumber = (nextCountry, number) => {
+    if (!number.replace(/\D/g, '')) {
+      return '';
+    }
+    return nextCountry?.dial && !ownDial ? `+${nextCountry.dial} ${number}` : number;
+  };
   // The "Phone" input mask (2.8.0): digits, spaces, dashes and brackets, up to
   // 15 digits. Numbers of the +1 plan keep the US layout.
   const phoneMask = config.inputMask === 'phone';

@@ -1199,7 +1199,7 @@ final class FieldValidator {
 	 */
 	private static function splitDial( array $field, array $mask, string $value ): array {
 		$phone = in_array( $field['type'] ?? '', array( 'phone', 'tel' ), true );
-		if ( $phone && 'fixed' === $mask['kind'] && ! empty( self::attr( $field, 'enableCountryCode' ) ) && preg_match( '/^(\+\d{1,3} )(.*)$/s', $value, $m ) ) {
+		if ( $phone && in_array( $mask['kind'], array( 'fixed', 'custom' ), true ) && 'phone_intl' !== $mask['key'] && ! empty( self::attr( $field, 'enableCountryCode' ) ) && preg_match( '/^(\+\d{1,3} )(.*)$/s', $value, $m ) ) {
 			return array( $m[1], $m[2] );
 		}
 		return array( '', $value );

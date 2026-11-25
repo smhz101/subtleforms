@@ -289,6 +289,12 @@ final class InputMaskTest extends TestCase {
 		$picker = array( 'inputMask' => 'phone_uk', 'enableCountryCode' => true );
 		$this->assertNull( $this->error( $picker, '+44 07700 900123', 'phone' ) );
 		$this->assertNotNull( $this->error( $picker, '+44 07700 9001', 'phone' ) );
+		// A custom pattern covers the number too; the international preset holds its own calling code.
+		$custom = array( 'inputMask' => 'custom', 'maskPattern' => '(999) 999-9999', 'enableCountryCode' => true );
+		$this->assertNull( $this->error( $custom, '+1 (555) 010-1234', 'phone' ) );
+		$this->assertNotNull( $this->error( $custom, '+1 (555) 010', 'phone' ) );
+		$intl = array( 'inputMask' => 'phone_intl', 'enableCountryCode' => true );
+		$this->assertNull( $this->error( $intl, '+44 555 010 1234', 'phone' ) );
 	}
 
 	public function test_a_ready_made_phone_mask_can_save_digits_only(): void {

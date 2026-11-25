@@ -129,6 +129,8 @@ describe('mask errors and validation', () => {
     // A ready-made phone mask covers the number, not the calling code of the country list.
     expect(maskError({ inputMask: 'phone_us', enableCountryCode: true }, '+1 (555) 010-1234')).toBe('');
     expect(maskError({ inputMask: 'phone_us', enableCountryCode: true }, '+1 (555) 010')).toBe('Enter this in the format (555) 010-1234.');
+    expect(maskError({ inputMask: 'custom', maskPattern: '(999) 999-9999', enableCountryCode: true }, '+1 (555) 010-1234')).toBe('');
+    expect(maskError({ inputMask: 'phone_intl', enableCountryCode: true }, '+44 555 010 1234')).toBe('');
     expect(maskError({ inputMask: 'phone_us' }, '(555) 010')).toBe('Enter this in the format (555) 010-1234.');
   });
 
