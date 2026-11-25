@@ -1571,6 +1571,7 @@ final class SubmissionsApi {
 						'submission_id' => (int) $submission['id'],
 						'links'         => true,
 						'signature'     => 'short',
+						'country_code'  => true,
 					)
 				);
 				foreach ( $ordered as $key ) {
