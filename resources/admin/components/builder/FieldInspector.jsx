@@ -27,7 +27,7 @@ import {
   DynamicInspectorPanel,
 } from './inspector/panels';
 import { isChoiceType } from './inspector/panels/OptionsPanel';
-import { chainedNotSetUpWarning } from './utils/fieldWarnings';
+import { chainedNotSetUpWarning, notShownWarning } from './utils/fieldWarnings';
 import {
   blockPicker,
   hasControls,
@@ -203,6 +203,8 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
     }
     const chained = chainedNotSetUpWarning(field);
     if (chained) warnings.push(chained);
+    const notShown = notShownWarning(field);
+    if (notShown) warnings.push(notShown);
     return warnings;
   }, [field]);
 
