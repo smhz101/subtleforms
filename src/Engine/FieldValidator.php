@@ -543,6 +543,10 @@ final class FieldValidator {
 				if ( $lengthError ) {
 					return $lengthError;
 				}
+				$rulesError = $this->validatePasswordRules( $value, $field );
+				if ( $rulesError ) {
+					return $rulesError;
+				}
 				return $this->validatePasswordConfirm( $value, $field );
 			case 'multiple_choice':
 				$error = $this->validateChoices( $value, $field, true === $this->attr( $field, 'allowMultiple' ) );
@@ -1474,6 +1478,71 @@ final class FieldValidator {
 		$national = strlen( $digits ) - strlen( $dial );
 		$ok       = '1' === $dial ? 10 === $national : ( $national >= 4 && strlen( $digits ) <= 15 );
 		return $ok ? null : $invalid;
+	}
+
+	/**
+	 * Password strength of a value: none, weak, fair, good or strong. Mirrors
+	 * resources/shared/passwordStrength.js exactly (one point each: 8+
+	 * characters, 12+ characters, lower and upper case, a digit, a symbol).
+	 *
+	 * @param string $value Password.
+	 * @return string
+	 */
+	private function passwordStrength( string $value ): string {
+		if ( '' === $value ) {
+			return 'none';
+		}
+		$length = mb_strlen( $value );
+		$score  = 0;
+		$score += $length >= 8 ? 1 : 0;
+		$score += $length >= 12 ? 1 : 0;
+		$score += ( preg_match( '/[a-z]/', $value ) && preg_match( '/[A-Z]/', $value ) ) ? 1 : 0;
+		$score += preg_match( '/[0-9]/', $value ) ? 1 : 0;
+		$score += preg_match( '/[^A-Za-z0-9]/', $value ) ? 1 : 0;
+		if ( $score <= 1 ) {
+			return 'weak';
+		}
+		if ( 2 === $score ) {
+			return 'fair';
+		}
+		return 3 === $score ? 'good' : 'strong';
+	}
+
+	/**
+	 * Password character rules and minimum strength (same messages as the
+	 * browser, fieldValidation.js).
+	 *
+	 * @param mixed $value Password.
+	 * @param array $field Field.
+	 * @return string|null
+	 */
+	private function validatePasswordRules( $value, array $field ) {
+		if ( $this->isEmpty( $value ) || ! is_string( $value ) ) {
+			return null;
+		}
+		$unmet = array();
+		if ( ! empty( $this->attr( $field, 'requireUppercase' ) ) && ! preg_match( '/[A-Z]/', $value ) ) {
+			$unmet[] = __( 'an uppercase letter', 'subtleforms' );
+		}
+		if ( ! empty( $this->attr( $field, 'requireLowercase' ) ) && ! preg_match( '/[a-z]/', $value ) ) {
+			$unmet[] = __( 'a lowercase letter', 'subtleforms' );
+		}
+		if ( ! empty( $this->attr( $field, 'requireNumber' ) ) && ! preg_match( '/[0-9]/', $value ) ) {
+			$unmet[] = __( 'a number', 'subtleforms' );
+		}
+		if ( ! empty( $this->attr( $field, 'requireSymbol' ) ) && ! preg_match( '/[^A-Za-z0-9]/', $value ) ) {
+			$unmet[] = __( 'a symbol', 'subtleforms' );
+		}
+		if ( $unmet ) {
+			/* translators: %s: list of missing password parts, such as "a number, a symbol" */
+			return sprintf( __( 'Your password needs: %s.', 'subtleforms' ), implode( ', ', $unmet ) );
+		}
+		$levels = array( 'weak', 'fair', 'good', 'strong' );
+		$min    = (string) $this->attr( $field, 'minStrength' );
+		if ( in_array( $min, $levels, true ) && array_search( $this->passwordStrength( $value ), $levels, true ) < array_search( $min, $levels, true ) ) {
+			return __( 'Choose a stronger password.', 'subtleforms' );
+		}
+		return null;
 	}
 
 	/**

@@ -104,3 +104,23 @@ describe('Name and Address follow their part settings (FB-02, FB-12)', () => {
     expect(validateField(field, {}, { requiredMessage: 'Please answer this.' })).toBe('Please answer this.');
   });
 });
+
+describe('Password rules and minimum strength (2.11.0)', () => {
+  const pw = (config) => ({ type: 'password', key: 'pw', label: 'Password', ...config });
+
+  test('lists every unmet rule in lower case words', () => {
+    const field = pw({ requireUppercase: true, requireNumber: true, requireSymbol: true });
+    expect(validateField(field, 'abcdefgh')).toBe('Your password needs: an uppercase letter, a number, a symbol.');
+    expect(validateField(field, 'Abcdefg1!')).toBeUndefined();
+  });
+
+  test('asks for a stronger password below minStrength', () => {
+    expect(validateField(pw({ minStrength: 'good' }), 'Abcdefgh')).toBe('Choose a stronger password.');
+    expect(validateField(pw({ minStrength: 'good' }), 'Abcdefg1')).toBeUndefined();
+  });
+
+  test('a default field and an empty optional value pass', () => {
+    expect(validateField(pw({ minLength: 8 }), 'abcdefgh')).toBeUndefined();
+    expect(validateField(pw({ requireNumber: true, minStrength: 'strong' }), '')).toBeUndefined();
+  });
+});

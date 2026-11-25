@@ -13,6 +13,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { getIn } from './valuePaths';
 import { isCompleteUsPhone } from '../../shared/phoneFormat';
 import { columnFields } from './columnFields';
+import { unmetRules, meetsStrength } from '../../shared/passwordStrength';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { getFieldType } from '../../shared/extend';
 import { hasParts, missingParts } from '../../shared/compositeParts';
@@ -303,6 +304,19 @@ function rawValidateField(field, value, defaults = {}) {
         __('Must be %d characters or fewer.', 'subtleforms'),
         maxLength
       );
+    }
+    if (type === 'password' && value !== '') {
+      const unmet = unmetRules(value, config);
+      if (unmet.length > 0) {
+        return sprintf(
+          /* translators: %s: list of missing password parts, such as "a number, a symbol" */
+          __('Your password needs: %s.', 'subtleforms'),
+          unmet.map((rule) => rule.phrase).join(', ')
+        );
+      }
+      if (!meetsStrength(value, config)) {
+        return __('Choose a stronger password.', 'subtleforms');
+      }
     }
     if (type === 'text' && config.pattern) {
       try {
