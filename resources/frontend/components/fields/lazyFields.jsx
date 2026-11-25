@@ -29,6 +29,7 @@ const LOADERS = {
   chained: () => import(/* webpackChunkName: "field-chained-select" */ './ChainedSelect'),
   choice: () => import(/* webpackChunkName: "field-choice" */ './ChoiceSelect'),
   richText: () => import(/* webpackChunkName: "field-rich-text" */ './RichTextInput'),
+  password: () => import(/* webpackChunkName: "field-password" */ './PasswordHints'),
   mask: () => import(/* webpackChunkName: "field-mask" */ './maskField'),
   draft: () => import(/* webpackChunkName: "form-draft" */ '../../utils/formDraft'),
   conversational: () =>
@@ -51,6 +52,7 @@ const TYPE_GROUPS = {
   select: 'choice',
   dropdown: 'choice',
   rich_text: 'richText',
+  password: 'password',
 };
 
 /** Loaded modules by group. */

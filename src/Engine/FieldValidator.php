@@ -1498,7 +1498,7 @@ final class FieldValidator {
 		$score += $length >= 12 ? 1 : 0;
 		$score += ( preg_match( '/[a-z]/', $value ) && preg_match( '/[A-Z]/', $value ) ) ? 1 : 0;
 		$score += preg_match( '/[0-9]/', $value ) ? 1 : 0;
-		$score += preg_match( '/[^A-Za-z0-9]/', $value ) ? 1 : 0;
+		$score += preg_match( '/[^A-Za-z0-9\s]/', $value ) ? 1 : 0;
 		if ( $score <= 1 ) {
 			return 'weak';
 		}
@@ -1530,7 +1530,7 @@ final class FieldValidator {
 		if ( ! empty( $this->attr( $field, 'requireNumber' ) ) && ! preg_match( '/[0-9]/', $value ) ) {
 			$unmet[] = __( 'a number', 'subtleforms' );
 		}
-		if ( ! empty( $this->attr( $field, 'requireSymbol' ) ) && ! preg_match( '/[^A-Za-z0-9]/', $value ) ) {
+		if ( ! empty( $this->attr( $field, 'requireSymbol' ) ) && ! preg_match( '/[^A-Za-z0-9\s]/', $value ) ) {
 			$unmet[] = __( 'a symbol', 'subtleforms' );
 		}
 		if ( $unmet ) {

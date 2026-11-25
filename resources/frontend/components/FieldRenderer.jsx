@@ -3,13 +3,6 @@ import { getIn } from '../utils/valuePaths';
 import { columnCountFromType } from '../../shared/columnCount';
 import { consentParts } from '../../shared/consentLabel';
 import { formatUsPhone, isCompleteUsPhone } from '../../shared/phoneFormat';
-import {
-  passwordStrength,
-  passwordRules,
-  hasPasswordRules,
-  isRuleMet,
-  strengthName,
-} from '../../shared/passwordStrength';
 import { columnFields } from '../utils/columnFields';
 import { fieldDomId } from '../utils/formInstance';
 import { getCompositeEmptyParts, isAnswerable } from '../utils/fieldValidation';
@@ -38,6 +31,7 @@ const FileUpload = lazyField('upload');
 const RepeaterField = lazyField('repeater');
 const RichTextInput = lazyField('richText');
 const MaskedInput = lazyField('mask', 'MaskedInput');
+const PasswordHints = lazyField('password', 'default', () => null);
 import {
   fieldAppearanceStyle,
   fieldAppearanceClasses,
@@ -730,54 +724,14 @@ function renderInput(
           />
         );
       }
-      if (field.type === 'password' && (config.strengthMeter !== false || config.requireConfirmation || hasPasswordRules(config))) {
-        const level = passwordStrength(value ?? '');
+      if (field.type === 'password') {
         const confirmPath = valuePath ? `${valuePath}_confirm` : `${name || 'password'}_confirm`;
         const confirm = getIn(values, confirmPath, '') ?? '';
         const mismatch = config.requireConfirmation && value && confirm && confirm !== value;
         return (
           <div className='subtleforms-password'>
             {input}
-            {config.strengthMeter !== false && (
-              <div className={`subtleforms-password__meter is-${level}`}>
-                <span className='subtleforms-password__bar' aria-hidden='true'>
-                  <span />
-                  <span />
-                  <span />
-                  <span />
-                </span>
-                <span className='subtleforms-password__level' role='status'>
-                  {level !== 'none' && (
-                    <>
-                      <span className='subtleforms-sr-only'>
-                        {sprintf(
-                          /* translators: %s: strength level such as Good */
-                          __('Password strength: %s', 'subtleforms'),
-                          strengthName(level)
-                        )}
-                      </span>
-                      <span aria-hidden='true'>{strengthName(level)}</span>
-                    </>
-                  )}
-                </span>
-              </div>
-            )}
-            {hasPasswordRules(config) && (
-              <ul className='subtleforms-password__rules'>
-                {passwordRules(config).map((rule) => {
-                  const met = isRuleMet(rule, value ?? '', config);
-                  return (
-                    <li key={rule.id} className={met ? 'is-met' : 'is-unmet'}>
-                      <span className='subtleforms-password__icon' aria-hidden='true' />
-                      {rule.label}
-                      <span className='subtleforms-sr-only'>
-                        {met ? __(' (met)', 'subtleforms') : __(' (not met)', 'subtleforms')}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
+            <PasswordHints value={value ?? ''} config={config} />
             {config.requireConfirmation && (
               <input
                 type='password'

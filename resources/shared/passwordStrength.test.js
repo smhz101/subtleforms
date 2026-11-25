@@ -1,10 +1,5 @@
-import {
-  passwordStrength,
-  passwordRules,
-  unmetRules,
-  meetsStrength,
-  hasPasswordRules,
-} from './passwordStrength';
+import { passwordStrength, unmetRules, meetsStrength, hasPasswordRules } from './passwordStrength';
+import { passwordRules } from './passwordRules';
 
 // The same list and levels are asserted in tests/unit/PasswordRulesTest.php.
 const SAMPLES = [
@@ -15,7 +10,9 @@ const SAMPLES = [
   ['Abcdefg1', 'good'],
   ['Abcdef1!', 'strong'],
   ['Abcdefghij1!', 'strong'],
-  ['abcdefgh ijkl', 'good'],
+  ['abcdefgh ijkl', 'fair'],
+  ['abcdefg ', 'weak'],
+  ['\u{1F600}\u{1F600}\u{1F600}\u{1F600}', 'weak'],
 ];
 
 test.each(SAMPLES)('strength of %j is %s', (value, level) => {
@@ -50,4 +47,15 @@ test('meetsStrength compares against minStrength', () => {
   expect(meetsStrength('abcdefgh', { minStrength: 'fair' })).toBe(false);
   expect(meetsStrength('Abcdefg1', { minStrength: 'good' })).toBe(true);
   expect(meetsStrength('Abcdefg1', { minStrength: 'strong' })).toBe(false);
+});
+
+test('the strength item reads Strong, not Strong or better', () => {
+  const label = (minStrength) => passwordRules({ minStrength }).find((r) => r.id === 'strength').label;
+  expect(label('strong')).toBe('Strength: Strong');
+  expect(label('good')).toBe('Strength: Good or better');
+  expect(label('fair')).toBe('Strength: Fair or better');
+});
+
+test('a trailing space is not a symbol', () => {
+  expect(unmetRules('abcdefgh ', { requireSymbol: true }).map((r) => r.id)).toEqual(['symbol']);
 });

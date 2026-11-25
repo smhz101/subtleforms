@@ -50,6 +50,10 @@ final class PasswordRulesTest extends TestCase {
 		$this->assertNull( $this->error( array( 'requireUppercase' => true, 'requireNumber' => true ), 'Abcdefg1' ) );
 	}
 
+	public function test_a_space_is_not_a_symbol() {
+		$this->assertSame( 'Your password needs: a symbol.', $this->error( array( 'requireSymbol' => true ), 'abcdefgh ' ) );
+	}
+
 	public function test_several_unmet_rules_are_listed() {
 		$config = array( 'requireUppercase' => true, 'requireNumber' => true, 'requireSymbol' => true );
 		$this->assertSame( 'Your password needs: an uppercase letter, a number, a symbol.', $this->error( $config, 'abcdefgh' ) );
@@ -77,7 +81,9 @@ final class PasswordRulesTest extends TestCase {
 			'Abcdefg1'      => 'good',
 			'Abcdef1!'      => 'strong',
 			'Abcdefghij1!'  => 'strong',
-			'abcdefgh ijkl' => 'good',
+			'abcdefgh ijkl' => 'fair',
+			'abcdefg '      => 'weak',
+			"\u{1F600}\u{1F600}\u{1F600}\u{1F600}" => 'weak',
 		);
 		$method = new \ReflectionMethod( FieldValidator::class, 'passwordStrength' );
 		$method->setAccessible( true );

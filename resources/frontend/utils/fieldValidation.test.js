@@ -1,4 +1,5 @@
 import { validateField, validateFields, isCompositeField } from './fieldValidation';
+import { loadGroup } from '../components/fields/lazyFields';
 
 describe('fieldValidation (Part A2: required validation skips composite fields)', () => {
   const nameGroup = {
@@ -106,6 +107,8 @@ describe('Name and Address follow their part settings (FB-02, FB-12)', () => {
 });
 
 describe('Password rules and minimum strength (2.11.0)', () => {
+  beforeAll(() => loadGroup('password'));
+
   const pw = (config) => ({ type: 'password', key: 'pw', label: 'Password', ...config });
 
   test('lists every unmet rule in lower case words', () => {

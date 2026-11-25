@@ -783,12 +783,11 @@
 	gap: 6px;
 	margin: 6px 0 0;
 	font-size: 13px;
-	line-height: 1.4;
 }
 
 .subtleforms-password__bar {
 	display: grid;
-	flex: 1 1 auto;
+	flex: 1;
 	grid-template-columns: repeat(4, 1fr);
 	gap: 4px;
 }
@@ -802,23 +801,24 @@
 .subtleforms-password__level {
 	min-width: 3.5em;
 	font-weight: 600;
+	color: var(--sf-pw-text);
 }
 
-.subtleforms-password__meter.is-weak .subtleforms-password__bar > span:nth-child(-n + 1) { background: #d63638; }
-.subtleforms-password__meter.is-fair .subtleforms-password__bar > span:nth-child(-n + 2) { background: #dd7d00; }
-.subtleforms-password__meter.is-good .subtleforms-password__bar > span:nth-child(-n + 3) { background: #6cbf3b; }
-.subtleforms-password__meter.is-strong .subtleforms-password__bar > span:nth-child(-n + 4) { background: #008a20; }
-.subtleforms-password__meter.is-weak .subtleforms-password__level { color: #b32d2e; }
-.subtleforms-password__meter.is-fair .subtleforms-password__level { color: #a35a00; }
-.subtleforms-password__meter.is-good .subtleforms-password__level { color: #3f7d1c; }
-.subtleforms-password__meter.is-strong .subtleforms-password__level { color: #007017; }
+.subtleforms-password__meter.is-weak { --sf-pw: #d63638; --sf-pw-text: #b32d2e; }
+.subtleforms-password__meter.is-fair { --sf-pw: #dd7d00; --sf-pw-text: #a35a00; }
+.subtleforms-password__meter.is-good { --sf-pw: #6cbf3b; --sf-pw-text: #3f7d1c; }
+.subtleforms-password__meter.is-strong { --sf-pw: #008a20; --sf-pw-text: #007017; }
+
+.subtleforms-password__bar > span:nth-child(-n + 1) { background: var(--sf-pw, var(--subtleforms-color-border, #e5e7eb)); }
+.subtleforms-password__meter.is-fair .subtleforms-password__bar > span:nth-child(-n + 2),
+.subtleforms-password__meter.is-good .subtleforms-password__bar > span:nth-child(-n + 3),
+.subtleforms-password__meter.is-strong .subtleforms-password__bar > span:nth-child(-n + 4) { background: var(--sf-pw); }
 
 .subtleforms-password__rules {
 	margin: 6px 0 0;
 	padding: 0;
 	list-style: none;
 	font-size: 13px;
-	line-height: 1.4;
 }
 
 .subtleforms-password__rules li {
@@ -830,22 +830,16 @@
 }
 
 .subtleforms-password__icon {
-	flex: none;
 	box-sizing: border-box;
 	width: 12px;
 	height: 12px;
-	border: 1.5px solid currentColor;
+	border: 1.5px solid;
 	border-radius: 50%;
+	font-size: 9px;
+	line-height: 9px;
+	text-align: center;
 }
 
-.subtleforms-password__rules li.is-met {
-	color: #007017;
-}
-
-.subtleforms-password__rules li.is-met .subtleforms-password__icon {
-	background: currentColor;
-	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 6.5l2.5 2.5L10 3.5' fill='none' stroke='%23000' stroke-width='1.6'/%3E%3C/svg%3E") center / contain no-repeat;
-	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 6.5l2.5 2.5L10 3.5' fill='none' stroke='%23000' stroke-width='1.6'/%3E%3C/svg%3E") center / contain no-repeat;
-	border: 0;
-	border-radius: 0;
-}
+.subtleforms-password__rules .is-met { color: #007017; }
+.subtleforms-password__rules .is-met .subtleforms-password__icon { background: #007017; color: #fff; }
+.subtleforms-password__rules .is-met .subtleforms-password__icon::before { content: "\2713"; }
