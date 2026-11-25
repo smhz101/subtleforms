@@ -216,8 +216,8 @@ function TimeColumn({ label, options, selected, onPick, isDisabled }) {
     }
     if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
       const sibling = event.key === 'ArrowLeft'
-        ? listRef.current?.previousElementSibling
-        : listRef.current?.nextElementSibling;
+        ? listRef.current?.parentElement?.previousElementSibling
+        : listRef.current?.parentElement?.nextElementSibling;
       const target = sibling?.querySelector('[role="option"][tabindex="0"]');
       if (target) {
         event.preventDefault();
@@ -251,6 +251,8 @@ function TimeColumn({ label, options, selected, onPick, isDisabled }) {
   };
 
   return (
+    <div className='subtleforms-picker__col'>
+      <div className='subtleforms-picker__col-heading' aria-hidden='true'>{label}</div>
     <div className='subtleforms-picker__column' role='listbox' aria-label={label} ref={listRef} onKeyDown={onKeyDown}>
       {options.map((option, index) => (
         <button
@@ -266,6 +268,7 @@ function TimeColumn({ label, options, selected, onPick, isDisabled }) {
           {option.label}
         </button>
       ))}
+    </div>
     </div>
   );
 }
@@ -596,6 +599,9 @@ export default function DateTimeField({
   };
 
   const todayAllowed = !isDisabled(siteNow());
+  const nowClockMinutes = clockMinutes(nowRounded(minuteStep));
+  // "Now" is off when the current time, or today for an empty date, is not allowed.
+  const nowOff = isTimeOff(nowClockMinutes) || (mode === 'datetime' && !dateValue && !todayAllowed);
   const monthNames = Array.from({ length: 12 }, (_, month) => (
     new Intl.DateTimeFormat(locale, { month: 'short' }).format(new Date(2024, month, 1))
   ));
@@ -918,7 +924,7 @@ export default function DateTimeField({
             )}
             {mode !== 'date' && (
               <div className='subtleforms-picker__time' ref={timeRef}>
-                {mode === 'datetime' && stacked && (
+                {mode === 'datetime' && (
                   <div className='subtleforms-picker__heading'>{__('Time', 'subtleforms')}</div>
                 )}
                 <div className='subtleforms-picker__columns'>
@@ -939,6 +945,7 @@ export default function DateTimeField({
                 </div>
                 {twelveHour && (
                   <div className='subtleforms-picker__meridiem'>
+                    <div className='subtleforms-picker__col-heading' aria-hidden='true'>{__('AM/PM', 'subtleforms')}</div>
                     {['AM', 'PM'].map((meridiem) => (
                       <button
                         key={meridiem}
@@ -955,6 +962,19 @@ export default function DateTimeField({
           </div>
           <div className='subtleforms-picker__footer'>
             <div className='subtleforms-picker__footer-actions'>
+              {mode !== 'date' && (
+                <button
+                  type='button'
+                  className='subtleforms-picker__text-button'
+                  disabled={nowOff}
+                  title={nowOff ? __('The current time is outside the allowed range', 'subtleforms') : undefined}
+                  onClick={() => {
+                    const now = parseTime(nowRounded(minuteStep));
+                    emitTime(now.hours, now.minutes);
+                  }}>
+                  {__('Now', 'subtleforms')}
+                </button>
+              )}
               {mode !== 'time' && (
                 <button
                   type='button'
@@ -969,6 +989,8 @@ export default function DateTimeField({
                   {__('Today', 'subtleforms')}
                 </button>
               )}
+            </div>
+            <div className='subtleforms-picker__footer-actions'>
               <button
                 type='button'
                 className='subtleforms-picker__text-button'
@@ -978,20 +1000,20 @@ export default function DateTimeField({
                 }}>
                 {__('Clear', 'subtleforms')}
               </button>
+              {mode !== 'date' && (
+                <button
+                  type='button'
+                  className='subtleforms-picker__primary-button'
+                  aria-disabled={(mode === 'datetime' && !bothSet) || undefined}
+                  onClick={() => {
+                    if (mode === 'time' || bothSet) {
+                      closeMenu();
+                    }
+                  }}>
+                  {__('Done', 'subtleforms')}
+                </button>
+              )}
             </div>
-            {mode === 'datetime' && (
-              <button
-                type='button'
-                className='subtleforms-picker__primary-button'
-                aria-disabled={!bothSet || undefined}
-                onClick={() => {
-                  if (bothSet) {
-                    closeMenu();
-                  }
-                }}>
-                {__('Done', 'subtleforms')}
-              </button>
-            )}
           </div>
         </div>
       )}

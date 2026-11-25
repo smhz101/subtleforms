@@ -286,6 +286,11 @@
 	padding: 12px;
 }
 
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu--calendar {
+	padding: 12px;
+	border-radius: 10px;
+}
+
 .subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__panel {
 	display: flex;
 	gap: 12px;
@@ -450,42 +455,76 @@
 
 .subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__columns {
 	display: flex;
-	gap: 4px;
-	height: 198px;
+	flex: 1 1 auto;
+	height: 224px;
 }
 
-// 5.5 rows of 36px show, with the rows fading out at the top and bottom.
-.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__column {
+// Each column is a heading over a scrolling listbox; a thin line divides the
+// columns and nothing else is boxed.
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__col {
+	display: flex;
+	flex-direction: column;
 	width: 56px;
-	overflow-y: auto;
-	scrollbar-width: none;
-	border: 1px solid var(--subtleforms-picker-border);
-	border-radius: min(var(--subtleforms-picker-radius), 8px);
-	-webkit-mask-image: linear-gradient(to bottom, transparent, #000 14px, #000 calc(100% - 14px), transparent);
-	mask-image: linear-gradient(to bottom, transparent, #000 14px, #000 calc(100% - 14px), transparent);
+	min-height: 0;
 
-	&::-webkit-scrollbar { display: none; }
+	& + .subtleforms-picker__col { border-left: 1px solid var(--subtleforms-picker-border); }
+}
+
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__col-heading {
+	flex: none;
+	padding: 4px 0 6px;
+	background: var(--subtleforms-picker-surface);
+	color: var(--subtleforms-picker-muted);
+	font-size: 11px;
+	letter-spacing: 0.04em;
+	text-align: center;
+	text-transform: uppercase;
+}
+
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__column {
+	flex: 1 1 0;
+	min-height: 0;
+	padding: 0 4px;
+	overflow-y: auto;
+	scrollbar-width: thin;
+	scrollbar-color: transparent transparent;
 }
 
 .subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__heading {
+	display: flex;
+	align-items: center;
+	min-height: 32px;
 	font-size: 12px;
 	font-weight: 600;
 	color: var(--subtleforms-picker-muted);
 }
 
-.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu--datetime .subtleforms-picker__panel { gap: 16px; }
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu--datetime .subtleforms-picker__panel { gap: 12px; }
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu--datetime .subtleforms-picker__time {
+	padding-left: 12px;
+	border-left: 1px solid var(--subtleforms-picker-border);
+}
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu--datetime .subtleforms-picker__columns { height: auto; }
 
 .subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu--datetime.is-stacked .subtleforms-picker__panel { flex-direction: column; }
-.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu--datetime.is-stacked .subtleforms-picker__column { flex: 1; width: auto; }
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu--datetime.is-stacked .subtleforms-picker__time {
+	padding: 12px 0 0;
+	border-left: 0;
+	border-top: 1px solid var(--subtleforms-picker-border);
+}
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu--datetime.is-stacked .subtleforms-picker__columns { height: 160px; }
+.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu--datetime.is-stacked .subtleforms-picker__col { flex: 1; width: auto; }
 .subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu--datetime.is-stacked { width: 284px; }
 
 .subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__tick {
 	display: block;
 	width: 100%;
-	height: 36px;
+	height: 32px;
 	box-sizing: border-box;
+	margin-bottom: 2px;
 	padding: 0;
-	line-height: 36px;
+	border-radius: 6px;
+	line-height: 32px;
 	font-size: 14px;
 	font-variant-numeric: tabular-nums;
 	text-align: center;
@@ -506,7 +545,10 @@
 
 .subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__meridiem {
 	display: flex;
+	flex-wrap: wrap;
 	gap: 4px;
+
+	.subtleforms-picker__col-heading { width: 100%; padding-bottom: 0; }
 
 	.subtleforms-picker__tick {
 		border: 1px solid var(--subtleforms-picker-border);
@@ -518,7 +560,7 @@
 	display: flex;
 	justify-content: space-between;
 	gap: 8px;
-	margin-top: 8px;
+	margin-top: 12px;
 	padding-top: 8px;
 	border-top: 1px solid var(--subtleforms-picker-border);
 }
@@ -561,7 +603,7 @@
 	.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu--calendar { width: 100%; }
 	.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__menu--datetime.is-stacked { width: 100%; }
 	.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__calendar { width: 100%; }
-	.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__column { flex: 1; width: auto; }
+	.subtleforms-picker.subtleforms-picker.subtleforms-picker .subtleforms-picker__col { flex: 1; width: auto; }
 }
 
 // The native control that carries the value into a plain HTML post and gives
