@@ -80,3 +80,40 @@ describe('Input mask setting', () => {
     expect(onUpdate).not.toHaveBeenCalled();
   });
 });
+
+describe('Input mask options by field type', () => {
+  const phoneOptions = [
+    ['', 'None'],
+    ['phone', 'Automatic (by country)'],
+    ['phone_us', '(999) 999-9999 (US and Canada)'],
+    ['phone_dash', '999-999-9999'],
+    ['phone_uk', '99999 999999 (UK)'],
+    ['phone_au', '9999 999 999 (Australia)'],
+    ['phone_in', '99999 99999 (India)'],
+    ['phone_intl', '+99 999 999 9999 (international)'],
+    ['custom', 'Custom pattern'],
+  ].map(([value, label]) => ({ value, label }));
+
+  function mountType(type, opts, field) {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    const def = { inspectorControls: [{ type: 'select', name: 'inputMask', label: 'Input mask', options: opts, section: 'validation' }] };
+    act(() =>
+      root.render(
+        <ConfigContext.Provider value={{ fieldDefinitions: { [type]: def } }}>
+          <DynamicInspectorPanel field={field} onUpdate={() => {}} sections={['validation']} />
+        </ConfigContext.Provider>
+      )
+    );
+    return [...container.querySelectorAll('option')].map((o) => [o.value, o.textContent]);
+  }
+
+  it('lists the ready-made masks on a Phone field in order', () => {
+    expect(mountType('phone', phoneOptions, { type: 'phone', id: 'p' })).toEqual(phoneOptions.map((o) => [o.value, o.label]));
+  });
+
+  it('keeps the Text field list as it is', () => {
+    expect(mountType('text', options, { type: 'text', id: 'a' })).toEqual(options.map((o) => [o.value, o.label]));
+  });
+});

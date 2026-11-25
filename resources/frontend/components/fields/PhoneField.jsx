@@ -8,6 +8,7 @@ import {
   phoneCountry,
   splitPhoneValue,
 } from '../../../shared/phone';
+import { resolveMask, shownValue, storedValue, editValue } from '../../../shared/inputMask';
 import { formatUsPhone, phoneDigits, sanitizePhone } from '../../../shared/phoneFormat';
 import FlagIcon from './FlagIcon';
 
@@ -65,7 +66,21 @@ export default function PhoneField({
     picked && (!parsed.national || picked.dial === parsed.country?.dial)
       ? picked
       : parsed.country;
-  const national = parsed.national;
+  // A ready-made mask (2.11.0) formats the number only; the dial code stays as
+  // picked. The mask wins over the automatic country formatting.
+  const fixed = useMemo(() => {
+    const mask = resolveMask(config);
+    return mask && (mask.kind === 'fixed' || mask.kind === 'custom') ? mask : null;
+  }, [config]);
+  // The international preset types its own calling code, so none is added.
+  const ownDial = fixed?.key === 'phone_intl';
+  const national = fixed ? (ownDial ? String(stored ?? '') : String(stored ?? '').replace(/^\+\d{1,3} /, '')) : parsed.national;
+  const joinNumber = (nextCountry, number) => {
+    if (!number.replace(/\D/g, '')) {
+      return '';
+    }
+    return nextCountry?.dial && !ownDial ? `+${nextCountry.dial} ${number}` : number;
+  };
   // The "Phone" input mask (2.8.0): digits, spaces, dashes and brackets, up to
   // 15 digits. Numbers of the +1 plan keep the US layout.
   const phoneMask = config.inputMask === 'phone';
@@ -102,7 +117,7 @@ export default function PhoneField({
     triggerRef.current?.focus();
     setQuery('');
     setPickedCode(nextCountry?.code || '');
-    emit(joinPhoneValue(nextCountry, national));
+    emit(fixed ? joinNumber(nextCountry, national) : joinPhoneValue(nextCountry, national));
   };
 
   const onSearchKeyDown = (event) => {
@@ -212,10 +227,10 @@ export default function PhoneField({
         type="tel"
         className={`${inputClassName} subtleforms-phone__input`}
         name={name}
-        value={usLayout ? formatUsPhone(national) : phoneMask ? sanitizePhone(national) : national}
+        value={fixed ? shownValue(fixed, national) : usLayout ? formatUsPhone(national) : phoneMask ? sanitizePhone(national) : national}
         inputMode="tel"
         autoComplete={config.autocomplete || 'tel-national'}
-        placeholder={placeholder || __('Phone number', 'subtleforms')}
+        placeholder={placeholder || fixed?.example || __('Phone number', 'subtleforms')}
         required={required || undefined}
         aria-required={required || undefined}
         aria-invalid={!!error || undefined}
@@ -224,6 +239,12 @@ export default function PhoneField({
         readOnly={readOnly || undefined}
         onChange={(event) => {
           const typed = event.target.value;
+          if (fixed) {
+            const result = editValue(fixed, typed, event.target.selectionStart ?? typed.length);
+            setPickedCode(country?.code || '');
+            emit(joinNumber(country, storedValue(fixed, result.value)));
+            return;
+          }
           // A pasted or typed international number ("+44 20 7946 0958")
           // brings its own country (FLD2-07).
           if (looksInternational(typed)) {

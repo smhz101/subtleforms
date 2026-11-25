@@ -79,7 +79,7 @@ final class InputMaskTest extends TestCase {
 			);
 			$this->assertSame( 'Try it', $controls['maskTry']['label'] );
 			// Dates and times stay as typed, so they do not offer Save as.
-			$this->assertSame( array( 'phone', 'zip_us', 'custom' ), $controls['maskStore']['showWhen']['inputMask'] );
+			$this->assertSame( array( 'phone', 'phone_us', 'phone_dash', 'phone_uk', 'phone_au', 'phone_in', 'phone_intl', 'zip_us', 'custom' ), $controls['maskStore']['showWhen']['inputMask'] );
 		}
 		$text = array_column( $registry->get( 'text' )->inspectorControls, null, 'name' );
 		$this->assertSame(
@@ -87,7 +87,7 @@ final class InputMaskTest extends TestCase {
 			array_column( $text['inputMask']['options'], 'value' )
 		);
 		$phone = array_column( $registry->get( 'phone' )->inspectorControls, null, 'name' );
-		$this->assertSame( array( '', 'phone' ), array_column( $phone['inputMask']['options'], 'value' ) );
+		$this->assertSame( array( '', 'phone', 'phone_us', 'phone_dash', 'phone_uk', 'phone_au', 'phone_in', 'phone_intl', 'custom' ), array_column( $phone['inputMask']['options'], 'value' ) );
 		$labels = array_column( $text['inputMask']['options'], 'label' );
 		$this->assertNotContains( 'Credit card', $labels );
 		$this->assertSame( 'None', $labels[0] );
@@ -257,6 +257,52 @@ final class InputMaskTest extends TestCase {
 		$this->assertSame( '31/12/2026', $this->stored( $field, '31/12/2026' ) );
 		$this->assertNull( $this->error( $field, '31/12/2026' ) );
 		$this->assertNotNull( $this->error( $field, '31122026' ) );
+	}
+
+	public function test_phone_fields_list_the_ready_made_masks_text_fields_do_not(): void {
+		$keys = static fn( string $type ): array => array_column( InputMask::options( $type ), 'value' );
+		$this->assertSame( array( '', 'phone', 'phone_us', 'phone_dash', 'phone_uk', 'phone_au', 'phone_in', 'phone_intl', 'custom' ), $keys( 'phone' ) );
+		$this->assertSame( $keys( 'phone' ), $keys( 'tel' ) );
+		$this->assertSame( array( '', 'phone', 'date_dmy', 'date_mdy', 'date_ymd', 'time_24', 'zip_us', 'custom' ), $keys( 'text' ) );
+		$labels = array_column( InputMask::options( 'phone' ), 'label', 'value' );
+		$this->assertSame( 'Automatic (by country)', $labels['phone'] );
+		$this->assertSame( 'Custom pattern', $labels['custom'] );
+		$this->assertSame( 'Phone', array_column( InputMask::options( 'text' ), 'label', 'value' )['phone'] );
+	}
+
+	public function test_phone_presets_are_saved_and_unknown_keys_are_dropped(): void {
+		foreach ( InputMask::fixedKeys() as $key ) {
+			$this->assertSame( $key, InputMask::sanitizeSettings( array( 'inputMask' => $key ) )['inputMask'] );
+		}
+		$this->assertSame( '', InputMask::sanitizeSettings( array( 'inputMask' => 'phone_xx' ) )['inputMask'] );
+	}
+
+	public function test_a_ready_made_phone_mask_rejects_an_incomplete_number(): void {
+		$us = array( 'inputMask' => 'phone_us' );
+		$this->assertNull( $this->error( $us, '(555) 010-1234', 'phone' ) );
+		$this->assertSame( 'Enter this in the format (555) 010-1234.', $this->error( $us, '(555) 010-12', 'phone' ) );
+		$this->assertNull( $this->error( $us, '', 'phone' ) );
+		$uk = array( 'inputMask' => 'phone_uk' );
+		$this->assertNull( $this->error( $uk, '07700 900123', 'tel' ) );
+		$this->assertNotNull( $this->error( $uk, '07700 9001', 'tel' ) );
+		// With the country list the calling code is not part of the mask.
+		$picker = array( 'inputMask' => 'phone_uk', 'enableCountryCode' => true );
+		$this->assertNull( $this->error( $picker, '+44 07700 900123', 'phone' ) );
+		$this->assertNotNull( $this->error( $picker, '+44 07700 9001', 'phone' ) );
+		// A custom pattern covers the number too; the international preset holds its own calling code.
+		$custom = array( 'inputMask' => 'custom', 'maskPattern' => '(999) 999-9999', 'enableCountryCode' => true );
+		$this->assertNull( $this->error( $custom, '+1 (555) 010-1234', 'phone' ) );
+		$this->assertNotNull( $this->error( $custom, '+1 (555) 010', 'phone' ) );
+		$intl = array( 'inputMask' => 'phone_intl', 'enableCountryCode' => true );
+		$this->assertNull( $this->error( $intl, '+44 555 010 1234', 'phone' ) );
+	}
+
+	public function test_a_ready_made_phone_mask_can_save_digits_only(): void {
+		$field = array( 'inputMask' => 'phone_us', 'maskStore' => 'digits' );
+		$this->assertSame( '5550101234', $this->stored( $field, '(555) 010-1234', 'phone' ) );
+		$this->assertNull( $this->error( $field, '(555) 010-1234', 'phone' ) );
+		$picker = $field + array( 'enableCountryCode' => true );
+		$this->assertSame( '+1 5550101234', $this->stored( $picker, '+1 (555) 010-1234', 'phone' ) );
 	}
 
 	public function test_phone_mask_is_generic_and_bounded(): void {

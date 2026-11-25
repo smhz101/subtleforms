@@ -447,7 +447,7 @@ final class FieldSettings {
 						'name'     => 'maskTry',
 						'label'    => __( 'Try it', 'subtleforms' ),
 						'section'  => 'validation',
-						'showWhen' => array( 'inputMask' => array( 'phone', 'date_dmy', 'date_mdy', 'date_ymd', 'time_24', 'zip_us', 'custom' ) ),
+						'showWhen' => array( 'inputMask' => array( 'phone', 'phone_us', 'phone_dash', 'phone_uk', 'phone_au', 'phone_in', 'phone_intl', 'date_dmy', 'date_mdy', 'date_ymd', 'time_24', 'zip_us', 'custom' ) ),
 					)
 				);
 				$add(
@@ -461,7 +461,7 @@ final class FieldSettings {
 							array( 'value' => 'digits', 'label' => __( 'Save digits only', 'subtleforms' ) ),
 						),
 						'section'  => 'validation',
-						'showWhen' => array( 'inputMask' => array( 'phone', 'zip_us', 'custom' ) ),
+						'showWhen' => array( 'inputMask' => array( 'phone', 'phone_us', 'phone_dash', 'phone_uk', 'phone_au', 'phone_in', 'phone_intl', 'zip_us', 'custom' ) ),
 					)
 				);
 			}

@@ -56,7 +56,9 @@ export function maskError(config, value) {
   if (!mask) {
     return '';
   }
-  const problem = maskProblem(mask, value);
+  // A ready-made phone mask covers the number only; the country list adds the calling code.
+  const number = (mask.kind === 'fixed' || mask.kind === 'custom') && mask.key !== 'phone_intl' && config.enableCountryCode ? String(value ?? '').replace(/^\+\d{1,3} /, '') : value;
+  const problem = maskProblem(mask, number);
   if (!problem) {
     return '';
   }
