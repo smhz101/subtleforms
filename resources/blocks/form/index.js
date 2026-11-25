@@ -31,5 +31,15 @@ registerBlockType(metadata.name, {
       // is a block saved without an ajax attribute: it follows the new default.
       migrate: (attributes) => ({ ...attributes, ajax: true }),
     },
+    {
+      attributes: metadata.attributes,
+      supports: metadata.supports,
+      apiVersion: metadata.apiVersion,
+      // A block written as a self-closing comment (by hand, WP-CLI, the REST
+      // API or a pattern) has no saved markup. The server renders it from its
+      // attributes, so empty content is valid and the editor writes the
+      // current markup the next time the page is saved.
+      save: () => null,
+    },
   ],
 });
