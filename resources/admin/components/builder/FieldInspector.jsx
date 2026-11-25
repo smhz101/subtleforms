@@ -27,7 +27,7 @@ import {
   DynamicInspectorPanel,
 } from './inspector/panels';
 import { isChoiceType } from './inspector/panels/OptionsPanel';
-import { chainedNotSetUpWarning } from './utils/fieldWarnings';
+import { chainedNotSetUpWarning, fieldNote, notShownWarning } from './utils/fieldWarnings';
 import {
   blockPicker,
   hasControls,
@@ -203,8 +203,11 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
     }
     const chained = chainedNotSetUpWarning(field);
     if (chained) warnings.push(chained);
+    const notShown = notShownWarning(field);
+    if (notShown) warnings.push(notShown);
     return warnings;
   }, [field]);
+  const note = fieldNote(field);
 
   // Which block of the sheet draws which control (see controlBlock()).
   const pickers = useMemo(
@@ -407,7 +410,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
       </div>
 
       <div className='sf-field-inspector__scroll'>
-      {(validationMessages.length > 0 || fieldWarnings.length > 0) && (
+      {(validationMessages.length > 0 || fieldWarnings.length > 0 || note) && (
         <div className='sf-field-inspector__notices'>
           {validationMessages.slice(0, 1).map((m, i) => (
             <Notice key={`v${i}`} status='warning' isDismissible={false}>
@@ -419,6 +422,11 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
               {warning}
             </Notice>
           ))}
+          {note && (
+            <Notice status='info' isDismissible={false}>
+              {note}
+            </Notice>
+          )}
         </div>
       )}
 

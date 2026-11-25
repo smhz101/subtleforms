@@ -221,4 +221,15 @@ class AnswerFormatterTest extends TestCase {
 		);
 		$this->assertSame( 'Pakistan, Sindh', AnswerFormatter::text( array( 'pk', 'sd' ), $tree ) );
 	}
+
+	/** #140: a Country answer reads as its name; the CSV keeps the code. */
+	public function test_country_code_reads_as_name() {
+		$field = array( 'type' => 'country', 'key' => 'where', 'label' => 'Where' );
+		$this->assertSame( 'Pakistan', AnswerFormatter::text( 'PK', $field ) );
+		$this->assertSame( 'Pakistan', EntryValues::toText( 'PK', $field ) );
+		$this->assertSame( 'ZZ', AnswerFormatter::text( 'ZZ', $field ) );
+		$this->assertSame( 'PK', AnswerFormatter::text( 'PK', $field, array( 'country_code' => true ) ) );
+		$schema = array( 'fields' => array( $field ) );
+		$this->assertSame( 'Pakistan', AnswerFormatter::display( $schema, array( 'where' => 'PK' ) )['where']['text'] );
+	}
 }

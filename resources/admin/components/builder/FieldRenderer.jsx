@@ -21,6 +21,7 @@ import ChoiceSelect from '../../../frontend/components/fields/ChoiceSelect';
 import CountrySelect from '../../../frontend/components/fields/CountrySelect';
 import DateTimeField from '../../../frontend/components/fields/DateTimeField';
 import { ConfigContext } from './context/ConfigContext';
+import { notShownWarning } from './utils/fieldWarnings';
 import './FieldRenderer.scss';
 
 const noop = () => {};
@@ -613,6 +614,13 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       {type === 'chained_select' && !isAnswerable('chained_select', fieldConfig(field)) && (
         <p className='sf-field-renderer__chained-warning' role='note'>
           {__('No options yet, so this field is hidden on the live form. Add them in the field settings.', 'subtleforms')}
+        </p>
+      )}
+
+      {/* ── Types the form does not draw yet (#140) ──────────────────────── */}
+      {notShownWarning(field) && (
+        <p className='sf-field-renderer__chained-warning' role='note'>
+          {notShownWarning(field)}
         </p>
       )}
 

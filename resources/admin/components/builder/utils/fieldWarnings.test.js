@@ -22,3 +22,22 @@ describe('getFieldWarnings for a Chained Select (RFUN-02)', () => {
     expect(chainedNotSetUpWarning({ type: 'text', label: 'Name' })).toBe('');
   });
 });
+
+describe('notShownWarning (#140)', () => {
+  const { notShownWarning } = require('./fieldWarnings');
+  test('warns for each type that is not drawn yet, not for a Dropdown', () => {
+    ['dynamic_field', 'post_selection', 'save_resume'].forEach((type) => {
+      expect(notShownWarning({ type })).toContain('not shown on the form yet');
+    });
+    expect(notShownWarning({ type: 'dropdown' })).toBe('');
+  });
+});
+
+describe('fieldNote (#140)', () => {
+  const { fieldNote } = require('./fieldWarnings');
+  test('the Password field says the password is not saved; other types have no note', () => {
+    expect(fieldNote({ type: 'password' })).toBe('The password is not saved. Entries show "Password provided" instead.');
+    expect(fieldNote({ type: 'text' })).toBe('');
+    expect(fieldNote(null)).toBe('');
+  });
+});

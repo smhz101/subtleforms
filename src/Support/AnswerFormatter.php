@@ -134,6 +134,7 @@ final class AnswerFormatter {
 	 * Context keys:
 	 * - submission_id (int)  Entry ID, for upload download links.
 	 * - links (bool)         Add download links after file names.
+	 * - country_code (bool)  Keep a Country answer as its ISO code (CSV).
 	 * - signature (string)   'long' (default), 'short' ("Signed") or 'raw'
 	 *                        (the image data, for renderers that draw it).
 	 *
@@ -214,6 +215,11 @@ final class AnswerFormatter {
 				return '';
 			}
 			return FieldMapper::isChecked( $value, $field ) ? __( 'Yes', 'subtleforms' ) : __( 'No', 'subtleforms' );
+		}
+
+		if ( 'country' === $type && is_string( $value ) && empty( $context['country_code'] ) ) {
+			$names = \SubtleForms\Fields\CountryList::getAll();
+			return $names[ strtoupper( $value ) ] ?? $value;
 		}
 
 		return FieldMapper::toText( FieldMapper::optionLabels( $value, $field ) );
