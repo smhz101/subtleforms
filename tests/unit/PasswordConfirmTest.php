@@ -54,4 +54,26 @@ final class PasswordConfirmTest extends TestCase {
 		$this->assertNull( $this->error( array( 'pw' => 'Secret123!' ), false ) );
 		$this->assertNull( $this->error( array( 'pw' => 'Secret123!', 'pw_confirm' => 'x' ), false, true ) );
 	}
+
+	private function schema(): array {
+		return array( 'fields' => array( array( 'key' => 'pw', 'type' => 'password', 'requireConfirmation' => true ) ) );
+	}
+
+	public function test_the_first_write_never_holds_the_confirmation() {
+		$stored = \SubtleForms\Api\PublicSubmitApi::storablePayload( array( 'pw' => 'Secret123!', 'pw_confirm' => 'Secret123!', 'name' => 'A' ), $this->schema() );
+		$this->assertArrayNotHasKey( 'pw_confirm', $stored );
+		$this->assertSame( 'A', $stored['name'] );
+	}
+
+	public function test_the_confirmation_is_restored_as_typed_beside_the_password() {
+		$raw      = array( 'pw' => ' Secret<b>123!</b> ', 'pw_confirm' => ' Secret<b>123!</b> ' );
+		$cleaned  = \SubtleForms\Validation\Sanitizer::sanitizeArrayDeep( $raw );
+		$api      = ( new \ReflectionClass( \SubtleForms\Api\PublicSubmitApi::class ) )->newInstanceWithoutConstructor();
+		$method   = new \ReflectionMethod( $api, 'restoreRichTextValues' );
+		$method->setAccessible( true );
+		$restored = $method->invoke( $api, $cleaned, $raw, $this->schema() );
+		$this->assertSame( $raw['pw'], $restored['pw'] );
+		$this->assertSame( $raw['pw_confirm'], $restored['pw_confirm'] );
+		$this->assertNull( $this->error( $restored ) );
+	}
 }
