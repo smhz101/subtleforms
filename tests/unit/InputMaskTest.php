@@ -266,6 +266,7 @@ final class InputMaskTest extends TestCase {
 		$this->assertSame( array( '', 'phone', 'date_dmy', 'date_mdy', 'date_ymd', 'time_24', 'zip_us', 'custom' ), $keys( 'text' ) );
 		$labels = array_column( InputMask::options( 'phone' ), 'label', 'value' );
 		$this->assertSame( 'Automatic (by country)', $labels['phone'] );
+		$this->assertSame( 'Custom pattern', $labels['custom'] );
 		$this->assertSame( 'Phone', array_column( InputMask::options( 'text' ), 'label', 'value' )['phone'] );
 	}
 

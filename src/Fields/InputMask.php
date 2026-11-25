@@ -77,7 +77,8 @@ final class InputMask {
 		// list can supply the dial code, so it has no date, time or ZIP masks.
 		$phone = in_array( $type, array( 'phone', 'tel' ), true );
 		if ( $phone ) {
-			$labels['phone'] = __( 'Automatic (by country)', 'subtleforms' );
+			$labels['phone']  = __( 'Automatic (by country)', 'subtleforms' );
+			$labels['custom'] = __( 'Custom pattern', 'subtleforms' );
 			$keys            = array( '', 'phone', 'phone_us', 'phone_dash', 'phone_uk', 'phone_au', 'phone_in', 'phone_intl', 'custom' );
 		} else {
 			$keys = array_values( array_diff( array_keys( $labels ), self::fixedKeys() ) );
