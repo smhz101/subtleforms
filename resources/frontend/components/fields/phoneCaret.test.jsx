@@ -16,12 +16,12 @@ function mount(node) {
   return { input: container.querySelector('input[type="tel"]'), done: () => { act(() => root.unmount()); container.remove(); } };
 }
 
-function type(input, text, caret) {
+function type(input, text, caret, inputType = 'insertText') {
   act(() => {
     const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
     setter.call(input, text);
     input.setSelectionRange(caret, caret);
-    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType }));
   });
 }
 
@@ -46,7 +46,7 @@ describe('plain US phone input', () => {
 
   test('backspace over a bracket deletes the digit before it', () => {
     const { input, done } = mount(<PlainUs />);
-    type(input, '(555 010-1234', 4);
+    type(input, '(555 010-1234', 4, 'deleteContentBackward');
     expect(input.value).toBe('(550) 101-234');
     expect(input.selectionStart).toBe(3);
     done();

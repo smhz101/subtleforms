@@ -24,7 +24,7 @@ export default function UsPhoneInput({ value, onChange, ...rest }) {
       inputMode="tel"
       onChange={(event) => {
         const typed = event.target.value;
-        const edit = editUsPhone(shown, typed, event.target.selectionStart ?? typed.length);
+        const edit = editUsPhone(shown, typed, event.target.selectionStart ?? typed.length, event.nativeEvent?.inputType);
         caretRef.current = edit.caret;
         onChange(edit.value);
       }}

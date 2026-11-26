@@ -253,7 +253,7 @@ export default function PhoneField({
         onChange={(event) => {
           const typed = event.target.value;
           if (fixed) {
-            const result = editValue(fixed, typed, event.target.selectionStart ?? typed.length);
+            const result = editValue(fixed, typed, event.target.selectionStart ?? typed.length, event.nativeEvent?.inputType);
             setPickedCode(country?.code || '');
             emit(joinNumber(country, storedValue(fixed, result.value)));
             return;
@@ -271,7 +271,7 @@ export default function PhoneField({
           setPickedCode(country?.code || '');
           let next;
           if (usLayout) {
-            const edit = editUsPhone(formatUsPhone(national), typed, event.target.selectionStart ?? typed.length);
+            const edit = editUsPhone(formatUsPhone(national), typed, event.target.selectionStart ?? typed.length, event.nativeEvent?.inputType);
             next = edit.value;
             caretRef.current = edit.caret;
           } else {

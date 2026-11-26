@@ -24,7 +24,7 @@ describe('editUsPhone keeps the caret by digit count', () => {
   });
 
   test('backspace over a separator deletes the digit before it', () => {
-    const out = editUsPhone(prev, '(555 010-1234', 4);
+    const out = editUsPhone(prev, '(555 010-1234', 4, 'deleteContentBackward');
     expect(out.value).toBe('(550) 101-234');
     expect(out.caret).toBe(3);
   });
@@ -33,5 +33,19 @@ describe('editUsPhone keeps the caret by digit count', () => {
     const out = editUsPhone('(555) 010-123', '(555) 010-1234', 14);
     expect(out.value).toBe('(555) 010-1234');
     expect(out.caret).toBe(14);
+  });
+
+  test('Delete before the hyphen leaves the number unchanged', () => {
+    const out = editUsPhone(prev, '(555) 0101234', 9, 'deleteContentForward');
+    expect(out.value).toBe(prev);
+  });
+
+  test('deleting a selected ") " leaves the digits unchanged', () => {
+    const out = editUsPhone(prev, '(555010-1234', 4, 'deleteContentBackward');
+    expect(out.value).toBe(prev);
+  });
+
+  test('no inputType never removes an extra digit', () => {
+    expect(editUsPhone(prev, '(555 010-1234', 4).value).toBe(prev);
   });
 });
