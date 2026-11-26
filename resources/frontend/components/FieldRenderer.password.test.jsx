@@ -109,3 +109,57 @@ describe('password confirmation (issue 190)', () => {
     done();
   });
 });
+
+describe('password confirmation shown while typing', () => {
+  const field = { type: 'password', key: 'pw', label: 'Password', requireConfirmation: true };
+  function renderWith(values, errors = {}) {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    act(() => {
+      root.render(<FieldRenderer field={field} values={values} onChange={() => {}} errors={errors} />);
+    });
+    return { container, done: () => { act(() => root.unmount()); container.remove(); } };
+  }
+  const live = (c) => c.querySelector('.subtleforms-password__mismatch');
+
+  test.each([
+    ['a wrong character', 'Secret1!', 'Sx'],
+    ['the full length but different', 'Secret1!', 'Secret1?'],
+    ['longer than the password', 'Secret1!', 'Secret1!x'],
+  ])('shows the error under the confirm input for %s', (_l, pw, confirm) => {
+    const { container, done } = renderWith({ pw, pw_confirm: confirm });
+    const msg = live(container);
+    expect(msg).not.toBeNull();
+    expect(msg.textContent).toBe('The passwords do not match.');
+    const input = container.querySelector('.subtleforms-password__confirm');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(input.getAttribute('aria-describedby')).toBe(msg.id);
+    expect(msg.previousElementSibling).toBe(input);
+    done();
+  });
+
+  test.each([
+    ['empty', ''],
+    ['a correct start still being typed', 'Secr'],
+    ['matching', 'Secret1!'],
+  ])('shows nothing while the confirmation is %s', (_l, confirm) => {
+    const { container, done } = renderWith({ pw: 'Secret1!', pw_confirm: confirm });
+    expect(live(container)).toBeNull();
+    expect(container.querySelector('.subtleforms-password__confirm').getAttribute('aria-invalid')).toBeNull();
+    done();
+  });
+
+  test('does not repeat the message once the submit error shows it', () => {
+    const { container, done } = renderWith({ pw: 'Secret1!', pw_confirm: 'Sx' }, { pw: 'The passwords do not match.' });
+    expect(live(container)).toBeNull();
+    expect(container.textContent.match(/The passwords do not match\./g)).toHaveLength(1);
+    done();
+  });
+
+  test('drops the submit error once the confirmation matches', () => {
+    const { container, done } = renderWith({ pw: 'Secret1!', pw_confirm: 'Secret1!' }, { pw: 'The passwords do not match.' });
+    expect(container.textContent).not.toContain('The passwords do not match.');
+    done();
+  });
+});

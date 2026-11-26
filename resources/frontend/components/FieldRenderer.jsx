@@ -99,7 +99,14 @@ export default function FieldRenderer({
   // A saved node can lack a key (RCOMPAT-02); never let that stop the form.
   const inputId = fieldDomId(resolvedPath || field.key || field.id || '', instance);
 
-  const error = errors?.[resolvedPath];
+  // A "passwords do not match" error from the last submit goes away once the
+  // confirmation matches, without waiting for the next submit.
+  const error =
+    field.type === 'password' &&
+    errors?.[resolvedPath] === __('The passwords do not match.', 'subtleforms') &&
+    getIn(values, `${resolvedPath}_confirm`) === getIn(values, resolvedPath)
+      ? undefined
+      : errors?.[resolvedPath];
 
   // An untouched slider shows a number before the visitor moves it. Write that
   // number into the form so a required slider submits what it already displays.
@@ -727,10 +734,15 @@ function renderInput(
       if (field.type === 'password') {
         const confirmPath = valuePath ? `${valuePath}_confirm` : `${name || 'password'}_confirm`;
         const confirm = getIn(values, confirmPath, '') ?? '';
-        const mismatch =
-          config.requireConfirmation &&
-          value &&
-          ((confirm && confirm !== value) || error === __('The passwords do not match.', 'subtleforms'));
+        const mismatchMessage = __('The passwords do not match.', 'subtleforms');
+        // Shown while the visitor types, as soon as the confirmation is no
+        // longer the start of the password (a different character, or longer).
+        // A correct confirmation still being typed shows nothing.
+        const liveMismatch = config.requireConfirmation && value && confirm && !String(value).startsWith(confirm);
+        const mismatch = config.requireConfirmation && value && (liveMismatch || error === mismatchMessage);
+        // After a submit the field error already says it under this input.
+        const showLive = liveMismatch && error !== mismatchMessage;
+        const confirmErrorId = `${inputId}-confirm-error`;
         return (
           <div className='subtleforms-password'>
             {input}
@@ -745,8 +757,14 @@ function renderInput(
                 placeholder={__('Confirm password', 'subtleforms')}
                 aria-label={__('Confirm password', 'subtleforms')}
                 aria-invalid={!!mismatch || undefined}
+                aria-describedby={showLive ? confirmErrorId : undefined}
                 onChange={(event) => onChange(event.target.value, confirmPath)}
               />
+            )}
+            {showLive && (
+              <p id={confirmErrorId} className='subtleforms-field-error subtleforms-password__mismatch' role='alert'>
+                {mismatchMessage}
+              </p>
             )}
           </div>
         );
