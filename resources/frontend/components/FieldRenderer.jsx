@@ -11,6 +11,7 @@ import { rangeSliderSeed } from '../utils/defaults';
 import { debug } from '../../shared/debug';
 import { cloneElement, useContext, useEffect } from '@wordpress/element';
 import PanelContainer from './fields/PanelContainer';
+import UsPhoneInput from './fields/UsPhoneInput';
 import { FormContext } from './fields/contexts';
 import { lazyField, fieldHasMask } from './fields/lazyFields';
 import { getFieldType, getFieldOverride, addonProvides } from '../../shared/extend';
@@ -722,12 +723,11 @@ function renderInput(
       if (field.type === 'phone' && config.format === 'us') {
         const shown = formatUsPhone(value ?? '');
         return (
-          <input
+          <UsPhoneInput
             {...input.props}
-            value={shown}
-            inputMode='tel'
+            value={value ?? ''}
             aria-invalid={!!error || (shown && !isCompleteUsPhone(shown)) || undefined}
-            onChange={(event) => onChange(formatUsPhone(event.target.value))}
+            onChange={onChange}
           />
         );
       }
