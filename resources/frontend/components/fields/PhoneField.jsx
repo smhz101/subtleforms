@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from '@wordpress/element';
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
   filterPhoneCountries,
@@ -9,7 +9,7 @@ import {
   splitPhoneValue,
 } from '../../../shared/phone';
 import { resolveMask, shownValue, storedValue, editValue } from '../../../shared/inputMask';
-import { formatUsPhone, phoneDigits, sanitizePhone } from '../../../shared/phoneFormat';
+import { editUsPhone, formatUsPhone, phoneDigits, sanitizePhone } from '../../../shared/phoneFormat';
 import FlagIcon from './FlagIcon';
 
 /**
@@ -38,6 +38,8 @@ export default function PhoneField({
   const rootRef = useRef(null);
   const searchRef = useRef(null);
   const triggerRef = useRef(null);
+  const inputRef = useRef(null);
+  const caretRef = useRef(null);
   const preferred = config.defaultCountry || config.default_country || 'US';
   const [localValue, setLocalValue] = useState(value ?? '');
   const stored = onChange ? value : localValue;
@@ -101,6 +103,15 @@ export default function PhoneField({
     searchRef.current?.focus();
     return () => document.removeEventListener('mousedown', onPointer);
   }, [open]);
+
+  // Put the caret back after a mid-number edit (the reformatted value would
+  // otherwise leave it at the end).
+  useLayoutEffect(() => {
+    if (caretRef.current !== null && inputRef.current) {
+      inputRef.current.setSelectionRange?.(caretRef.current, caretRef.current);
+    }
+    caretRef.current = null;
+  });
 
   useEffect(() => {
     setActive(0);
@@ -223,6 +234,7 @@ export default function PhoneField({
         )}
       </div>
       <input
+        ref={inputRef}
         id={inputId}
         type="tel"
         className={`${inputClassName} subtleforms-phone__input`}
@@ -256,7 +268,14 @@ export default function PhoneField({
             }
           }
           setPickedCode(country?.code || '');
-          let next = usLayout ? formatUsPhone(typed) : phoneMask ? sanitizePhone(typed) : typed;
+          let next;
+          if (usLayout) {
+            const edit = editUsPhone(formatUsPhone(national), typed, event.target.selectionStart ?? typed.length);
+            next = edit.value;
+            caretRef.current = edit.caret;
+          } else {
+            next = phoneMask ? sanitizePhone(typed) : typed;
+          }
           if (keepDigits) {
             next = phoneDigits(next);
           }
