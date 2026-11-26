@@ -358,6 +358,10 @@ final class InputMaskTest extends TestCase {
 		$this->assertSame( array( 'mask' ), $groups( array( array( 'type' => 'step', 'children' => array( array( 'type' => 'phone', 'key' => 'p', 'inputMask' => 'phone' ) ) ) ) ) );
 		$this->assertSame( array( 'geo' ), $groups( array( array( 'type' => 'phone', 'key' => 'p', 'inputMask' => 'phone', 'enableCountryCode' => true ) ) ) );
 		$this->assertSame( array(), $groups( array( array( 'type' => 'email', 'key' => 'e', 'inputMask' => 'phone' ) ) ) );
+		$this->assertSame( array( 'mask' ), $groups( array( array( 'type' => 'phone', 'key' => 'p', 'config' => array( 'format' => 'us' ) ) ) ) );
+		$this->assertSame( array( 'mask' ), $groups( array( array( 'type' => 'tel', 'key' => 't', 'format' => 'us' ) ) ) );
+		$this->assertSame( array( 'geo' ), $groups( array( array( 'type' => 'phone', 'key' => 'p', 'format' => 'us', 'enableCountryCode' => true ) ) ) );
+		$this->assertSame( array(), $groups( array( array( 'type' => 'phone', 'key' => 'p' ) ) ) );
 		$chunks = ( new \ReflectionClass( FrontendAssets::class ) )->getConstant( 'GROUP_CHUNKS' );
 		$this->assertSame( 'field-mask', $chunks['mask'] );
 		$js = (string) file_get_contents( dirname( __DIR__, 2 ) . '/resources/frontend/components/fields/lazyFields.jsx' );

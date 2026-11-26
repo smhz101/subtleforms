@@ -25,6 +25,7 @@ import { toggleIsOn } from '../../shared/toggleState';
 const ChainedSelect = lazyField('chained');
 const ChoiceSelect = lazyField('choice');
 const PhoneField = lazyField('geo', 'PhoneField');
+const UsPhoneInput = lazyField('mask', 'UsPhoneInput');
 const CountrySelect = lazyField('geo', 'CountrySelect');
 const DateTimeField = lazyField('date');
 const FileUpload = lazyField('upload');
@@ -722,12 +723,11 @@ function renderInput(
       if (field.type === 'phone' && config.format === 'us') {
         const shown = formatUsPhone(value ?? '');
         return (
-          <input
+          <UsPhoneInput
             {...input.props}
-            value={shown}
-            inputMode='tel'
+            value={value ?? ''}
             aria-invalid={!!error || (shown && !isCompleteUsPhone(shown)) || undefined}
-            onChange={(event) => onChange(formatUsPhone(event.target.value))}
+            onChange={onChange}
           />
         );
       }
