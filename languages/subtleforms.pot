@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: SubtleForms 2.10.0\n"
+"Project-Id-Version: SubtleForms 2.11.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/subtleforms\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-25T10:53:11+00:00\n"
+"POT-Creation-Date: 2026-11-26T09:03:47+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -86,7 +86,7 @@ msgstr ""
 
 #: src/Admin/AdminBar.php:106
 #: src/Admin/AdminMenu.php:397
-#: src/Fields/CoreFields.php:1534
+#: src/Fields/CoreFields.php:1571
 msgid "Add New"
 msgstr ""
 
@@ -132,7 +132,7 @@ msgid "Are you sure you want to delete this item?"
 msgstr ""
 
 #: src/Admin/AdminMenu.php:705
-#: src/Frontend/FrontendAssets.php:142
+#: src/Frontend/FrontendAssets.php:143
 msgid "An error occurred. Please try again."
 msgstr ""
 
@@ -854,7 +854,7 @@ msgid "Test form"
 msgstr ""
 
 #: src/Api/WebhooksApi.php:205
-#: src/Fields/CoreFields.php:1813
+#: src/Fields/CoreFields.php:1850
 #: src/Fields/FieldSettings.php:75
 #: src/Templates/FormTemplates.php:133
 #: src/Templates/FormTemplates.php:191
@@ -900,7 +900,7 @@ msgstr ""
 msgid "The custom JSON body is not valid: %s"
 msgstr ""
 
-#: src/Blocks/SubtleFormsBlock.php:120
+#: src/Blocks/SubtleFormsBlock.php:122
 msgid "This form is not available or has been unpublished."
 msgstr ""
 
@@ -956,145 +956,179 @@ msgstr ""
 msgid "Please answer the \"%s\" row."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:500
-#: src/Engine/FieldValidator.php:1198
+#: src/Engine/FieldValidator.php:504
+#: src/Engine/FieldValidator.php:1223
 msgid "Please enter a single value."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:607
+#: src/Engine/FieldValidator.php:615
 msgid "The signature could not be read. Please sign again."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:689
+#: src/Engine/FieldValidator.php:697
 msgid "This field cannot be changed."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:832
+#: src/Engine/FieldValidator.php:840
 msgid "Please choose only one option."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:851
+#: src/Engine/FieldValidator.php:859
 msgid "Please choose one of the options shown."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:975
-#: resources/frontend/utils/fieldValidation.js:349
+#: src/Engine/FieldValidator.php:983
+#: resources/frontend/utils/fieldValidation.js:355
 msgid "Please enter a valid date."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:989
-#: resources/frontend/utils/fieldValidation.js:352
+#: src/Engine/FieldValidator.php:997
+#: resources/frontend/utils/fieldValidation.js:358
 msgid "Please enter a valid time."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1023
-#: resources/frontend/utils/fieldValidation.js:357
+#: src/Engine/FieldValidator.php:1031
+#: resources/frontend/utils/fieldValidation.js:363
 msgid "Please enter a valid date and time."
 msgstr ""
 
 #. translators: %d: number of stars
-#: src/Engine/FieldValidator.php:1063
+#: src/Engine/FieldValidator.php:1071
 #, php-format
 msgid "Please choose a rating from 1 to %d."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1080
+#: src/Engine/FieldValidator.php:1088
 msgid "Please choose a score from 0 to 10."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1165
-#: resources/frontend/utils/fieldValidation.js:361
+#: src/Engine/FieldValidator.php:1173
+#: resources/frontend/utils/fieldValidation.js:367
 msgid "Please enter a colour as a hex value, such as #336699."
 msgstr ""
 
 #. translators: %d: maximum number of characters
-#: src/Engine/FieldValidator.php:1222
+#: src/Engine/FieldValidator.php:1247
 #: resources/frontend/utils/fieldValidation.js:303
 #, php-format,js-format
 msgid "Must be %d characters or fewer."
 msgstr ""
 
 #. translators: %d: minimum number of characters
-#: src/Engine/FieldValidator.php:1227
+#: src/Engine/FieldValidator.php:1252
 #: resources/frontend/utils/fieldValidation.js:296
 #, php-format,js-format
 msgid "Must be at least %d characters."
 msgstr ""
 
 #. translators: %s: minimum value
-#: src/Engine/FieldValidator.php:1253
-#: resources/frontend/utils/fieldValidation.js:328
+#: src/Engine/FieldValidator.php:1278
+#: resources/frontend/utils/fieldValidation.js:334
 #, php-format,js-format
 msgid "Must be at least %s."
 msgstr ""
 
 #. translators: %s: maximum value
-#: src/Engine/FieldValidator.php:1258
-#: resources/frontend/utils/fieldValidation.js:332
+#: src/Engine/FieldValidator.php:1283
+#: resources/frontend/utils/fieldValidation.js:338
 #, php-format,js-format
 msgid "Must be no more than %s."
 msgstr ""
 
 #. translators: %s: step increment
-#: src/Engine/FieldValidator.php:1269
-#: resources/frontend/utils/fieldValidation.js:341
+#: src/Engine/FieldValidator.php:1294
+#: resources/frontend/utils/fieldValidation.js:347
 #, php-format,js-format
 msgid "Must match the step of %s."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1306
+#: src/Engine/FieldValidator.php:1331
 #: resources/frontend/utils/fieldValidation.js:264
 msgid "Invalid email address."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1355
+#: src/Engine/FieldValidator.php:1380
 #: resources/frontend/utils/fieldValidation.js:267
 msgid "Invalid URL."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1371
-#: src/Engine/FieldValidator.php:1376
-#: resources/frontend/utils/fieldValidation.js:323
+#: src/Engine/FieldValidator.php:1396
+#: src/Engine/FieldValidator.php:1401
+#: resources/frontend/utils/fieldValidation.js:329
 msgid "Please enter a number."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1446
-#: src/Fields/InputMask.php:315
-#: resources/frontend/components/fields/maskField.jsx:64
-#: resources/frontend/utils/fieldValidation.js:382
+#: src/Engine/FieldValidator.php:1471
+#: src/Fields/InputMask.php:343
+#: resources/frontend/components/fields/maskField.jsx:66
+#: resources/frontend/utils/fieldValidation.js:388
 msgid "Invalid phone number."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1461
-#: resources/frontend/utils/fieldValidation.js:385
+#: src/Engine/FieldValidator.php:1486
+#: resources/frontend/utils/fieldValidation.js:391
 msgid "Enter a 10-digit US phone number."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1493
-#: resources/frontend/utils/fieldValidation.js:502
+#: src/Engine/FieldValidator.php:1546
+#: resources/shared/passwordStrength.js:60
+msgid "an uppercase letter"
+msgstr ""
+
+#: src/Engine/FieldValidator.php:1549
+#: resources/shared/passwordStrength.js:61
+msgid "a lowercase letter"
+msgstr ""
+
+#: src/Engine/FieldValidator.php:1552
+#: resources/shared/passwordStrength.js:62
+msgid "a number"
+msgstr ""
+
+#: src/Engine/FieldValidator.php:1555
+#: resources/shared/passwordStrength.js:63
+msgid "a symbol"
+msgstr ""
+
+#. translators: %s: list of missing password parts, such as "a number, a symbol"
+#: src/Engine/FieldValidator.php:1559
+#: resources/frontend/components/fields/PasswordHints.jsx:21
+#, php-format,js-format
+msgid "Your password needs: %s."
+msgstr ""
+
+#: src/Engine/FieldValidator.php:1564
+#: resources/frontend/components/fields/PasswordHints.jsx:25
+msgid "Choose a stronger password."
+msgstr ""
+
+#: src/Engine/FieldValidator.php:1583
+#: resources/frontend/components/FieldRenderer.jsx:106
+#: resources/frontend/components/FieldRenderer.jsx:737
+#: resources/frontend/utils/fieldValidation.js:508
 msgid "The passwords do not match."
 msgstr ""
 
 #. translators: %s: field label
-#: src/Engine/FieldValidator.php:1633
+#: src/Engine/FieldValidator.php:1723
 #, php-format
 msgid "%s is required."
 msgstr ""
 
 #. translators: %s: field key
-#: src/Engine/FieldValidator.php:1636
+#: src/Engine/FieldValidator.php:1726
 #, php-format
 msgid "Field \"%s\" is required."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1673
-#: resources/frontend/utils/fieldValidation.js:311
+#: src/Engine/FieldValidator.php:1763
+#: resources/frontend/utils/fieldValidation.js:317
 msgid "Please match the requested format."
 msgstr ""
 
 #. translators: %d: minimum number of selections
-#: src/Engine/FieldValidator.php:1694
-#: resources/frontend/utils/fieldValidation.js:395
+#: src/Engine/FieldValidator.php:1784
+#: resources/frontend/utils/fieldValidation.js:401
 #, php-format,js-format
 msgid "Select at least %d option."
 msgid_plural "Select at least %d options."
@@ -1102,16 +1136,16 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: maximum number of selections
-#: src/Engine/FieldValidator.php:1698
-#: resources/frontend/utils/fieldValidation.js:402
+#: src/Engine/FieldValidator.php:1788
+#: resources/frontend/utils/fieldValidation.js:408
 #, php-format,js-format
 msgid "Select no more than %d option."
 msgid_plural "Select no more than %d options."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Engine/FieldValidator.php:1715
-#: src/Engine/FieldValidator.php:1721
+#: src/Engine/FieldValidator.php:1805
+#: src/Engine/FieldValidator.php:1811
 msgid "Please choose a value on the scale."
 msgstr ""
 
@@ -1185,8 +1219,8 @@ msgstr ""
 
 #: src/Fields/CoreFields.php:41
 #: src/Fields/CoreFields.php:275
-#: src/Fields/CoreFields.php:675
-#: src/Fields/InputMask.php:56
+#: src/Fields/CoreFields.php:712
+#: src/Fields/InputMask.php:62
 #: src/Tools/Import/WPFormsMapper.php:232
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:154
 #: resources/admin/components/OnboardingWizard.jsx:99
@@ -1221,7 +1255,7 @@ msgid "Address line 2"
 msgstr ""
 
 #: src/Fields/CoreFields.php:47
-#: src/Fields/CoreFields.php:1878
+#: src/Fields/CoreFields.php:1915
 #: resources/admin/components/builder/utils/schemaTree.js:425
 #: resources/shared/autocomplete.js:35
 #: resources/shared/compositeParts.js:49
@@ -1239,8 +1273,8 @@ msgid "Postal code"
 msgstr ""
 
 #: src/Fields/CoreFields.php:50
-#: src/Fields/CoreFields.php:723
-#: src/Fields/CoreFields.php:1881
+#: src/Fields/CoreFields.php:760
+#: src/Fields/CoreFields.php:1918
 #: resources/admin/components/builder/utils/schemaTree.js:428
 #: resources/shared/autocomplete.js:38
 #: resources/shared/compositeParts.js:52
@@ -1279,35 +1313,35 @@ msgstr ""
 #: src/Fields/CoreFields.php:244
 #: src/Fields/CoreFields.php:291
 #: src/Fields/CoreFields.php:361
-#: src/Fields/CoreFields.php:393
-#: src/Fields/CoreFields.php:448
-#: src/Fields/CoreFields.php:484
-#: src/Fields/CoreFields.php:538
-#: src/Fields/CoreFields.php:574
-#: src/Fields/CoreFields.php:615
-#: src/Fields/CoreFields.php:658
-#: src/Fields/CoreFields.php:688
-#: src/Fields/CoreFields.php:740
-#: src/Fields/CoreFields.php:805
-#: src/Fields/CoreFields.php:1046
-#: src/Fields/CoreFields.php:1074
-#: src/Fields/CoreFields.php:1103
-#: src/Fields/CoreFields.php:1134
+#: src/Fields/CoreFields.php:398
+#: src/Fields/CoreFields.php:485
+#: src/Fields/CoreFields.php:521
+#: src/Fields/CoreFields.php:575
+#: src/Fields/CoreFields.php:611
+#: src/Fields/CoreFields.php:652
+#: src/Fields/CoreFields.php:695
+#: src/Fields/CoreFields.php:725
+#: src/Fields/CoreFields.php:777
+#: src/Fields/CoreFields.php:842
+#: src/Fields/CoreFields.php:1083
+#: src/Fields/CoreFields.php:1111
+#: src/Fields/CoreFields.php:1140
 #: src/Fields/CoreFields.php:1171
-#: src/Fields/CoreFields.php:1196
-#: src/Fields/CoreFields.php:1216
-#: src/Fields/CoreFields.php:1240
-#: src/Fields/CoreFields.php:1262
-#: src/Fields/CoreFields.php:1289
-#: src/Fields/CoreFields.php:1469
-#: src/Fields/CoreFields.php:1583
-#: src/Fields/CoreFields.php:1618
-#: src/Fields/CoreFields.php:1674
-#: src/Fields/CoreFields.php:1830
-#: src/Fields/CoreFields.php:1870
-#: src/Fields/CoreFields.php:2077
-#: src/Fields/FieldSettings.php:291
-#: src/Fields/FieldSettings.php:595
+#: src/Fields/CoreFields.php:1208
+#: src/Fields/CoreFields.php:1233
+#: src/Fields/CoreFields.php:1253
+#: src/Fields/CoreFields.php:1277
+#: src/Fields/CoreFields.php:1299
+#: src/Fields/CoreFields.php:1326
+#: src/Fields/CoreFields.php:1506
+#: src/Fields/CoreFields.php:1620
+#: src/Fields/CoreFields.php:1655
+#: src/Fields/CoreFields.php:1711
+#: src/Fields/CoreFields.php:1867
+#: src/Fields/CoreFields.php:1907
+#: src/Fields/CoreFields.php:2114
+#: src/Fields/FieldSettings.php:296
+#: src/Fields/FieldSettings.php:600
 #: src/Fields/FieldsV2.php:51
 #: src/Fields/FieldsV2.php:103
 #: resources/admin/components/builder/appearance/tokenDefs.js:95
@@ -1323,13 +1357,13 @@ msgstr ""
 #: src/Fields/CoreFields.php:249
 #: src/Fields/CoreFields.php:296
 #: src/Fields/CoreFields.php:366
-#: src/Fields/CoreFields.php:398
-#: src/Fields/CoreFields.php:620
-#: src/Fields/CoreFields.php:663
-#: src/Fields/CoreFields.php:693
-#: src/Fields/CoreFields.php:745
-#: src/Fields/CoreFields.php:2084
-#: src/Fields/FieldSettings.php:303
+#: src/Fields/CoreFields.php:403
+#: src/Fields/CoreFields.php:657
+#: src/Fields/CoreFields.php:700
+#: src/Fields/CoreFields.php:730
+#: src/Fields/CoreFields.php:782
+#: src/Fields/CoreFields.php:2121
+#: src/Fields/FieldSettings.php:308
 #: resources/admin/components/builder/appearance/tokenDefs.js:97
 #: resources/admin/components/builder/inspector/controls/SubfieldInspectorControl.jsx:178
 #: resources/admin/utils/saveErrors.js:67
@@ -1350,7 +1384,7 @@ msgid "Use strict RFC 5322 email validation"
 msgstr ""
 
 #: src/Fields/CoreFields.php:173
-#: src/Fields/CoreFields.php:579
+#: src/Fields/CoreFields.php:616
 msgid "Allow Multiple"
 msgstr ""
 
@@ -1363,7 +1397,7 @@ msgid "Textarea"
 msgstr ""
 
 #: src/Fields/CoreFields.php:210
-#: src/Fields/FieldSettings.php:495
+#: src/Fields/FieldSettings.php:500
 msgid "Rows"
 msgstr ""
 
@@ -1380,13 +1414,13 @@ msgid "Maximum Value"
 msgstr ""
 
 #: src/Fields/CoreFields.php:264
-#: src/Fields/CoreFields.php:1149
+#: src/Fields/CoreFields.php:1186
 msgid "Step size"
 msgstr ""
 
 #: src/Fields/CoreFields.php:301
-#: resources/frontend/components/fields/PhoneField.jsx:140
-#: resources/frontend/components/fields/PhoneField.jsx:177
+#: resources/frontend/components/fields/PhoneField.jsx:155
+#: resources/frontend/components/fields/PhoneField.jsx:192
 msgid "Country code"
 msgstr ""
 
@@ -1395,7 +1429,7 @@ msgid "Add a searchable country list with dial codes in front of the number."
 msgstr ""
 
 #: src/Fields/CoreFields.php:308
-#: src/Fields/CoreFields.php:750
+#: src/Fields/CoreFields.php:787
 msgid "Default country"
 msgstr ""
 
@@ -1404,35 +1438,35 @@ msgid "Two-letter country code used when the country picker is on, for example U
 msgstr ""
 
 #: src/Fields/CoreFields.php:316
-#: src/Fields/CoreFields.php:764
+#: src/Fields/CoreFields.php:801
 msgid "Show country flags"
 msgstr ""
 
 #: src/Fields/CoreFields.php:317
-#: src/Fields/CoreFields.php:765
+#: src/Fields/CoreFields.php:802
 msgid "Shows a small flag next to the country code. Loads a flag image only for forms that use it."
 msgstr ""
 
 #: src/Fields/CoreFields.php:323
-#: src/Fields/CoreFields.php:698
+#: src/Fields/CoreFields.php:735
 #: resources/admin/components/EmailActionDetails.jsx:31
 msgid "Format"
 msgstr ""
 
 #: src/Fields/CoreFields.php:327
-#: src/Fields/CoreFields.php:702
+#: src/Fields/CoreFields.php:739
 msgid "International"
 msgstr ""
 
 #: src/Fields/CoreFields.php:331
-#: src/Fields/CoreFields.php:706
+#: src/Fields/CoreFields.php:743
 msgid "US"
 msgstr ""
 
 #: src/Fields/CoreFields.php:335
-#: src/Fields/CoreFields.php:710
-#: src/Fields/CoreFields.php:2198
-#: src/Fields/InputMask.php:62
+#: src/Fields/CoreFields.php:747
+#: src/Fields/CoreFields.php:2235
+#: src/Fields/InputMask.php:74
 #: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:455
 msgid "Custom"
 msgstr ""
@@ -1445,375 +1479,420 @@ msgstr ""
 msgid "Password"
 msgstr ""
 
-#: src/Fields/CoreFields.php:403
+#: src/Fields/CoreFields.php:408
 msgid "Minimum Length"
 msgstr ""
 
-#: src/Fields/CoreFields.php:408
-msgid "Show Strength Meter"
-msgstr ""
-
 #: src/Fields/CoreFields.php:413
-msgid "Require Confirmation"
+msgid "Require an uppercase letter (A-Z)"
 msgstr ""
 
 #: src/Fields/CoreFields.php:418
+msgid "Require a lowercase letter (a-z)"
+msgstr ""
+
+#: src/Fields/CoreFields.php:423
+msgid "Require a number (0-9)"
+msgstr ""
+
+#: src/Fields/CoreFields.php:428
+msgid "Require a symbol (such as ~ ! @ # $ %)"
+msgstr ""
+
+#: src/Fields/CoreFields.php:433
+msgid "Minimum strength"
+msgstr ""
+
+#: src/Fields/CoreFields.php:434
+msgid "Visitors cannot send the form until the password reaches this strength."
+msgstr ""
+
+#: src/Fields/CoreFields.php:436
+msgid "Any"
+msgstr ""
+
+#: src/Fields/CoreFields.php:437
+#: resources/shared/passwordRules.js:6
+msgid "Fair"
+msgstr ""
+
+#: src/Fields/CoreFields.php:438
+#: resources/admin/components/OnboardingWizard.jsx:113
+#: resources/shared/passwordRules.js:7
+msgid "Good"
+msgstr ""
+
+#: src/Fields/CoreFields.php:439
+#: resources/shared/passwordRules.js:8
+msgid "Strong"
+msgstr ""
+
+#: src/Fields/CoreFields.php:445
+msgid "Show strength meter"
+msgstr ""
+
+#: src/Fields/CoreFields.php:450
+msgid "Require confirmation"
+msgstr ""
+
+#: src/Fields/CoreFields.php:455
 msgid "Store a hash"
 msgstr ""
 
-#: src/Fields/CoreFields.php:419
+#: src/Fields/CoreFields.php:456
 msgid "Passwords are never stored as typed. By default the entry only records that a password was provided. Turn this on to keep a one-way hash instead. Passwords are never included in emails or exports."
 msgstr ""
 
-#: src/Fields/CoreFields.php:432
+#: src/Fields/CoreFields.php:469
 msgid "Checkbox"
 msgstr ""
 
-#: src/Fields/CoreFields.php:442
+#: src/Fields/CoreFields.php:479
 #: resources/admin/components/builder/FieldRenderer.jsx:334
-#: resources/frontend/components/FieldRenderer.jsx:866
+#: resources/frontend/components/FieldRenderer.jsx:878
 msgid "I agree"
 msgstr ""
 
-#: src/Fields/CoreFields.php:453
+#: src/Fields/CoreFields.php:490
 msgid "Checkbox label"
 msgstr ""
 
-#: src/Fields/CoreFields.php:454
+#: src/Fields/CoreFields.php:491
 msgid "Text shown next to the checkbox."
 msgstr ""
 
-#: src/Fields/CoreFields.php:468
+#: src/Fields/CoreFields.php:505
 #: src/Tools/Import/Cf7Mapper.php:181
 msgid "Consent"
 msgstr ""
 
-#: src/Fields/CoreFields.php:476
+#: src/Fields/CoreFields.php:513
 #: resources/admin/components/builder/FieldRenderer.jsx:349
-#: resources/frontend/components/FieldRenderer.jsx:874
+#: resources/frontend/components/FieldRenderer.jsx:886
 msgid "I agree to the Privacy Policy."
 msgstr ""
 
-#: src/Fields/CoreFields.php:478
+#: src/Fields/CoreFields.php:515
 #: resources/admin/components/builder/FieldRenderer.jsx:351
-#: resources/frontend/components/FieldRenderer.jsx:876
+#: resources/frontend/components/FieldRenderer.jsx:888
 msgid "Privacy Policy"
 msgstr ""
 
-#: src/Fields/CoreFields.php:489
+#: src/Fields/CoreFields.php:526
 msgid "Consent statement"
 msgstr ""
 
-#: src/Fields/CoreFields.php:490
+#: src/Fields/CoreFields.php:527
 msgid "Text shown next to the checkbox. Add the link placeholder below to insert a Privacy Policy link."
 msgstr ""
 
-#: src/Fields/CoreFields.php:496
+#: src/Fields/CoreFields.php:533
 msgid "Privacy Policy URL"
 msgstr ""
 
-#: src/Fields/CoreFields.php:497
+#: src/Fields/CoreFields.php:534
 msgid "Link target for the consent statement. Defaults to the site Privacy Policy page."
 msgstr ""
 
-#: src/Fields/CoreFields.php:502
+#: src/Fields/CoreFields.php:539
 msgid "Link text"
 msgstr ""
 
-#: src/Fields/CoreFields.php:503
+#: src/Fields/CoreFields.php:540
 msgid "Text of the Privacy Policy link inside the consent statement."
 msgstr ""
 
-#: src/Fields/CoreFields.php:513
+#: src/Fields/CoreFields.php:550
 msgid "Radio"
 msgstr ""
 
-#: src/Fields/CoreFields.php:521
-#: src/Fields/CoreFields.php:556
-#: src/Fields/CoreFields.php:598
-#: src/Fields/CoreFields.php:641
+#: src/Fields/CoreFields.php:558
+#: src/Fields/CoreFields.php:593
+#: src/Fields/CoreFields.php:635
+#: src/Fields/CoreFields.php:678
 msgid "First choice"
 msgstr ""
 
-#: src/Fields/CoreFields.php:525
-#: src/Fields/CoreFields.php:560
-#: src/Fields/CoreFields.php:602
-#: src/Fields/CoreFields.php:645
+#: src/Fields/CoreFields.php:562
+#: src/Fields/CoreFields.php:597
+#: src/Fields/CoreFields.php:639
+#: src/Fields/CoreFields.php:682
 msgid "Second choice"
 msgstr ""
 
-#: src/Fields/CoreFields.php:529
-#: src/Fields/CoreFields.php:564
-#: src/Fields/CoreFields.php:606
-#: src/Fields/CoreFields.php:649
+#: src/Fields/CoreFields.php:566
+#: src/Fields/CoreFields.php:601
+#: src/Fields/CoreFields.php:643
+#: src/Fields/CoreFields.php:686
 msgid "Third choice"
 msgstr ""
 
-#: src/Fields/CoreFields.php:548
+#: src/Fields/CoreFields.php:585
 msgid "Multiple Choice"
 msgstr ""
 
-#: src/Fields/CoreFields.php:589
+#: src/Fields/CoreFields.php:626
 msgid "Dropdown"
 msgstr ""
 
-#: src/Fields/CoreFields.php:632
+#: src/Fields/CoreFields.php:669
 msgid "Select"
 msgstr ""
 
-#: src/Fields/CoreFields.php:757
+#: src/Fields/CoreFields.php:794
 msgid "Preferred countries"
 msgstr ""
 
-#: src/Fields/CoreFields.php:758
+#: src/Fields/CoreFields.php:795
 msgid "ISO codes shown first, one per line. Example: US"
 msgstr ""
 
-#: src/Fields/CoreFields.php:771
+#: src/Fields/CoreFields.php:808
 msgid "Output Format"
 msgstr ""
 
-#: src/Fields/CoreFields.php:773
+#: src/Fields/CoreFields.php:810
 msgid "ISO Code (US, GB)"
 msgstr ""
 
-#: src/Fields/CoreFields.php:774
+#: src/Fields/CoreFields.php:811
 msgid "Country Name"
 msgstr ""
 
-#: src/Fields/CoreFields.php:780
+#: src/Fields/CoreFields.php:817
 msgid "Enable Search"
 msgstr ""
 
-#: src/Fields/CoreFields.php:790
+#: src/Fields/CoreFields.php:827
 msgid "Chained Select"
 msgstr ""
 
-#: src/Fields/CoreFields.php:810
+#: src/Fields/CoreFields.php:847
 #: resources/admin/components/builder/FieldInspector.jsx:503
 #: resources/admin/components/builder/inspector/controls/ChainedDisplayControl.jsx:8
 msgid "Dropdowns"
 msgstr ""
 
-#: src/Fields/CoreFields.php:812
+#: src/Fields/CoreFields.php:849
 msgid "Each dropdown appears after the one above it. A choice in a later dropdown is only offered when the visitor picks its parent."
 msgstr ""
 
-#: src/Fields/CoreFields.php:824
+#: src/Fields/CoreFields.php:861
 #: resources/admin/components/merge-tags/mergeTags.js:14
 #: resources/admin/components/TrendChart.jsx:158
 msgid "Date"
 msgstr ""
 
-#: src/Fields/CoreFields.php:845
+#: src/Fields/CoreFields.php:882
 msgid "Date format"
 msgstr ""
 
-#: src/Fields/CoreFields.php:846
+#: src/Fields/CoreFields.php:883
 msgid "How the date reads in the field. The saved value is always the same."
 msgstr ""
 
-#: src/Fields/CoreFields.php:853
-#: src/Fields/CoreFields.php:922
-#: src/Fields/CoreFields.php:988
+#: src/Fields/CoreFields.php:890
+#: src/Fields/CoreFields.php:959
+#: src/Fields/CoreFields.php:1025
 msgid "Custom format"
 msgstr ""
 
-#: src/Fields/CoreFields.php:854
+#: src/Fields/CoreFields.php:891
 msgid "PHP date format letters, for example d/m/Y."
 msgstr ""
 
-#: src/Fields/CoreFields.php:861
-#: src/Fields/CoreFields.php:996
+#: src/Fields/CoreFields.php:898
+#: src/Fields/CoreFields.php:1033
 msgid "First day of the week"
 msgstr ""
 
-#: src/Fields/CoreFields.php:862
-#: src/Fields/CoreFields.php:997
+#: src/Fields/CoreFields.php:899
+#: src/Fields/CoreFields.php:1034
 msgid "Which day the calendar starts its weeks on."
 msgstr ""
 
-#: src/Fields/CoreFields.php:872
-#: src/Fields/CoreFields.php:933
-#: src/Fields/CoreFields.php:1008
-#: src/Fields/FieldSettings.php:330
+#: src/Fields/CoreFields.php:909
+#: src/Fields/CoreFields.php:970
+#: src/Fields/CoreFields.php:1045
+#: src/Fields/FieldSettings.php:335
 msgid "Default value"
 msgstr ""
 
-#: src/Fields/CoreFields.php:873
+#: src/Fields/CoreFields.php:910
 msgid "Today fills the field when the form opens with no value."
 msgstr ""
 
-#: src/Fields/CoreFields.php:878
-#: src/Fields/CoreFields.php:939
-#: src/Fields/CoreFields.php:1014
-#: src/Fields/CoreFields.php:1695
-#: src/Fields/InputMask.php:55
+#: src/Fields/CoreFields.php:915
+#: src/Fields/CoreFields.php:976
+#: src/Fields/CoreFields.php:1051
+#: src/Fields/CoreFields.php:1732
+#: src/Fields/InputMask.php:61
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:24
 #: resources/admin/components/builder/appearance/tokenDefs.js:35
 msgid "None"
 msgstr ""
 
-#: src/Fields/CoreFields.php:882
+#: src/Fields/CoreFields.php:919
 #: resources/admin/components/TrendChart.jsx:152
 #: resources/admin/pages/ReportsPage.jsx:27
 #: resources/admin/pages/SubmissionsPage.jsx:351
-#: resources/frontend/components/fields/DateTimeField.jsx:969
+#: resources/frontend/components/fields/DateTimeField.jsx:989
 msgid "Today"
 msgstr ""
 
-#: src/Fields/CoreFields.php:895
+#: src/Fields/CoreFields.php:932
 #: resources/admin/components/logs/ApiLog.jsx:40
 #: resources/admin/pages/SubmissionDetailPage.jsx:1068
-#: resources/frontend/components/fields/DateTimeField.jsx:922
+#: resources/frontend/components/fields/DateTimeField.jsx:928
 msgid "Time"
 msgstr ""
 
-#: src/Fields/CoreFields.php:914
+#: src/Fields/CoreFields.php:951
 msgid "Time format"
 msgstr ""
 
-#: src/Fields/CoreFields.php:915
+#: src/Fields/CoreFields.php:952
 msgid "How the time reads in the field. The saved value is always 24-hour, like 14:30."
 msgstr ""
 
-#: src/Fields/CoreFields.php:923
+#: src/Fields/CoreFields.php:960
 msgid "PHP date format letters, for example H:i."
 msgstr ""
 
-#: src/Fields/CoreFields.php:934
+#: src/Fields/CoreFields.php:971
 msgid "Now fills the field with the current time, rounded up to the minute step."
 msgstr ""
 
-#: src/Fields/CoreFields.php:943
-#: src/Fields/CoreFields.php:1018
+#: src/Fields/CoreFields.php:980
+#: src/Fields/CoreFields.php:1055
+#: resources/frontend/components/fields/DateTimeField.jsx:975
 msgid "Now"
 msgstr ""
 
-#: src/Fields/CoreFields.php:956
+#: src/Fields/CoreFields.php:993
 msgid "Date & Time"
 msgstr ""
 
-#: src/Fields/CoreFields.php:980
+#: src/Fields/CoreFields.php:1017
 msgid "Date and time format"
 msgstr ""
 
-#: src/Fields/CoreFields.php:981
+#: src/Fields/CoreFields.php:1018
 msgid "How the date and time read in the field. The saved value is always like 2025-03-31T14:30."
 msgstr ""
 
-#: src/Fields/CoreFields.php:989
+#: src/Fields/CoreFields.php:1026
 msgid "PHP date format letters, for example d/m/Y H:i."
 msgstr ""
 
-#: src/Fields/CoreFields.php:1009
+#: src/Fields/CoreFields.php:1046
 msgid "Now fills the field with today and the current time, rounded up to the minute step."
 msgstr ""
 
-#: src/Fields/CoreFields.php:1033
+#: src/Fields/CoreFields.php:1070
 msgid "Image Upload"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1051
-#: src/Fields/CoreFields.php:1079
+#: src/Fields/CoreFields.php:1088
+#: src/Fields/CoreFields.php:1116
 msgid "Max Size (bytes)"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1061
+#: src/Fields/CoreFields.php:1098
 msgid "File Upload"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1091
+#: src/Fields/CoreFields.php:1128
 #: resources/admin/components/OnboardingWizard.jsx:108
 msgid "Rating"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1108
+#: src/Fields/CoreFields.php:1145
 msgid "Max Rating"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1120
+#: src/Fields/CoreFields.php:1157
 msgid "Range Slider"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1139
+#: src/Fields/CoreFields.php:1176
 msgid "Minimum"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1144
+#: src/Fields/CoreFields.php:1181
 msgid "Maximum"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1159
+#: src/Fields/CoreFields.php:1196
 msgid "Color Picker"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1176
+#: src/Fields/CoreFields.php:1213
 msgid "Default Color"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1186
+#: src/Fields/CoreFields.php:1223
 msgid "Rich Text Input"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1206
+#: src/Fields/CoreFields.php:1243
 msgid "Net Promoter Score"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1226
+#: src/Fields/CoreFields.php:1263
 msgid "Checkbox Grid"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1233
+#: src/Fields/CoreFields.php:1270
 msgid "Row 1"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1233
+#: src/Fields/CoreFields.php:1270
 msgid "Row 2"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1234
+#: src/Fields/CoreFields.php:1271
 msgid "Column 1"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1234
+#: src/Fields/CoreFields.php:1271
 msgid "Column 2"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1234
+#: src/Fields/CoreFields.php:1271
 msgid "Column 3"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1250
+#: src/Fields/CoreFields.php:1287
 msgid "Dynamic Field"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1267
+#: src/Fields/CoreFields.php:1304
 msgid "Data Source"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1277
+#: src/Fields/CoreFields.php:1314
 msgid "Post Selection"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1294
+#: src/Fields/CoreFields.php:1331
 msgid "Post Type"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1304
+#: src/Fields/CoreFields.php:1341
 #: resources/admin/components/EmailActionDetails.jsx:38
 msgid "HTML"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1316
+#: src/Fields/CoreFields.php:1353
 msgid "HTML Content"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1326
+#: src/Fields/CoreFields.php:1363
 msgid "Hidden"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1338
+#: src/Fields/CoreFields.php:1375
 #: resources/admin/components/builder/ConditionEditor.jsx:108
 #: resources/admin/components/builder/inspector/panels/OptionsPanel.jsx:143
 #: resources/admin/components/builder/LogicEditor.jsx:296
@@ -1823,131 +1902,131 @@ msgstr ""
 msgid "Value"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1339
+#: src/Fields/CoreFields.php:1376
 msgid "Sent with the entry to notifications and integrations. Visitors never see it. Supports {user_email}, {user_name}, {date} and {get:param}."
 msgstr ""
 
-#: src/Fields/CoreFields.php:1356
+#: src/Fields/CoreFields.php:1393
 msgid "Disclaimer"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1371
+#: src/Fields/CoreFields.php:1408
 msgid "Disclaimer Text"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1376
+#: src/Fields/CoreFields.php:1413
 msgid "Style"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1379
+#: src/Fields/CoreFields.php:1416
 #: resources/admin/components/logs/LogList.jsx:42
 msgid "Info"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1383
+#: src/Fields/CoreFields.php:1420
 #: resources/admin/components/logs/LogList.jsx:43
 msgid "Warning"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1387
+#: src/Fields/CoreFields.php:1424
 #: resources/admin/components/builder/appearance/tokenDefs.js:108
 msgid "Success"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1391
+#: src/Fields/CoreFields.php:1428
 msgid "Neutral"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1403
+#: src/Fields/CoreFields.php:1440
 #: resources/admin/components/builder/FieldRenderer.jsx:180
 msgid "Section Break"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1418
-#: src/Fields/CoreFields.php:1446
-#: src/Fields/CoreFields.php:1743
-#: src/Fields/CoreFields.php:1769
-#: src/Fields/CoreFields.php:1796
+#: src/Fields/CoreFields.php:1455
+#: src/Fields/CoreFields.php:1483
+#: src/Fields/CoreFields.php:1780
+#: src/Fields/CoreFields.php:1806
+#: src/Fields/CoreFields.php:1833
 #: resources/admin/components/builder/appearance/tokenDefs.js:30
 msgid "Title"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1423
-#: src/Fields/CoreFields.php:1801
+#: src/Fields/CoreFields.php:1460
+#: src/Fields/CoreFields.php:1838
 #: resources/admin/modals/CreateFormModal.jsx:298
 #: resources/admin/utils/formNameHelp.js:26
 msgid "Description"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1432
+#: src/Fields/CoreFields.php:1469
 msgid "Form Step"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1455
+#: src/Fields/CoreFields.php:1492
 msgid "Repeat Field"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1474
+#: src/Fields/CoreFields.php:1511
 msgid "Max Items"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1487
+#: src/Fields/CoreFields.php:1524
 msgid "Column"
 msgid_plural "Columns"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Fields/CoreFields.php:1503
-#: src/Fields/CoreFields.php:1558
-#: src/Fields/CoreFields.php:1588
+#: src/Fields/CoreFields.php:1540
+#: src/Fields/CoreFields.php:1595
+#: src/Fields/CoreFields.php:1625
 msgid "Spacing (px)"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1525
+#: src/Fields/CoreFields.php:1562
 #: resources/admin/components/builder/ContainerWrapper.jsx:48
 msgid "Repeat Container"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1543
+#: src/Fields/CoreFields.php:1580
 msgid "Min Repeats"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1548
+#: src/Fields/CoreFields.php:1585
 msgid "Max Repeats"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1553
+#: src/Fields/CoreFields.php:1590
 msgid "Button Label"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1567
-#: src/Fields/CoreFields.php:1574
+#: src/Fields/CoreFields.php:1604
+#: src/Fields/CoreFields.php:1611
 #: src/Fields/FieldSettings.php:66
 #: resources/admin/components/builder/ContainerRenderer.jsx:44
 #: resources/admin/components/builder/GroupRenderer.jsx:25
 msgid "Group"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1600
-#: src/Fields/CoreFields.php:1607
+#: src/Fields/CoreFields.php:1637
+#: src/Fields/CoreFields.php:1644
 #: src/Fields/FieldSettings.php:67
 #: resources/admin/components/builder/PanelContainerRenderer.jsx:64
 msgid "Tabs"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1619
+#: src/Fields/CoreFields.php:1656
 msgid "Names the tabs in the builder and for screen readers. Visitors do not see it."
 msgstr ""
 
-#: src/Fields/CoreFields.php:1625
+#: src/Fields/CoreFields.php:1662
 msgid "Tab position"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1629
+#: src/Fields/CoreFields.php:1666
 msgid "Top"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1633
+#: src/Fields/CoreFields.php:1670
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:37
 #: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:390
 #: resources/admin/components/builder/appearance/labels.js:61
@@ -1955,69 +2034,69 @@ msgstr ""
 msgid "Left"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1641
+#: src/Fields/CoreFields.php:1678
 msgid "On narrow screens, show as accordion"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1647
+#: src/Fields/CoreFields.php:1684
 msgid "Tab shown first"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1656
-#: src/Fields/CoreFields.php:1663
+#: src/Fields/CoreFields.php:1693
+#: src/Fields/CoreFields.php:1700
 #: src/Fields/FieldSettings.php:68
 #: resources/admin/components/builder/PanelContainerRenderer.jsx:64
 msgid "Accordion"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1675
+#: src/Fields/CoreFields.php:1712
 msgid "Names the accordion in the builder. Visitors do not see it."
 msgstr ""
 
-#: src/Fields/CoreFields.php:1681
+#: src/Fields/CoreFields.php:1718
 msgid "Let several sections open at once"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1687
+#: src/Fields/CoreFields.php:1724
 msgid "Open at start"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1691
+#: src/Fields/CoreFields.php:1728
 msgid "First section"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1699
+#: src/Fields/CoreFields.php:1736
 #: resources/admin/pages/FormsPage.jsx:125
 #: resources/admin/pages/SubmissionsPage.jsx:339
 msgid "All"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1707
+#: src/Fields/CoreFields.php:1744
 msgid "Icon"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1711
+#: src/Fields/CoreFields.php:1748
 msgid "Chevron"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1715
+#: src/Fields/CoreFields.php:1752
 msgid "Plus and minus"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1726
-#: src/Fields/CoreFields.php:1732
+#: src/Fields/CoreFields.php:1763
+#: src/Fields/CoreFields.php:1769
 #: src/Fields/FieldSettings.php:69
 msgid "Tab"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1752
-#: src/Fields/CoreFields.php:1758
+#: src/Fields/CoreFields.php:1789
+#: src/Fields/CoreFields.php:1795
 #: src/Fields/FieldSettings.php:70
 msgid "Section"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1780
-#: src/Fields/CoreFields.php:1787
+#: src/Fields/CoreFields.php:1817
+#: src/Fields/CoreFields.php:1824
 #: resources/admin/components/builder/ContainerRenderer.jsx:38
 #: resources/admin/components/builder/FieldInspector.jsx:75
 #: resources/admin/components/builder/FieldRenderer.jsx:548
@@ -2026,7 +2105,7 @@ msgstr ""
 msgid "Step"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1836
+#: src/Fields/CoreFields.php:1873
 #: src/Templates/FormTemplates.php:305
 #: src/Templates/FormTemplates.php:334
 #: src/Templates/FormTemplates.php:568
@@ -2035,213 +2114,213 @@ msgstr ""
 msgid "First Name"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1837
+#: src/Fields/CoreFields.php:1874
 #: src/Templates/FormTemplates.php:335
 #: resources/admin/components/builder/utils/schemaTree.js:420
 #: resources/shared/compositeParts.js:44
 msgid "Last Name"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1838
+#: src/Fields/CoreFields.php:1875
 #: resources/admin/components/builder/utils/schemaTree.js:419
 #: resources/shared/compositeParts.js:45
 msgid "Middle Name"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1839
-#: src/Fields/FieldSettings.php:355
-#: src/Fields/FieldSettings.php:732
+#: src/Fields/CoreFields.php:1876
+#: src/Fields/FieldSettings.php:360
+#: src/Fields/FieldSettings.php:737
 #: resources/shared/compositeParts.js:46
 msgid "Suffix"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1851
+#: src/Fields/CoreFields.php:1888
 #: src/Fields/FieldSettings.php:76
 #: src/Tools/Import/FluentMapper.php:262
 #: src/Tools/Import/WPFormsMapper.php:230
 msgid "Address"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1876
+#: src/Fields/CoreFields.php:1913
 #: resources/admin/components/builder/utils/schemaTree.js:423
 #: resources/shared/compositeParts.js:47
 msgid "Street Address"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1877
+#: src/Fields/CoreFields.php:1914
 #: resources/admin/components/builder/utils/schemaTree.js:424
 #: resources/shared/compositeParts.js:48
 msgid "Street Address Line 2"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1879
+#: src/Fields/CoreFields.php:1916
 #: resources/admin/components/builder/utils/schemaTree.js:426
 #: resources/shared/compositeParts.js:50
 msgid "State / Province"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1880
+#: src/Fields/CoreFields.php:1917
 #: resources/admin/components/builder/utils/schemaTree.js:427
 #: resources/shared/compositeParts.js:51
 msgid "Postal Code"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1894
+#: src/Fields/CoreFields.php:1931
 msgid "reCaptcha"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1907
-#: src/Fields/CoreFields.php:1936
-#: src/Fields/CoreFields.php:1965
+#: src/Fields/CoreFields.php:1944
+#: src/Fields/CoreFields.php:1973
+#: src/Fields/CoreFields.php:2002
 #: resources/admin/components/settings/AdvancedSettings.jsx:307
 #: resources/admin/components/settings/AdvancedSettings.jsx:394
 #: resources/admin/components/settings/AdvancedSettings.jsx:484
 msgid "Site Key"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1912
-#: src/Fields/CoreFields.php:1941
-#: src/Fields/CoreFields.php:1970
+#: src/Fields/CoreFields.php:1949
+#: src/Fields/CoreFields.php:1978
+#: src/Fields/CoreFields.php:2007
 msgid "Secret key"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1913
-#: src/Fields/CoreFields.php:1942
-#: src/Fields/CoreFields.php:1971
+#: src/Fields/CoreFields.php:1950
+#: src/Fields/CoreFields.php:1979
+#: src/Fields/CoreFields.php:2008
 msgid "Used to check the answer. Leave blank to use the key saved in Settings for this provider."
 msgstr ""
 
-#: src/Fields/CoreFields.php:1923
+#: src/Fields/CoreFields.php:1960
 #: resources/admin/components/settings/AdvancedSettings.jsx:362
 msgid "hCaptcha"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1952
+#: src/Fields/CoreFields.php:1989
 msgid "Turnstile"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1981
+#: src/Fields/CoreFields.php:2018
 #: src/Fields/FieldSettings.php:78
 #: resources/admin/components/builder/FieldRenderer.jsx:520
 msgid "Action Hook"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1993
+#: src/Fields/CoreFields.php:2030
 msgid "Hook Name"
 msgstr ""
 
-#: src/Fields/CoreFields.php:2004
+#: src/Fields/CoreFields.php:2041
 msgid "Save & Resume"
 msgstr ""
 
-#: src/Fields/CoreFields.php:2016
+#: src/Fields/CoreFields.php:2053
 #: src/Fields/FieldsV2.php:65
 #: resources/admin/components/builder/ActionsPanel.jsx:333
 #: resources/admin/components/integrations/serviceTiles/ServiceDetailHeader.jsx:42
 msgid "Enabled"
 msgstr ""
 
-#: src/Fields/CoreFields.php:2036
+#: src/Fields/CoreFields.php:2073
 msgid "No default"
 msgstr ""
 
-#: src/Fields/CoreFields.php:2078
+#: src/Fields/CoreFields.php:2115
 msgid "The question shown above the field."
 msgstr ""
 
-#: src/Fields/CoreFields.php:2085
+#: src/Fields/CoreFields.php:2122
 msgid "Shown while the field is empty. Leave it blank to show an example of the format."
 msgstr ""
 
-#: src/Fields/CoreFields.php:2101
+#: src/Fields/CoreFields.php:2138
 msgid "Earliest date"
 msgstr ""
 
-#: src/Fields/CoreFields.php:2102
+#: src/Fields/CoreFields.php:2139
 msgid "A date, or a relative date such as today or +7 days."
 msgstr ""
 
-#: src/Fields/CoreFields.php:2108
+#: src/Fields/CoreFields.php:2145
 msgid "Latest date"
 msgstr ""
 
-#: src/Fields/CoreFields.php:2109
+#: src/Fields/CoreFields.php:2146
 msgid "A date, or a relative date such as +1 year."
 msgstr ""
 
-#: src/Fields/CoreFields.php:2115
+#: src/Fields/CoreFields.php:2152
 msgid "No past dates"
 msgstr ""
 
-#: src/Fields/CoreFields.php:2116
+#: src/Fields/CoreFields.php:2153
 msgid "Days before today cannot be picked."
 msgstr ""
 
-#: src/Fields/CoreFields.php:2122
+#: src/Fields/CoreFields.php:2159
 msgid "Unavailable weekdays"
 msgstr ""
 
-#: src/Fields/CoreFields.php:2123
+#: src/Fields/CoreFields.php:2160
 msgid "Turn on the days of the week that cannot be picked."
 msgstr ""
 
 #. translators: %d: number of minutes.
-#: src/Fields/CoreFields.php:2140
+#: src/Fields/CoreFields.php:2177
 #, php-format
 msgid "%d minute"
 msgid_plural "%d minutes"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Fields/CoreFields.php:2147
+#: src/Fields/CoreFields.php:2184
 msgid "Minute step"
 msgstr ""
 
-#: src/Fields/CoreFields.php:2148
+#: src/Fields/CoreFields.php:2185
 msgid "The minutes offered in the time list."
 msgstr ""
 
-#: src/Fields/CoreFields.php:2155
+#: src/Fields/CoreFields.php:2192
 msgid "Earliest time"
 msgstr ""
 
-#: src/Fields/CoreFields.php:2156
+#: src/Fields/CoreFields.php:2193
 msgid "Times before this cannot be picked."
 msgstr ""
 
-#: src/Fields/CoreFields.php:2162
+#: src/Fields/CoreFields.php:2199
 msgid "Latest time"
 msgstr ""
 
-#: src/Fields/CoreFields.php:2163
+#: src/Fields/CoreFields.php:2200
 msgid "Times after this cannot be picked."
 msgstr ""
 
 #. translators: %s: the site date format with an example.
 #. translators: %s: the site time format with an example.
 #. translators: %s: the site date and time format with an example.
-#: src/Fields/CoreFields.php:2215
-#: src/Fields/CoreFields.php:2232
-#: src/Fields/CoreFields.php:2249
+#: src/Fields/CoreFields.php:2252
+#: src/Fields/CoreFields.php:2269
+#: src/Fields/CoreFields.php:2286
 #, php-format
 msgid "Site setting (%s)"
 msgstr ""
 
-#: src/Fields/CoreFields.php:2263
+#: src/Fields/CoreFields.php:2300
 msgid "Site setting"
 msgstr ""
 
-#: src/Fields/CoreFields.php:2267
+#: src/Fields/CoreFields.php:2304
 #: resources/admin/components/builder/inspector/controls/WeekdaysInspectorControl.jsx:9
 msgid "Sunday"
 msgstr ""
 
-#: src/Fields/CoreFields.php:2271
+#: src/Fields/CoreFields.php:2308
 #: resources/admin/components/builder/inspector/controls/WeekdaysInspectorControl.jsx:10
 msgid "Monday"
 msgstr ""
 
-#: src/Fields/CoreFields.php:2275
+#: src/Fields/CoreFields.php:2312
 #: resources/admin/components/builder/inspector/controls/WeekdaysInspectorControl.jsx:15
 msgid "Saturday"
 msgstr ""
@@ -3311,31 +3390,31 @@ msgstr ""
 msgid "NPS"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:266
+#: src/Fields/FieldSettings.php:271
 msgid "Number of stars"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:314
-#: src/Fields/FieldSettings.php:620
+#: src/Fields/FieldSettings.php:319
+#: src/Fields/FieldSettings.php:625
 #: resources/admin/components/builder/appearance/tokenDefs.js:106
 #: resources/admin/components/builder/FieldInspector.jsx:52
 msgid "Help text"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:315
+#: src/Fields/FieldSettings.php:320
 msgid "Shown under the field to guide the visitor."
 msgstr ""
 
-#: src/Fields/FieldSettings.php:331
+#: src/Fields/FieldSettings.php:336
 msgid "Prefilled when the form loads. Supports {user_email}, {user_name}, {date} and {get:param}."
 msgstr ""
 
-#: src/Fields/FieldSettings.php:344
-#: src/Fields/FieldSettings.php:723
+#: src/Fields/FieldSettings.php:349
+#: src/Fields/FieldSettings.php:728
 msgid "Prefix"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:369
+#: src/Fields/FieldSettings.php:374
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:165
 #: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:49
 #: resources/admin/components/builder/appearance/tokenDefs.js:164
@@ -3345,394 +3424,394 @@ msgstr ""
 msgid "Layout"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:371
+#: src/Fields/FieldSettings.php:376
 #: resources/admin/components/builder/appearance/labels.js:67
 msgid "Stacked"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:372
+#: src/Fields/FieldSettings.php:377
 #: resources/admin/components/builder/appearance/labels.js:69
 msgid "Inline"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:373
+#: src/Fields/FieldSettings.php:378
 msgid "Two columns"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:374
+#: src/Fields/FieldSettings.php:379
 msgid "Three columns"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:375
+#: src/Fields/FieldSettings.php:380
 #: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:48
 #: resources/admin/components/builder/appearance/tokenDefs.js:149
 #: resources/admin/components/builder/inspector/controls/ChainedDisplayControl.jsx:13
 msgid "Buttons"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:388
+#: src/Fields/FieldSettings.php:393
 msgid "Minimum characters"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:399
+#: src/Fields/FieldSettings.php:404
 msgid "Maximum characters"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:410
+#: src/Fields/FieldSettings.php:415
 msgid "Pattern (regular expression)"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:422
+#: src/Fields/FieldSettings.php:427
 msgid "Input mask"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:423
+#: src/Fields/FieldSettings.php:428
 msgid "Formats the answer as the visitor types."
 msgstr ""
 
-#: src/Fields/FieldSettings.php:432
+#: src/Fields/FieldSettings.php:437
 msgid "Pattern"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:433
+#: src/Fields/FieldSettings.php:438
 msgid "9 is a digit, A is a letter, * is a letter or digit. Anything else is typed for the visitor, for example AA-9999."
 msgstr ""
 
-#: src/Fields/FieldSettings.php:443
+#: src/Fields/FieldSettings.php:448
 #: resources/admin/components/builder/inspector/controls/MaskTryControl.jsx:24
 #: resources/admin/components/builder/inspector/controls/MaskTryControl.jsx:48
 msgid "Try it"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:452
+#: src/Fields/FieldSettings.php:457
 msgid "Save as"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:453
+#: src/Fields/FieldSettings.php:458
 msgid "Digits only removes the dashes, spaces and brackets the mask adds before the answer is saved."
 msgstr ""
 
-#: src/Fields/FieldSettings.php:455
+#: src/Fields/FieldSettings.php:460
 msgid "Save as typed"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:456
+#: src/Fields/FieldSettings.php:461
 msgid "Save digits only"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:469
+#: src/Fields/FieldSettings.php:474
 msgid "Minimum selections"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:480
+#: src/Fields/FieldSettings.php:485
 msgid "Maximum selections"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:496
+#: src/Fields/FieldSettings.php:501
 msgid "One per line. These are the questions."
 msgstr ""
 
-#: src/Fields/FieldSettings.php:506
+#: src/Fields/FieldSettings.php:511
 #: resources/admin/components/builder/ContainerRenderer.jsx:43
 #: resources/admin/components/builder/inspector/controls/ChainedDisplayControl.jsx:18
 msgid "Columns"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:507
+#: src/Fields/FieldSettings.php:512
 msgid "One per line. These are the answers."
 msgstr ""
 
-#: src/Fields/FieldSettings.php:516
+#: src/Fields/FieldSettings.php:521
 msgid "Allow several answers per row"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:529
+#: src/Fields/FieldSettings.php:534
 msgid "Allowed file types"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:531
+#: src/Fields/FieldSettings.php:536
 msgid "Extensions separated by commas. Leave empty for the usual document or image types. Scripts and web pages are never accepted."
 msgstr ""
 
-#: src/Fields/FieldSettings.php:545
+#: src/Fields/FieldSettings.php:550
 msgid "Message when left empty"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:546
+#: src/Fields/FieldSettings.php:551
 #: resources/admin/components/builder/FieldRenderer.jsx:778
 #: resources/admin/components/builder/FormSettings.jsx:285
 #: resources/frontend/utils/fieldValidation.js:220
 msgid "This field is required."
 msgstr ""
 
-#: src/Fields/FieldSettings.php:554
+#: src/Fields/FieldSettings.php:559
 msgid "Custom validation message"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:555
+#: src/Fields/FieldSettings.php:560
 msgid "Shown when the answer is not valid, for example a wrong email address, a number out of range or text that does not match the pattern. Leave empty for the standard message."
 msgstr ""
 
-#: src/Fields/FieldSettings.php:567
-#: src/Fields/FieldSettings.php:636
-#: src/Fields/FieldSettings.php:667
+#: src/Fields/FieldSettings.php:572
+#: src/Fields/FieldSettings.php:641
+#: src/Fields/FieldSettings.php:672
 msgid "Admin label"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:568
-#: src/Fields/FieldSettings.php:637
+#: src/Fields/FieldSettings.php:573
+#: src/Fields/FieldSettings.php:642
 msgid "Used in entries, emails, exports and integrations instead of the public label."
 msgstr ""
 
-#: src/Fields/FieldSettings.php:578
+#: src/Fields/FieldSettings.php:583
 msgid "Read-only"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:579
+#: src/Fields/FieldSettings.php:584
 msgid "Visitors can see but not change the value."
 msgstr ""
 
-#: src/Fields/FieldSettings.php:622
+#: src/Fields/FieldSettings.php:627
 msgid "Shown once above the groups visitors add."
 msgstr ""
 
-#: src/Fields/FieldSettings.php:623
+#: src/Fields/FieldSettings.php:628
 msgid "Shown under the label, above the fields."
 msgstr ""
 
-#: src/Fields/FieldSettings.php:668
+#: src/Fields/FieldSettings.php:673
 msgid "Used in entries, emails, exports and integrations."
 msgstr ""
 
-#: src/Fields/FieldSettings.php:679
+#: src/Fields/FieldSettings.php:684
 msgid "Names this field in the builder. Visitors never see it."
 msgstr ""
 
-#: src/Fields/FieldSettings.php:689
+#: src/Fields/FieldSettings.php:694
 msgid "CSS class"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:702
+#: src/Fields/FieldSettings.php:707
 msgid "Low label"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:711
+#: src/Fields/FieldSettings.php:716
 msgid "High label"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:761
+#: src/Fields/FieldSettings.php:766
 #: resources/admin/components/builder/FormSettings.jsx:220
 msgid "Field label visibility"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:763
-#: src/Fields/FieldSettings.php:782
+#: src/Fields/FieldSettings.php:768
+#: src/Fields/FieldSettings.php:787
 msgid "Form default"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:764
+#: src/Fields/FieldSettings.php:769
 #: resources/admin/components/builder/FormSettings.jsx:223
 msgid "Visible (top aligned)"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:765
+#: src/Fields/FieldSettings.php:770
 #: resources/admin/components/builder/FormSettings.jsx:224
 msgid "Hidden (kept for screen readers)"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:780
+#: src/Fields/FieldSettings.php:785
 #: resources/admin/components/builder/FormSettings.jsx:232
 msgid "Help text placement"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:783
+#: src/Fields/FieldSettings.php:788
 #: resources/admin/components/builder/FormSettings.jsx:235
 msgid "Below input"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:784
+#: src/Fields/FieldSettings.php:789
 #: resources/admin/components/builder/FormSettings.jsx:236
 msgid "Above input"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:809
+#: src/Fields/FieldSettings.php:814
 msgid "Short answer on one line"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:810
+#: src/Fields/FieldSettings.php:815
 msgid "Longer answer over several lines"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:811
+#: src/Fields/FieldSettings.php:816
 msgid "Validated email address"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:812
+#: src/Fields/FieldSettings.php:817
 msgid "Numbers with optional limits"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:813
+#: src/Fields/FieldSettings.php:818
 #: resources/admin/components/integrations/crm/HubSpotFormPanel.jsx:12
-#: resources/frontend/components/fields/PhoneField.jsx:218
+#: resources/frontend/components/fields/PhoneField.jsx:233
 msgid "Phone number"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:814
+#: src/Fields/FieldSettings.php:819
 msgid "Website address"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:815
+#: src/Fields/FieldSettings.php:820
 msgid "First, middle and last name"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:816
+#: src/Fields/FieldSettings.php:821
 msgid "Street, city, region and country"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:817
+#: src/Fields/FieldSettings.php:822
 msgid "Password with a strength meter and an optional confirmation"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:818
+#: src/Fields/FieldSettings.php:823
 msgid "Pick one from a list"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:819
+#: src/Fields/FieldSettings.php:824
 msgid "Pick one, all options visible"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:820
+#: src/Fields/FieldSettings.php:825
 msgid "Pick any number of options"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:821
+#: src/Fields/FieldSettings.php:826
 msgid "A single tick box"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:822
+#: src/Fields/FieldSettings.php:827
 msgid "Yes / no switch"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:823
+#: src/Fields/FieldSettings.php:828
 msgid "Searchable country list"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:824
+#: src/Fields/FieldSettings.php:829
 #: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:125
 msgid "Dependent dropdowns"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:825
+#: src/Fields/FieldSettings.php:830
 msgid "Terms or privacy agreement"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:826
+#: src/Fields/FieldSettings.php:831
 msgid "Calendar date picker"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:827
+#: src/Fields/FieldSettings.php:832
 msgid "Time of day"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:828
+#: src/Fields/FieldSettings.php:833
 msgid "Date and time together"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:829
+#: src/Fields/FieldSettings.php:834
 msgid "Star rating"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:830
+#: src/Fields/FieldSettings.php:835
 msgid "Numbered opinion scale"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:831
+#: src/Fields/FieldSettings.php:836
 msgid "0–10 likelihood to recommend"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:832
+#: src/Fields/FieldSettings.php:837
 msgid "Drag to pick a value"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:833
+#: src/Fields/FieldSettings.php:838
 msgid "Rows × columns of options"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:834
+#: src/Fields/FieldSettings.php:839
 msgid "Live total from other fields"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:835
+#: src/Fields/FieldSettings.php:840
 msgid "Draw a signature"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:836
+#: src/Fields/FieldSettings.php:841
 msgid "Pick a colour"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:837
+#: src/Fields/FieldSettings.php:842
 msgid "Formatted text editor"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:838
+#: src/Fields/FieldSettings.php:843
 msgid "A value visitors never see, for tracking"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:839
+#: src/Fields/FieldSettings.php:844
 msgid "Upload documents"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:840
+#: src/Fields/FieldSettings.php:845
 msgid "Upload images"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:841
+#: src/Fields/FieldSettings.php:846
 msgid "Heading and intro text"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:842
+#: src/Fields/FieldSettings.php:847
 msgid "Any HTML content"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:843
+#: src/Fields/FieldSettings.php:848
 msgid "Highlighted notice box"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:844
+#: src/Fields/FieldSettings.php:849
 msgid "Split the form into pages"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:845
+#: src/Fields/FieldSettings.php:850
 msgid "Group fields together"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:846
+#: src/Fields/FieldSettings.php:851
 msgid "Split fields into tabs"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:847
+#: src/Fields/FieldSettings.php:852
 msgid "Split fields into sections that open and close"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:848
+#: src/Fields/FieldSettings.php:853
 msgid "Let visitors add rows"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:849
+#: src/Fields/FieldSettings.php:854
 #: resources/admin/components/settings/AdvancedSettings.jsx:242
 msgid "Google reCAPTCHA"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:850
+#: src/Fields/FieldSettings.php:855
 msgid "hCaptcha challenge"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:851
+#: src/Fields/FieldSettings.php:856
 #: resources/admin/components/settings/AdvancedSettings.jsx:449
 msgid "Cloudflare Turnstile"
 msgstr ""
 
-#: src/Fields/FieldSettings.php:855
+#: src/Fields/FieldSettings.php:860
 msgid "Place fields side by side"
 msgstr ""
 
@@ -3798,55 +3877,87 @@ msgstr ""
 msgid "High end label"
 msgstr ""
 
-#: src/Fields/InputMask.php:57
+#: src/Fields/InputMask.php:63
+msgid "(999) 999-9999 (US and Canada)"
+msgstr ""
+
+#: src/Fields/InputMask.php:64
+msgid "999-999-9999"
+msgstr ""
+
+#: src/Fields/InputMask.php:65
+msgid "99999 999999 (UK)"
+msgstr ""
+
+#: src/Fields/InputMask.php:66
+msgid "9999 999 999 (Australia)"
+msgstr ""
+
+#: src/Fields/InputMask.php:67
+msgid "99999 99999 (India)"
+msgstr ""
+
+#: src/Fields/InputMask.php:68
+msgid "+99 999 999 9999 (international)"
+msgstr ""
+
+#: src/Fields/InputMask.php:69
 msgid "Date DD/MM/YYYY"
 msgstr ""
 
-#: src/Fields/InputMask.php:58
+#: src/Fields/InputMask.php:70
 msgid "Date MM/DD/YYYY"
 msgstr ""
 
-#: src/Fields/InputMask.php:59
+#: src/Fields/InputMask.php:71
 msgid "Date YYYY-MM-DD"
 msgstr ""
 
-#: src/Fields/InputMask.php:60
+#: src/Fields/InputMask.php:72
 msgid "Time HH:MM (24-hour)"
 msgstr ""
 
-#: src/Fields/InputMask.php:61
+#: src/Fields/InputMask.php:73
 msgid "Postcode or ZIP (US)"
 msgstr ""
 
+#: src/Fields/InputMask.php:80
+msgid "Automatic (by country)"
+msgstr ""
+
+#: src/Fields/InputMask.php:81
+msgid "Custom pattern"
+msgstr ""
+
 #. translators: %s: format such as DD/MM/YYYY
-#: src/Fields/InputMask.php:326
-#: resources/frontend/components/fields/maskField.jsx:68
+#: src/Fields/InputMask.php:354
+#: resources/frontend/components/fields/maskField.jsx:70
 #, php-format,js-format
 msgid "Enter the date as %s."
 msgstr ""
 
 #. translators: %s: sentence such as "Enter the date as DD/MM/YYYY."
-#: src/Fields/InputMask.php:333
-#: resources/frontend/components/fields/maskField.jsx:69
+#: src/Fields/InputMask.php:361
+#: resources/frontend/components/fields/maskField.jsx:71
 #, php-format,js-format
 msgid "That date does not exist. %s"
 msgstr ""
 
 #. translators: %s: format such as HH:MM
-#: src/Fields/InputMask.php:340
-#: resources/frontend/components/fields/maskField.jsx:73
+#: src/Fields/InputMask.php:368
+#: resources/frontend/components/fields/maskField.jsx:75
 #, php-format,js-format
 msgid "Enter the time as %s (24-hour)."
 msgstr ""
 
-#: src/Fields/InputMask.php:346
-#: resources/frontend/components/fields/maskField.jsx:76
+#: src/Fields/InputMask.php:374
+#: resources/frontend/components/fields/maskField.jsx:78
 msgid "Enter a US ZIP code, such as 12345 or 12345-6789."
 msgstr ""
 
 #. translators: %s: format such as AA-9999
-#: src/Fields/InputMask.php:349
-#: resources/frontend/components/fields/maskField.jsx:79
+#: src/Fields/InputMask.php:377
+#: resources/frontend/components/fields/maskField.jsx:81
 #, php-format,js-format
 msgid "Enter this in the format %s."
 msgstr ""
@@ -3879,7 +3990,7 @@ msgstr ""
 msgid "This form needs JavaScript. Turn it on in your browser to fill it in."
 msgstr ""
 
-#: src/Frontend/FrontendAssets.php:141
+#: src/Frontend/FrontendAssets.php:142
 #: resources/frontend/components/FormRenderer.jsx:963
 #: resources/frontend/components/FormRenderer.jsx:1099
 #: resources/frontend/components/FormRenderer.jsx:1151
@@ -4403,7 +4514,7 @@ msgstr ""
 #. translators: %d: maximum number of groups
 #. translators: %d: maximum number of entries
 #: src/Support/Repeater.php:309
-#: resources/frontend/utils/fieldValidation.js:482
+#: resources/frontend/utils/fieldValidation.js:488
 #, php-format,js-format
 msgid "Add no more than %d entry."
 msgid_plural "Add no more than %d entries."
@@ -5888,7 +5999,7 @@ msgstr ""
 #: resources/admin/components/integrations/emailMarketing/ServiceDetail.jsx:74
 #: resources/admin/components/RouteTransition.jsx:23
 #: resources/admin/pages/SettingsPage.jsx:293
-#: resources/frontend/components/fields/lazyFields.jsx:226
+#: resources/frontend/components/fields/lazyFields.jsx:228
 msgid "Loading…"
 msgstr ""
 
@@ -6205,8 +6316,8 @@ msgstr ""
 #: resources/admin/pages/ReportsPage.jsx:315
 #: resources/admin/pages/SubmissionDetailPage.jsx:1171
 #: resources/admin/pages/ToolsPage.jsx:318
-#: resources/blocks/form/FormPicker.jsx:78
-#: resources/blocks/form/FormPicker.jsx:88
+#: resources/blocks/form/FormPicker.jsx:80
+#: resources/blocks/form/FormPicker.jsx:90
 #: resources/frontend/components/FormRenderer.jsx:1285
 msgid "Form"
 msgstr ""
@@ -6234,7 +6345,7 @@ msgstr ""
 
 #: resources/admin/components/builder/appearance/AppearanceControls.jsx:118
 #: resources/admin/pages/DashboardPage.jsx:286
-#: resources/frontend/components/fields/DateTimeField.jsx:992
+#: resources/frontend/components/fields/DateTimeField.jsx:1013
 msgid "Done"
 msgstr ""
 
@@ -6310,7 +6421,7 @@ msgstr[1] ""
 
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:122
 #: resources/admin/components/DataTable.jsx:153
-#: resources/frontend/components/fields/DateTimeField.jsx:979
+#: resources/frontend/components/fields/DateTimeField.jsx:1001
 msgid "Clear"
 msgstr ""
 
@@ -8262,7 +8373,7 @@ msgstr[1] ""
 #. translators: 1: field label, 2: kind of picker (calendar, time picker, date and time picker).
 #: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:57
 #: resources/admin/components/TrendChart.jsx:121
-#: resources/frontend/components/fields/DateTimeField.jsx:450
+#: resources/frontend/components/fields/DateTimeField.jsx:453
 #, js-format
 msgid "%1$s, %2$s"
 msgstr ""
@@ -10942,7 +11053,7 @@ msgid "No form (only create the subscriber)"
 msgstr ""
 
 #: resources/admin/components/integrations/emailMarketing/serviceUi.js:69
-#: resources/blocks/form/FormPicker.jsx:83
+#: resources/blocks/form/FormPicker.jsx:85
 msgid "Loading forms…"
 msgstr ""
 
@@ -11287,10 +11398,6 @@ msgstr ""
 
 #: resources/admin/components/OnboardingWizard.jsx:112
 msgid "Excellent"
-msgstr ""
-
-#: resources/admin/components/OnboardingWizard.jsx:113
-msgid "Good"
 msgstr ""
 
 #: resources/admin/components/OnboardingWizard.jsx:114
@@ -13004,7 +13111,7 @@ msgid "Autosave"
 msgstr ""
 
 #: resources/admin/pages/DashboardPage.jsx:220
-#: resources/blocks/form/FormPicker.jsx:72
+#: resources/blocks/form/FormPicker.jsx:74
 msgid "Create a form"
 msgstr ""
 
@@ -13226,8 +13333,8 @@ msgstr ""
 #. translators: 1: first date, 2: last date
 #. translators: 1: first year, 2: last year of the years shown.
 #: resources/admin/pages/ReportsPage.jsx:345
-#: resources/frontend/components/fields/DateTimeField.jsx:775
-#: resources/frontend/components/fields/DateTimeField.jsx:876
+#: resources/frontend/components/fields/DateTimeField.jsx:781
+#: resources/frontend/components/fields/DateTimeField.jsx:882
 #, js-format
 msgid "%1$s to %2$s"
 msgstr ""
@@ -13405,7 +13512,7 @@ msgstr ""
 
 #: resources/admin/pages/SubmissionDetailPage.jsx:657
 #: resources/admin/pages/SubmissionDetailPage.jsx:796
-#: resources/frontend/components/fields/DateTimeField.jsx:790
+#: resources/frontend/components/fields/DateTimeField.jsx:796
 msgid "Close"
 msgstr ""
 
@@ -14391,12 +14498,16 @@ msgstr ""
 msgid "Select a published form to embed"
 msgstr ""
 
-#: resources/blocks/form/FormPicker.jsx:62
+#: resources/blocks/form/FormPicker.jsx:64
 msgid "Forms could not be loaded. Reload the editor to try again."
 msgstr ""
 
-#: resources/blocks/form/FormPicker.jsx:70
+#: resources/blocks/form/FormPicker.jsx:72
 msgid "No published forms yet."
+msgstr ""
+
+#: resources/blocks/form/FormPicker.jsx:99
+msgid "Edit this form"
 msgstr ""
 
 #: resources/frontend/components/ConversationalFormRenderer.jsx:280
@@ -14448,44 +14559,32 @@ msgstr ""
 msgid "Question"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:738
-msgid "Strong password"
-msgstr ""
-
-#: resources/frontend/components/FieldRenderer.jsx:740
-msgid "Fair password"
-msgstr ""
-
-#: resources/frontend/components/FieldRenderer.jsx:741
-msgid "Weak password"
-msgstr ""
-
-#: resources/frontend/components/FieldRenderer.jsx:751
-#: resources/frontend/components/FieldRenderer.jsx:752
+#: resources/frontend/components/FieldRenderer.jsx:757
+#: resources/frontend/components/FieldRenderer.jsx:758
 msgid "Confirm password"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:1101
+#: resources/frontend/components/FieldRenderer.jsx:1113
 msgid "Select Country"
 msgstr ""
 
 #. translators: 1: chosen rating, 2: highest rating
 #. translators: 1: groups added, 2: maximum groups
-#: resources/frontend/components/FieldRenderer.jsx:1162
+#: resources/frontend/components/FieldRenderer.jsx:1174
 #: resources/frontend/components/fields/RepeaterField.jsx:226
 #, js-format
 msgid "%1$d of %2$d"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:1253
+#: resources/frontend/components/FieldRenderer.jsx:1265
 msgid "Not at all likely"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:1254
+#: resources/frontend/components/FieldRenderer.jsx:1266
 msgid "Extremely likely"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:1449
+#: resources/frontend/components/FieldRenderer.jsx:1461
 msgid "Colour hex value"
 msgstr ""
 
@@ -14520,67 +14619,75 @@ msgid "Search countries"
 msgstr ""
 
 #: resources/frontend/components/fields/CountrySelect.jsx:242
-#: resources/frontend/components/fields/PhoneField.jsx:181
+#: resources/frontend/components/fields/PhoneField.jsx:196
 msgid "No countries match that search."
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:445
+#: resources/frontend/components/fields/DateTimeField.jsx:448
 msgid "time picker"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:447
+#: resources/frontend/components/fields/DateTimeField.jsx:450
 msgid "date and time picker"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:448
+#: resources/frontend/components/fields/DateTimeField.jsx:451
 msgid "calendar"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:654
+#: resources/frontend/components/fields/DateTimeField.jsx:660
 msgid "Previous month"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:654
+#: resources/frontend/components/fields/DateTimeField.jsx:660
 msgid "Next month"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:655
+#: resources/frontend/components/fields/DateTimeField.jsx:661
 msgid "Previous year"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:655
+#: resources/frontend/components/fields/DateTimeField.jsx:661
 msgid "Next year"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:656
+#: resources/frontend/components/fields/DateTimeField.jsx:662
 msgid "Previous 12 years"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:656
+#: resources/frontend/components/fields/DateTimeField.jsx:662
 msgid "Next 12 years"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:715
+#: resources/frontend/components/fields/DateTimeField.jsx:721
 msgid "Open time picker"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:717
+#: resources/frontend/components/fields/DateTimeField.jsx:723
 msgid "Open date and time picker"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:718
+#: resources/frontend/components/fields/DateTimeField.jsx:724
 msgid "Open calendar"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:926
+#: resources/frontend/components/fields/DateTimeField.jsx:932
 msgid "Hour"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:933
+#: resources/frontend/components/fields/DateTimeField.jsx:939
 msgid "Minute"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:963
+#: resources/frontend/components/fields/DateTimeField.jsx:948
+msgid "AM/PM"
+msgstr ""
+
+#: resources/frontend/components/fields/DateTimeField.jsx:970
+msgid "The current time is outside the allowed range"
+msgstr ""
+
+#: resources/frontend/components/fields/DateTimeField.jsx:983
 msgid "Today is outside the allowed dates"
 msgstr ""
 
@@ -14660,8 +14767,22 @@ msgid_plural "%d errors"
 msgstr[0] ""
 msgstr[1] ""
 
-#: resources/frontend/components/fields/PhoneField.jsx:161
-#: resources/frontend/components/fields/PhoneField.jsx:162
+#. translators: %s: strength level such as Good
+#: resources/frontend/components/fields/PasswordHints.jsx:46
+#, js-format
+msgid "Password strength: %s"
+msgstr ""
+
+#: resources/frontend/components/fields/PasswordHints.jsx:65
+msgid " (met)"
+msgstr ""
+
+#: resources/frontend/components/fields/PasswordHints.jsx:65
+msgid " (not met)"
+msgstr ""
+
+#: resources/frontend/components/fields/PhoneField.jsx:176
+#: resources/frontend/components/fields/PhoneField.jsx:177
 msgid "Search country or code"
 msgstr ""
 
@@ -14744,12 +14865,12 @@ msgstr ""
 msgid "%s (current)"
 msgstr ""
 
-#: resources/frontend/utils/fieldValidation.js:430
 #: resources/frontend/utils/fieldValidation.js:436
+#: resources/frontend/utils/fieldValidation.js:442
 msgid "Please enter your first and last name."
 msgstr ""
 
-#: resources/frontend/utils/fieldValidation.js:431
+#: resources/frontend/utils/fieldValidation.js:437
 msgid "Please enter your full address."
 msgstr ""
 
@@ -14771,6 +14892,42 @@ msgstr ""
 
 #: resources/shared/logicFields.js:43
 msgid "Unchecked"
+msgstr ""
+
+#: resources/shared/passwordRules.js:9
+msgid "Weak"
+msgstr ""
+
+#: resources/shared/passwordRules.js:13
+msgid "An uppercase letter"
+msgstr ""
+
+#: resources/shared/passwordRules.js:14
+msgid "A lowercase letter"
+msgstr ""
+
+#: resources/shared/passwordRules.js:15
+msgid "A number"
+msgstr ""
+
+#: resources/shared/passwordRules.js:16
+msgid "A symbol"
+msgstr ""
+
+#. translators: %d: minimum number of characters
+#: resources/shared/passwordRules.js:28
+#, js-format
+msgid "At least %d characters"
+msgstr ""
+
+#: resources/shared/passwordRules.js:42
+msgid "Strength: Strong"
+msgstr ""
+
+#. translators: %s: strength level such as Good
+#: resources/shared/passwordRules.js:45
+#, js-format
+msgid "Strength: %s or better"
 msgstr ""
 
 #: resources/blocks/form/block.json
