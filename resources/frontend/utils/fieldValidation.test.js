@@ -147,6 +147,16 @@ describe('Password confirmation (issue 190)', () => {
     expect(check({ pw: 'a1B2c3D4', pw_confirm: 'a1B2c3D4' }, cols)).toEqual({});
   });
 
+  test('inside a repeater only the row with a mismatch is blocked (issue 198)', () => {
+    const rep = { type: 'repeat_container', key: 'people', config: { key: 'people', min: 1, max: 3 }, children: [pw] };
+    const rows = [
+      { pw: 'Secret123!', pw_confirm: 'Secret123!' },
+      { pw: 'Secret123!', pw_confirm: 'Other123!' },
+      { pw: 'Secret123!', pw_confirm: 'Secret123!' },
+    ];
+    expect(check({ people: rows }, rep)).toEqual({ 'people.1.pw': 'The passwords do not match.' });
+  });
+
   test('the setting off asks for nothing', () => {
     expect(check({ pw: 'Secret123!' }, { ...pw, requireConfirmation: false })).toEqual({});
   });

@@ -266,6 +266,10 @@ final class Repeater {
 			if ( array_key_exists( $key, $group ) ) {
 				$flat[ $prefix . $key ] = $group[ $key ];
 			}
+			// A password's confirmation sits beside it in the row.
+			if ( 'password' === ( $node['type'] ?? '' ) && array_key_exists( $key . '_confirm', $group ) ) {
+				$flat[ $prefix . $key . '_confirm' ] = $group[ $key . '_confirm' ];
+			}
 		}
 		foreach ( array( 'children', 'fields' ) as $list ) {
 			if ( isset( $node[ $list ] ) && is_array( $node[ $list ] ) && ( ! $node[ $list ] || isset( $node[ $list ][0] ) ) ) {
@@ -286,6 +290,34 @@ final class Repeater {
 			}
 		}
 		return $node;
+	}
+
+	/**
+	 * Remove every password confirmation from every group. The confirmation
+	 * is only for the check, so no storage or notification may see it.
+	 *
+	 * @param array $payload Answers.
+	 * @param mixed $schema  Form schema.
+	 * @return array
+	 */
+	public static function stripConfirmations( array $payload, $schema ): array {
+		if ( ! is_array( $schema ) ) {
+			return $payload;
+		}
+		foreach ( self::find( is_array( $schema['fields'] ?? null ) ? $schema['fields'] : array() ) as $key => $node ) {
+			if ( ! isset( $payload[ $key ] ) || ! is_array( $payload[ $key ] ) ) {
+				continue;
+			}
+			$secrets = EntryValues::secretKeys( array( 'fields' => self::children( $node ) ) );
+			foreach ( $payload[ $key ] as $i => $group ) {
+				if ( is_array( $group ) ) {
+					foreach ( $secrets as $secret ) {
+						unset( $payload[ $key ][ $i ][ $secret . '_confirm' ] );
+					}
+				}
+			}
+		}
+		return $payload;
 	}
 
 	/**

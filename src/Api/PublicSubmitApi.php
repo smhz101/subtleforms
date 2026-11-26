@@ -1030,6 +1030,7 @@ final class PublicSubmitApi {
 			// The confirmation is never kept, not even in the first write.
 			unset( $payload[ $entry['key'] . '_confirm' ] );
 		}
+		$payload = \SubtleForms\Support\Repeater::stripConfirmations( $payload, $schema );
 		foreach ( $payload as $key => $value ) {
 			if ( self::COMPUTE_ERROR === $value ) {
 				$payload[ $key ] = null;
