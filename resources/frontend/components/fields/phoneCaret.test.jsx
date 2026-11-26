@@ -65,3 +65,25 @@ describe('phone field with country selector', () => {
     done();
   });
 });
+
+describe('FieldRenderer plain US phone', () => {
+  const FieldRenderer = require('../FieldRenderer').default;
+  const { loadAllFieldGroups } = require('./lazyFields');
+
+  function Host({ field }) {
+    const [values, setValues] = useState({ ph: '' });
+    return <FieldRenderer field={field} values={values} onChange={(_k, v) => setValues({ ph: v })} errors={{}} />;
+  }
+
+  test.each([
+    ['flat format', { type: 'phone', key: 'ph', label: 'Phone', format: 'us' }],
+    ['config.format', { type: 'phone', key: 'ph', label: 'Phone', config: { format: 'us' } }],
+  ])('formats while typing (%s)', async (_n, field) => {
+    await loadAllFieldGroups();
+    const { input, done } = mount(<Host field={field} />);
+    type(input, '5550101234', 10);
+    expect(input.value).toBe('(555) 010-1234');
+    expect(input.getAttribute('inputmode')).toBe('tel');
+    done();
+  });
+});

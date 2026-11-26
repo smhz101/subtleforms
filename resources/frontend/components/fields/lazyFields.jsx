@@ -89,7 +89,7 @@ export function fieldHasMask(field) {
   }
   const config = fieldConfig(field);
   const key = typeof config.inputMask === 'string' ? config.inputMask : '';
-  if (!key && !(['phone', 'tel'].includes(field.type) && config.format === 'us')) {
+  if (!key) {
     return false;
   }
   return !(['phone', 'tel'].includes(field.type) && config.enableCountryCode);
@@ -123,7 +123,7 @@ export function fieldGroups(schema) {
     if (group) {
       groups.add(group);
     }
-    if (fieldHasMask(node)) {
+    if (fieldHasMask(node) || (['phone', 'tel'].includes(node.type) && fieldConfig(node).format === 'us' && !fieldConfig(node).enableCountryCode)) {
       groups.add('mask');
     }
     if ((group === 'geo' && (node.type === 'country' || (node.type === 'address_group' && addonProvides('address_flags')) || fieldConfig(node).enableCountryCode)) && flagsOn(fieldConfig(node).showFlags)) {
