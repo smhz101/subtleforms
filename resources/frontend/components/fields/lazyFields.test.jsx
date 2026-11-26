@@ -50,6 +50,12 @@ describe('fieldGroups', () => {
     );
   });
 
+  test('tabs and accordion containers are the panel group', () => {
+    const { fieldGroups } = require('./lazyFields');
+    const schema = { fields: [{ type: 'tabs_container' }, { type: 'accordion_container' }] };
+    expect([...fieldGroups(schema)]).toEqual(['panel']);
+  });
+
   test('container hint keeps known groups only', () => {
     const div = document.createElement('div');
     div.dataset.features = 'date  geo bogus upload';
@@ -71,6 +77,14 @@ describe('loading', () => {
     const first = await mod.loadGroup('date');
     expect(await mod.loadGroup('date')).toBe(first);
     expect(await mod.loadGroup('nope')).toBeNull();
+  });
+
+  test('a form with tabs waits for the panel group', async () => {
+    const mod = require('./lazyFields');
+    const schema = { fields: [{ type: 'tabs_container' }] };
+    expect(mod.fieldsReadyFor(schema)).toBe(false);
+    await mod.loadFieldsFor(schema);
+    expect(mod.fieldsReadyFor(schema)).toBe(true);
   });
 
   test('a form with a dropdown waits for the choice group', async () => {

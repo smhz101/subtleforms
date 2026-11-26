@@ -39,19 +39,21 @@ final class FrontendAssets {
 	 * group. Mirrors resources/frontend/components/fields/lazyFields.jsx.
 	 */
 	private const TYPE_GROUPS = array(
-		'date'             => 'date',
-		'time'             => 'date',
-		'datetime'         => 'date',
-		'country'          => 'geo',
-		'address_group'    => 'geo',
-		'file_upload'      => 'upload',
-		'image_upload'     => 'upload',
-		'repeat_container' => 'repeater',
-		'chained_select'   => 'chained',
-		'select'           => 'choice',
-		'dropdown'         => 'choice',
-		'rich_text'        => 'richText',
-		'password'         => 'password',
+		'date'                => 'date',
+		'time'                => 'date',
+		'datetime'            => 'date',
+		'country'             => 'geo',
+		'address_group'       => 'geo',
+		'file_upload'         => 'upload',
+		'image_upload'        => 'upload',
+		'repeat_container'    => 'repeater',
+		'chained_select'      => 'chained',
+		'select'              => 'choice',
+		'dropdown'            => 'choice',
+		'tabs_container'      => 'panel',
+		'accordion_container' => 'panel',
+		'rich_text'           => 'richText',
+		'password'            => 'password',
 	);
 
 	/**
@@ -578,6 +580,7 @@ final class FrontendAssets {
 		'flags'          => 'feature-flags',
 		'geo'            => 'field-phone-country',
 		'mask'           => 'field-mask',
+		'panel'          => 'field-panel',
 		'password'       => 'field-password',
 		'repeater'       => 'field-repeater',
 		'richText'       => 'field-rich-text',

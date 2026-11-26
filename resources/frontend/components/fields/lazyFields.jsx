@@ -3,7 +3,7 @@
  *
  * The main front-end bundle holds the form and the everyday fields. The date
  * picker, the phone and country pickers (with the country list), uploads,
- * repeaters, chained selects, the rich text editor and the
+ * repeaters, tabs and accordions, chained selects, the rich text editor and the
  * conversational layout each live in their own file and are fetched only for
  * a form that has them.
  *
@@ -28,6 +28,7 @@ const LOADERS = {
   repeater: () => import(/* webpackChunkName: "field-repeater" */ './RepeaterField'),
   chained: () => import(/* webpackChunkName: "field-chained-select" */ './ChainedSelect'),
   choice: () => import(/* webpackChunkName: "field-choice" */ './ChoiceSelect'),
+  panel: () => import(/* webpackChunkName: "field-panel" */ './PanelContainer'),
   richText: () => import(/* webpackChunkName: "field-rich-text" */ './RichTextInput'),
   password: () => import(/* webpackChunkName: "field-password" */ './PasswordHints'),
   mask: () => import(/* webpackChunkName: "field-mask" */ './maskField'),
@@ -49,6 +50,8 @@ const TYPE_GROUPS = {
   image_upload: 'upload',
   repeat_container: 'repeater',
   chained_select: 'chained',
+  tabs_container: 'panel',
+  accordion_container: 'panel',
   select: 'choice',
   dropdown: 'choice',
   rich_text: 'richText',
