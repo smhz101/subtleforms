@@ -267,9 +267,9 @@ class AdminMenu {
 		if ( 0 !== strpos( self::menu_icon(), 'data:' ) ) {
 			$css .= $row . ' .wp-menu-image img{width:16px;height:16px;padding:9px 0 0;opacity:1;object-fit:contain;}';
 		}
-		// The upgrade item is a button: lime background, dark text, regular
+		// The upgrade item is a full-width button: lime background, dark centred text, regular
 		// weight, no icon. Hover and focus keep the same colours in every scheme.
-		$css .= '#adminmenu .sf-menu-upgrade,#adminmenu a:hover .sf-menu-upgrade,#adminmenu a:focus .sf-menu-upgrade{display:inline-block;padding:3px 10px;border-radius:4px;background:#C6F432;color:#0E0E2C;font-weight:400;line-height:1.5;}'
+		$css .= '#adminmenu .sf-menu-upgrade,#adminmenu a:hover .sf-menu-upgrade,#adminmenu a:focus .sf-menu-upgrade{display:block;box-sizing:border-box;text-align:center;padding:3px 10px;border-radius:4px;background:#C6F432;color:#0E0E2C;font-weight:400;line-height:1.5;}'
 			. '#adminmenu a:hover .sf-menu-upgrade,#adminmenu a:focus .sf-menu-upgrade{background:#b4e01c;}';
 		wp_register_style( 'subtleforms-menu-icon', false, array(), SUBTLEFORMS_VERSION );
 		wp_enqueue_style( 'subtleforms-menu-icon' );
