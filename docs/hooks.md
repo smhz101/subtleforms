@@ -269,7 +269,7 @@ Use the exact path string the script requests, query included. A preloaded answe
 | `docsUrl`, `settingsUrl` | A URL or an empty string. |
 | `source` | `core` (built into this plugin) or `addon`. |
 | `status` | `included`, `locked`, `available`, `installed`, `active` or `update`. This plugin sets `included` or `locked`. |
-| `action` | `array( 'label' => ..., 'url' => ..., 'kind' => ... )` with `kind` one of `settings`, `plans`, `install`, `update`, or `null`. |
+| `action` | `array( 'label' => ..., 'url' => ..., 'kind' => ... )` with `kind` one of `settings`, `plans`, `install`, `activate`, `update`, or `null`. |
 
 ```php
 add_filter(

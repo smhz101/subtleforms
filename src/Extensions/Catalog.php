@@ -24,7 +24,7 @@ final class Catalog {
 	public const PLANS      = array( 'free', 'starter', 'pro', 'agency' );
 	public const SOURCES    = array( 'core', 'addon' );
 	public const STATUSES   = array( 'included', 'locked', 'available', 'installed', 'active', 'update' );
-	public const ACTIONS    = array( 'settings', 'plans', 'install', 'update' );
+	public const ACTIONS    = array( 'settings', 'plans', 'install', 'activate', 'update' );
 	private const REQUIRED  = array( 'slug', 'title', 'description', 'category', 'plan', 'icon', 'source', 'status' );
 
 	/**

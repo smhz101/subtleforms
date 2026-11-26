@@ -122,6 +122,17 @@ final class ExtensionsCatalogTest extends TestCase {
 		$this->assertSame( 'Mailchimp', $by['mailchimp']['title'] );
 	}
 
+	public function test_activate_is_a_valid_action_kind(): void {
+		add_filter(
+			'subtleforms/extensions/catalog',
+			function ( $entries ) {
+				$entries[] = $this->entry( array( 'action' => array( 'label' => 'Activate', 'url' => 'https://example.com/a', 'kind' => 'activate' ) ) );
+				return $entries;
+			}
+		);
+		$this->assertSame( 'activate', $this->bySlug()['demo']['action']['kind'] );
+	}
+
 	public function test_filter_returning_a_non_array_leaves_an_empty_list(): void {
 		add_filter( 'subtleforms/extensions/catalog', '__return_null' );
 		$this->assertSame( array(), Catalog::entries() );
