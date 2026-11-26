@@ -4,7 +4,7 @@ Tags: form builder, contact form, multi-step form, conversational form, forms
 Requires at least: 6.6
 Tested up to: 7.2
 Requires PHP: 8.1
-Stable tag: 2.11.0
+Stable tag: 2.11.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -199,6 +199,11 @@ Each entry is sent as JSON only to the URL the administrator enters.
 
 == Changelog ==
 
+= 2.11.1 - 2026-11-27 =
+* Fix: Editing a phone number in the middle no longer moves the cursor to the end.
+* Fix: Password fields with Require confirmation now work inside a repeater.
+* Fix: The Upgrade to Pro menu item fills the menu width with its label centred.
+
 = 2.11.0 - 2026-11-26 =
 * New: The form block settings have an "Edit this form" link under the form picker that opens the builder in a new tab, and the picker has more space above the toggles.
 * New: The Password field can require an uppercase letter, a lowercase letter, a number or a symbol, and a minimum strength. The strength meter is now a coloured four-step bar, with a checklist of the rules.
@@ -265,6 +270,9 @@ Each entry is sent as JSON only to the URL the administrator enters.
 The full history is in changelog.txt in the plugin folder.
 
 == Upgrade Notice ==
+
+= 2.11.1 =
+Fixes Password fields with Require confirmation inside a repeater and keeps the cursor in place when editing a phone number. Recommended for everyone.
 
 = 2.11.0 =
 Password rules with a strength meter, ready-made phone masks and finished time and colour pickers. Fixes Password fields with Require confirmation, which could not be sent. Recommended for everyone.
