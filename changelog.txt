@@ -4,6 +4,11 @@ This file keeps the full release history. readme.txt lists only the latest versi
 
 == Changelog ==
 
+= 2.11.1 - 2026-11-27 =
+* Fix: Editing a phone number in the middle no longer moves the cursor to the end.
+* Fix: Password fields with Require confirmation now work inside a repeater.
+* Fix: The Upgrade to Pro menu item fills the menu width with its label centred.
+
 = 2.11.0 - 2026-11-26 =
 * New: The form block settings have an "Edit this form" link under the form picker that opens the builder in a new tab, and the picker has more space above the toggles.
 * New: The Password field can require an uppercase letter, a lowercase letter, a number or a symbol, and a minimum strength. The strength meter is now a coloured four-step bar, with a checklist of the rules.
