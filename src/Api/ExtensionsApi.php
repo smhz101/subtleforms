@@ -54,7 +54,7 @@ final class ExtensionsApi {
 	 * @return WP_REST_Response
 	 */
 	public function index(): WP_REST_Response {
-		return new WP_REST_Response(
+		return ApiResponse::success(
 			array(
 				'entries'    => Catalog::entries(),
 				'categories' => Catalog::categories(),

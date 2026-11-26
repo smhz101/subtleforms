@@ -141,7 +141,7 @@ final class ExtensionsCatalogTest extends TestCase {
 	public function test_rest_returns_the_catalog_to_an_admin(): void {
 		$this->asAdmin();
 		$res  = $this->get();
-		$data = $res->get_data();
+		$data = $res->get_data()['data'];
 		$this->assertSame( 200, $res->get_status() );
 		$this->assertSame( array( 'entries', 'categories', 'hasAddon' ), array_keys( $data ) );
 		$this->assertCount( 20, $data['entries'] );
