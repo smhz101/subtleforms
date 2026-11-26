@@ -7,7 +7,7 @@ import { queryKeys } from '../queryKeys';
 
 export function useExtensions(options = {}) {
   return useQuery({
-    queryKey: queryKeys.extensions.all,
+    queryKey: queryKeys.extensions.list(),
     queryFn: () => apiClient.get('/extensions'),
     staleTime: 60 * 1000,
     ...options,
