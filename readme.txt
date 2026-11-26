@@ -4,7 +4,7 @@ Tags: form builder, contact form, multi-step form, conversational form, forms
 Requires at least: 6.6
 Tested up to: 7.2
 Requires PHP: 8.1
-Stable tag: 2.10.0
+Stable tag: 2.11.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -199,6 +199,16 @@ Each entry is sent as JSON only to the URL the administrator enters.
 
 == Changelog ==
 
+= 2.11.0 - 2026-11-26 =
+* New: The form block settings have an "Edit this form" link under the form picker that opens the builder in a new tab, and the picker has more space above the toggles.
+* New: The Password field can require an uppercase letter, a lowercase letter, a number or a symbol, and a minimum strength. The strength meter is now a coloured four-step bar, with a checklist of the rules.
+* New: The Phone field has ready-made input masks: US and Canada, 999-999-9999, UK, Australia, India and international. "Phone" is now called "Automatic (by country)" on Phone fields.
+* Change: With Require confirmation on, "The passwords do not match." now shows under the confirm password input while the visitor types, and goes away as soon as the two match.
+* Fix: Checkbox, radio and multiple choice options in the builder canvas are tighter and match the frontend: 16px controls, 14px text and a 6px gap between rows.
+* Fix: A password field with "Require confirmation" now sends the confirmation with the form, so matching passwords go through and a mismatch or an empty confirmation is blocked.
+* Fix: The time, date and time, and colour fields now look finished: labelled hour and minute columns with Now and Done buttons, and a colour field that matches the other inputs.
+* Fix: A form block written as a self-closing comment, for example by hand, with WP-CLI or from a pattern, no longer shows "Block contains unexpected or invalid content" in the editor.
+
 = 2.10.0 - 2026-11-25 =
 * New: Text fields such as Name and Company now tell browsers what they ask for, so autofill and password managers can fill them, and each field has an Autofill setting to choose or turn it off.
 * New: Dropdowns jump to the option you type, and lists with more than 15 options have a search box.
@@ -255,6 +265,9 @@ Each entry is sent as JSON only to the URL the administrator enters.
 The full history is in changelog.txt in the plugin folder.
 
 == Upgrade Notice ==
+
+= 2.11.0 =
+Password rules with a strength meter, ready-made phone masks and finished time and colour pickers. Fixes Password fields with Require confirmation, which could not be sent. Recommended for everyone.
 
 = 2.10.0 =
 Spam no longer counts in All, Read and Unread, bulk actions can cover every matching entry, answers survive a page reload, and a Site Health check flags uploaded files that can be opened from the web, for example on nginx. Recommended for everyone.
