@@ -89,7 +89,7 @@ export function fieldHasMask(field) {
   }
   const config = fieldConfig(field);
   const key = typeof config.inputMask === 'string' ? config.inputMask : '';
-  if (!key) {
+  if (!key && !(['phone', 'tel'].includes(field.type) && config.format === 'us')) {
     return false;
   }
   return !(['phone', 'tel'].includes(field.type) && config.enableCountryCode);

@@ -169,3 +169,4 @@ export function MaskedInput({
 }
 
 export default MaskedInput;
+export { default as UsPhoneInput } from './UsPhoneInput';

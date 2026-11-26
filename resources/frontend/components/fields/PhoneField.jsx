@@ -9,7 +9,8 @@ import {
   splitPhoneValue,
 } from '../../../shared/phone';
 import { resolveMask, shownValue, storedValue, editValue } from '../../../shared/inputMask';
-import { editUsPhone, formatUsPhone, phoneDigits, sanitizePhone } from '../../../shared/phoneFormat';
+import { formatUsPhone, phoneDigits, sanitizePhone } from '../../../shared/phoneFormat';
+import { editUsPhone } from '../../../shared/phoneCaret';
 import FlagIcon from './FlagIcon';
 
 /**

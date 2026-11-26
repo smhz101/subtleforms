@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef } from '@wordpress/element';
-import { editUsPhone, formatUsPhone } from '../../../shared/phoneFormat';
+import { formatUsPhone } from '../../../shared/phoneFormat';
+import { editUsPhone } from '../../../shared/phoneCaret';
 
 /**
  * Plain US-format phone input (no country selector). Reformats while typing
