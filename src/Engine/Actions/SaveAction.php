@@ -87,6 +87,7 @@ final class SaveAction implements ActionInterface {
 			foreach ( \SubtleForms\Support\EntryValues::secretKeys( $schema ) as $secretKey ) {
 				unset( $context->payload[ $secretKey . '_confirm' ] );
 			}
+			$context->payload = \SubtleForms\Support\Repeater::stripConfirmations( $context->payload, $schema );
 		}
 
 		// Persist payload/meta snapshot. Sanitize user-submitted values before storing.

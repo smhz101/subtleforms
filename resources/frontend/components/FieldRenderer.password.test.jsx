@@ -163,3 +163,52 @@ describe('password confirmation shown while typing', () => {
     done();
   });
 });
+
+describe('password confirmation inside a repeater (issue 198)', () => {
+  const repeater = {
+    type: 'repeat_container',
+    key: 'people',
+    config: { key: 'people', min: 1, max: 3 },
+    children: [{ type: 'password', key: 'pw', label: 'Password', requireConfirmation: true }],
+  };
+
+  test('the live mismatch shows under the row that has it only', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    const values = {
+      people: [
+        { pw: 'Secret123!', pw_confirm: 'Secret123!' },
+        { pw: 'Secret123!', pw_confirm: 'Other' },
+      ],
+    };
+    act(() => {
+      root.render(<FieldRenderer field={repeater} values={values} onChange={() => {}} errors={{}} />);
+    });
+    expect(container.querySelectorAll('.subtleforms-password__confirm')).toHaveLength(2);
+    const messages = container.querySelectorAll('.subtleforms-password__mismatch');
+    expect(messages).toHaveLength(1);
+    expect(messages[0].closest('.subtleforms-repeater__group, fieldset, li').textContent).toContain('Entry 2');
+    act(() => root.unmount());
+    container.remove();
+  });
+
+  test('typing a confirmation writes it into that row', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    const onChange = jest.fn();
+    act(() => {
+      root.render(<FieldRenderer field={repeater} values={{ people: [{ pw: 'a' }] }} onChange={onChange} errors={{}} />);
+    });
+    const input = container.querySelector('.subtleforms-password__confirm');
+    const set = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+    act(() => {
+      set.call(input, 'a');
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    expect(onChange).toHaveBeenCalledWith('people.0.pw_confirm', 'a');
+    act(() => root.unmount());
+    container.remove();
+  });
+});

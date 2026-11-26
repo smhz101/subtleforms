@@ -76,4 +76,52 @@ final class PasswordConfirmTest extends TestCase {
 		$this->assertSame( $raw['pw_confirm'], $restored['pw_confirm'] );
 		$this->assertNull( $this->error( $restored ) );
 	}
+
+	private function repeaterSchema(): array {
+		return array(
+			'fields' => array(
+				array(
+					'type'     => 'repeat_container',
+					'key'      => 'people',
+					'children' => array( array( 'key' => 'pw', 'type' => 'password', 'requireConfirmation' => true ) ),
+				),
+			),
+		);
+	}
+
+	private function rowErrors( array $rows ): array {
+		$schema   = $this->repeaterSchema();
+		$expanded = \SubtleForms\Support\Repeater::expandForValidation( $schema, array( 'people' => $rows ) );
+		$result   = ( new FieldValidator() )->validate( $expanded['schema'], $expanded['payload'], array( 'hidden_fields' => array(), 'required_fields' => array() ) );
+		return $result['errors'];
+	}
+
+	public function test_a_mismatch_in_one_repeater_row_is_keyed_to_that_row() {
+		$errors = $this->rowErrors(
+			array(
+				array( 'pw' => 'Secret123!', 'pw_confirm' => 'Secret123!' ),
+				array( 'pw' => 'Secret123!', 'pw_confirm' => 'Other123!' ),
+				array( 'pw' => 'Secret123!', 'pw_confirm' => 'Secret123!' ),
+			)
+		);
+		$this->assertSame( array( 'people.1.pw' => 'The passwords do not match.' ), $errors );
+	}
+
+	public function test_matching_repeater_rows_pass() {
+		$row = array( 'pw' => 'Secret123!', 'pw_confirm' => 'Secret123!' );
+		$this->assertSame( array(), $this->rowErrors( array( $row, $row ) ) );
+	}
+
+	public function test_repeater_rows_are_stored_without_the_confirmation() {
+		$row    = array( 'pw' => 'Secret123!', 'pw_confirm' => 'Secret123!' );
+		$stored = \SubtleForms\Api\PublicSubmitApi::storablePayload( array( 'people' => array( $row, $row ) ), $this->repeaterSchema() );
+		foreach ( $stored['people'] as $r ) {
+			$this->assertArrayNotHasKey( 'pw_confirm', $r );
+		}
+		$stripped = \SubtleForms\Support\Repeater::stripConfirmations( array( 'people' => array( $row, $row ) ), $this->repeaterSchema() );
+		foreach ( $stripped['people'] as $r ) {
+			$this->assertArrayNotHasKey( 'pw_confirm', $r );
+			$this->assertSame( 'Secret123!', $r['pw'] );
+		}
+	}
 }
