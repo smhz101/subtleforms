@@ -84,6 +84,12 @@ final class PageHeaderMenuTest extends TestCase {
 		$this->assertSame( '', (string) ob_get_clean() );
 	}
 
+	public function test_upgrade_item_style_is_full_width_and_centred(): void {
+		( new AdminMenu( new Capabilities() ) )->menu_icon_styles();
+		$css = (string) wp_styles()->get_data( 'subtleforms-menu-icon', 'after' )[0];
+		$this->assertMatchesRegularExpression( '/\.sf-menu-upgrade[^{]*\{[^}]*display:block[^}]*text-align:center/', $css );
+	}
+
 	public function test_upgrade_item_is_absent_when_the_filter_says_no(): void {
 		add_filter( 'subtleforms/admin/upgrade_menu_item', '__return_false' );
 		$slugs = $this->slugs();
