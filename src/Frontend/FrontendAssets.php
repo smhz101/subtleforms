@@ -511,6 +511,10 @@ final class FrontendAssets {
 			if ( in_array( $type, array( 'text', 'number', 'phone', 'tel' ), true ) && is_string( $mask ) && '' !== $mask && ! $phonePicker ) {
 				$groups['mask'] = true;
 			}
+			// The plain US phone input (format "us", no country picker) lives in the same chunk.
+			if ( ( 'phone' === $type || 'tel' === $type ) && ! $phonePicker && 'us' === self::flatOrConfig( $node, $config, 'format' ) ) {
+				$groups['mask'] = true;
+			}
 			if ( $phonePicker ) {
 				$groups['geo'] = true;
 			} elseif ( isset( self::TYPE_GROUPS[ $type ] ) ) {
