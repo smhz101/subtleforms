@@ -4,9 +4,9 @@
       "frontend.js",
       "index.jsx.css"
     ],
-    "measuredGzipBytes": 49152,
+    "measuredGzipBytes": 48026,
     "limitGzipBytes": 50861,
-    "note": "Limit is the 2.6.0 size plus 10 percent (46237 * 1.1) and is kept as is. The 2.7.0 move of picture choice, multi upload, advanced logic and analytics to Pro shrank the bundle to 46606 (47493 measured at 2.6.1). 2.9.0: the picker styles moved out of index.jsx.css into picker.css and the date limit checks moved into the date file, so the base is 49392. 2.10.0: the dropdown (ChoiceSelect with type-ahead and search) moved to the lazy field-choice file, so the base is 49152.",
+    "note": "Limit is the 2.6.0 size plus 10 percent (46237 * 1.1) and is kept as is. The 2.7.0 move of picture choice, multi upload, advanced logic and analytics to Pro shrank the bundle to 46606 (47493 measured at 2.6.1). 2.9.0: the picker styles moved out of index.jsx.css into picker.css and the date limit checks moved into the date file, so the base is 49392. 2.10.0: the dropdown (ChoiceSelect with type-ahead and search) moved to the lazy field-choice file, so the base is 49152. 2.11.1: Tabs and Accordion (PanelContainer) moved to the lazy field-panel file, so the base is 48026 and a form with a picker is 50593.",
     "mustNotContain": [
       "Afghanistan"
     ],
@@ -18,7 +18,7 @@
     "files": [
       "picker.css"
     ],
-    "measuredGzipBytes": 2449,
+    "measuredGzipBytes": 2567,
     "limitGzipBytes": 3000,
     "withBaseLimitGzipBytes": 52500,
     "note": "2.9.0: picker.css is loaded only for forms with a dropdown, country, address, date or time field. A form with a picker downloads the base bundle plus this file, so the two together are held to withBaseLimitGzipBytes (the 2.8 base of 50318 plus 2.9 picker polish)."

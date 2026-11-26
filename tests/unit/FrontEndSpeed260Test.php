@@ -65,6 +65,14 @@ final class FrontEndSpeed260Test extends TestCase {
 		);
 	}
 
+	public function test_tabs_and_accordion_are_a_lazy_group_with_a_chunk(): void {
+		$this->assertSame( array( 'panel' ), FrontendAssets::fieldGroups( array( 'fields' => array( array( 'type' => 'tabs_container' ), array( 'type' => 'accordion_container' ) ) ) ) );
+		$chunks = ( new ReflectionClass( FrontendAssets::class ) )->getConstant( 'GROUP_CHUNKS' );
+		$this->assertSame( 'field-panel', $chunks['panel'] );
+		$js = (string) file_get_contents( $this->root() . '/resources/frontend/components/fields/lazyFields.jsx' );
+		$this->assertStringContainsString( 'webpackChunkName: "field-panel"', $js );
+	}
+
 	public function test_type_groups_match_the_browser_list(): void {
 		$js = (string) file_get_contents( $this->root() . '/resources/frontend/components/fields/lazyFields.jsx' );
 		$this->assertSame( 1, preg_match( '/const TYPE_GROUPS = \{(.*?)\};/s', $js, $m ) );
