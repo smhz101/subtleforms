@@ -53,6 +53,7 @@ const SubmissionsPage    = lazyWithRetry(() => import(/* webpackChunkName: "page
 const SubmissionDetailPage = lazyWithRetry(() => import(/* webpackChunkName: "page-submission-detail" */ '../pages/SubmissionDetailPage'));
 const BuilderPage        = lazyWithRetry(() => import(/* webpackChunkName: "page-builder" */        '../pages/BuilderPage'));
 const ReportsPage        = lazyWithRetry(() => import(/* webpackChunkName: "page-reports" */        '../pages/ReportsPage'));
+const ExtensionsPage     = lazyWithRetry(() => import(/* webpackChunkName: "page-extensions" */     '../pages/ExtensionsPage'));
 const CreateFormPage     = lazyWithRetry(() => import(/* webpackChunkName: "page-create-form" */    '../pages/CreateFormPage'));
 
 /**
@@ -146,6 +147,9 @@ function getInitialPath() {
 		case 'subtleforms-reports':
 			return '/reports';
 
+		case 'subtleforms-extensions':
+			return '/extensions';
+
 		default:
 			// A submenu page an add-on added (registerAdminPage).
 			if (/^subtleforms-[a-z0-9-]+$/.test(page)) {
@@ -203,6 +207,7 @@ function getPageNameFromPath(pathname) {
 		'/submissions': __('Submissions', 'subtleforms'),
 		'/settings': __('Settings', 'subtleforms'),
 		'/reports': __('Reports', 'subtleforms'),
+		'/extensions': __('Extensions', 'subtleforms'),
 		'/upgrade': __('SubtleForms Pro', 'subtleforms'),
 	};
 	if (pathname.startsWith('/forms/') && pathname !== '/forms/new') {
@@ -408,6 +413,14 @@ function AppContent() {
 						element={
 							<PageErrorBoundary pageName='Reports'>
 								<ReportsPage />
+							</PageErrorBoundary>
+						}
+					/>
+					<Route
+						path='/extensions'
+						element={
+							<PageErrorBoundary pageName='Extensions'>
+								<ExtensionsPage />
 							</PageErrorBoundary>
 						}
 					/>

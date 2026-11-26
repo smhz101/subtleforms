@@ -61,6 +61,11 @@ export const queryKeys = {
     protection: () => ['spam', 'protection'],
   },
 
+  // Extensions catalog
+  extensions: {
+    all: ['extensions'],
+  },
+
   // Reports
   reports: {
     all: ['reports'],

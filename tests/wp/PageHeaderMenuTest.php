@@ -64,7 +64,8 @@ final class PageHeaderMenuTest extends TestCase {
 		// Free mode, even where an add-on is active on the test site.
 		add_filter( 'subtleforms/admin/upgrade_menu_item', '__return_true' );
 		$slugs = $this->slugs();
-		$this->assertSame( 'subtleforms-settings', $slugs[ count( $slugs ) - 2 ] );
+		$this->assertSame( 'subtleforms-settings', $slugs[ count( $slugs ) - 3 ] );
+		$this->assertSame( 'subtleforms-extensions', $slugs[ count( $slugs ) - 2 ] );
 		$this->assertSame( AdminMenu::upgrade_url( 'menu' ), end( $slugs ) );
 		$this->assertStringStartsWith( 'https://subtleforms.com/pro/', end( $slugs ) );
 	}
@@ -94,7 +95,7 @@ final class PageHeaderMenuTest extends TestCase {
 		add_filter( 'subtleforms/admin/upgrade_menu_item', '__return_false' );
 		$slugs = $this->slugs();
 		$this->assertNotContains( AdminMenu::upgrade_url( 'menu' ), $slugs );
-		$this->assertSame( 'subtleforms-settings', end( $slugs ) );
+		$this->assertSame( 'subtleforms-extensions', end( $slugs ) );
 	}
 
 	public function test_add_on_items_land_between_reports_and_settings(): void {

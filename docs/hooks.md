@@ -255,6 +255,37 @@ Use the exact path string the script requests, query included. A preloaded answe
 | `subtleforms/email/after_send` | action `( array $job, string[] $attachments )` | An email was sent. |
 | `subtleforms/transfer/entry_meta_keys` | filter `( string[] $keys, array $record )` | Entry meta records that go into the submissions export and come back on import. The default is every record (an array) that another plugin saved on the entry, so an entry keeps what an add-on stored on it even when the add-on is not active. Records this plugin writes itself (the visitor's address and browser, request state, spam checks, consents, notes) never travel, nor do records over 64 KB or keys that name a token, secret, password or API key. An add-on narrows the list to the records it wants to travel. Since 2.7.2. |
 
+## Extensions catalog (PHP, 2.12.0)
+
+`apply_filters( 'subtleforms/extensions/catalog', array $entries )` runs after the built-in list. An add-on adds its own entries or changes the status of a built-in one. The list is checked after the filter: an entry that misses a required key, repeats a slug or has an unknown value is dropped, strings are cleaned and URLs are escaped. The page reads the result from `GET subtleforms/v1/extensions`.
+
+| Key | Value |
+| --- | --- |
+| `slug` | Unique, kebab-case. |
+| `title`, `description` | Translatable text. One or two plain sentences for the description. |
+| `category` | `payments`, `integrations`, `fields`, `entries` or `site`. |
+| `plan` | `free`, `starter`, `pro` or `agency`. |
+| `icon` | A dashicon name. |
+| `docsUrl`, `settingsUrl` | A URL or an empty string. |
+| `source` | `core` (built into this plugin) or `addon`. |
+| `status` | `included`, `locked`, `available`, `installed`, `active` or `update`. This plugin sets `included` or `locked`. |
+| `action` | `array( 'label' => ..., 'url' => ..., 'kind' => ... )` with `kind` one of `settings`, `plans`, `install`, `update`, or `null`. |
+
+```php
+add_filter(
+	'subtleforms/extensions/catalog',
+	function ( array $entries ): array {
+		foreach ( $entries as &$entry ) {
+			if ( 'payments' === $entry['slug'] ) {
+				$entry['status'] = 'active';
+				$entry['action'] = null;
+			}
+		}
+		return $entries;
+	}
+);
+```
+
 ## Email marketing
 
 This plugin adds people to Mailchimp, Brevo or Kit after an entry is saved, for forms where the site owner turned a service on (Form settings > Integrations > Email marketing, stored in `metadata.integrations.mailchimp`, `.brevo` and `.kit`). There is one Email marketing entry in Settings > Integrations; the three services live inside it. Each service has its own connection in the non-autoloaded option `subtleforms_<slug>_connection`, with the API key, a switch and the service's own settings. Switching a service off keeps its key and settings. The job runs in the background (`subtleforms_async_email_marketing`, one per service) and writes "Mailchimp: subscribed", "pending (double opt-in)", "skipped (...)" or "failed: ..." to the entry's activity log, with the service name in front. Everything works without an add-on.
