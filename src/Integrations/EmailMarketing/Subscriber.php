@@ -72,7 +72,7 @@ final class Subscriber {
 	 * @return array<string,mixed>
 	 */
 	public static function normalize( $config, string $service = 'mailchimp' ): array {
-		$def    = Services::definitions()[ $service ] ?? array();
+		$def    = Services::registered()[ $service ] ?? array();
 		$upper  = 'keep' !== ( $def['case'] ?? 'upper' );
 		$config = is_array( $config ) ? $config : array();
 		$fields = is_array( $config['fields'] ?? null ) ? $config['fields'] : array();

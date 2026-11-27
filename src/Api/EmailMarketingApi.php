@@ -43,7 +43,7 @@ final class EmailMarketingApi {
 	public function registerRoutes(): void {
 		$base    = '/integrations/email-marketing';
 		$perm    = array( $this, 'checkPermissions' );
-		$service = '/(?P<service>' . implode( '|', array_map( 'preg_quote', Services::slugs() ) ) . ')';
+		$service = '/(?P<service>[A-Za-z0-9_-]+)';
 
 		register_rest_route(
 			'subtleforms/v1',
@@ -183,6 +183,10 @@ final class EmailMarketingApi {
 		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
 			return new WP_Error( 'subtleforms_invalid_nonce', __( 'Security check failed. Please refresh and try again.', 'subtleforms' ), array( 'status' => 403 ) );
 		}
+		$service = $request->get_param( 'service' );
+		if ( null !== $service && ! Services::isRegistered( sanitize_key( (string) $service ) ) ) {
+			return new WP_Error( 'rest_no_route', __( 'No route was found matching the URL and request method.', 'subtleforms' ), array( 'status' => 404 ) );
+		}
 		return true;
 	}
 
@@ -239,12 +243,13 @@ final class EmailMarketingApi {
 	public function connect( WP_REST_Request $request ): WP_REST_Response {
 		$slug = $this->slug( $request );
 		$key  = trim( sanitize_text_field( (string) $request->get_param( 'api_key' ) ) );
-		$def  = Services::definitions()[ $slug ];
+		$def  = Services::registered()[ $slug ];
 		if ( Services::isLocal( $slug ) ) {
 			return $this->notForLocal( $slug );
 		}
 		if ( ! $def['client']::looksLikeKey( $key ) ) {
-			return ApiResponse::error( 'subtleforms_email_marketing_key', $def['client']::badKeyMessage(), 400 );
+			$message = method_exists( $def['client'], 'badKeyMessage' ) ? $def['client']::badKeyMessage() : __( 'That does not look like an API key for this service.', 'subtleforms' );
+			return ApiResponse::error( 'subtleforms_email_marketing_key', $message, 400 );
 		}
 		$connection = new Connection( $slug );
 		try {
@@ -405,7 +410,7 @@ final class EmailMarketingApi {
 		return ApiResponse::error(
 			'subtleforms_email_marketing_local',
 			/* translators: %s: service name */
-			sprintf( __( '%s is a plugin on this site and has no API key to connect.', 'subtleforms' ), Services::definitions()[ $slug ]['label'] ?? $slug ),
+			sprintf( __( '%s is a plugin on this site and has no API key to connect.', 'subtleforms' ), Services::registered()[ $slug ]['label'] ?? $slug ),
 			400
 		);
 	}
@@ -452,7 +457,7 @@ final class EmailMarketingApi {
 			return ApiResponse::error(
 				'subtleforms_email_marketing_not_connected',
 				/* translators: %s: service name */
-				sprintf( __( 'Connect %s first, in Settings > Integrations > Email marketing.', 'subtleforms' ), Services::definitions()[ $slug ]['label'] ?? $slug ),
+				sprintf( __( 'Connect %s first, in Settings > Integrations > Email marketing.', 'subtleforms' ), Services::registered()[ $slug ]['label'] ?? $slug ),
 				400
 			);
 		}

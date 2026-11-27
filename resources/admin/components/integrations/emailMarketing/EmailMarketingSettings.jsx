@@ -6,8 +6,7 @@ import ServiceDetail from './ServiceDetail';
 import ServiceGrid from './ServiceGrid';
 import { announceService, pageData } from './api';
 import { useSetServiceEnabled } from './queries';
-import { getEmailMarketingServices } from '../../../../shared/extend';
-import './registerBuiltins';
+import { listServices } from './registerBuiltins';
 import './emailMarketing.scss';
 
 /**
@@ -57,7 +56,7 @@ export default function EmailMarketingSettings() {
 
   const services = useMemo(() => {
     const server = pageData().services;
-    return getEmailMarketingServices().filter((s) => server[s.slug] && server[s.slug].available !== false);
+    return listServices().filter((s) => server[s.slug] && server[s.slug].available !== false);
     // The registry can grow while the page loads; the list is read again on every address change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);

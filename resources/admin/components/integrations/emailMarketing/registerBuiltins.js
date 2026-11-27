@@ -1,4 +1,5 @@
-import { registerEmailMarketingService } from '../../../../shared/extend';
+import { getEmailMarketingServices, registerEmailMarketingService } from '../../../../shared/extend';
+import { pageData } from './api';
 import { LOGOS, logoFor } from './logos';
 import ServiceSettings, { BrevoScreen } from './ServiceSettings';
 import MailPoetStatus from './MailPoetStatus';
@@ -25,3 +26,19 @@ BUILT_IN.forEach(({ slug, order, settingsComponent }) => {
     formComponent: ServiceFormPanel,
   });
 });
+
+/**
+ * Every service the screens can draw: the registered ones, then each service
+ * the server says this plugin sends for (`core`) that no add-on registered in
+ * the browser. Those get the generic screens (key, test, list, mapping, tags).
+ *
+ * @return {Array} Services { slug, label, order, ... } in grid order.
+ */
+export function listServices() {
+  const registered = getEmailMarketingServices();
+  const known = new Set(registered.map((s) => s.slug));
+  const generic = Object.entries(pageData().services)
+    .filter(([slug, entry]) => entry && entry.core && !known.has(slug))
+    .map(([slug, entry]) => ({ slug, label: entry.label || slug, order: 100 }));
+  return [...registered, ...generic];
+}

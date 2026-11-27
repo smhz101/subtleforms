@@ -4,6 +4,7 @@ import { __ } from '@wordpress/i18n';
 import ServiceDetailHeader from '../serviceTiles/ServiceDetailHeader';
 import ExtensionSlot from '../../ExtensionSlot';
 import ProBanner from './ProBanner';
+import ServiceSettings from './ServiceSettings';
 import { announceService, isConnected } from './api';
 import { useServiceState, useSetServiceEnabled, useStoreServiceState } from './queries';
 import './emailMarketing.scss';
@@ -29,7 +30,7 @@ export default function ServiceDetail({ service, onBack, onToggle, enabled }) {
   const [error, setError] = useState('');
   const loadError = queryError && !connection ? queryError.message || __('Could not load the connection.', 'subtleforms') : '';
   const busy = setEnabled.isPending;
-  const Settings = service.settingsComponent;
+  const Settings = service.settingsComponent || ServiceSettings;
   const toggleId = `sf-em-toggle-${service.slug}`;
   const setConnection = (next) => storeState(service.slug, next);
 

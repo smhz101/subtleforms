@@ -321,6 +321,43 @@ An add-on that leaves the entry alone adds to it through the filter, the slots a
 
 In the browser, `registerEmailMarketingService( slug, { label, icon, settingsComponent, formComponent } )` adds a service (or replaces a built-in one with the same slug), and the two `email_marketing.service.*` slots add options to a service this plugin draws. A control that needs the service should stay disabled until `connected` is true.
 
+### Adding a service that this plugin handles (2.12.0)
+
+An entry in `subtleforms/email/marketing/services` with a new slug and a `client` is a service this plugin handles like Mailchimp or Kit. `client` is the name of a class that implements `SubtleForms\Integrations\EmailMarketing\ClientInterface`; the plugin checks that the class exists and implements it, and ignores the entry otherwise. The entry carries the same keys the built-in services have: `label`, `description`, `case` (`upper` writes a mapped field name in capitals, `keep` leaves it as typed), `tags` (the service takes tags), `list_required`. `local` is always false for an add-on.
+
+For such a service this plugin does the rest: the key is saved and checked (`Connection`), the routes under `/integrations/email-marketing/<slug>` answer (`connect`, `test`, `enabled`, `lists`, `fields`, `settings`, state and disconnect), and an entry is queued, sent and logged by the same sender, so the hooks above (`feeds`, `skip_reason`, `subscriber`, `request_body`, `delivered`, `failed`, `skipped`) and the retries apply to it. `Services::client()`, `Services::clientFor()` and `Services::coreOwns()` accept its slug. An unknown slug on a route is a 404. The class name is not sent to the browser. Additive: `ExtensionPoints::LEVEL` stays 3.
+
+```php
+add_filter( 'subtleforms/email/marketing/services', function ( $services ) {
+	$services['acme'] = array(
+		'slug'          => 'acme',
+		'label'         => 'Acme Mail',
+		'description'   => 'Add people who fill in a form to Acme Mail.',
+		'client'        => \Acme\AcmeClient::class,
+		'case'          => 'upper',
+		'tags'          => true,
+		'list_required' => true,
+	);
+	return $services;
+} );
+```
+
+In the browser a service with no screens of its own gets the generic ones: the API key with a test button, the list, the field mapping, tags, double opt-in and update existing. `registerEmailMarketingService( 'acme', { label, icon } )` adds a logo and a position; give `settingsComponent` or `formComponent` only to replace a screen. Since 2.12.0 `window.SubtleFormsExtend` also has the components this plugin draws, so an add-on can reuse one inside its own screen (check `typeof SubtleFormsExtend.EmailMarketingServiceSettings === 'function'`):
+
+| Component | Props |
+| --- | --- |
+| `EmailMarketingServiceSettings` | `{ service, connection, onConnection }`: the key, test and disconnect card. |
+| `EmailMarketingServiceFormPanel` | `{ service, connected, connection, schema, config, patch, fieldOptions, isReadOnly }`: the form's list, mapping, tags and options. |
+| `EmailMarketingMappingTable` | `{ service, config, patch, fieldOptions, emailOptions, mergeFields, mergeLoading, mergeError, disabled }`: the field mapping rows. |
+
+```js
+const { registerEmailMarketingService, EmailMarketingServiceFormPanel } = window.SubtleFormsExtend;
+registerEmailMarketingService( 'acme', {
+	label: 'Acme Mail',
+	formComponent: ( props ) => <EmailMarketingServiceFormPanel { ...props } />,
+} );
+```
+
 ### Older add-ons
 
 The hooks `subtleforms/mailchimp/*` were never released and are gone. An add-on built before this change that sends Mailchimp, Brevo or Kit by itself (SubtleForms Pro 2.8.0) lists its own `email_marketing` entry, so this plugin sends nothing and no one is added twice.

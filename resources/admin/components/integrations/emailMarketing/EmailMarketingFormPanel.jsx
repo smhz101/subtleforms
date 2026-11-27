@@ -5,8 +5,8 @@ import ExtensionSlot from '../../ExtensionSlot';
 import { StatusBadge } from './ServiceConnection';
 import { emailMarketingApi, pageData, isConnected } from './api';
 import { uiFor } from './serviceUi';
-import { getEmailMarketingServices } from '../../../../shared/extend';
-import './registerBuiltins';
+import { listServices } from './registerBuiltins';
+import ServiceFormPanel from './ServiceFormPanel';
 import './emailMarketing.scss';
 
 const SETTINGS_URL = 'admin.php?page=subtleforms-settings#tab=extensions&ext=email_marketing';
@@ -59,7 +59,7 @@ export default function EmailMarketingFormPanel({ schema, integrations = {}, pat
   }, []);
 
   const on = useMemo(
-    () => getEmailMarketingServices().filter((s) => states[s.slug]?.enabled),
+    () => listServices().filter((s) => states[s.slug]?.enabled),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [states]
   );
@@ -80,7 +80,7 @@ export default function EmailMarketingFormPanel({ schema, integrations = {}, pat
         const connected = isConnected(state);
         const config = integrations[service.slug] || {};
         const enabled = !!config.enabled;
-        const Body = service.formComponent;
+        const Body = service.formComponent || ServiceFormPanel;
         const ui = uiFor(service.slug);
         const set = (values) => patch(service.slug, values);
         const props = { service: service.slug, connected, connection: state, schema, config, patch: set, isReadOnly, fieldOptions };
