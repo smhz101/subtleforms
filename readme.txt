@@ -1,6 +1,6 @@
-=== SubtleForms ===
+=== SubtleForms – Contact Form, Multi-Step & Conversational Form Builder ===
 Contributors: subtleforms, smhz101
-Tags: form builder, contact form, multi-step form, conversational form, forms
+Tags: form builder, contact form, conversational form, multi-step form, conditional logic
 Requires at least: 6.6
 Tested up to: 7.2
 Requires PHP: 8.1
@@ -8,11 +8,11 @@ Stable tag: 2.11.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Build contact, multi-step and conversational forms on a visual canvas, then read every entry in a clean inbox. No account needed.
+Subtle Forms is a drag and drop form builder for contact forms, multi-step forms and conversational forms, with every entry in a clean inbox.
 
 == Description ==
 
-SubtleForms is a form builder for WordPress. You build on a canvas that looks like the live form, publish with a shortcode or the SubtleForms block, and read every entry in an inbox inside wp-admin. One builder makes regular, multi-step and conversational forms, and everything described here is in this plugin and works without an account or a licence.
+SubtleForms (Subtle Forms) is a drag and drop form builder for WordPress. You build on a canvas that looks like the live form, publish with a shortcode or the SubtleForms block, and read every entry in an inbox inside wp-admin. One builder makes regular, multi-step and conversational forms, and everything described here is in this plugin and works without an account or a licence.
 
 https://www.youtube.com/watch?v=NBc4yT3h7NQ
 
