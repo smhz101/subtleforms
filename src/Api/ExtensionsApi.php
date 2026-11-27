@@ -59,6 +59,7 @@ final class ExtensionsApi {
 				'entries'    => Catalog::entries(),
 				'categories' => Catalog::categories(),
 				'hasAddon'   => AdminMenu::companion_active(),
+				'wooActive'  => class_exists( 'WooCommerce' ),
 			)
 		);
 	}

@@ -154,10 +154,11 @@ final class ExtensionsCatalogTest extends TestCase {
 		$res  = $this->get();
 		$data = $res->get_data()['data'];
 		$this->assertSame( 200, $res->get_status() );
-		$this->assertSame( array( 'entries', 'categories', 'hasAddon' ), array_keys( $data ) );
+		$this->assertSame( array( 'entries', 'categories', 'hasAddon', 'wooActive' ), array_keys( $data ) );
 		$this->assertCount( 20, $data['entries'] );
 		$this->assertSame( array( 'payments', 'integrations', 'fields', 'entries', 'site' ), wp_list_pluck( $data['categories'], 'id' ) );
 		$this->assertIsBool( $data['hasAddon'] );
+		$this->assertSame( class_exists( 'WooCommerce' ), $data['wooActive'] );
 	}
 
 	private function slugs(): array {

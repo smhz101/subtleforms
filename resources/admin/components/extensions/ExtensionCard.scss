@@ -1,0 +1,116 @@
+/**
+ * Extension card (Extensions page).
+ */
+
+.sf-ext-card {
+	display: flex;
+	flex-direction: column;
+	gap: var(--sf-space-3);
+	min-width: 0;
+	padding: var(--sf-space-4);
+	background: var(--sf-bg-surface);
+	border: 1px solid var(--sf-border);
+	border-radius: var(--sf-radius-lg);
+
+	&__top {
+		display: flex;
+		align-items: center;
+		gap: var(--sf-space-3);
+		min-width: 0;
+	}
+
+	&__tile {
+		display: inline-flex;
+		flex: 0 0 40px;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		height: 40px;
+		border-radius: var(--sf-radius-lg);
+		background: var(--sf-primary-100);
+		color: var(--sf-primary-600);
+
+		.dashicons {
+			width: 22px;
+			height: 22px;
+			font-size: 22px;
+		}
+	}
+
+	&__title {
+		margin: 0;
+		font-size: var(--sf-text-base);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
+		overflow-wrap: anywhere;
+	}
+
+	&__by {
+		margin: 2px 0 0;
+		font-size: var(--sf-text-xs);
+		color: var(--sf-text-muted);
+	}
+
+	&__desc {
+		flex: 1;
+		margin: 0;
+		color: var(--sf-text-secondary);
+		font-size: var(--sf-text-sm);
+		line-height: 1.5;
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 3;
+		line-clamp: 3;
+		overflow: hidden;
+	}
+
+	&__badges {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--sf-space-2);
+	}
+
+	&__footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--sf-space-3);
+		padding-top: var(--sf-space-3);
+		border-top: 1px solid var(--sf-border-subtle);
+	}
+
+	&__plan {
+		font-size: var(--sf-text-xs);
+		color: var(--sf-text-muted);
+	}
+
+	&__link {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		font-size: var(--sf-text-sm);
+		font-weight: var(--sf-weight-medium);
+
+		&:focus-visible {
+			outline: 2px solid var(--sf-brand);
+			outline-offset: 2px;
+		}
+
+		svg { fill: none; }
+	}
+
+	&__note,
+	&__error {
+		margin: 0;
+		font-size: var(--sf-text-xs);
+	}
+
+	&__error {
+		color: var(--sf-danger);
+	}
+
+	.components-button:focus-visible {
+		outline: 2px solid var(--sf-brand);
+		outline-offset: 2px;
+	}
+}
