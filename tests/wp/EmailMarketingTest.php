@@ -630,6 +630,7 @@ final class EmailMarketingTest extends TestCase {
 	}
 
 	public function test_an_add_on_service_is_listed_and_its_routes_answer(): void {
+		$this->asAdmin();
 		$this->addOnService();
 		$index = $this->rest( 'GET', '/integrations/email-marketing' );
 		$this->assertSame( 200, $index->get_status() );
@@ -649,6 +650,7 @@ final class EmailMarketingTest extends TestCase {
 	}
 
 	public function test_an_unknown_or_invalid_add_on_slug_is_a_404(): void {
+		$this->asAdmin();
 		$this->addOnService( \stdClass::class );
 		foreach ( array( 'acme', 'nothing' ) as $slug ) {
 			$this->assertSame( 404, $this->rest( 'GET', '/integrations/email-marketing/' . $slug )->get_status(), $slug );
