@@ -85,7 +85,7 @@ final class Sender {
 		$submissionId = (int) ( $job['submission_id'] ?? 0 );
 		$retryCount   = max( 0, (int) ( $job['retry_count'] ?? 0 ) );
 		$only         = is_array( $job['feeds'] ?? null ) ? array_map( 'strval', $job['feeds'] ) : array();
-		if ( ! Services::isBuiltIn( $service ) ) {
+		if ( ! Services::isRegistered( $service ) ) {
 			return;
 		}
 
@@ -117,7 +117,7 @@ final class Sender {
 	 * @param string $service Service slug.
 	 */
 	public static function label( string $service ): string {
-		return (string) ( Services::definitions()[ $service ]['label'] ?? $service );
+		return (string) ( Services::registered()[ $service ]['label'] ?? $service );
 	}
 
 	/**
@@ -278,7 +278,7 @@ final class Sender {
 		$sub      = $filtered instanceof Subscriber ? $filtered : $sub;
 
 		try {
-			if ( '' === $sub->listId && ! empty( Services::definitions()[ $service ]['list_required'] ) ) {
+			if ( '' === $sub->listId && ! empty( Services::registered()[ $service ]['list_required'] ) ) {
 				// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Messages are shown as JSON or in the entry log, never printed as HTML.
 				throw new ServiceException(
 					sprintf(

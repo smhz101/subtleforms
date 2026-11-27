@@ -72,7 +72,7 @@ final class Subscriber {
 	 * @return array<string,mixed>
 	 */
 	public static function normalize( $config, string $service = 'mailchimp' ): array {
-		$def    = Services::definitions()[ $service ] ?? array();
+		$def    = Services::registered()[ $service ] ?? array();
 		$upper  = 'keep' !== ( $def['case'] ?? 'upper' );
 		$config = is_array( $config ) ? $config : array();
 		$fields = is_array( $config['fields'] ?? null ) ? $config['fields'] : array();
@@ -113,7 +113,7 @@ final class Subscriber {
 	 * @return array{subscriber:?self,skip:?string} `skip` is `consent_not_given` or `no_email` when nobody is added.
 	 */
 	public static function build( array $config, array $schema, array $payload, string $service = 'mailchimp' ): array {
-		$config = self::normalize( $config, $service );
+		$config = self::withoutPasswords( self::normalize( $config, $service ), $schema );
 		$auto   = FieldMapper::defaults( $schema );
 		$fields = $config['fields'];
 
@@ -174,6 +174,46 @@ final class Subscriber {
 			'subscriber' => $sub,
 			'skip'       => null,
 		);
+	}
+
+	/**
+	 * Drop every mapping whose source is a password field. A password is never
+	 * sent to an email marketing service, whatever the form says.
+	 *
+	 * @param array $config Settings from normalize().
+	 * @param array $schema Form schema.
+	 * @return array
+	 */
+	private static function withoutPasswords( array $config, array $schema ): array {
+		$keys = array();
+		foreach ( FieldMapper::fields( $schema ) as $field ) {
+			if ( 'password' === $field['type'] ) {
+				$keys[] = $field['key'];
+			}
+		}
+		if ( ! $keys ) {
+			return $config;
+		}
+		$isPassword = static function ( $source ) use ( $keys ): bool {
+			return in_array( explode( '.', (string) $source )[0], $keys, true );
+		};
+		foreach ( $config['fields'] as $name => $source ) {
+			if ( $isPassword( $source ) ) {
+				$config['fields'][ $name ] = '';
+			}
+		}
+		$config['merge_fields'] = array_values(
+			array_filter(
+				$config['merge_fields'],
+				static function ( $row ) use ( $isPassword ): bool {
+					return ! $isPassword( $row['field'] ?? '' );
+				}
+			)
+		);
+		if ( $isPassword( $config['consent_field'] ) ) {
+			$config['consent_field'] = '';
+		}
+		return $config;
 	}
 
 	/**

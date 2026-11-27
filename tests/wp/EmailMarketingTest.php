@@ -608,6 +608,120 @@ final class EmailMarketingTest extends TestCase {
 		$this->assertSame( 'Mailchimp: skipped (the rule did not match)', $this->lines( $id2 )[0] );
 	}
 
+	// ── Add-on services ─────────────────────────────────────────────
+
+	private function addOnService( string $class = AddOnWpClient::class, array $extra = array() ): void {
+		AddOnWpClient::$subscribed = array();
+		add_filter(
+			'subtleforms/email/marketing/services',
+			static function ( $list ) use ( $class, $extra ) {
+				$list['acme'] = array_merge( array(
+					'slug'          => 'acme',
+					'label'         => 'Acme Mail',
+					'description'   => 'Add people to Acme Mail.',
+					'client'        => $class,
+					'case'          => 'upper',
+					'tags'          => true,
+					'list_required' => true,
+				), $extra );
+				return $list;
+			}
+		);
+	}
+
+	public function test_service_settings_are_checked_and_saved_before_the_key_is_tested(): void {
+		$this->asAdmin();
+		$this->addOnService( AddOnWpClient::class, array( 'settings' => array( array( 'name' => 'api_url', 'label' => 'Account URL', 'type' => 'url', 'required' => true, 'pattern' => '^https://[a-z0-9-]+\.example\.com$' ) ) ) );
+		$route = '/integrations/email-marketing/acme/connect';
+		$this->assertSame( 400, $this->rest( 'POST', $route, array( 'api_key' => 'acme-key-1234' ) )->get_status(), 'required' );
+		$this->assertSame( 400, $this->rest( 'POST', $route, array( 'api_key' => 'acme-key-1234', 'api_url' => 'https://evil.test' ) )->get_status(), 'pattern' );
+		$this->assertFalse( $this->conn( 'acme' )->hasKey() );
+		$ok = $this->rest( 'POST', $route, array( 'api_key' => 'acme-key-1234', 'api_url' => 'https://acme.example.com' ) );
+		$this->assertSame( 200, $ok->get_status(), wp_json_encode( $ok->get_data() ) );
+		$this->assertSame( 'https://acme.example.com', $this->conn( 'acme' )->settings()['api_url'] );
+		delete_option( Connection::optionName( 'acme' ) );
+	}
+
+	public function test_a_password_answer_is_never_sent_by_an_add_on_service(): void {
+		$this->addOnService();
+		$this->conn( 'acme' )->save( 'acme-key-1234', array( 'name' => 'Acme', 'email' => 'o@example.com' ), true );
+		$form   = $this->mailchimpForm( array(), array( array( 'id' => 'f9', 'key' => 'pw', 'type' => 'password', 'label' => 'Password' ) ) );
+		$repo   = new FormsRepository();
+		$loaded = $repo->loadSchemaVersion( $form );
+		$schema = is_array( $loaded ) ? ( $loaded['schema'] ?? $loaded ) : array();
+		$schema['metadata']['integrations']['acme'] = array(
+			'enabled'      => true,
+			'list_id'      => 'l1',
+			'fields'       => array( 'email' => 'email', 'first_name' => 'pw' ),
+			'merge_fields' => array( array( 'field' => 'pw', 'target' => 'SECRET' ) ),
+		);
+		$repo->saveSchemaVersion( $form, $schema, true );
+		$this->submitAndRun( $form, array( 'fname' => 'Ada', 'email' => 'ada@example.com', 'pw' => 'Hunter2!pass' ) );
+		$this->assertNotEmpty( AddOnWpClient::$subscribed );
+		$this->assertStringNotContainsString( 'Hunter2', wp_json_encode( AddOnWpClient::$subscribed ) );
+		delete_option( Connection::optionName( 'acme' ) );
+	}
+
+	public function test_an_add_on_service_is_listed_and_its_routes_answer(): void {
+		$this->asAdmin();
+		$this->addOnService();
+		$index = $this->rest( 'GET', '/integrations/email-marketing' );
+		$this->assertSame( 200, $index->get_status() );
+		$this->assertArrayHasKey( 'acme', $index->get_data()['data']['services'] );
+
+		$connect = $this->rest( 'POST', '/integrations/email-marketing/acme/connect', array( 'api_key' => 'acme-key-1234' ) );
+		$this->assertSame( 200, $connect->get_status(), wp_json_encode( $connect->get_data() ) );
+		$this->assertStringNotContainsString( 'acme-key-1234', wp_json_encode( $connect->get_data() ) );
+		$this->assertTrue( $this->conn( 'acme' )->hasKey() );
+
+		$lists = $this->rest( 'GET', '/integrations/email-marketing/acme/lists' );
+		$this->assertSame( 200, $lists->get_status() );
+		$this->assertSame( 'l1', $lists->get_data()['data'][0]['id'] );
+		$this->assertSame( 200, $this->rest( 'POST', '/integrations/email-marketing/acme/test' )->get_status() );
+		$this->assertSame( 200, $this->rest( 'GET', '/integrations/email-marketing/acme/fields' )->get_status() );
+		delete_option( Connection::optionName( 'acme' ) );
+	}
+
+	public function test_an_unknown_or_invalid_add_on_slug_is_a_404(): void {
+		$this->asAdmin();
+		$this->addOnService( \stdClass::class );
+		foreach ( array( 'acme', 'nothing' ) as $slug ) {
+			$this->assertSame( 404, $this->rest( 'GET', '/integrations/email-marketing/' . $slug )->get_status(), $slug );
+			$this->assertSame( 404, $this->rest( 'GET', '/integrations/email-marketing/' . $slug . '/lists' )->get_status(), $slug );
+		}
+		$this->assertArrayNotHasKey( 'acme', $this->rest( 'GET', '/integrations/email-marketing' )->get_data()['data']['services'] );
+	}
+
+	public function test_an_add_on_service_is_queued_and_sent_with_the_feed_filters_applied(): void {
+		$this->addOnService();
+		$this->conn( 'acme' )->save( 'acme-key-1234', array( 'name' => 'Acme', 'email' => 'o@example.com' ), true );
+		$form = $this->mailchimpForm();
+		$repo = new FormsRepository();
+		$loaded = $repo->loadSchemaVersion( $form );
+		$schema = is_array( $loaded ) ? ( $loaded['schema'] ?? $loaded ) : array();
+		$schema['metadata']['integrations']['acme'] = array(
+			'enabled' => true,
+			'list_id' => 'l1',
+			'fields'  => array( 'email' => 'email', 'first_name' => 'fname' ),
+		);
+		$repo->saveSchemaVersion( $form, $schema, true );
+		add_filter( 'subtleforms/email/marketing/feeds', static function ( $feeds, $context, $service ) {
+			if ( 'acme' === $service ) {
+				$second            = $feeds[0];
+				$second['id']      = 'second';
+				$second['list_id'] = 'l2';
+				$feeds[]           = $second;
+			}
+			return $feeds;
+		}, 10, 3 );
+		$id = $this->submitAndRun( $form, array( 'fname' => 'Ada', 'email' => 'ada@example.com' ) );
+
+		$this->assertSame( array( 'l1', 'l2' ), array_column( AddOnWpClient::$subscribed, 'list' ) );
+		$this->assertSame( 'ada@example.com', AddOnWpClient::$subscribed[0]['email'] );
+		$this->assertSame( array( 'Acme Mail: subscribed', 'Acme Mail: subscribed' ), $this->lines( $id, 'acme' ) );
+		delete_option( Connection::optionName( 'acme' ) );
+	}
+
 	// ── Switch, settings, banner ────────────────────────────────────
 
 	public function test_the_enabled_route_switches_a_service_and_keeps_its_key_and_settings(): void {
@@ -828,5 +942,37 @@ final class EmailMarketingTest extends TestCase {
 			$this->assertNotNull( $autoload, $slug );
 			$this->assertNotContains( $autoload, $yes, $slug );
 		}
+	}
+}
+
+final class AddOnWpClient implements \SubtleForms\Integrations\EmailMarketing\ClientInterface {
+	/** @var array[] */
+	public static array $subscribed = array();
+
+	public function __construct( string $key = '', int $timeout = 10, array $settings = array() ) {}
+
+	public static function looksLikeKey( string $key ): bool {
+		return '' !== $key;
+	}
+
+	public function account(): array {
+		return array( 'name' => 'Acme', 'email' => 'o@example.com' );
+	}
+
+	public function lists(): array {
+		return array( array( 'id' => 'l1', 'name' => 'Newsletter', 'count' => 3 ) );
+	}
+
+	public function fields( string $listId ): array {
+		return array();
+	}
+
+	public function isMember( string $listId, string $email ): bool {
+		return false;
+	}
+
+	public function subscribe( \SubtleForms\Integrations\EmailMarketing\Subscriber $sub, ?callable $bodyFilter = null ): array {
+		self::$subscribed[] = array( 'list' => $sub->listId, 'email' => $sub->email, 'first' => $sub->firstName, 'fields' => $sub->fields );
+		return array( 'status' => 'subscribed', 'member' => '1', 'notes' => array() );
 	}
 }

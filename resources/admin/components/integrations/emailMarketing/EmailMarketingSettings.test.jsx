@@ -330,6 +330,27 @@ describe('the registry', () => {
     expect(container.querySelector('[data-testid="acme"]').textContent).toBe('Acme screen');
   });
 
+  test('a service the server sends for but no add-on registered here gets the generic key screen', async () => {
+    const data = pageData();
+    data.emailMarketing.services.acme = { slug: 'acme', label: 'Acme Mail', available: true, enabled: false, configured: false, builtin: false, core: true };
+    await mount(data);
+    expect(tile('acme').querySelector('.sf-svc-logo__wordmark').textContent).toBe('Acme Mail');
+    await open('acme');
+    expect(container.querySelector('.sf-em-settings')).not.toBeNull();
+    expect(container.textContent).toContain('Acme Studio');
+  });
+
+  test('Free hands its email marketing screens to add-ons on the extension object', () => {
+    const target = {};
+    // eslint-disable-next-line global-require
+    const { exposeEmailMarketing } = require('./expose');
+    exposeEmailMarketing(target);
+    expect(typeof target.EmailMarketingServiceSettings).toBe('function');
+    expect(typeof target.EmailMarketingServiceFormPanel).toBe('function');
+    expect(typeof target.EmailMarketingMappingTable).toBe('function');
+    expect(typeof window.SubtleFormsExtend.EmailMarketingServiceSettings).toBe('function');
+  });
+
   test('a service the server does not list has no tile', async () => {
     registerEmailMarketingService('acme', { label: 'Acme Mail', settingsComponent: () => null });
     await mount();

@@ -10,7 +10,7 @@ export const emailMarketingApi = {
   all: () => apiClient.get(BASE),
   state: (service) => apiClient.get(`${BASE}/${service}`),
   setEnabled: (service, enabled) => apiClient.post(`${BASE}/${service}/enabled`, { enabled }),
-  connect: (service, apiKey) => apiClient.post(`${BASE}/${service}/connect`, { api_key: apiKey }),
+  connect: (service, apiKey, settings = {}) => apiClient.post(`${BASE}/${service}/connect`, { ...settings, api_key: apiKey }),
   test: (service) => apiClient.post(`${BASE}/${service}/test`, {}),
   disconnect: (service) => apiClient.delete(`${BASE}/${service}`),
   saveSettings: (service, values) => apiClient.post(`${BASE}/${service}/settings`, values),
@@ -64,7 +64,7 @@ export function announceService(service, change = {}) {
   }
   const ext = window.subtleformsAdmin?.extensions?.email_marketing;
   if (ext && data?.services) {
-    const list = Object.values(data.services).filter((s) => s && s.builtin !== false);
+    const list = Object.values(data.services).filter((s) => s && (s.builtin !== false || s.core));
     ext.enabled = list.some((s) => s.enabled);
     ext.configured = list.some((s) => s.enabled && s.configured);
   }

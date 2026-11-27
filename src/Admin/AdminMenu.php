@@ -983,7 +983,16 @@ class AdminMenu {
 		$extras    = \SubtleForms\Integrations\EmailMarketing\Services::extras();
 		$dismissed = \SubtleForms\Api\EmailMarketingApi::bannerDismissed( get_current_user_id() );
 		return array(
-			'services' => (object) \SubtleForms\Integrations\EmailMarketing\Services::all(),
+			// The class name of an add-on's client stays on the server.
+			'services' => (object) array_map(
+				static function ( $entry ) {
+					if ( is_array( $entry ) ) {
+						unset( $entry['client'] );
+					}
+					return $entry;
+				},
+				\SubtleForms\Integrations\EmailMarketing\Services::all()
+			),
 			'extras'   => $extras,
 			'banner'   => array(
 				'show' => ! $dismissed && array() === $extras,

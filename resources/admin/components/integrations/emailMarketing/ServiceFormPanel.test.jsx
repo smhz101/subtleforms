@@ -311,3 +311,16 @@ describe('MailPoet', () => {
     expect(container.textContent).not.toContain('Tags');
   });
 });
+
+test('a password field is never offered as a source in the mapping lists', async () => {
+  const schema = { fields: [...SCHEMA.fields, { key: 'pw', type: 'password', label: 'Password' }] };
+  await mount({ enabled: true, list_id: 'abc123' }, { schema, fieldOptions: [...FIELD_OPTIONS, { label: 'Password', value: 'pw' }] });
+  const all = [...container.querySelectorAll('select')].flatMap((s) => optionsOf(s));
+  expect(all).toContain('Company');
+  expect(all).not.toContain('Password');
+});
+
+test('an add-on service loads its fields for the chosen list', async () => {
+  await mount({ enabled: true, list_id: 'abc123' }, { service: 'acme' });
+  expect(emailMarketingApi.fields).toHaveBeenCalledWith('acme', 'abc123', false);
+});

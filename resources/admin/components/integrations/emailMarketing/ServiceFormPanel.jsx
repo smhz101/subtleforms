@@ -5,7 +5,7 @@ import { consentFieldOptions, flattenFields } from '../../builder/utils/integrat
 import MappingTable from './MappingTable';
 import { useQueryClient } from '@tanstack/react-query';
 import { fetchFields, fetchLists } from './queries';
-import { uiFor } from './serviceUi';
+import { SERVICE_UI, uiFor } from './serviceUi';
 import './emailMarketing.scss';
 
 /**
@@ -32,12 +32,17 @@ export default function ServiceFormPanel({ service, connected, connection, schem
   const ui = uiFor(service);
   const client = useQueryClient();
   const listId = config.list_id || '';
-  const mappingKey = ui.upper && service === 'mailchimp' ? listId : '';
+  // Mailchimp and add-on services have fields that belong to one list.
+  const mappingKey = service === 'mailchimp' || !SERVICE_UI[service] ? listId : '';
 
   const [lists, setLists] = useState(null);
   const [listError, setListError] = useState('');
   const [listBusy, setListBusy] = useState(false);
   const [fields, setFields] = useState({ key: null, items: [], loading: false, error: '' });
+
+  // A password is never sent to an email marketing service.
+  const passwordKeys = useMemo(() => new Set(flattenFields(schema?.fields).filter(({ type }) => type === 'password').map(({ key }) => key)), [schema?.fields]);
+  const sourceOptions = useMemo(() => fieldOptions.filter((o) => !passwordKeys.has(String(o.value).split('.')[0])), [fieldOptions, passwordKeys]);
 
   const emailOptions = useMemo(
     () => flattenFields(schema?.fields).filter(({ type }) => type === 'email').map(({ key, label }) => ({ label, value: key })),
@@ -118,7 +123,7 @@ export default function ServiceFormPanel({ service, connected, connection, schem
         service={service}
         config={config}
         patch={set}
-        fieldOptions={fieldOptions}
+        fieldOptions={sourceOptions}
         emailOptions={emailOptions}
         mergeFields={fieldsReady ? fields.items : []}
         mergeLoading={fields.loading}

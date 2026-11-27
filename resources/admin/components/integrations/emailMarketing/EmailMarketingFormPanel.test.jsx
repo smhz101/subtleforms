@@ -28,8 +28,8 @@ const state = (enabled, extra = {}) => ({ enabled, status: 'connected', has_key:
 let container;
 let root;
 
-async function mount(integrations, services = { mailchimp: state(true), brevo: state(false), kit: state(true) }) {
-  window.subtleformsAdmin = { extensions: { email_marketing: { builtin: true } }, emailMarketing: { services: {}, extras: [], banner: { show: false } } };
+async function mount(integrations, services = { mailchimp: state(true), brevo: state(false), kit: state(true) }, pageServices = {}) {
+  window.subtleformsAdmin = { extensions: { email_marketing: { builtin: true } }, emailMarketing: { services: pageServices, extras: [], banner: { show: false } } };
   emailMarketingApi.all.mockResolvedValue({ services });
   emailMarketingApi.lists.mockResolvedValue([]);
   emailMarketingApi.fields.mockResolvedValue([]);
@@ -103,4 +103,15 @@ test('an add-on draws its options in the email_marketing.service.form slot, told
   await mount({ mailchimp: { enabled: true }, kit: { enabled: true } }, { mailchimp: state(true), brevo: state(false), kit: state(true, { has_key: false, status: 'none' }) });
   expect(container.querySelector('[data-testid="extra-mailchimp"]').textContent).toBe('connected true');
   expect(container.querySelector('[data-testid="extra-kit"]').textContent).toBe('connected false');
+});
+
+test('a service an add-on adds with no screens of its own gets the generic form settings', async () => {
+  const acme = { slug: 'acme', label: 'Acme Mail', available: true, enabled: true, configured: true, builtin: false, core: true, tags: true, list_required: true };
+  emailMarketingApi.lists.mockResolvedValue([{ id: 'l1', name: 'Newsletter', count: 3 }]);
+  await mount({ acme: { enabled: true, list_id: '' } }, { acme: state(true) }, { acme });
+  expect(sections()).toEqual(['acme']);
+  const section = container.querySelector('[data-service="acme"]');
+  expect(section.querySelector('select')).not.toBeNull();
+  expect(emailMarketingApi.lists).toHaveBeenCalledWith('acme', false);
+  expect(section.textContent).toContain('Add people who submit this form');
 });

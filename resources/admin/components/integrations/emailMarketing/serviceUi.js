@@ -1,4 +1,5 @@
 import { __ } from '@wordpress/i18n';
+import { pageData } from './api';
 
 /**
  * What differs between the services on the screens: names of things, help
@@ -117,11 +118,13 @@ export const SERVICE_UI = {
  * @return {Object} Descriptor.
  */
 export function uiFor(slug) {
+  // A service an add-on adds says how it works in its server entry.
+  const entry = pageData().services[slug] || {};
   return (
     SERVICE_UI[slug] || {
-      upper: false,
-      listRequired: false,
-      hasTags: false,
+      upper: entry.case === 'upper',
+      listRequired: !!entry.list_required,
+      hasTags: !!entry.tags,
       doi: 'none',
       listLabel: __('List', 'subtleforms'),
       listChoose: __('Choose a list', 'subtleforms'),

@@ -1,6 +1,7 @@
 import ServiceConnection from './ServiceConnection';
 import BrevoSettings from './BrevoSettings';
 import { getEmailMarketingService } from '../../../../shared/extend';
+import { pageData } from './api';
 import './emailMarketing.scss';
 
 /**
@@ -12,7 +13,7 @@ import './emailMarketing.scss';
  * @param {Function} props.onConnection Called with the new state after a change.
  */
 export default function ServiceSettings({ service, connection, onConnection }) {
-  const label = getEmailMarketingService(service)?.label || service;
+  const label = getEmailMarketingService(service)?.label || pageData().services[service]?.label || service;
   return (
     <div className='sf-em-settings'>
       <ServiceConnection service={service} label={label} state={connection} onState={onConnection} />

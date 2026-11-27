@@ -429,4 +429,112 @@ final class EmailMarketingTest extends TestCase {
 		};
 		$this->assertTrue( Registry::coreOwnsEmailMarketing() );
 	}
+
+	// ── Add-on services ─────────────────────────────────────────────
+
+	private function addOnService( array $extra = array() ): void {
+		$GLOBALS['sf_test_filters']['subtleforms/email/marketing/services'] = static function ( $list ) use ( $extra ) {
+			$list['acme'] = array_merge(
+				array(
+					'slug'          => 'acme',
+					'label'         => 'Acme Mail',
+					'description'   => 'Add people to Acme Mail.',
+					'client'        => AddOnClientStub::class,
+					'case'          => 'upper',
+					'tags'          => true,
+					'list_required' => true,
+				),
+				$extra
+			);
+			return $list;
+		};
+	}
+
+	public function test_an_add_on_service_with_a_valid_client_is_handled_like_a_built_in(): void {
+		$this->addOnService();
+		$this->assertContains( 'acme', Services::slugs() );
+		$this->assertTrue( Services::isRegistered( 'acme' ) );
+		$this->assertFalse( Services::isBuiltIn( 'acme' ) );
+		$this->assertTrue( Services::coreOwns( 'acme' ) );
+		$this->assertInstanceOf( AddOnClientStub::class, Services::client( 'acme', 'k' ) );
+		$this->assertSame( 'Acme Mail', Services::registered()['acme']['label'] );
+		$this->assertTrue( Services::registered()['acme']['list_required'] );
+		$this->assertFalse( Services::isLocal( 'acme' ) );
+		$this->assertSame( 'none', Services::state( 'acme' )['status'] );
+		$this->assertSame( 'ACME', Subscriber::normalize( array( 'merge_fields' => array( array( 'field' => 'a', 'target' => 'acme' ) ) ), 'acme' )['merge_fields'][0]['target'] );
+		$this->assertSame( array( 'mailchimp', 'brevo', 'kit', 'mailpoet' ), array_slice( Services::slugs(), 0, 4 ) );
+	}
+
+	public function test_a_password_field_is_never_sent_to_a_service(): void {
+		$schema = $this->schema();
+		$schema['fields'][] = array( 'type' => 'password', 'key' => 'pw', 'label' => 'Password' );
+		$built = Subscriber::build(
+			$this->config( array( 'merge_fields' => array( array( 'field' => 'pw', 'target' => 'secret' ), array( 'field' => 'company', 'target' => 'company' ) ) ) ),
+			$schema,
+			array( 'email' => 'a@example.com', 'company' => 'Engines', 'pw' => 'hunter2' ),
+			'mailchimp'
+		);
+		$this->assertSame( array( 'COMPANY' => 'Engines' ), $built['subscriber']->fields );
+		$this->assertStringNotContainsString( 'hunter2', wp_json_encode( $built['subscriber'] ) );
+	}
+
+	public function test_an_add_on_service_settings_fields_are_cleaned(): void {
+		$this->addOnService( array( 'settings' => array( array( 'name' => 'API_URL', 'label' => 'Account URL', 'type' => 'url', 'required' => true ), array( 'name' => '' ), 'junk' ) ) );
+		$settings = Services::registered()['acme']['settings'];
+		$this->assertCount( 1, $settings );
+		$this->assertSame( 'api_url', $settings[0]['name'] );
+		$this->assertSame( 'url', $settings[0]['type'] );
+		$this->assertTrue( $settings[0]['required'] );
+	}
+
+	public function test_an_add_on_service_with_an_invalid_client_is_ignored(): void {
+		foreach ( array( 'Missing\\Class', \stdClass::class, '' ) as $class ) {
+			$this->addOnService( array( 'client' => $class ) );
+			$this->assertNotContains( 'acme', Services::slugs(), 'client: ' . $class );
+			$this->assertFalse( Services::coreOwns( 'acme' ) );
+		}
+		$this->addOnService();
+		$this->assertContains( 'acme', Services::slugs() );
+	}
+
+	public function test_an_add_on_cannot_swap_the_client_of_a_built_in_service(): void {
+		$this->addOnService();
+		$before = Services::client( 'kit', 'k' );
+		$GLOBALS['sf_test_filters']['subtleforms/email/marketing/services'] = static function ( $list ) {
+			$list['kit']['client'] = AddOnClientStub::class;
+			return $list;
+		};
+		$this->assertSame( get_class( $before ), get_class( Services::client( 'kit', 'k' ) ) );
+	}
+
+	public function test_an_add_on_service_follows_the_email_marketing_owner(): void {
+		$this->addOnService();
+		$GLOBALS['sf_test_filters']['subtleforms/admin/integrations'] = static function ( $list ) {
+			unset( $list['email_marketing'] );
+			return $list;
+		};
+		$this->assertFalse( Services::coreOwns( 'acme' ) );
+	}
+}
+
+final class AddOnClientStub implements \SubtleForms\Integrations\EmailMarketing\ClientInterface {
+	public function __construct( string $key = '', int $timeout = 10, array $settings = array() ) {}
+	public static function looksLikeKey( string $key ): bool {
+		return '' !== $key;
+	}
+	public function account(): array {
+		return array( 'name' => 'Acme', 'email' => 'a@example.com' );
+	}
+	public function lists(): array {
+		return array();
+	}
+	public function fields( string $listId ): array {
+		return array();
+	}
+	public function isMember( string $listId, string $email ): bool {
+		return false;
+	}
+	public function subscribe( Subscriber $sub, ?callable $bodyFilter = null ): array {
+		return array( 'status' => 'subscribed', 'member' => '1', 'notes' => array() );
+	}
 }

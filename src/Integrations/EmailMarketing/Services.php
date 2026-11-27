@@ -23,6 +23,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * service this plugin has, without `builtin => true`, takes that service
  * over. This plugin then sends nothing to it. That is the only rule; it does
  * not depend on which add-on it is.
+ *
+ * An entry with a new slug and a `client` (a class that implements
+ * ClientInterface) is an add-on service this plugin handles like its own:
+ * connection, routes, queue, sender and activity log.
  */
 final class Services {
 
@@ -79,12 +83,94 @@ final class Services {
 	}
 
 	/**
-	 * Slugs of this plugin's own services, in grid order.
+	 * What an add-on lists with a usable client, keyed by slug, with the same
+	 * definition keys the built-ins have. An entry with a missing class, a class
+	 * that is not a ClientInterface, or the slug of a built-in is left out.
+	 *
+	 * @return array<string,array<string,mixed>>
+	 */
+	public static function addons(): array {
+		$result = array();
+		foreach ( self::all() as $slug => $entry ) {
+			if ( ! is_string( $slug ) || '' === $slug || self::isBuiltIn( $slug ) || ! self::validClient( $entry ) ) {
+				continue;
+			}
+			$result[ $slug ] = array(
+				'label'         => (string) ( $entry['label'] ?? $slug ),
+				'client'        => $entry['client'],
+				'description'   => (string) ( $entry['description'] ?? '' ),
+				'case'          => 'upper' === ( $entry['case'] ?? 'keep' ) ? 'upper' : 'keep',
+				'tags'          => ! empty( $entry['tags'] ),
+				'list_required' => ! empty( $entry['list_required'] ),
+				'local'         => false,
+				'settings'      => self::cleanSettingFields( $entry['settings'] ?? array() ),
+			);
+		}
+		return $result;
+	}
+
+	/**
+	 * The settings fields an add-on service asks for above the API key:
+	 * `name`, `label`, `type` (text or url), `required`, `pattern`, `help`.
+	 *
+	 * @param mixed $list Fields as listed by the add-on.
+	 * @return array<int,array<string,mixed>>
+	 */
+	public static function cleanSettingFields( $list ): array {
+		$out = array();
+		foreach ( is_array( $list ) ? $list : array() as $item ) {
+			$name = is_array( $item ) ? sanitize_key( (string) ( $item['name'] ?? '' ) ) : '';
+			if ( '' === $name ) {
+				continue;
+			}
+			$out[] = array(
+				'name'     => $name,
+				'label'    => (string) ( $item['label'] ?? $name ),
+				'type'     => 'url' === ( $item['type'] ?? '' ) ? 'url' : 'text',
+				'required' => ! empty( $item['required'] ),
+				'pattern'  => (string) ( $item['pattern'] ?? '' ),
+				'help'     => (string) ( $item['help'] ?? '' ),
+			);
+		}
+		return $out;
+	}
+
+	/**
+	 * Every service this plugin can talk to: its own, then add-on services
+	 * with a valid client.
+	 *
+	 * @return array<string,array<string,mixed>>
+	 */
+	public static function registered(): array {
+		return self::definitions() + self::addons();
+	}
+
+	/**
+	 * Slugs of every registered service, built-ins first.
 	 *
 	 * @return string[]
 	 */
 	public static function slugs(): array {
-		return array_keys( self::definitions() );
+		return array_keys( self::registered() );
+	}
+
+	/**
+	 * Whether a slug is a built-in or an add-on service with a valid client.
+	 *
+	 * @param string $slug Service slug.
+	 */
+	public static function isRegistered( string $slug ): bool {
+		return isset( self::registered()[ $slug ] );
+	}
+
+	/**
+	 * Whether a listed entry names a class that implements ClientInterface.
+	 *
+	 * @param mixed $entry Entry from the services filter.
+	 */
+	private static function validClient( $entry ): bool {
+		$class = is_array( $entry ) ? ( $entry['client'] ?? null ) : null;
+		return is_string( $class ) && class_exists( $class ) && is_subclass_of( $class, ClientInterface::class, true );
 	}
 
 	/**
@@ -163,7 +249,7 @@ final class Services {
 	 * @throws ServiceException For a slug this plugin has no client for.
 	 */
 	public static function client( string $slug, string $key, int $timeout = AbstractClient::ADMIN_TIMEOUT, array $settings = array() ): ClientInterface {
-		$def = self::definitions()[ $slug ] ?? null;
+		$def = self::registered()[ $slug ] ?? null;
 		if ( null === $def ) {
 			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Messages are shown as JSON or in the entry log, never printed as HTML.
 			throw new ServiceException( __( 'Unknown email marketing service.', 'subtleforms' ) );
@@ -220,12 +306,31 @@ final class Services {
 		 * not carry `builtin => true` replaces it: this plugin then sends
 		 * nothing to that service. A new slug adds a tile; the add-on draws
 		 * its screens in the browser with `registerEmailMarketingService`.
+		 * A new slug with `client` (a class that implements ClientInterface),
+		 * `case`, `tags`, `list_required` and `label` is sent to by this
+		 * plugin like a built-in service.
 		 *
 		 * @param array<string, array> $services Map of slug to { slug, label, description, available, enabled, configured, builtin }.
 		 * @since 2.8.0
 		 */
 		$result = apply_filters( 'subtleforms/email/marketing/services', $result );
-		return is_array( $result ) ? $result : array();
+		$result = is_array( $result ) ? $result : array();
+		foreach ( $result as $slug => $entry ) {
+			if ( is_string( $slug ) && ! self::isBuiltIn( $slug ) && self::validClient( $entry ) ) {
+				// An add-on service with a client is stored and switched like a built-in one.
+				$connection     = new Connection( $slug );
+				$result[ $slug ] = $entry + array(
+					'slug'       => $slug,
+					'available'  => true,
+					'enabled'    => $connection->isEnabled(),
+					'configured' => Connection::STATUS_CONNECTED === $connection->status(),
+					'builtin'    => false,
+					'core'       => true,
+				);
+				$result[ $slug ]['settings'] = self::cleanSettingFields( $entry['settings'] ?? array() );
+			}
+		}
+		return $result;
 	}
 
 	/**
@@ -235,8 +340,15 @@ final class Services {
 	 * @param string $slug Service slug.
 	 */
 	public static function coreOwns( string $slug ): bool {
-		if ( ! self::isBuiltIn( $slug ) || ! Registry::coreOwnsEmailMarketing() ) {
+		if ( ! Registry::coreOwnsEmailMarketing() ) {
 			return false;
+		}
+		if ( ! self::isBuiltIn( $slug ) ) {
+			try {
+				return isset( self::addons()[ $slug ] );
+			} catch ( \Throwable $e ) {
+				return false;
+			}
 		}
 		try {
 			$all = self::all();

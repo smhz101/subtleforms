@@ -43,7 +43,7 @@ final class EmailMarketingApi {
 	public function registerRoutes(): void {
 		$base    = '/integrations/email-marketing';
 		$perm    = array( $this, 'checkPermissions' );
-		$service = '/(?P<service>' . implode( '|', array_map( 'preg_quote', Services::slugs() ) ) . ')';
+		$service = '/(?P<service>[A-Za-z0-9_-]+)';
 
 		register_rest_route(
 			'subtleforms/v1',
@@ -183,6 +183,10 @@ final class EmailMarketingApi {
 		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
 			return new WP_Error( 'subtleforms_invalid_nonce', __( 'Security check failed. Please refresh and try again.', 'subtleforms' ), array( 'status' => 403 ) );
 		}
+		$service = $request->get_param( 'service' );
+		if ( null !== $service && ! Services::isRegistered( sanitize_key( (string) $service ) ) ) {
+			return new WP_Error( 'rest_no_route', __( 'No route was found matching the URL and request method.', 'subtleforms' ), array( 'status' => 404 ) );
+		}
 		return true;
 	}
 
@@ -239,14 +243,20 @@ final class EmailMarketingApi {
 	public function connect( WP_REST_Request $request ): WP_REST_Response {
 		$slug = $this->slug( $request );
 		$key  = trim( sanitize_text_field( (string) $request->get_param( 'api_key' ) ) );
-		$def  = Services::definitions()[ $slug ];
+		$def  = Services::registered()[ $slug ];
 		if ( Services::isLocal( $slug ) ) {
 			return $this->notForLocal( $slug );
 		}
 		if ( ! $def['client']::looksLikeKey( $key ) ) {
-			return ApiResponse::error( 'subtleforms_email_marketing_key', $def['client']::badKeyMessage(), 400 );
+			$message = method_exists( $def['client'], 'badKeyMessage' ) ? $def['client']::badKeyMessage() : __( 'That does not look like an API key for this service.', 'subtleforms' );
+			return ApiResponse::error( 'subtleforms_email_marketing_key', $message, 400 );
 		}
 		$connection = new Connection( $slug );
+		// The service's own settings are saved first: the client may need them to check the key.
+		$problem = $this->saveServiceSettings( $slug, $request, $connection );
+		if ( null !== $problem ) {
+			return ApiResponse::error( 'subtleforms_email_marketing_settings', $problem, 400 );
+		}
 		try {
 			$account = Services::client( $slug, $key, \SubtleForms\Integrations\EmailMarketing\AbstractClient::ADMIN_TIMEOUT, $connection->settings() )->account();
 		} catch ( ServiceException $e ) {
@@ -313,6 +323,10 @@ final class EmailMarketingApi {
 	public function saveSettings( WP_REST_Request $request ): WP_REST_Response {
 		$slug       = $this->slug( $request );
 		$connection = new Connection( $slug );
+		if ( ! Services::isBuiltIn( $slug ) ) {
+			$problem = $this->saveServiceSettings( $slug, $request, $connection );
+			return null === $problem ? ApiResponse::success( $connection->state() ) : ApiResponse::error( 'subtleforms_email_marketing_settings', $problem, 400 );
+		}
 		if ( 'brevo' !== $slug ) {
 			return ApiResponse::success( $connection->state() );
 		}
@@ -324,6 +338,45 @@ final class EmailMarketingApi {
 			)
 		);
 		return ApiResponse::success( $connection->state() );
+	}
+
+	/**
+	 * Check and save the settings fields an add-on service declared, from the
+	 * request. Values are cleaned by type and checked against `required` and
+	 * `pattern`; nothing is saved when one is refused.
+	 *
+	 * @param string          $slug       Service slug.
+	 * @param WP_REST_Request $request    Request.
+	 * @param Connection      $connection Connection.
+	 * @return string|null The reason a value was refused, or null.
+	 */
+	private function saveServiceSettings( string $slug, WP_REST_Request $request, Connection $connection ): ?string {
+		$fields = Services::registered()[ $slug ]['settings'] ?? array();
+		if ( ! $fields ) {
+			return null;
+		}
+		$saved  = $connection->settings();
+		$values = array();
+		foreach ( $fields as $field ) {
+			$name = $field['name'];
+			$raw  = $request->get_param( $name );
+			if ( null === $raw ) {
+				$raw = $saved[ $name ] ?? '';
+			}
+			$value = 'url' === $field['type'] ? esc_url_raw( trim( (string) $raw ), array( 'http', 'https' ) ) : trim( sanitize_text_field( (string) $raw ) );
+			if ( '' === $value ) {
+				if ( $field['required'] ) {
+					/* translators: %s: setting name */
+					return sprintf( __( '%s is required.', 'subtleforms' ), $field['label'] );
+				}
+			} elseif ( '' !== $field['pattern'] && 1 !== @preg_match( '~' . str_replace( '~', '\\~', $field['pattern'] ) . '~', $value ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- A bad pattern from an add-on must not break the request.
+				/* translators: %s: setting name */
+				return sprintf( __( '%s does not look right.', 'subtleforms' ), $field['label'] );
+			}
+			$values[ $name ] = $value;
+		}
+		$connection->saveSettings( array_merge( $saved, $values ) );
+		return null;
 	}
 
 	/**
@@ -370,7 +423,7 @@ final class EmailMarketingApi {
 		$id   = preg_replace( '/[^A-Za-z0-9_-]/', '', (string) $request->get_param( 'list_id' ) );
 		return $this->cached(
 			$slug,
-			'fields|' . ( 'mailchimp' === $slug ? $id : '' ),
+			'fields|' . ( 'mailchimp' === $slug || ! Services::isBuiltIn( $slug ) ? $id : '' ),
 			(bool) $request->get_param( 'refresh' ),
 			static function ( $client ) use ( $id ): array {
 				return $client->fields( (string) $id );
@@ -405,7 +458,7 @@ final class EmailMarketingApi {
 		return ApiResponse::error(
 			'subtleforms_email_marketing_local',
 			/* translators: %s: service name */
-			sprintf( __( '%s is a plugin on this site and has no API key to connect.', 'subtleforms' ), Services::definitions()[ $slug ]['label'] ?? $slug ),
+			sprintf( __( '%s is a plugin on this site and has no API key to connect.', 'subtleforms' ), Services::registered()[ $slug ]['label'] ?? $slug ),
 			400
 		);
 	}
@@ -452,7 +505,7 @@ final class EmailMarketingApi {
 			return ApiResponse::error(
 				'subtleforms_email_marketing_not_connected',
 				/* translators: %s: service name */
-				sprintf( __( 'Connect %s first, in Settings > Integrations > Email marketing.', 'subtleforms' ), Services::definitions()[ $slug ]['label'] ?? $slug ),
+				sprintf( __( 'Connect %s first, in Settings > Integrations > Email marketing.', 'subtleforms' ), Services::registered()[ $slug ]['label'] ?? $slug ),
 				400
 			);
 		}
