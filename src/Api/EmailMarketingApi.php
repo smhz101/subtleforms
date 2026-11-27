@@ -252,6 +252,11 @@ final class EmailMarketingApi {
 			return ApiResponse::error( 'subtleforms_email_marketing_key', $message, 400 );
 		}
 		$connection = new Connection( $slug );
+		// The service's own settings are saved first: the client may need them to check the key.
+		$problem = $this->saveServiceSettings( $slug, $request, $connection );
+		if ( null !== $problem ) {
+			return ApiResponse::error( 'subtleforms_email_marketing_settings', $problem, 400 );
+		}
 		try {
 			$account = Services::client( $slug, $key, \SubtleForms\Integrations\EmailMarketing\AbstractClient::ADMIN_TIMEOUT, $connection->settings() )->account();
 		} catch ( ServiceException $e ) {
@@ -318,6 +323,10 @@ final class EmailMarketingApi {
 	public function saveSettings( WP_REST_Request $request ): WP_REST_Response {
 		$slug       = $this->slug( $request );
 		$connection = new Connection( $slug );
+		if ( ! Services::isBuiltIn( $slug ) ) {
+			$problem = $this->saveServiceSettings( $slug, $request, $connection );
+			return null === $problem ? ApiResponse::success( $connection->state() ) : ApiResponse::error( 'subtleforms_email_marketing_settings', $problem, 400 );
+		}
 		if ( 'brevo' !== $slug ) {
 			return ApiResponse::success( $connection->state() );
 		}
@@ -329,6 +338,45 @@ final class EmailMarketingApi {
 			)
 		);
 		return ApiResponse::success( $connection->state() );
+	}
+
+	/**
+	 * Check and save the settings fields an add-on service declared, from the
+	 * request. Values are cleaned by type and checked against `required` and
+	 * `pattern`; nothing is saved when one is refused.
+	 *
+	 * @param string          $slug       Service slug.
+	 * @param WP_REST_Request $request    Request.
+	 * @param Connection      $connection Connection.
+	 * @return string|null The reason a value was refused, or null.
+	 */
+	private function saveServiceSettings( string $slug, WP_REST_Request $request, Connection $connection ): ?string {
+		$fields = Services::registered()[ $slug ]['settings'] ?? array();
+		if ( ! $fields ) {
+			return null;
+		}
+		$saved  = $connection->settings();
+		$values = array();
+		foreach ( $fields as $field ) {
+			$name = $field['name'];
+			$raw  = $request->get_param( $name );
+			if ( null === $raw ) {
+				$raw = $saved[ $name ] ?? '';
+			}
+			$value = 'url' === $field['type'] ? esc_url_raw( trim( (string) $raw ), array( 'http', 'https' ) ) : trim( sanitize_text_field( (string) $raw ) );
+			if ( '' === $value ) {
+				if ( $field['required'] ) {
+					/* translators: %s: setting name */
+					return sprintf( __( '%s is required.', 'subtleforms' ), $field['label'] );
+				}
+			} elseif ( '' !== $field['pattern'] && 1 !== @preg_match( '~' . str_replace( '~', '\\~', $field['pattern'] ) . '~', $value ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- A bad pattern from an add-on must not break the request.
+				/* translators: %s: setting name */
+				return sprintf( __( '%s does not look right.', 'subtleforms' ), $field['label'] );
+			}
+			$values[ $name ] = $value;
+		}
+		$connection->saveSettings( array_merge( $saved, $values ) );
+		return null;
 	}
 
 	/**

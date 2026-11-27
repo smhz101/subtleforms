@@ -465,6 +465,28 @@ final class EmailMarketingTest extends TestCase {
 		$this->assertSame( array( 'mailchimp', 'brevo', 'kit', 'mailpoet' ), array_slice( Services::slugs(), 0, 4 ) );
 	}
 
+	public function test_a_password_field_is_never_sent_to_a_service(): void {
+		$schema = $this->schema();
+		$schema['fields'][] = array( 'type' => 'password', 'key' => 'pw', 'label' => 'Password' );
+		$built = Subscriber::build(
+			$this->config( array( 'merge_fields' => array( array( 'field' => 'pw', 'target' => 'secret' ), array( 'field' => 'company', 'target' => 'company' ) ) ) ),
+			$schema,
+			array( 'email' => 'a@example.com', 'company' => 'Engines', 'pw' => 'hunter2' ),
+			'mailchimp'
+		);
+		$this->assertSame( array( 'COMPANY' => 'Engines' ), $built['subscriber']->fields );
+		$this->assertStringNotContainsString( 'hunter2', wp_json_encode( $built['subscriber'] ) );
+	}
+
+	public function test_an_add_on_service_settings_fields_are_cleaned(): void {
+		$this->addOnService( array( 'settings' => array( array( 'name' => 'API_URL', 'label' => 'Account URL', 'type' => 'url', 'required' => true ), array( 'name' => '' ), 'junk' ) ) );
+		$settings = Services::registered()['acme']['settings'];
+		$this->assertCount( 1, $settings );
+		$this->assertSame( 'api_url', $settings[0]['name'] );
+		$this->assertSame( 'url', $settings[0]['type'] );
+		$this->assertTrue( $settings[0]['required'] );
+	}
+
 	public function test_an_add_on_service_with_an_invalid_client_is_ignored(): void {
 		foreach ( array( 'Missing\\Class', \stdClass::class, '' ) as $class ) {
 			$this->addOnService( array( 'client' => $class ) );

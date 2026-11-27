@@ -2,7 +2,7 @@ import { useState } from '@wordpress/element';
 import { Button, TextControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import Icon from '../../../ui/Icon';
-import { announceService } from './api';
+import { announceService, pageData } from './api';
 import { useConnectService, useDisconnectService, useTestService } from './queries';
 import { uiFor } from './serviceUi';
 import { stepsFor } from './serviceSteps';
@@ -56,6 +56,8 @@ export default function ServiceConnection({ service, label, state, onState }) {
   const ui = uiFor(service);
   const [editing, setEditing] = useState(false);
   const [key, setKey] = useState('');
+  const settingFields = pageData().services[service]?.settings || [];
+  const [values, setValues] = useState(() => Object.fromEntries(settingFields.map((f) => [f.name, state.settings?.[f.name] || ''])));
   const [result, setResult] = useState({ tone: '', text: '' });
   const connectMutation = useConnectService(service);
   const testMutation = useTestService(service);
@@ -72,7 +74,7 @@ export default function ServiceConnection({ service, label, state, onState }) {
   const save = async () => {
     setResult({ tone: '', text: '' });
     try {
-      const next = await connectMutation.mutateAsync(key.trim());
+      const next = await connectMutation.mutateAsync(settingFields.length ? { key: key.trim(), settings: values } : key.trim());
       setKey('');
       setEditing(false);
       apply(next);
@@ -145,6 +147,17 @@ export default function ServiceConnection({ service, label, state, onState }) {
 
       {showField ? (
         <div className='sf-em-card__key'>
+          {settingFields.map((f) => (
+            <TextControl
+              key={f.name}
+              label={f.label}
+              type={f.type === 'url' ? 'url' : 'text'}
+              value={values[f.name] || ''}
+              onChange={(v) => setValues((current) => ({ ...current, [f.name]: v }))}
+              help={f.help || undefined}
+              required={!!f.required}
+            />
+          ))}
           <TextControl
             label={__('API key', 'subtleforms')}
             type='password'
@@ -163,7 +176,7 @@ export default function ServiceConnection({ service, label, state, onState }) {
             </p>
           )}
           <div className='sf-em-card__actions'>
-            <Button variant='primary' onClick={save} isBusy={busy === 'save'} disabled={!key.trim() || !!busy}>
+            <Button variant='primary' onClick={save} isBusy={busy === 'save'} disabled={!key.trim() || !!busy || settingFields.some((f) => f.required && !String(values[f.name] || '').trim())}>
               {__('Save and connect', 'subtleforms')}
             </Button>
             {state.has_key && (

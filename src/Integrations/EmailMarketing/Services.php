@@ -103,9 +103,36 @@ final class Services {
 				'tags'          => ! empty( $entry['tags'] ),
 				'list_required' => ! empty( $entry['list_required'] ),
 				'local'         => false,
+				'settings'      => self::cleanSettingFields( $entry['settings'] ?? array() ),
 			);
 		}
 		return $result;
+	}
+
+	/**
+	 * The settings fields an add-on service asks for above the API key:
+	 * `name`, `label`, `type` (text or url), `required`, `pattern`, `help`.
+	 *
+	 * @param mixed $list Fields as listed by the add-on.
+	 * @return array<int,array<string,mixed>>
+	 */
+	public static function cleanSettingFields( $list ): array {
+		$out = array();
+		foreach ( is_array( $list ) ? $list : array() as $item ) {
+			$name = is_array( $item ) ? sanitize_key( (string) ( $item['name'] ?? '' ) ) : '';
+			if ( '' === $name ) {
+				continue;
+			}
+			$out[] = array(
+				'name'     => $name,
+				'label'    => (string) ( $item['label'] ?? $name ),
+				'type'     => 'url' === ( $item['type'] ?? '' ) ? 'url' : 'text',
+				'required' => ! empty( $item['required'] ),
+				'pattern'  => (string) ( $item['pattern'] ?? '' ),
+				'help'     => (string) ( $item['help'] ?? '' ),
+			);
+		}
+		return $out;
 	}
 
 	/**
@@ -300,6 +327,7 @@ final class Services {
 					'builtin'    => false,
 					'core'       => true,
 				);
+				$result[ $slug ]['settings'] = self::cleanSettingFields( $entry['settings'] ?? array() );
 			}
 		}
 		return $result;

@@ -10,7 +10,7 @@ export const emailMarketingApi = {
   all: () => apiClient.get(BASE),
   state: (service) => apiClient.get(`${BASE}/${service}`),
   setEnabled: (service, enabled) => apiClient.post(`${BASE}/${service}/enabled`, { enabled }),
-  connect: (service, apiKey) => apiClient.post(`${BASE}/${service}/connect`, { api_key: apiKey }),
+  connect: (service, apiKey, settings = {}) => apiClient.post(`${BASE}/${service}/connect`, { ...settings, api_key: apiKey }),
   test: (service) => apiClient.post(`${BASE}/${service}/test`, {}),
   disconnect: (service) => apiClient.delete(`${BASE}/${service}`),
   saveSettings: (service, values) => apiClient.post(`${BASE}/${service}/settings`, values),

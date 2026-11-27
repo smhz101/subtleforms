@@ -89,7 +89,8 @@ export function useConnectService(service) {
   const store = useStoreServiceState();
   return useMutation({
     retry: false,
-    mutationFn: (apiKey) => emailMarketingApi.connect(service, apiKey),
+    // A string is the key; { key, settings } also sends the service's own settings.
+    mutationFn: (value) => (typeof value === 'string' ? emailMarketingApi.connect(service, value) : emailMarketingApi.connect(service, value.key, value.settings)),
     onSuccess: (state) => {
       forgetAccountData(client, service);
       store(service, state);

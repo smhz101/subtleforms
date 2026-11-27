@@ -342,6 +342,10 @@ add_filter( 'subtleforms/email/marketing/services', function ( $services ) {
 } );
 ```
 
+**Settings fields.** An add-on service may add `settings`, a list of `{ name, label, type, required, pattern, help }` (`type` is `text` or `url`; `pattern` is an optional regular expression the value must match; `name` is lowercase letters, numbers, dashes and underscores). The generic settings screen shows them above the API key. The `connect` route (and `settings` for a service that is not Brevo) cleans each value by its type, refuses a missing required value or one that does not match its pattern with a 400, and saves them with the connection before the key is tested. The client receives them as the constructor's `$settings` argument, for example an account API URL.
+
+**Passwords.** A password field is never sent to an email marketing service, built-in or add-on: the sender drops any mapping (email, name, merge fields, consent) whose source is a password field, and the generic form panel does not list password fields in its mapping selects.
+
 In the browser a service with no screens of its own gets the generic ones: the API key with a test button, the list, the field mapping, tags, double opt-in and update existing. `registerEmailMarketingService( 'acme', { label, icon } )` adds a logo and a position; give `settingsComponent` or `formComponent` only to replace a screen. Since 2.12.0 `window.SubtleFormsExtend` also has the components this plugin draws, so an add-on can reuse one inside its own screen (check `typeof SubtleFormsExtend.EmailMarketingServiceSettings === 'function'`):
 
 | Component | Props |
