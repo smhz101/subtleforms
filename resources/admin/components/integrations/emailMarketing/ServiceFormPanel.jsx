@@ -5,7 +5,7 @@ import { consentFieldOptions, flattenFields } from '../../builder/utils/integrat
 import MappingTable from './MappingTable';
 import { useQueryClient } from '@tanstack/react-query';
 import { fetchFields, fetchLists } from './queries';
-import { uiFor } from './serviceUi';
+import { SERVICE_UI, uiFor } from './serviceUi';
 import './emailMarketing.scss';
 
 /**
@@ -32,7 +32,8 @@ export default function ServiceFormPanel({ service, connected, connection, schem
   const ui = uiFor(service);
   const client = useQueryClient();
   const listId = config.list_id || '';
-  const mappingKey = ui.upper && service === 'mailchimp' ? listId : '';
+  // Mailchimp and add-on services have fields that belong to one list.
+  const mappingKey = service === 'mailchimp' || !SERVICE_UI[service] ? listId : '';
 
   const [lists, setLists] = useState(null);
   const [listError, setListError] = useState('');

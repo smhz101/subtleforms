@@ -319,3 +319,8 @@ test('a password field is never offered as a source in the mapping lists', async
   expect(all).toContain('Company');
   expect(all).not.toContain('Password');
 });
+
+test('an add-on service loads its fields for the chosen list', async () => {
+  await mount({ enabled: true, list_id: 'abc123' }, { service: 'acme' });
+  expect(emailMarketingApi.fields).toHaveBeenCalledWith('acme', 'abc123', false);
+});

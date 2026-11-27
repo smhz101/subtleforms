@@ -423,7 +423,7 @@ final class EmailMarketingApi {
 		$id   = preg_replace( '/[^A-Za-z0-9_-]/', '', (string) $request->get_param( 'list_id' ) );
 		return $this->cached(
 			$slug,
-			'fields|' . ( 'mailchimp' === $slug ? $id : '' ),
+			'fields|' . ( 'mailchimp' === $slug || ! Services::isBuiltIn( $slug ) ? $id : '' ),
 			(bool) $request->get_param( 'refresh' ),
 			static function ( $client ) use ( $id ): array {
 				return $client->fields( (string) $id );
