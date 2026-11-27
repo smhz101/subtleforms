@@ -239,6 +239,17 @@ describe('card', () => {
     expect(onChanged).not.toHaveBeenCalled();
   });
 
+  test('a 409 in the envelope shape (meta) offers the zip too, and other 409s do not', async () => {
+    apiClient.post.mockRejectedValue(Object.assign(new Error('Off.'), { status: 409, code: 'file_mods_disabled', meta: { downloadUrl: 'https://example.com/m.zip' } }));
+    await render(<ExtensionCard entry={e('sig', { status: 'available', action: act1('install') })} />);
+    await click(byText('button', 'Install'));
+    expect(byText('a', 'Download the zip').getAttribute('href')).toBe('https://example.com/m.zip');
+    apiClient.post.mockRejectedValue(Object.assign(new Error('Needs a newer WordPress.'), { status: 409, code: 'requirements_not_met', data: { status: 409 } }));
+    await click(byText('button', 'Install'));
+    expect(container.querySelector('[role=alert]').textContent).toBe('Needs a newer WordPress.');
+    expect(byText('a', 'Download the zip')).toBeUndefined();
+  });
+
   test('a plain error has no download link', async () => {
     apiClient.post.mockRejectedValue(new Error('No route'));
     await render(<ExtensionCard entry={e('sig', { status: 'installed', action: act1('activate') })} />);
