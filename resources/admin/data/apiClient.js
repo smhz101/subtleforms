@@ -109,6 +109,7 @@ const normalizeError = (body, status) => {
   );
   normalizedError.code = errorData?.code || 'unknown_error';
   normalizedError.meta = errorMeta;
+  normalizedError.data = errorData?.data;
   normalizedError.status = status;
 
   if (status === 422 && errorMeta?.fields) {
