@@ -64,7 +64,7 @@ export function announceService(service, change = {}) {
   }
   const ext = window.subtleformsAdmin?.extensions?.email_marketing;
   if (ext && data?.services) {
-    const list = Object.values(data.services).filter((s) => s && s.builtin !== false);
+    const list = Object.values(data.services).filter((s) => s && (s.builtin !== false || s.core));
     ext.enabled = list.some((s) => s.enabled);
     ext.configured = list.some((s) => s.enabled && s.configured);
   }
