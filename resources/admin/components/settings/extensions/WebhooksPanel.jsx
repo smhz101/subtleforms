@@ -5,6 +5,7 @@ import FieldError from '../FieldError';
 import ConnectionTest from './ConnectionTest';
 import SectionHeader from '../../sectionPanel/SectionHeader';
 import { normalizeWebhookUrl } from '../../../utils/webhookUrl';
+import { secretUnreadable } from '../../../utils/secretUnreadable';
 import ConnectionSteps from '../../integrations/ConnectionSteps';
 import { webhookSteps } from './webhookSteps';
 
@@ -81,7 +82,7 @@ export default function WebhooksPanel({ settings, updateSetting, fieldErrors = {
               autoComplete='off'
               value={settings.ext_webhooks_signing_secret || ''}
               onChange={(v) => updateSetting('ext_webhooks_signing_secret', v)}
-              help={__(
+              help={secretUnreadable(settings, 'ext_webhooks_signing_secret', 'signing secret') || __(
                 'Used by webhook actions that have HMAC-SHA256 signing on but no secret of their own. The signature is sent in the X-SubtleForms-Signature header as sha256=HMAC of the body.',
                 'subtleforms'
               )}

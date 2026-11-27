@@ -147,6 +147,11 @@ function ControlRenderer( { ctrl, field, onUpdate, isReadOnly, override } ) {
 		onChange: ( newValue ) => onUpdate( { [ fieldKey ]: newValue } ),
 	};
 
+	// A saved secret key is never sent to the browser: the server says only that one is saved.
+	if ( fieldKey === 'secret_key' && field.secret_key_set && ! value ) {
+		props.placeholder = __( 'Saved. Enter a new key to replace it.', 'subtleforms' );
+	}
+
 	// Pass type-specific extra props from the PHP control definition
 	if ( isRowType ) {
 		props.layout = 'row';

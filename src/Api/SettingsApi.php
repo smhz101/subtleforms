@@ -8,6 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use SubtleForms\Api\ApiResponse;
 use SubtleForms\Support\Settings;
+use SubtleForms\Support\SettingsSecrets;
 use SubtleForms\Validation\RequestValidator;
 use SubtleForms\Validation\ValidationException;
 use SubtleForms\Validation\Schemas;
@@ -127,18 +128,22 @@ class SettingsApi {
 	/** What the settings screen receives instead of a saved CAPTCHA secret key. */
 	public const SECRET_MASK = '********';
 
-	/** Settings that hold a CAPTCHA secret key. */
-	private const SECRET_KEYS = array( 'captcha_recaptcha_secret_key', 'captcha_hcaptcha_secret_key', 'captcha_turnstile_secret_key' );
+	/** Settings that hold a secret: the CAPTCHA secret keys and the default webhook signing secret. */
+	private const SECRET_KEYS = SettingsSecrets::KEYS;
 
 	/**
-	 * Replace saved CAPTCHA secret keys with a mask. An empty key stays empty, so
-	 * the screen can tell whether one is saved.
+	 * Replace saved secrets with a mask. An empty secret stays empty, so the
+	 * screen can tell whether one is saved. When SubtleForms Pro is active it
+	 * masks the signing secret in its own way, so that one is left to it.
 	 *
 	 * @param array $settings Settings.
 	 * @return array Settings safe to send to the browser.
 	 */
 	public static function maskSecrets( array $settings ): array {
 		foreach ( self::SECRET_KEYS as $key ) {
+			if ( 'ext_webhooks_signing_secret' === $key && class_exists( '\\SubtleFormsPro\\Modules\\Integrations\\Support\\SecretSettings' ) ) {
+				continue;
+			}
 			if ( isset( $settings[ $key ] ) && '' !== (string) $settings[ $key ] ) {
 				$settings[ $key ] = self::SECRET_MASK;
 			}

@@ -10,6 +10,7 @@ import {
 import { __ } from '@wordpress/i18n';
 import FieldError from './FieldError';
 import { apiClient } from '../../data/apiClient';
+import { secretUnreadable } from '../../utils/secretUnreadable';
 
 /** Turn the textarea (one address or range per line, or commas) into a list. */
 export function parseProxyList( text ) {
@@ -336,6 +337,7 @@ export default function AdvancedSettings( {
 										'subtleforms'
 									) }
 									type="password"
+									help={ secretUnreadable( settings, 'captcha_recaptcha_secret_key' ) }
 									value={
 										settings.captcha_recaptcha_secret_key ??
 										''
@@ -423,6 +425,7 @@ export default function AdvancedSettings( {
 										'subtleforms'
 									) }
 									type="password"
+									help={ secretUnreadable( settings, 'captcha_hcaptcha_secret_key' ) }
 									value={
 										settings.captcha_hcaptcha_secret_key ??
 										''
@@ -513,6 +516,7 @@ export default function AdvancedSettings( {
 										'subtleforms'
 									) }
 									type="password"
+									help={ secretUnreadable( settings, 'captcha_turnstile_secret_key' ) }
 									value={
 										settings.captcha_turnstile_secret_key ??
 										''

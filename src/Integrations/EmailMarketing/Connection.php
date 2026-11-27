@@ -10,6 +10,9 @@ declare(strict_types=1);
 
 namespace SubtleForms\Integrations\EmailMarketing;
 
+use SubtleForms\Support\Logger;
+use SubtleForms\Support\SecretBox;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -19,7 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * option per service, which WordPress does not load on every request. The key
  * is read only by the code that talks to the service. Everything handed to the
  * browser comes from state(), which holds the last four characters of the key
- * and never the key itself.
+ * and never the key itself. The key is sealed in the database (SecretBox); a
+ * key saved before 2.12.0 is read as it is and sealed on that first read.
  *
  * Switching a service off changes only the `enabled` flag: the key, the
  * settings and every form's settings are kept, so switching it on restores
@@ -38,6 +42,11 @@ final class Connection {
 
 	/** @var string */
 	private string $slug;
+
+	/** Shown when a sealed key cannot be opened, for example after the site's salts changed. */
+	public static function unreadableMessage(): string {
+		return __( 'Your API key could not be read. Please enter it again.', 'subtleforms' );
+	}
 
 	/**
 	 * @param string $slug Service slug (mailchimp, brevo, kit).
@@ -58,13 +67,22 @@ final class Connection {
 	/**
 	 * The stored record.
 	 *
-	 * @return array{api_key:string,account_name:string,account_email:string,account_id:string,status:string,error:string,checked_at:int,enabled:bool,settings:array}
+	 * @return array{unreadable:bool,api_key:string,account_name:string,account_email:string,account_id:string,status:string,error:string,checked_at:int,enabled:bool,settings:array}
 	 */
 	private function record(): array {
 		$stored = get_option( self::optionName( $this->slug ), array() );
 		$stored = is_array( $stored ) ? $stored : array();
+		$raw    = isset( $stored['api_key'] ) ? trim( (string) $stored['api_key'] ) : '';
+		$key    = SecretBox::open( $raw );
+		if ( '' !== $raw && '' === $key ) {
+			$this->noteUnreadable();
+		} elseif ( '' !== $key && ! SecretBox::isSealed( $raw ) && SecretBox::available() ) {
+			$stored['api_key'] = $key; // write() seals it.
+			$this->write( $stored );
+		}
 		return array(
-			'api_key'       => isset( $stored['api_key'] ) ? trim( (string) $stored['api_key'] ) : '',
+			'unreadable'    => '' !== $raw && '' === $key,
+			'api_key'       => $key,
 			'account_name'  => (string) ( $stored['account_name'] ?? '' ),
 			'account_email' => (string) ( $stored['account_email'] ?? '' ),
 			'account_id'    => (string) ( $stored['account_id'] ?? '' ),
@@ -82,7 +100,9 @@ final class Connection {
 	 * @param array $record Record.
 	 */
 	private function write( array $record ): void {
-		$name = self::optionName( $this->slug );
+		unset( $record['unreadable'] );
+		$record['api_key'] = SecretBox::seal( (string) ( $record['api_key'] ?? '' ) );
+		$name              = self::optionName( $this->slug );
 		if ( false === get_option( $name, false ) ) {
 			add_option( $name, $record, '', false );
 			return;
@@ -136,7 +156,7 @@ final class Connection {
 	public function status(): string {
 		$record = $this->record();
 		if ( '' === $record['api_key'] ) {
-			return self::STATUS_NONE;
+			return $record['unreadable'] ? self::STATUS_ERROR : self::STATUS_NONE;
 		}
 		return self::STATUS_ERROR === $record['status'] ? self::STATUS_ERROR : self::STATUS_CONNECTED;
 	}
@@ -181,10 +201,21 @@ final class Connection {
 			'account_name'  => $record['account_name'],
 			'account_email' => $record['account_email'],
 			'account_id'    => $record['account_id'],
-			'error'         => $record['error'],
+			'error'         => $record['unreadable'] ? self::unreadableMessage() : $record['error'],
 			'checked_at'    => $record['checked_at'],
 			'settings'      => $record['settings'],
 		);
+	}
+
+	/**
+	 * Log once a day, without the key, that the saved key cannot be opened.
+	 */
+	private function noteUnreadable(): void {
+		$flag = 'subtleforms_unreadable_' . $this->slug;
+		if ( false === get_transient( $flag ) ) {
+			set_transient( $flag, 1, DAY_IN_SECONDS );
+			Logger::warning( 'The saved API key for %s could not be read. It has to be entered again.', $this->slug );
+		}
 	}
 
 	/**
