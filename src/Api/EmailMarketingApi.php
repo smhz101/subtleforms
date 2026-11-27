@@ -247,15 +247,17 @@ final class EmailMarketingApi {
 		if ( Services::isLocal( $slug ) ) {
 			return $this->notForLocal( $slug );
 		}
-		if ( ! $def['client']::looksLikeKey( $key ) ) {
-			$message = method_exists( $def['client'], 'badKeyMessage' ) ? $def['client']::badKeyMessage() : __( 'That does not look like an API key for this service.', 'subtleforms' );
-			return ApiResponse::error( 'subtleforms_email_marketing_key', $message, 400 );
-		}
 		$connection = new Connection( $slug );
-		// The service's own settings are saved first: the client may need them to check the key.
+		// The service's own settings are checked and saved first: a wrong setting
+		// (such as an account URL) is reported even when the key is also wrong,
+		// and the client may need the settings to check the key.
 		$problem = $this->saveServiceSettings( $slug, $request, $connection );
 		if ( null !== $problem ) {
 			return ApiResponse::error( 'subtleforms_email_marketing_settings', $problem, 400 );
+		}
+		if ( ! $def['client']::looksLikeKey( $key ) ) {
+			$message = method_exists( $def['client'], 'badKeyMessage' ) ? $def['client']::badKeyMessage() : __( 'That does not look like an API key for this service.', 'subtleforms' );
+			return ApiResponse::error( 'subtleforms_email_marketing_key', $message, 400 );
 		}
 		try {
 			$account = Services::client( $slug, $key, \SubtleForms\Integrations\EmailMarketing\AbstractClient::ADMIN_TIMEOUT, $connection->settings() )->account();

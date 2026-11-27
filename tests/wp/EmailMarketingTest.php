@@ -635,6 +635,8 @@ final class EmailMarketingTest extends TestCase {
 		$route = '/integrations/email-marketing/acme/connect';
 		$this->assertSame( 400, $this->rest( 'POST', $route, array( 'api_key' => 'acme-key-1234' ) )->get_status(), 'required' );
 		$this->assertSame( 400, $this->rest( 'POST', $route, array( 'api_key' => 'acme-key-1234', 'api_url' => 'https://evil.test' ) )->get_status(), 'pattern' );
+		$both = $this->rest( 'POST', $route, array( 'api_key' => 'x', 'api_url' => 'https://evil.test' ) );
+		$this->assertSame( 'subtleforms_email_marketing_settings', $both->get_data()['error']['code'] ?? $both->get_data()['code'] ?? '', 'a wrong URL is reported before a bad key' );
 		$this->assertFalse( $this->conn( 'acme' )->hasKey() );
 		$ok = $this->rest( 'POST', $route, array( 'api_key' => 'acme-key-1234', 'api_url' => 'https://acme.example.com' ) );
 		$this->assertSame( 200, $ok->get_status(), wp_json_encode( $ok->get_data() ) );
