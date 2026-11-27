@@ -180,7 +180,7 @@ test('My plan with the add-on groups by status with counts', async () => {
   await mount({
     ...catalog,
     hasAddon: true,
-    entries: [e('a', { status: 'active', action: null }), e('b', { status: 'available' }), e('c', { status: 'available' })],
+    entries: [e('a', { status: 'active', action: null }), e('b', { status: 'available' }), e('c', { status: 'installed' })],
   });
   await click(byText('[role=tab]', 'My plan'));
   const heads = [...container.querySelectorAll('.sf-ext-section__title')].map((n) => n.textContent);

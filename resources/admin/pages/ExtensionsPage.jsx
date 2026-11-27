@@ -202,13 +202,15 @@ export default function ExtensionsPage() {
     if (searching && !found.length) {
       return empty;
     }
+    // Installed but inactive extensions sit with the ones ready to install,
+    // so their Activate button stays reachable.
     const groups = [
-      ['active', __('Active', 'subtleforms')],
-      ['available', __('Ready to install', 'subtleforms')],
-      ['update', __('Updates', 'subtleforms')],
+      [['active'], __('Active', 'subtleforms')],
+      [['available', 'installed'], __('Ready to install', 'subtleforms')],
+      [['update'], __('Updates', 'subtleforms')],
     ];
     const shown = groups
-      .map(([status, label]) => [label, sortEntries(found.filter((e) => e.status === status))])
+      .map(([statuses, label]) => [label, sortEntries(found.filter((e) => statuses.includes(e.status)))])
       .filter(([, list]) => list.length);
     if (!shown.length) {
       return <p className='sf-ext-empty'>{__('Nothing to show here yet.', 'subtleforms')}</p>;
