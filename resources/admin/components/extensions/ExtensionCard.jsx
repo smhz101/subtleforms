@@ -92,14 +92,13 @@ export default function ExtensionCard({ entry, onChanged }) {
         </div>
       </header>
       <p className='sf-ext-card__desc'>{entry.description}</p>
-      <div className='sf-ext-card__badges'>
-        <span className='sf-badge'>{plans[entry.plan] || entry.plan}</span>
-        {statusPill ? (
+      {statusPill ? (
+        <div className='sf-ext-card__badges'>
           <span className='sf-badge' data-type={status === 'active' ? 'success' : 'warning'}>
             {statusPill}
           </span>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
       <footer className='sf-ext-card__footer'>
         <span className='sf-ext-card__plan'>{footerText}</span>
         {button}

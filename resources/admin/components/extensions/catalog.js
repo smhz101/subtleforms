@@ -27,6 +27,7 @@ export function sortEntries(entries) {
   return [...entries].sort(
     (a, b) =>
       (RANK[a.status] ?? 9) - (RANK[b.status] ?? 9) ||
+      (a.status === 'locked' ? PLANS.indexOf(a.plan) - PLANS.indexOf(b.plan) : 0) ||
       a.title.localeCompare(b.title)
   );
 }

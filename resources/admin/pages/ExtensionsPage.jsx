@@ -206,7 +206,7 @@ export default function ExtensionsPage() {
     // so their Activate button stays reachable.
     const groups = [
       [['active'], __('Active', 'subtleforms')],
-      [['available', 'installed'], __('Ready to install', 'subtleforms')],
+      [['available', 'installed'], __('Ready to install or activate', 'subtleforms')],
       [['update'], __('Updates', 'subtleforms')],
     ];
     const shown = groups

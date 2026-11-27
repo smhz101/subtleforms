@@ -151,6 +151,17 @@ test('all extensions sorts active before locked', async () => {
   expect(titles()).toEqual(['Beta', 'Zeta']);
 });
 
+test('locked cards sort by plan rank, then title', async () => {
+  await mount({ ...catalog, entries: [e('b', { plan: 'agency' }), e('z', { plan: 'starter' }), e('a', { plan: 'pro' }), e('c', { plan: 'starter' })] });
+  await click(byText('[role=tab]', 'All extensions'));
+  expect(titles()).toEqual(['C', 'Z', 'A', 'B']);
+});
+
+test('a card with no status has no badge row', async () => {
+  await render(<ExtensionCard entry={e('a')} />);
+  expect(container.querySelector('.sf-ext-card__badges')).toBeNull();
+});
+
 test('recommendations: woo first, then available or update, then next plan', () => {
   const entries = [
     e('payments', { category: 'payments' }),
@@ -184,7 +195,7 @@ test('My plan with the add-on groups by status with counts', async () => {
   });
   await click(byText('[role=tab]', 'My plan'));
   const heads = [...container.querySelectorAll('.sf-ext-section__title')].map((n) => n.textContent);
-  expect(heads).toEqual(['Active (1)', 'Ready to install (2)']);
+  expect(heads).toEqual(['Active (1)', 'Ready to install or activate (2)']);
 });
 
 describe('card', () => {
@@ -192,7 +203,7 @@ describe('card', () => {
 
   test('renders status pill, plan badge and footer text per status', async () => {
     await render(<ExtensionCard entry={e('a', { status: 'update', plan: 'pro', action: act1('update') })} />);
-    expect(container.textContent).toContain('Pro');
+    expect(container.querySelectorAll('.sf-badge')).toHaveLength(1);
     expect(container.textContent).toContain('Update available');
     expect(container.textContent).toContain('In your plan');
     act(() => root.unmount());
