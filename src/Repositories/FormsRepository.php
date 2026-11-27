@@ -382,7 +382,9 @@ final class FormsRepository {
 		 * @since 2.1.0
 		 */
 		$filtered = apply_filters( 'subtleforms/forms/schema_before_save', $schema, $formId, $activate );
-		return is_array( $filtered ) ? $filtered : $schema;
+		$filtered = is_array( $filtered ) ? $filtered : $schema;
+		// A CAPTCHA field's own secret key is stored sealed (2.12.0).
+		return \SubtleForms\Support\SchemaSecrets::seal( $filtered );
 	}
 
 	/**

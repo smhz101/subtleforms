@@ -43,7 +43,6 @@ final class SettingsSecrets {
 	 */
 	public static function register(): void {
 		add_filter( 'option_' . Settings::OPTION_NAME, array( self::class, 'open' ), 5 );
-		add_filter( 'option_' . Settings::OPTION_NAME, array( self::class, 'dropUnopened' ), 20 );
 		add_filter( 'pre_update_option_' . Settings::OPTION_NAME, array( self::class, 'seal' ), 20 );
 	}
 
@@ -61,12 +60,12 @@ final class SettingsSecrets {
 			if ( ! isset( $value[ $key ] ) || ! is_string( $value[ $key ] ) || '' === $value[ $key ] ) {
 				continue;
 			}
-			if ( SecretBox::isSealed( $value[ $key ] ) ) {
-				$value[ $key ] = SecretBox::open( $value[ $key ] );
+			if ( SecretBox::isSealed( $value[ $key ] ) || 0 === strpos( $value[ $key ], self::PRO_PREFIX ) ) {
+				$value[ $key ] = 0 === strpos( $value[ $key ], self::PRO_PREFIX ) ? self::openPro( $value[ $key ] ) : SecretBox::open( $value[ $key ] );
 				if ( '' === $value[ $key ] ) {
 					self::unreadable( $key );
 				}
-			} elseif ( 0 !== strpos( $value[ $key ], self::PRO_PREFIX ) && SecretBox::available() ) {
+			} elseif ( SecretBox::available() ) {
 				self::queueMigration();
 			}
 		}
@@ -74,23 +73,21 @@ final class SettingsSecrets {
 	}
 
 	/**
-	 * A value Pro encrypted that is still encrypted here means Pro is not
-	 * active: it cannot be used, so it counts as missing.
+	 * Open a value SubtleForms Pro encrypted itself (AES-256-GCM, its own key),
+	 * so the signing secret stays usable when Pro is switched off. Same steps
+	 * as Pro's SecretSettings::decrypt(). Empty when it cannot be opened.
 	 *
-	 * @param mixed $value Option value.
-	 * @return mixed
+	 * @param string $stored Stored value, starting with sfenc:v1:.
 	 */
-	public static function dropUnopened( $value ) {
-		if ( ! is_array( $value ) ) {
-			return $value;
+	public static function openPro( string $stored ): string {
+		$cipher = 'aes-256-gcm';
+		$raw    = base64_decode( substr( $stored, strlen( self::PRO_PREFIX ) ), true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Reading back encrypted storage.
+		if ( false === $raw || strlen( $raw ) < 29 || ! function_exists( 'openssl_decrypt' ) || ! in_array( $cipher, openssl_get_cipher_methods(), true ) ) {
+			return '';
 		}
-		foreach ( self::KEYS as $key ) {
-			if ( isset( $value[ $key ] ) && is_string( $value[ $key ] ) && 0 === strpos( $value[ $key ], self::PRO_PREFIX ) ) {
-				$value[ $key ] = '';
-				self::unreadable( $key );
-			}
-		}
-		return $value;
+		$key   = hash( 'sha256', wp_salt( 'secure_auth' ) . '|subtleforms-pro-secrets', true );
+		$plain = openssl_decrypt( substr( $raw, 28 ), $cipher, $key, OPENSSL_RAW_DATA, substr( $raw, 0, 12 ), substr( $raw, 12, 16 ) );
+		return false === $plain ? '' : $plain;
 	}
 
 	/**

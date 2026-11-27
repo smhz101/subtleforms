@@ -96,7 +96,8 @@ final class TransferService {
 			$forms[] = array(
 				'title'  => (string) ( $form['title'] ?? '' ),
 				'status' => in_array( $status, array( 'draft', 'published' ), true ) ? $status : 'draft',
-				'schema' => $schema,
+				// A CAPTCHA field's secret key is never exported.
+				'schema' => \SubtleForms\Support\SchemaSecrets::strip( $schema ),
 			);
 		}
 		// An export that silently leaves forms out cannot be imported back,

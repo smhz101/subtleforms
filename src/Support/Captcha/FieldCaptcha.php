@@ -148,7 +148,9 @@ final class FieldCaptcha {
 	 */
 	private static function key( array $field, string $name ): string {
 		$value = $field[ $name ] ?? ( $field['config'][ $name ] ?? '' );
-		return is_string( $value ) ? trim( $value ) : '';
+		$value = is_string( $value ) ? trim( $value ) : '';
+		// A secret key is stored sealed; plain values saved before 2.12.0 are used as they are.
+		return 'secret_key' === $name ? \SubtleForms\Support\SecretBox::open( $value ) : $value;
 	}
 
 	/**

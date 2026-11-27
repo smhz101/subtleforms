@@ -8,8 +8,11 @@
 namespace SubtleForms\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
+use SubtleForms\Api\FormsApi;
 use SubtleForms\Api\SettingsApi;
 use SubtleForms\Integrations\EmailMarketing\Connection;
+use SubtleForms\Support\Captcha\FieldCaptcha;
+use SubtleForms\Support\SchemaSecrets;
 use SubtleForms\Support\SecretBox;
 use SubtleForms\Support\SettingsSecrets;
 
@@ -106,11 +109,82 @@ final class SealedSecretsTest extends TestCase {
 		$this->assertContains( 'captcha_turnstile_secret_key', SettingsSecrets::unreadableKeys() );
 	}
 
-	public function test_a_secret_pro_encrypted_is_left_for_pro_or_dropped_without_it(): void {
-		$pro = array( 'ext_webhooks_signing_secret' => 'sfenc:v1:AAAA' );
-		$this->assertSame( 'sfenc:v1:AAAA', SettingsSecrets::open( $pro )['ext_webhooks_signing_secret'] );
-		$this->assertSame( 'sfenc:v1:AAAA', SettingsSecrets::seal( $pro )['ext_webhooks_signing_secret'] );
-		$this->assertSame( '', SettingsSecrets::dropUnopened( $pro )['ext_webhooks_signing_secret'] );
+	/** Pro's SecretSettings::encrypt(), copied: AES-256-GCM, key from secure_auth, iv + tag + cipher. */
+	private function proEncrypt( string $plain ): string {
+		$key    = hash( 'sha256', wp_salt( 'secure_auth' ) . '|subtleforms-pro-secrets', true );
+		$iv     = random_bytes( 12 );
+		$tag    = '';
+		$cipher = openssl_encrypt( $plain, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag );
+		return 'sfenc:v1:' . base64_encode( $iv . $tag . $cipher );
+	}
+
+	public function test_a_signing_secret_pro_encrypted_opens_here_and_signs_the_same_with_or_without_pro(): void {
+		$body   = '{"a":1}';
+		$stored = array( 'ext_webhooks_signing_secret' => $this->proEncrypt( $this->secret() ) );
+
+		// Pro inactive: Free opens Pro's value itself.
+		$read = SettingsSecrets::open( $stored );
+		$this->assertSame( $this->secret(), $read['ext_webhooks_signing_secret'] );
+		$this->assertSame( 'sha256=' . hash_hmac( 'sha256', $body, $this->secret() ), \SubtleForms\Support\Webhooks::signature( $body, $read['ext_webhooks_signing_secret'] ) );
+
+		// Pro active: Free's read comes first, so Pro's own filter gets the plain value and keeps it.
+		$again = SettingsSecrets::open( SettingsSecrets::open( $stored ) );
+		$this->assertSame( $this->secret(), $again['ext_webhooks_signing_secret'] );
+
+		// Free saves a Pro value as it is, and a plain one sealed.
+		$this->assertSame( $stored['ext_webhooks_signing_secret'], SettingsSecrets::seal( $stored )['ext_webhooks_signing_secret'] );
+		$this->assertTrue( SecretBox::isSealed( SettingsSecrets::seal( array( 'ext_webhooks_signing_secret' => $this->secret() ) )['ext_webhooks_signing_secret'] ) );
+	}
+
+	public function test_a_pro_value_that_cannot_be_opened_is_missing(): void {
+		$this->assertSame( '', SettingsSecrets::open( array( 'ext_webhooks_signing_secret' => 'sfenc:v1:AAAA' ) )['ext_webhooks_signing_secret'] );
+	}
+
+	public function test_a_field_secret_key_is_sealed_on_save_and_opened_for_checking(): void {
+		$schema = array(
+			'fields' => array(
+				array( 'type' => 'hcaptcha', 'secret_key' => $this->secret(), 'site_key' => 'site' ),
+				array( 'type' => 'group', 'children' => array( array( 'type' => 'turnstile', 'config' => array( 'secret_key' => $this->secret() ) ) ) ),
+				array( 'type' => 'columns', 'columns' => array( array( 'fields' => array( array( 'type' => 'recaptcha', 'secret_key' => $this->secret() ) ) ) ) ),
+			),
+		);
+		$sealed = SchemaSecrets::seal( $schema );
+		$this->assertStringNotContainsString( $this->secret(), (string) wp_json_encode( $sealed ) );
+		$this->assertSame( 'site', $sealed['fields'][0]['site_key'] );
+		$this->assertSame( $sealed, SchemaSecrets::seal( $sealed ), 'sealing twice changes nothing' );
+
+		$resolved = FieldCaptcha::resolve( $sealed['fields'][0] );
+		$this->assertSame( $this->secret(), $resolved['secret'] );
+		$legacy = FieldCaptcha::resolve( $schema['fields'][0] );
+		$this->assertSame( $this->secret(), $legacy['secret'], 'a plain value saved before 2.12.0 still works' );
+	}
+
+	public function test_an_export_never_holds_a_field_secret_key(): void {
+		$schema = array( 'fields' => array( array( 'type' => 'hcaptcha', 'secret_key' => SecretBox::seal( $this->secret() ), 'site_key' => 'site', 'config' => array( 'secret_key' => $this->secret() ) ) ) );
+		$out    = (string) wp_json_encode( SchemaSecrets::strip( $schema ) );
+		$this->assertStringNotContainsString( 'secret_key', $out );
+		$this->assertStringNotContainsString( $this->secret(), $out );
+		$this->assertStringContainsString( 'site', $out );
+	}
+
+	public function test_no_visitor_facing_schema_holds_a_field_secret_key(): void {
+		// The REST schema route, the inline data on the page, the shortcode and the block all
+		// print FormsApi::publicPayload(), which is buildPublicSchema() then filterPublicSchema().
+		$schema = array(
+			'fields' => array(
+				array( 'type' => 'hcaptcha', 'secret_key' => $this->secret() ),
+				array( 'type' => 'group', 'children' => array( array( 'type' => 'turnstile', 'config' => array( 'secret_key' => SecretBox::seal( $this->secret() ) ) ) ) ),
+				array( 'type' => 'columns', 'columns' => array( array( 'fields' => array( array( 'type' => 'recaptcha', 'secret_key' => $this->secret() ) ) ), array( array( 'type' => 'hcaptcha', 'secret_key' => $this->secret() ) ) ) ),
+			),
+		);
+		$api    = ( new \ReflectionClass( FormsApi::class ) )->newInstanceWithoutConstructor();
+		$build  = new \ReflectionMethod( FormsApi::class, 'buildPublicSchema' );
+		$build->setAccessible( true );
+		$public = FormsApi::filterPublicSchema( $build->invoke( $api, $schema ), 1 );
+		$out    = (string) wp_json_encode( $public );
+		$this->assertStringNotContainsString( 'secret_key', $out );
+		$this->assertStringNotContainsString( $this->secret(), $out );
+		$this->assertStringNotContainsString( 'sfs1:', $out );
 	}
 
 	public function test_rest_answers_never_hold_a_secret(): void {
