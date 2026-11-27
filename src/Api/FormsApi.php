@@ -484,7 +484,8 @@ final class FormsApi {
 		$counts                   = $this->submissionsRepo->get_counts_by_forms( array( (int) $form['id'] ) );
 		$form['submission_count'] = (int) ( $counts[ (int) $form['id'] ] ?? 0 );
 
-		$response = ApiResponse::success( $form );
+		// A CAPTCHA field's secret key never goes to the browser (2.12.0).
+		$response = ApiResponse::success( \SubtleForms\Support\SchemaSecrets::hideInRow( $form ) );
 		return ApiResponse::withHeaders( $response, array( 'ETag' => $etag ) );
 	}
 
@@ -540,7 +541,7 @@ final class FormsApi {
 			$draftSchema = $this->formsRepo->getDraftSchema( $formId );
 
 			if ( $draftSchema ) {
-				$draftSchema = $this->injectCaptchaProvider( $draftSchema );
+				$draftSchema = \SubtleForms\Support\SchemaSecrets::hide( $this->injectCaptchaProvider( $draftSchema ) );
 
 				return ApiResponse::success(
 					array(
@@ -592,8 +593,8 @@ final class FormsApi {
 
 		return ApiResponse::success(
 			array(
-				'form'    => $form,
-				'schema'  => $schemaData,
+				'form'    => \SubtleForms\Support\SchemaSecrets::hideInRow( $form ),
+				'schema'  => is_array( $schemaData ) ? \SubtleForms\Support\SchemaSecrets::hide( $schemaData ) : $schemaData,
 				'version' => $schema['version'] ?? null,
 			)
 		);
@@ -741,6 +742,18 @@ final class FormsApi {
 		}
 
 		$schema = $this->keepSpamSettings( $formId, $schema );
+
+		// An empty CAPTCHA secret key keeps the one saved; a new one replaces it.
+		$current = $this->formsRepo->getDraftSchema( $formId );
+		if ( ! is_array( $current ) ) {
+			try {
+				$loaded = $this->formsRepo->loadSchemaVersion( $formId );
+			} catch ( \RuntimeException $e ) {
+				$loaded = null;
+			}
+			$current = is_array( $loaded ) && is_array( $loaded['schema'] ?? null ) ? $loaded['schema'] : array();
+		}
+		$schema = \SubtleForms\Support\SchemaSecrets::keep( $schema, $current );
 
 		$schema = FormsRepository::beforeSave( $schema, $formId, (bool) $activate );
 

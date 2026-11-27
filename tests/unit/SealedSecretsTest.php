@@ -159,6 +159,53 @@ final class SealedSecretsTest extends TestCase {
 		$this->assertSame( $this->secret(), $legacy['secret'], 'a plain value saved before 2.12.0 still works' );
 	}
 
+	private function storedSchema(): array {
+		return array(
+			'fields' => array(
+				array( 'id' => 'f1', 'type' => 'hcaptcha', 'site_key' => 'site', 'secret_key' => SecretBox::seal( $this->secret() ) ),
+				array( 'id' => 'f2', 'type' => 'group', 'children' => array( array( 'id' => 'f3', 'type' => 'turnstile', 'config' => array( 'secret_key' => SecretBox::seal( $this->secret() ) ) ) ) ),
+			),
+		);
+	}
+
+	public function test_the_builder_payload_has_no_secret_only_a_flag(): void {
+		$stored = $this->storedSchema();
+		$hidden = SchemaSecrets::hide( $stored );
+		$out    = (string) wp_json_encode( $hidden );
+		$this->assertStringNotContainsString( 'sfs1:', $out );
+		$this->assertStringNotContainsString( $this->secret(), $out );
+		$this->assertSame( '', $hidden['fields'][0]['secret_key'] );
+		$this->assertTrue( $hidden['fields'][0]['secret_key_set'] );
+		$this->assertTrue( $hidden['fields'][1]['children'][0]['config']['secret_key_set'] );
+
+		// GET /forms/{id}: the row's published schema and its draft text.
+		$row = SchemaSecrets::hideInRow( array( 'id' => 1, 'config' => $stored, 'draft_schema' => (string) wp_json_encode( $stored ) ) );
+		$this->assertStringNotContainsString( 'sfs1:', (string) wp_json_encode( $row ) );
+		$this->assertStringContainsString( 'secret_key_set', $row['draft_schema'] );
+	}
+
+	public function test_saving_with_an_empty_secret_key_keeps_the_stored_one(): void {
+		$stored = $this->storedSchema();
+		$sent   = SchemaSecrets::hide( $stored );
+		$sent['fields'][0]['site_key'] = 'new-site';
+		$saved = SchemaSecrets::seal( SchemaSecrets::keep( $sent, $stored ) );
+		$this->assertSame( $stored['fields'][0]['secret_key'], $saved['fields'][0]['secret_key'] );
+		$this->assertSame( $stored['fields'][1]['children'][0]['config']['secret_key'], $saved['fields'][1]['children'][0]['config']['secret_key'] );
+		$this->assertSame( 'new-site', $saved['fields'][0]['site_key'] );
+		$this->assertArrayNotHasKey( 'secret_key_set', $saved['fields'][0] );
+	}
+
+	public function test_saving_with_a_new_secret_key_replaces_it_sealed(): void {
+		$stored = $this->storedSchema();
+		$sent   = SchemaSecrets::hide( $stored );
+		$new    = 'new' . str_repeat( 'q7', 5 );
+		$sent['fields'][0]['secret_key'] = $new;
+		$saved = SchemaSecrets::seal( SchemaSecrets::keep( $sent, $stored ) );
+		$this->assertTrue( SecretBox::isSealed( $saved['fields'][0]['secret_key'] ) );
+		$this->assertSame( $new, SecretBox::open( $saved['fields'][0]['secret_key'] ) );
+		$this->assertSame( $this->secret(), SecretBox::open( $saved['fields'][1]['children'][0]['config']['secret_key'] ) );
+	}
+
 	public function test_an_export_never_holds_a_field_secret_key(): void {
 		$schema = array( 'fields' => array( array( 'type' => 'hcaptcha', 'secret_key' => SecretBox::seal( $this->secret() ), 'site_key' => 'site', 'config' => array( 'secret_key' => $this->secret() ) ) ) );
 		$out    = (string) wp_json_encode( SchemaSecrets::strip( $schema ) );
