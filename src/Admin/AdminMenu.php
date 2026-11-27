@@ -439,7 +439,16 @@ class AdminMenu {
 			array( $this, 'render_settings' )
 		);
 
-		// The upgrade item, after Settings, until an add-on is installed. It is
+		add_submenu_page(
+			'subtleforms',
+			__( 'Extensions', 'subtleforms' ),
+			__( 'Extensions', 'subtleforms' ),
+			$this->caps->manage_cap(),
+			'subtleforms-extensions',
+			array( $this, 'render_extensions' )
+		);
+
+		// The upgrade item, after Extensions, until an add-on is installed. It is
 		// a link to the Pro page on subtleforms.com, not a page: WordPress prints
 		// a submenu slug that is not a registered page as the link itself. The
 		// footer script opens it in a new tab.
@@ -518,7 +527,7 @@ class AdminMenu {
 		if ( empty( $submenu['subtleforms'] ) || ! is_array( $submenu['subtleforms'] ) ) {
 			return;
 		}
-		$pinned = array( 'subtleforms-settings', self::upgrade_url( 'menu' ) );
+		$pinned = array( 'subtleforms-settings', 'subtleforms-extensions', self::upgrade_url( 'menu' ) );
 		$head   = array();
 		$tail   = array();
 		foreach ( $submenu['subtleforms'] as $item ) {
@@ -1251,6 +1260,16 @@ class AdminMenu {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'subtleforms' ) );
 		}
 		$this->get_template( 'reports' );
+	}
+
+	/**
+	 * Render extensions page.
+	 */
+	public function render_extensions(): void {
+		if ( ! current_user_can( $this->caps->manage_cap() ) ) {
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'subtleforms' ) );
+		}
+		$this->get_template( 'extensions-catalog' );
 	}
 
 	/**

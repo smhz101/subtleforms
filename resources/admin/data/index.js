@@ -33,6 +33,8 @@ export { useDashboardStats } from './queries/dashboard';
 
 export { useReport } from './queries/reports';
 
+export { useExtensions } from './queries/extensions';
+
 export { useSpamStats, useSpamProtection } from './queries/spam';
 export { useSpamProtectionAction } from './mutations/spam';
 

@@ -166,6 +166,8 @@ final class RestController {
 		$reportsApi = new ReportsApi( $this->formsRepo, $this->submissionsRepo, $this->gate );
 		$reportsApi->registerRoutes();
 
+		( new ExtensionsApi() )->registerRoutes();
+
 		// The active theme's colours, fonts and button look for the builder (2.7.2).
 		( new AppearanceApi( $this->gate ) )->registerRoutes();
 
