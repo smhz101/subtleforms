@@ -765,6 +765,8 @@ class AdminMenu {
 				'captchaReady' => self::captchaReadyFlags(),
 				// Per-key flags: a field's site key can pair with a secret key from Settings.
 				'captchaKeys'  => self::captchaKeyFlags(),
+				// Saved secrets that cannot be opened (the site's salts changed): the screen asks for them again.
+				'secretsUnreadable' => \SubtleForms\Support\SettingsSecrets::unreadableKeys(),
 			)
 		);
 

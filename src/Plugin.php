@@ -142,6 +142,7 @@ final class Plugin {
 		// Blocked spam counter (2.6.0).
 		\SubtleForms\Analytics\SpamStats::register();
 		\SubtleForms\Security\RateLimitStore::register();
+		\SubtleForms\Support\SettingsSecrets::register();
 		\SubtleForms\Support\SpamDefaults::register();
 		\SubtleForms\Support\ImportOffer::register();
 		\SubtleForms\Support\UninstallDefaults::register();
