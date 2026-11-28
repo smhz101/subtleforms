@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use SubtleForms\Async\AsyncDispatcher;
 use SubtleForms\Integrations\EmailMarketing\Connection;
+use SubtleForms\Integrations\EmailMarketing\Services;
 use SubtleForms\Repositories\FormsRepository;
 use SubtleForms\Repositories\LogsRepository;
 
@@ -627,6 +628,21 @@ final class EmailMarketingTest extends TestCase {
 				return $list;
 			}
 		);
+	}
+
+	public function test_an_add_on_service_logo_is_kept_only_for_an_http_or_https_address(): void {
+		$this->addOnService( AddOnWpClient::class, array( 'logo' => 'https://example.com/logo.svg' ) );
+		$this->assertSame( 'https://example.com/logo.svg', Services::addons()['acme']['logo'] );
+		$this->assertSame( 'https://example.com/logo.svg', Services::all()['acme']['logo'] );
+		foreach ( array( 'javascript:alert(1)', 'data:image/svg+xml;base64,AAAA', array( 'x' ) ) as $bad ) {
+			remove_all_filters( 'subtleforms/email/marketing/services' );
+			$this->addOnService( AddOnWpClient::class, array( 'logo' => $bad ) );
+			$this->assertSame( '', Services::addons()['acme']['logo'] );
+			$this->assertSame( '', Services::all()['acme']['logo'] );
+		}
+		remove_all_filters( 'subtleforms/email/marketing/services' );
+		$this->addOnService();
+		$this->assertSame( '', Services::addons()['acme']['logo'] );
 	}
 
 	public function test_service_settings_are_checked_and_saved_before_the_key_is_tested(): void {

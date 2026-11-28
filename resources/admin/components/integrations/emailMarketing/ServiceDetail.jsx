@@ -5,7 +5,7 @@ import ServiceDetailHeader from '../serviceTiles/ServiceDetailHeader';
 import ExtensionSlot from '../../ExtensionSlot';
 import ProBanner from './ProBanner';
 import ServiceSettings from './ServiceSettings';
-import { announceService, isConnected } from './api';
+import { announceService, isConnected, pageData } from './api';
 import { useServiceState, useSetServiceEnabled, useStoreServiceState } from './queries';
 import './emailMarketing.scss';
 
@@ -53,7 +53,7 @@ export default function ServiceDetail({ service, onBack, onToggle, enabled }) {
       <ServiceDetailHeader
         id={toggleId}
         label={service.label}
-        logo={service.icon}
+        logo={service.icon || pageData().services[service.slug]?.logo || undefined}
         brandColor={service.brandColor}
         enabled={!!enabled}
         busy={busy}

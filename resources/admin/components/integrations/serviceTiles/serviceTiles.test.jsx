@@ -44,6 +44,17 @@ afterEach(() => {
 
 const scss = fs.readFileSync(path.join(__dirname, 'serviceTiles.scss'), 'utf8');
 
+describe('an add-on logo address', () => {
+  test('is drawn as an image in the same box', async () => {
+    await mount(<ServiceTileGrid services={[{ slug: 'acme', label: 'Acme', logo: 'https://example.com/a.svg', enabled: true }]} onOpen={() => {}} onToggle={() => {}} />);
+    const img = container.querySelector('.sf-svc-logo img');
+    expect(img.getAttribute('src')).toBe('https://example.com/a.svg');
+    expect(img.getAttribute('alt')).toBe('');
+    expect(img.getAttribute('width')).toBe('44');
+    expect(img.style.objectFit).toBe('contain');
+  });
+});
+
 describe('logoClass', () => {
   test('an enabled service is coloured, a disabled one is grey', () => {
     expect(logoClass(true)).toBe('sf-svc-logo--colour');
