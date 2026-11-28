@@ -202,9 +202,7 @@ final class UploadsExposure {
 				'label'       => __( 'Files uploaded to SubtleForms forms can be opened by anyone with the link', 'subtleforms' ),
 				'status'      => 'critical',
 				'badge'       => $badge,
-				'description' => '<p>' . esc_html__( 'Your server ignores the rules SubtleForms puts in its uploads folder. Nginx does this. Visitors cannot list the files, but anyone who has a file\'s address can open it.', 'subtleforms' ) . '</p>'
-					. '<p>' . esc_html__( 'Add this rule to your nginx site configuration, then reload nginx:', 'subtleforms' ) . '</p>'
-					. '<pre><code>' . esc_html( self::nginxRule( self::folderPath() ) ) . '</code></pre>'
+				'description' => self::stepsHtml( self::serverKind( self::serverSoftware() ) )
 					. '<p>' . esc_html__( 'Files stay available to you in the entry screen, which serves them through WordPress.', 'subtleforms' ) . '</p>',
 				'test'        => 'subtleforms_uploads_private',
 			);
@@ -247,18 +245,70 @@ final class UploadsExposure {
 		if ( get_user_meta( get_current_user_id(), self::DISMISSED_META, true ) ) {
 			return;
 		}
-		$dismiss = wp_nonce_url( admin_url( 'admin-post.php?action=' . self::DISMISS_ACTION ), self::DISMISS_ACTION );
-		printf(
-			'<div class="notice notice-warning"><p><strong>%1$s</strong> %2$s</p><p>%3$s</p><pre><code>%4$s</code></pre><p><a href="%5$s">%6$s</a> | <a href="%7$s">%8$s</a></p></div>',
-			esc_html__( 'SubtleForms: uploaded files are not private on this server.', 'subtleforms' ),
-			esc_html__( 'Your server ignores the folder rules, so anyone with a file\'s address can open it. Add this rule to your nginx site configuration:', 'subtleforms' ),
-			esc_html__( 'Then check again in Tools > Site Health.', 'subtleforms' ),
-			esc_html( self::nginxRule( self::folderPath() ) ),
-			esc_url( admin_url( 'site-health.php' ) ),
-			esc_html__( 'Open Site Health', 'subtleforms' ),
-			esc_url( $dismiss ),
-			esc_html__( 'Dismiss', 'subtleforms' )
+		self::renderNotice(
+			self::serverKind( self::serverSoftware() ),
+			admin_url( 'site-health.php' ),
+			wp_nonce_url( admin_url( 'admin-post.php?action=' . self::DISMISS_ACTION ), self::DISMISS_ACTION )
 		);
+	}
+
+	/**
+	 * Print the notice markup.
+	 *
+	 * @param string $kind       Result of serverKind().
+	 * @param string $healthUrl  Site Health address.
+	 * @param string $dismissUrl Dismiss link.
+	 */
+	public static function renderNotice( string $kind, string $healthUrl, string $dismissUrl ): void {
+		echo '<div class="notice notice-warning"><p><strong>' . esc_html__( 'SubtleForms: uploaded files are not private on this server.', 'subtleforms' ) . '</strong></p>'
+			. self::stepsHtml( $kind ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in stepsHtml().
+			. '<p><a href="' . esc_url( $healthUrl ) . '">' . esc_html__( 'Open Site Health', 'subtleforms' ) . '</a> | <a href="' . esc_url( $dismissUrl ) . '">' . esc_html__( 'Dismiss', 'subtleforms' ) . '</a></p></div>';
+	}
+
+	/**
+	 * Server family from a SERVER_SOFTWARE string. LiteSpeed reads .htaccess
+	 * like Apache.
+	 *
+	 * @return string 'nginx', 'apache' or 'unknown'.
+	 */
+	public static function serverKind( string $software ): string {
+		$software = strtolower( $software );
+		if ( false !== strpos( $software, 'nginx' ) ) {
+			return 'nginx';
+		}
+		if ( false !== strpos( $software, 'apache' ) || false !== strpos( $software, 'litespeed' ) ) {
+			return 'apache';
+		}
+		return 'unknown';
+	}
+
+	private static function serverSoftware(): string {
+		return isset( $_SERVER['SERVER_SOFTWARE'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) : '';
+	}
+
+	/**
+	 * Escaped steps for the notice and Site Health: what is wrong, the fix for
+	 * this server, then the host fallback.
+	 */
+	private static function stepsHtml( string $kind ): string {
+		$rule   = '<pre><code>' . esc_html( self::nginxRule( self::folderPath() ) ) . '</code></pre>';
+		$nginx  = '<p>' . esc_html__( 'Add this rule to your nginx site configuration:', 'subtleforms' ) . '</p>' . $rule
+			. '<p>' . esc_html__( 'Reload nginx, then check again in Tools > Site Health.', 'subtleforms' ) . '</p>';
+		$apache = '<p>' . esc_html__( 'Your server is not reading the .htaccess file in the uploads folder. Ask your host to allow .htaccess files (AllowOverride) or to block this folder:', 'subtleforms' ) . '</p>'
+			. '<p><code>' . esc_html( self::folderPath() ) . '</code></p>'
+			. '<p>' . esc_html__( 'Then check again in Tools > Site Health.', 'subtleforms' ) . '</p>';
+
+		if ( 'nginx' === $kind ) {
+			$fix = $nginx;
+		} elseif ( 'apache' === $kind ) {
+			$fix = $apache;
+		} else {
+			$fix = $nginx . '<p>' . esc_html__( 'On Apache or LiteSpeed, ask your host to allow .htaccess files (AllowOverride) in this folder.', 'subtleforms' ) . '</p>';
+		}
+
+		return '<p>' . esc_html__( 'Your server ignores the folder rules, so anyone with a file\'s address can open it.', 'subtleforms' ) . '</p>'
+			. $fix
+			. '<p>' . esc_html__( 'If you cannot edit the server configuration, send this to your host.', 'subtleforms' ) . '</p>';
 	}
 
 	/**
