@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use SubtleForms\Async\AsyncDispatcher;
 use SubtleForms\Integrations\EmailMarketing\Connection;
+use SubtleForms\Integrations\EmailMarketing\Services;
 use SubtleForms\Repositories\FormsRepository;
 use SubtleForms\Repositories\LogsRepository;
 
