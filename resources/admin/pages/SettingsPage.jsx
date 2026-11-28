@@ -149,10 +149,15 @@ export default function Settings() {
   const current = resolveTab(activeTab, groups.flatMap((g) => g.tabs));
 
   // Keep the tab in the hash so reloads and links land in the same place.
+  const knownTabs = groups.flatMap((g) => g.tabs).map((t) => t.name).join(',');
   useEffect(() => {
     const hash = window.location.hash.replace(/^#/, '');
     const params = new URLSearchParams(hash);
-    if (params.get('tab') !== current.name) {
+    const linked = params.get('tab');
+    // A link to an add-on's tab can arrive before the add-on registers it:
+    // leave the address alone so its details (a gateway, a section) survive.
+    if (linked && !knownTabs.split(',').includes(linked)) return;
+    if (linked !== current.name) {
       params.set('tab', current.name);
       // What the old tab kept in the address (a section, a screen inside it) means nothing to the next.
       [...params.keys()].forEach((key) => {
@@ -160,7 +165,7 @@ export default function Settings() {
       });
       window.history.replaceState(null, '', `#${params.toString()}`);
     }
-  }, [current.name]);
+  }, [current.name, knownTabs]);
 
   // A link to an old address while Settings is open (the logs used to be in Tools).
   useEffect(() => {

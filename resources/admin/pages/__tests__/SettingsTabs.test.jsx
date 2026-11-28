@@ -180,3 +180,21 @@ describe('A site tab sits right after Tools', () => {
     unmount();
   });
 });
+
+describe('the tab in the address (#226)', () => {
+  afterEach(() => window.history.replaceState(null, '', '#'));
+
+  test('a link to a tab no add-on has registered yet keeps its details', () => {
+    window.history.replaceState(null, '', '#tab=addon-payments&gateway=paypal');
+    const { unmount } = render('addon-payments');
+    expect(window.location.hash).toBe('#tab=addon-payments&gateway=paypal');
+    unmount();
+  });
+
+  test('switching to another known tab still clears the old details', () => {
+    window.history.replaceState(null, '', '#tab=general&section=old');
+    const { unmount } = render('email');
+    expect(window.location.hash).toBe('#tab=email');
+    unmount();
+  });
+});
