@@ -48,37 +48,6 @@ export function isSafeHref(href) {
 }
 
 /**
- * Read the remembered open or closed choice for a set of steps.
- *
- * @param {string} key Storage key.
- * @return {?boolean} The saved choice, or null when there is none or storage is unavailable.
- */
-function readChoice(key) {
-  try {
-    const value = window.localStorage.getItem(key);
-    if (value === '1') return true;
-    if (value === '0') return false;
-  } catch (e) {
-    // Storage can be blocked; the default applies.
-  }
-  return null;
-}
-
-/**
- * Remember the open or closed choice. Storage may be blocked, so a failure is ignored.
- *
- * @param {string}  key  Storage key.
- * @param {boolean} open Choice to keep.
- */
-function writeChoice(key, open) {
-  try {
-    window.localStorage.setItem(key, open ? '1' : '0');
-  } catch (e) {
-    // Nothing to do; the choice only lasts for this screen.
-  }
-}
-
-/**
  * Numbered instructions for connecting a service. Every connection screen
  * uses it, so the steps look and read the same everywhere.
  *
@@ -86,10 +55,9 @@ function writeChoice(key, open) {
  * button that opens that page in a new tab. A step that gives the person
  * something to paste carries `code`; it is drawn as a copy field.
  *
- * The steps sit in an accordion so they are read only when needed. Pass
- * `defaultOpen` true when the service is not connected yet and false when it
- * is. The person's own choice is remembered per `storageKey` and wins over the
- * default.
+ * The steps sit in an accordion that always starts closed, so they are read
+ * only when needed. `defaultOpen` and `storageKey` are deprecated and ignored;
+ * add-ons that still pass them keep working.
  *
  * The component is also on `window.SubtleFormsExtend.ConnectionSteps`, so an
  * add-on draws its own instructions the same way. Add-ons check that it exists
@@ -102,8 +70,8 @@ function writeChoice(key, open) {
  * @param {*}        [props.note]        Something to know after the steps.
  * @param {string}   [props.id]          Id prefix, for tests and anchors.
  * @param {boolean}  [props.collapsible] Draw the steps inside an accordion. True by default.
- * @param {boolean}  [props.defaultOpen] Whether the accordion starts open when the person has not chosen yet. True by default.
- * @param {string}   [props.storageKey]  localStorage key of the remembered choice. `id` by default.
+ * @param {boolean}  [props.defaultOpen] Deprecated and ignored. The accordion starts closed.
+ * @param {string}   [props.storageKey]  Deprecated and ignored.
  */
 export default function ConnectionSteps({
   title,
@@ -112,18 +80,11 @@ export default function ConnectionSteps({
   note,
   id = 'sf-steps',
   collapsible = true,
-  defaultOpen = true,
-  storageKey,
 }) {
   const list = (Array.isArray(steps) ? steps : []).filter((step) => step && step.text);
-  const key = storageKey || id;
-  const [saved, setSaved] = useState(() => (collapsible ? readChoice(key) : null));
-  const open = !collapsible || (saved === null ? !!defaultOpen : saved);
-  const toggle = useCallback(() => {
-    const next = !open;
-    setSaved(next);
-    writeChoice(key, next);
-  }, [open, key]);
+  const [opened, setOpened] = useState(false);
+  const open = !collapsible || opened;
+  const toggle = useCallback(() => setOpened((value) => !value), []);
 
   const heading = title || (collapsible ? __('How to connect', 'subtleforms') : '');
   const content = (
@@ -166,7 +127,8 @@ export default function ConnectionSteps({
       <section className='sf-steps' aria-labelledby={heading ? `${id}-title` : undefined} data-testid='connection-steps'>
         {heading && (
           <h4 id={`${id}-title`} className='sf-steps__title'>
-            {heading}
+            <Icon.Lightbulb size={16} aria-hidden='true' className='sf-steps__bulb' />
+            <span>{heading}</span>
           </h4>
         )}
         {content}
@@ -189,7 +151,8 @@ export default function ConnectionSteps({
           aria-controls={`${id}-panel`}
           onClick={toggle}
         >
-          <span>{heading}</span>
+          <Icon.Lightbulb size={16} aria-hidden='true' className='sf-steps__bulb' />
+          <span className='sf-steps__toggle-text'>{heading}</span>
           <Icon.ChevronDown size={16} aria-hidden='true' className='sf-steps__chevron' />
         </button>
       </h4>

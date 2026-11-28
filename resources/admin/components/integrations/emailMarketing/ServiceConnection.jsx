@@ -143,7 +143,7 @@ export default function ServiceConnection({ service, label, state, onState }) {
       </header>
       {!(result.text && result.tone === 'ok') && <p className='sf-em-card__summary'>{summary}</p>}
 
-      {showField && guide && <ConnectionSteps id={`sf-steps-${service}`} title={guideTitle} defaultOpen={state.status !== 'connected'} {...guide} />}
+      {showField && guide && <ConnectionSteps id={`sf-steps-${service}`} title={guideTitle} {...guide} />}
 
       {showField ? (
         <div className='sf-em-card__key'>
@@ -223,7 +223,7 @@ export default function ServiceConnection({ service, label, state, onState }) {
       )}
 
       {!showField && guide && (
-        <ConnectionSteps id={`sf-steps-${service}`} title={guideTitle} defaultOpen={false} {...guide} />
+        <ConnectionSteps id={`sf-steps-${service}`} title={guideTitle} {...guide} />
       )}
 
       {result.text && (

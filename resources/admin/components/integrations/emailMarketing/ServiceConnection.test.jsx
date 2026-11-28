@@ -173,9 +173,9 @@ test('a connected card keeps the steps in a closed accordion', async () => {
   expect(container.querySelector('ol.sf-steps__list')).not.toBeNull();
 });
 
-test('a card with no key shows the steps open', async () => {
+test('a card with no key also starts with the steps closed', async () => {
   await mount(NONE);
-  expect(container.querySelector('button.sf-steps__toggle').getAttribute('aria-expanded')).toBe('true');
+  expect(container.querySelector('button.sf-steps__toggle').getAttribute('aria-expanded')).toBe('false');
 });
 
 test('the typed key is sent to the right service route', async () => {

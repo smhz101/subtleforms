@@ -665,6 +665,7 @@ root.SubtleFormsExtend = Object.assign(root.SubtleFormsExtend || {}, {
   registerLogicExtension,
   registerLogicEditor,
   registerSlotItem,
+  getSlotItems,
   registerFormMountHook,
   registerFormIntegration,
   registerFormWrapper,

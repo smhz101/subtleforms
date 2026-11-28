@@ -197,6 +197,8 @@ Data the server sends with the page (`subtleforms/admin/preload_paths`) is put i
 
 Screen slots for `registerSlotItem( slot, id, { component, order } )` that the admin app draws. This plugin draws nothing of its own in a slot an add-on leaves empty.
 
+`getSlotItems( slot )` returns [{ id, ...def }] sorted by order then id, for add-ons that host their own slot.
+
 | Slot | Where | The component receives |
 | --- | --- | --- |
 | `submission.panels` | Panels on the entry screen | `{ submission, meta }` |
@@ -323,7 +325,7 @@ In the browser, `registerEmailMarketingService( slug, { label, icon, settingsCom
 
 ### Adding a service that this plugin handles (2.12.0)
 
-An entry in `subtleforms/email/marketing/services` with a new slug and a `client` is a service this plugin handles like Mailchimp or Kit. `client` is the name of a class that implements `SubtleForms\Integrations\EmailMarketing\ClientInterface`; the plugin checks that the class exists and implements it, and ignores the entry otherwise. The entry carries the same keys the built-in services have: `label`, `description`, `case` (`upper` writes a mapped field name in capitals, `keep` leaves it as typed), `tags` (the service takes tags), `list_required`. `local` is always false for an add-on.
+An entry in `subtleforms/email/marketing/services` with a new slug and a `client` is a service this plugin handles like Mailchimp or Kit. `client` is the name of a class that implements `SubtleForms\Integrations\EmailMarketing\ClientInterface`; the plugin checks that the class exists and implements it, and ignores the entry otherwise. The entry carries the same keys the built-in services have: `label`, `description`, `case` (`upper` writes a mapped field name in capitals, `keep` leaves it as typed), `tags` (the service takes tags), `list_required`, and an optional `logo` (an http or https address of an image, drawn in the service tile; anything else is dropped). `local` is always false for an add-on.
 
 For such a service this plugin does the rest: the key is saved and checked (`Connection`), the routes under `/integrations/email-marketing/<slug>` answer (`connect`, `test`, `enabled`, `lists`, `fields`, `settings`, state and disconnect), and an entry is queued, sent and logged by the same sender, so the hooks above (`feeds`, `skip_reason`, `subscriber`, `request_body`, `delivered`, `failed`, `skipped`) and the retries apply to it. `Services::client()`, `Services::clientFor()` and `Services::coreOwns()` accept its slug. An unknown slug on a route is a 404. The class name is not sent to the browser. Additive: `ExtensionPoints::LEVEL` stays 3.
 
@@ -337,6 +339,7 @@ add_filter( 'subtleforms/email/marketing/services', function ( $services ) {
 		'case'          => 'upper',
 		'tags'          => true,
 		'list_required' => true,
+		'logo'          => plugins_url( 'assets/logo.svg', __FILE__ ),
 	);
 	return $services;
 } );
@@ -503,6 +506,7 @@ Counts already stored in the `subtleforms_stats` and `subtleforms_funnel` tables
 | `registerLogicExtension( { supports, passes, evaluateCondition } )` | Browser side of the logic hooks. Functions get a helpers object: `toText`, `listOf`, `norm`, `isNumeric`, `isEmptyValue`, `textEquals`, `countryEquals`, `readValue`, `today`, `evaluateCondition`. |
 | `registerLogicEditor( Component )` | Replace the builder logic editor. It gets the editor props (`logic`, `availableFields`, `onChange`, `scope`, `disabled`, ...) plus `countries` (the country list for country rules) and `Fallback`, the free editor. |
 | `registerSlotItem( slot, id, { component, order } )` | Add an item to a screen slot. |
+| `getSlotItems( slot )` | Returns `[{ id, ...def }]` sorted by `order` then `id`, for add-ons that host their own slot. |
 | `registerSettingsRedirect( from, to )` | Send an old Settings address (`#tab=...`) to its new place. |
 | `registerAdminPage( slug, { component, title, description } )` | Draw an add-on submenu page inside the SubtleForms frame. |
 | `SectionPanel`, `SectionHeader` | Components for a list of sections with a header each (see "Section panel and section header"). |

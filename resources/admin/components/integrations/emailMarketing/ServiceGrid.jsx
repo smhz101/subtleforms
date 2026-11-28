@@ -36,7 +36,7 @@ export default function ServiceGrid({ services, enabled, onOpen, onToggle, busy 
   const items = services.map((service) => ({
     slug: service.slug,
     label: service.label,
-    logo: service.icon,
+    logo: service.icon || server[service.slug]?.logo || undefined,
     brandColor: service.brandColor,
     enabled: !!enabled[service.slug],
     statusLabel: statusLabelFor(server[service.slug]),

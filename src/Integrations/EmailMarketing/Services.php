@@ -103,10 +103,21 @@ final class Services {
 				'tags'          => ! empty( $entry['tags'] ),
 				'list_required' => ! empty( $entry['list_required'] ),
 				'local'         => false,
+				'logo'          => self::cleanLogo( $entry['logo'] ?? '' ),
 				'settings'      => self::cleanSettingFields( $entry['settings'] ?? array() ),
 			);
 		}
 		return $result;
+	}
+
+	/**
+	 * The logo address of an add-on service: an http or https URL, or an empty string.
+	 *
+	 * @param mixed $logo Value as listed by the add-on.
+	 * @return string
+	 */
+	public static function cleanLogo( $logo ): string {
+		return is_string( $logo ) ? esc_url_raw( trim( $logo ), array( 'https', 'http' ) ) : '';
 	}
 
 	/**
@@ -327,6 +338,7 @@ final class Services {
 					'builtin'    => false,
 					'core'       => true,
 				);
+				$result[ $slug ]['logo']     = self::cleanLogo( $entry['logo'] ?? '' );
 				$result[ $slug ]['settings'] = self::cleanSettingFields( $entry['settings'] ?? array() );
 			}
 		}

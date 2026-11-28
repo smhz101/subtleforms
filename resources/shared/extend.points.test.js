@@ -117,3 +117,9 @@ test('addonProvides reads the features the server says an add-on runs', () => {
   expect(addonProvides('analytics')).toBe(true);
   expect(addonProvides('advanced_logic')).toBe(false);
 });
+
+test('getSlotItems is on window.SubtleFormsExtend and returns a registered item', () => {
+  registerSlotItem('settings.payments.gateways', 'stripe', { component: () => null, order: 1 });
+  expect(window.SubtleFormsExtend.getSlotItems).toBe(getSlotItems);
+  expect(window.SubtleFormsExtend.getSlotItems('settings.payments.gateways').map((i) => i.id)).toEqual(['stripe']);
+});

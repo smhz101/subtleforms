@@ -5,11 +5,11 @@ import { logoClass } from './logoState';
  * for assistive technology). It is drawn in its own colours; `logoClass`
  * decides whether the style sheet greys it.
  *
- * `logo` is a component receiving { size } (the logos of this plugin), any
- * element, or nothing: the name is then written in the brand colour.
+ * `logo` is a component receiving { size } (the logos of this plugin), an
+ * image address (an add-on's), any element, or nothing: the name is then written in the brand colour.
  *
  * @param {Object}                        props
- * @param {Function|import('react').ReactNode} props.logo       Logo component or element.
+ * @param {Function|string|import('react').ReactNode} props.logo       Logo component, image address or element.
  * @param {string}                        props.label       Service name (the text fallback).
  * @param {string}                        props.brandColor  Colour of the text fallback.
  * @param {boolean}                       props.enabled     Whether the service is on.
@@ -20,6 +20,8 @@ export default function ServiceLogo({ logo, label, brandColor, enabled, size = 4
   let inner;
   if (Logo) {
     inner = <Logo size={size} />;
+  } else if (typeof logo === 'string' && logo) {
+    inner = <img src={logo} alt='' width={size} height={size} style={{ objectFit: 'contain' }} />;
   } else if (logo) {
     inner = logo;
   } else {
